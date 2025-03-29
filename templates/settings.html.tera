@@ -1,0 +1,61 @@
+{% extends "base" %}
+
+{% block content %}
+<a href="/">MARMAK Mirror</a>/<a href="/settings">Settings</a>/<br>
+{% if is_logged_in %}
+Hi, {{ username }}!
+<br>
+<a href="/settings/sync"><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">Sync settings</a>
+<a href="/settings/fetch"><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">Fetch settings</a>
+
+{% endif %}
+<form method="get">
+    <img src="/static/images/icons/{% if hires %}hires/{% endif %}theme.png" class="icon">Change theme<br>
+    <select name="theme">
+        <option value="standard" {% if theme=="standard" %} selected{% endif %}>Default theme</option>
+        <option value="darkblu" {% if theme=="darkblu" %} selected{% endif %}>Darkblue theme</option>
+        <option value="greenish" {% if theme=="greenish" %} selected{% endif %}>Greenish theme</option>
+        <option value="antique" {% if theme=="antique" %} selected{% endif %}>Antique (original) theme</option>
+        <option value="dark" {% if theme=="dark" %} selected{% endif %}>OLED</option>
+        <option value="matrix" {% if theme=="matrix" %} selected{% endif %}>OLED Matrix</option>
+        <option value="light" {% if theme=="light" %} selected{% endif %}>#fff</option>
+        {% if theme == "venti" %}<option value="venti" selected>Venti by Olek47</option>{% endif %}
+    </select>
+    <br>
+    <label for="hires"><img src="/static/images/icons/{% if hires %}hires/{% endif %}floppy.png" class="icon">High resolution icons</label>
+    <br>
+    <label><input type="radio" name="hires" value="true" {% if hires %}checked {% endif %}>Enable</label>
+    <label><input type="radio" name="hires" value="false" {% if not hires %}checked {% endif %}>Disable</label>
+    <br>
+    <label for="smallhead"><img src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png" class="icon">Small header logo</label>
+    <br>
+    <label><input type="radio" name="smallhead" value="true" {% if smallhead %}checked {% endif %}>Enable</label>
+    <label><input type="radio" name="smallhead" value="false" {% if not smallhead %}checked {% endif %}>Disable</label>
+    <br>
+    <label for="nolang"><img src="/static/images/icons/{% if hires %}hires/{% endif %}lang.png" class="icon">Don't ask about languages</label>
+    <br>
+    <label><input type="radio" name="nolang" value="true" {% if nolang %}checked {% endif %}>Enable</label>
+    <label><input type="radio" name="nolang" value="false" {% if not nolang %}checked {% endif %}>Disable</label>
+    <br>
+    <label for="plain"><img src="/static/images/icons/{% if hires %}hires/{% endif %}default.png" class="icon">Plain HTML Mode (unfinished)</label>
+    <br>
+    <label><input type="radio" name="plain" value="true" {% if plain %}checked {% endif %}>Enable</label>
+    <label><input type="radio" name="plain" value="false" {% if not plain %}checked {% endif %}>Disable</label>
+    <br>
+    <label for="nooverride"><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">Don't overwrite settings</label>
+    <br>
+    <label><input type="radio" name="nooverride" value="true" {% if nooverride %}checked {% endif %}>Enable</label>
+    <label><input type="radio" name="nooverride" value="false" {% if not nooverride %}checked {% endif %}>Disable</label>
+    {% if is_logged_in and admin %}
+    <br>
+    <label for="nooverride"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">Disable file browser in uploader</label>
+    <br>
+    <label><input type="radio" name="filebrowser" value="true" {% if filebrowser %}checked {% endif %}>Enable</label>
+    <label><input type="radio" name="filebrowser" value="false" {% if not filebrowser %}checked {% endif %}>Disable</label>
+    {% endif %}
+    <br>
+    <center>
+        <button type="submit">Save settings</button>
+    </center>
+</form>
+{% endblock content %}

@@ -1,0 +1,113 @@
+@import url('https://fonts.marmak.net.pl/OpenSans.css');
+
+body {
+    margin: 0;
+    background-color: #202020;
+    color: #fff;
+    font-family: 'Open Sans', 'Segoe UI', sans-serif;
+}
+
+a {
+    color: #007BFF;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.header a {
+    color: #fff;
+}
+
+a:hover {
+    color: #FF6B6B;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #202020;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+}
+
+.header {
+    padding: 20px 0;
+    text-align: center;
+    background-color: #32A852;
+    color: #fff;
+}
+
+.icon {
+    width: 1em;
+    height: 1em;
+    margin: 0px 4px -4px 0px;
+}
+
+.fullwidth {
+    width: 100%;
+}
+
+.header h1 {
+    margin: 10px 0;
+    font-size: 24px;
+}
+
+.header a {
+    font-size: 16px;
+}
+
+div.line {
+    border-bottom: 1px solid white;
+    width: 100%;
+}
+
+.mark {
+    background-color: #FFD700;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+.main {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #303030;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+}
+
+.footer {
+    margin-top: 20px;
+    padding: 20px;
+    text-align: center;
+    background-color: #32A852;
+    color: #fff;
+}
+
+table {
+    width: 100%;
+}
+
+th {
+    text-align: center;
+}
+
+.dialog-content {
+    background: #202020;
+	border: 1px solid #fff;
+    margin: 10% auto;
+    padding: 20px;
+    width: 50%;
+    text-align: center;
+}
+
+iframe {
+	border: none;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+@media only screen and (max-width: 600px) {
+    .dialog-content {
+        width: auto !important;
+    }
+}

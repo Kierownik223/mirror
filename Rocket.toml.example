@@ -1,0 +1,20 @@
+[default]
+port = 2115
+ident = "Mirror"
+
+[default.limits]
+data-form = "100 MB"
+file = "100 MB"
+
+[release]
+secret_key = "your-secret-key"
+
+# prod database
+
+[release.databases.marmak]
+url = "mysql://marmak:12345678@localhost:3306/marmak"
+
+# dev database
+
+[debug.databases.marmak]
+url = "mysql://marmak:12345678@localhost:3306/marmak"

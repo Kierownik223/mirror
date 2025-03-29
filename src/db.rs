@@ -1,0 +1,103 @@
+use rocket_db_pools::{sqlx, Connection, Database};
+use sqlx::Row;
+
+use bcrypt::verify;
+
+use crate::MarmakUser;
+
+#[derive(Database)]
+#[database("marmak")]
+pub struct Db(sqlx::MySqlPool);
+
+pub async fn login_user(mut db: Connection<Db>, username: &str, password: &str, ip: &str, verify_password: bool) -> Option<MarmakUser> {
+    let query_result =
+        sqlx::query("SELECT password, perms, mirror_settings FROM users WHERE username = ?")
+            .bind(username)
+            .fetch_one(&mut **db)
+            .await;
+
+    match query_result {
+        Ok(row) => {
+            if let Some(stored_hash) = row.try_get::<String, _>("password").ok() {
+                if verify_password && verify(password, &stored_hash).unwrap_or(false) {
+                    if let Some(perms) = row.try_get::<i32, _>("perms").ok() {
+                        add_login(db, username, ip).await;
+                        let settings = row.try_get::<String, _>("mirror_settings").ok();
+                        return Some(MarmakUser {
+                            username: username.to_string(),
+                            password: password.to_string(),
+                            perms: Some(perms),
+                            mirror_settings: settings,
+                        });
+                    } else {
+                        None
+                    }
+                } else if !verify_password {
+                    if let Some(perms) = row.try_get::<i32, _>("perms").ok() {
+                        add_login(db, username, ip).await;
+                        let settings = row.try_get::<String, _>("mirror_settings").ok();
+                        return Some(MarmakUser {
+                            username: username.to_string(),
+                            password: password.to_string(),
+                            perms: Some(perms),
+                            mirror_settings: settings,
+                        });
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        }
+        Err(_) => None,
+    }
+}
+
+pub async fn fetch_user(mut db: Connection<Db>, username: &str) -> Option<MarmakUser> {
+    let query_result =
+        sqlx::query("SELECT password, perms, mirror_settings FROM users WHERE username = ?")
+            .bind(username)
+            .fetch_one(&mut **db)
+            .await;
+
+    match query_result {
+        Ok(row) => {
+            if let Some(perms) = row.try_get::<i32, _>("perms").ok() {
+                let settings = row.try_get::<String, _>("mirror_settings").ok();
+                return Some(MarmakUser {
+                    username: username.to_string(),
+                    password: row.try_get::<String, _>("password").ok().unwrap(),
+                    perms: Some(perms),
+                    mirror_settings: settings,
+                });
+            } else {
+                None
+            }
+        }
+        Err(_) => None,
+    }
+}
+
+pub async fn update_settings(mut db: Connection<Db>, username: &str, settings: &str) -> () {
+    let _ = sqlx::query("UPDATE users SET mirror_settings = ? WHERE username = ?")
+        .bind(settings)
+        .bind(username)
+        .fetch_one(&mut **db)
+        .await;
+}
+
+pub async fn add_login(mut db: Connection<Db>, username: &str, ip: &str) -> () {
+    let _ = sqlx::query("UPDATE users SET lastlogin_time = CURRENT_TIMESTAMP, lastlogin_ip = ?, lastlogin_via = 'MARMAK Mirror' WHERE username = ?")
+    .bind(ip)
+    .bind(username)
+    .fetch_one(&mut **db)
+    .await;
+    let _ = sqlx::query("INSERT INTO logins (account, time, ip, via) VALUES (?, CURRENT_TIMESTAMP, ?, 'MARMAK Mirror')")
+    .bind(username)
+    .bind(ip)
+    .fetch_one(&mut **db)
+    .await;
+}

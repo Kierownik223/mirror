@@ -1,0 +1,107 @@
+@import url('https://fonts.marmak.net.pl/OpenSans.css');
+
+body {
+    margin: 0;
+    background-color: antiquewhite;
+    color: black;
+    font-family: 'Open Sans', sans-serif;
+}
+
+a {
+    color: black;
+}
+
+a:hover {
+    color: crimson;
+}
+
+.container {
+    width: min(800px, 95vw);
+    margin: 0 auto;
+}
+
+.icon {
+    width: 1em;
+    height: 1em;
+    margin: 0px 4px -4px 0px;
+}
+
+.header {
+    margin-top: 50px;
+    padding: 5px;
+    border: 1px solid black;
+    text-align: center;
+}
+
+.header h1 {
+    margin: 10px 0;
+}
+
+.header a {
+    letter-spacing: 1px;
+}
+
+.main {
+    margin-top: 20px;
+    padding: 5px;
+    border: 1px solid black;
+}
+
+div.line {
+    border-bottom: 1px solid black;
+    width: 100%;
+}
+
+input,
+button {
+	padding: 10px;
+	font-size: 16px;
+	border: 1px solid #fff;
+	margin: 10px 0;
+    background: antiquewhite;
+    border: 1px solid black;
+    color: black;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+button:hover {
+    color: antiquewhite;
+    background: black;
+}
+
+form {
+    margin-top: 10px;
+}
+
+label input {
+    width: auto;
+}
+
+.footer {
+    margin-top: 20px;
+    padding: 5px;
+    border: 1px solid black;
+    text-align: center;
+}
+
+.dialog-content {
+    background: antiquewhite;
+    border: 1px solid black;
+    margin: 10% auto;
+    padding: 20px;
+    width: 50%;
+    text-align: center;
+}
+
+iframe {
+	border: none;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+@media only screen and (max-width: 600px) {
+    .dialog-content {
+        width: auto !important;
+    }
+}

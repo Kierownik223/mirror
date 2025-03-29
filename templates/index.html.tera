@@ -1,0 +1,56 @@
+{% extends "base" %}
+
+{% block content %}
+<a href="/">MARMAK Mirror</a>/
+{% for s in path_seg %}
+{% if s != "" %}
+{{s}}/
+{% endif %}
+{% endfor %}
+{% if markdown != "" and topmarkdown %}
+<table>
+    <tbody>
+        <tr>
+            <td><a href="../"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png"
+                        class="icon">../</a></td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+<p><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}md.png">README.md</p>
+{{ markdown | safe}}
+{% endif %}
+<table>
+    <tbody>
+        {% if notroot and not topmarkdown %}
+        <tr>
+            <td><a href="../"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png"
+                        class="icon">../</a></td>
+            <td>---</td>
+            <td>Directory</td>
+        </tr>
+        {% endif %}
+
+        {% for s in dirs %}
+        <tr>
+            <td><a href="{{ s.name }}/"><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png"
+                        class="icon">{{ s.name }}/</a></td>
+            <td>{{ s.size }}</td>
+            <td>Directory</td>
+        </tr>
+        {% endfor %}
+        {% for s in files %}
+        <tr>
+            <td><a href="{{ s.name }}"><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png"
+                        class="icon">{{ s.name }}</a></td>
+            <td>{{ s.size }}</td>
+            <td>{{ s.ext }} file</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% if markdown != "" and not topmarkdown %}
+<p><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}md.png">README.md</p>
+{{ markdown | safe}}
+{% endif %}
+{% endblock content %}

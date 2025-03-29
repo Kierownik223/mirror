@@ -1,0 +1,122 @@
+@import url('https://fonts.marmak.net.pl/OpenSans.css');
+
+body {
+    margin: 0;
+    background: #27a57f;
+    color: white;
+    font-family: 'Open Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+a {
+    color: white;
+}
+
+a:hover {
+    color: crimson;
+}
+
+div.line {
+    border-bottom: 1px solid white;
+    width: 100%;
+}
+
+.container {
+    width: min(800px, 95vw);
+    padding: 8px;
+    margin: 0 auto;
+}
+
+.header {
+    padding: 5px;
+    border: 1px solid white;
+    text-align: center;
+}
+
+.icon {
+    width: 1em;
+    height: 1em;
+    margin: 0px 4px -4px 0px;
+}
+
+.fullwidth {
+    width: 100%;
+}
+
+.header h1 {
+    margin: 10px 0;
+}
+
+.header a {
+    font-size: 14px;
+}
+
+.mark {
+    background-color: #656b0e;
+}
+
+.main {
+    margin-top: 20px;
+    padding: 5px;
+    border: 1px solid white;
+}
+
+.footer {
+    margin-top: 20px;
+    padding: 5px;
+    border: 1px solid white;
+    text-align: center;
+}
+
+table {
+    width: 100%;
+}
+
+th {
+    text-align: center;
+}
+
+input,
+button {
+	padding: 10px;
+	font-size: 16px;
+	border: 1px solid #fff;
+	margin: 10px 0;
+    background: #27a57f;
+    color: #fff;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+button:hover {
+    background: #fff;
+    color: #27a57f;
+}
+
+form {
+    margin-top: 10px;
+}
+
+label input {
+    width: auto;
+}
+
+.dialog-content {
+    background: #27a57f;
+	border: 1px solid #fff;
+    margin: 10% auto;
+    padding: 20px;
+    width: 50%;
+    text-align: center;
+}
+
+iframe {
+	border: none;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+@media only screen and (max-width: 600px) {
+    .dialog-content {
+        width: auto !important;
+    }
+}

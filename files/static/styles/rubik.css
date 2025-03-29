@@ -1,0 +1,145 @@
+@import url('https://fonts.marmak.net.pl/Rubik.css');
+
+body {
+    margin: 0;
+    background: #000000;
+    color: #fff;
+    font-family: 'Rubik', sans-serif;
+    font-size: 16px;
+    color-scheme: dark;
+}
+
+.icon {
+    width: 1em;
+    height: 1em;
+    margin: 2px 4px -2px 0px;
+}
+
+.header {
+    text-align: center;
+}
+
+.header h1 {
+    margin: 10px 0;
+    display: inline-block;
+    text-align: start;
+}
+
+.main {
+    width: 90vw;
+    max-width: 800px;
+    margin: 10px auto;
+    padding-top: 10px;
+    box-sizing: border-box;
+    border-top: 1px solid #303030;
+}
+
+@media only screen and (max-width: 600px) {
+    .main {
+        padding: 0;
+        border: none;
+    }
+
+    .dialog-content {
+        width: auto !important;
+    }
+}
+
+a {
+    color: #fff;
+    text-decoration: none;
+    transition: all ease-in-out .1s;
+}
+
+a:hover {
+    color: #999999;
+}
+
+input,
+select,
+button {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 10px auto;
+    padding: 10px;
+    border: 1px solid #303030;
+    border-radius: 4px;
+    background: #000;
+    color: #fff;
+}
+
+input[type="radio"] {
+    width: auto;
+    box-sizing: content-box;
+}
+
+button {
+    color: white;
+    font-size: 16px;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all .1s ease-in-out;
+    width: 100%;
+    margin: auto;
+    display: block;
+    text-align: center;
+    background-color: #000;
+    box-sizing: border-box;
+    margin-top: 10px;
+}
+
+button:hover {
+    transform: scale(0.98);
+}
+
+table {
+	width: 100%;
+	margin-bottom: 4px;
+	border-radius: 8px;
+}
+
+td {
+    color: #aaaaaa;
+}
+
+td:first-child {
+    color: #fff;
+}
+
+td:last-child {
+    text-align: right;
+}
+
+.footer {
+    width: 90vw;
+    max-width: 800px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    text-align: center;
+    color: #aaaaaa;
+    border-top: 1px solid #303030;
+    margin-bottom: 10px;
+}
+
+progress {
+    width: 100%;
+    color: #32a852;
+    accent-color: #32a852;
+}
+
+.dialog-content {
+    background: #000;
+	border: 1px solid #32a852;
+    margin: 10% auto;
+    padding: 20px;
+    width: 50%;
+    text-align: center;
+    border-radius: 8px;
+}
+
+iframe {
+	border: none;
+    box-sizing: border-box;
+    width: 100%;
+}

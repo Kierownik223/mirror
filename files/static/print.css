@@ -1,0 +1,16 @@
+@media print {
+    .header,
+    .footer,
+    .controls {
+        display: none;
+    }
+
+    .container,
+    .main,
+    .markdown {
+        width: 100%;
+        border: none;
+        max-width: auto;
+        margin: 0;
+    }
+}

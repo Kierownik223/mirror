@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - MARMAK Mirror</title>
+</head>
+
+<body>
+    <a href="/">Home</a>
+    <a href="/settings?plain=false">Normal mode</a>
+    <hr>
+    <a href="/">MARMAK Mirror</a>/
+    {% for s in path_seg %}
+    {% if s != "" %}
+    {{s}}/
+    {% endif %}
+    {% endfor %}
+    <hr>
+    {% if markdown != "" and topmarkdown %}
+    <a href="../">../</a><br>
+    <hr>
+    README.md<br>
+    {{ markdown | safe}}
+    <hr>
+    {% endif %}
+    {% if notroot and not topmarkdown %}
+    <a href="../">../</a><br>
+    {% endif %}
+
+    {% for s in dirs %}
+    <a href="{{ s.name }}/">{{ s.name }}/</a><br>
+    {% endfor %}
+    {% for s in files %}
+    <a href="{{ s.name }}">{{ s.name }}</a><br>
+    {% endfor %}
+    {% if markdown != "" and not topmarkdown %}
+    <hr>
+    README.md<br>
+    {{ markdown | safe}}
+    {% endif %}
+    <hr>
+    <center>
+        Using HinduFuture technologies<br>
+        Made by Kierownik223
+    </center>
+</body>
+
+</html>

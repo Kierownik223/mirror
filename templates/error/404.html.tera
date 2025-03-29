@@ -1,0 +1,6 @@
+{% extends "base" %}
+
+{% block content %}
+<a href="/">MARMAK Mirror</a>/HTTP 404<br>
+The requested resource could not be located. Please double-check the URL and try again.
+{% endblock content %}

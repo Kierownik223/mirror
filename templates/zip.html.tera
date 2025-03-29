@@ -1,0 +1,27 @@
+{% extends "base" %}
+
+{% block content %}
+<div class="controls">
+    Reading file {{ path }}
+    <div style="float: right;"><a href="?download" download><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">Download</a></div><br>
+</div>
+<table>
+    <tbody>
+        <tr>
+            <td><a href="./"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png"
+                        class="icon">../</a></td>
+            <td>---</td>
+            <td>Directory</td>
+        </tr>
+
+        {% for s in files %}
+        <tr>
+            <td><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name
+                }}</td>
+            <td>{{ s.size }}</td>
+            <td>{{ s.ext }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock content %}

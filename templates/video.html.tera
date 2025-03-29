@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#000000">
+    <link rel="shortcut icon" href="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png" type="image/x-icon">
+    <link rel="icon" href="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">
+    <meta property="og:title" content="{{ vidtitle }}">
+    <meta property="og:url" content="dl.marmak.net.pl/">
+    <meta property="og:description" content="{{ details }}">
+    <meta property="og:type" content=website>
+    <meta property="og:image" content="{{ poster }}">
+    <meta property="og:locale" content="en">
+    <meta property="og:site_name" content="MARMAK Mirror">
+    <meta property="og:video" content="https://dl.marmak.net.pl{{ path }}?download"/>
+    <meta property="og:video:secure_url" content="https://dl.marmak.net.pl{{ path }}?download"/>
+    <meta name="description" content="{{ title }}">
+    <link rel="stylesheet" href="/static/styles/{{ theme }}.css">
+    <title>{{ vidtitle }} - MARMAK Mirror</title>
+</head>
+<body>
+    <div class="container">
+        {% include "nav" %}
+        <div class="main">
+            <div class="controls">
+                Watching file {{ path }}
+                <div style="float: right;"><a href="?download" download><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">Download</a></div><br>
+                <a href="./"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png">./</a>
+            </div>
+            <video src="?download" controls style="height: 60vh; width: 100%;" poster="{{ poster }}">Your browser does not support the video element.</video>
+            {% if displaydetails %}
+            <b style="font-size: 24px;">{{ vidtitle }}</b>
+            {{ details | safe }}
+            {% endif %}
+        </div>
+        {% include "footer" %}
+    </div>
+</body>
+</html>

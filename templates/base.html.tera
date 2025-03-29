@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#000000">
+    <link rel="shortcut icon" href="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png" type="image/x-icon">
+    <link rel="icon" href="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">
+    <meta property="og:title" content="{{ title }}">
+    <meta property="og:url" content="dl.marmak.net.pl/">
+    <meta property="og:description" content="{{ title }}">
+    <meta property="og:type" content=website>
+    <meta property="og:image" content="/static/images/icons/hires/favicon.png">
+    <meta property="og:locale" content="en">
+    <meta property="og:site_name" content="MARMAK Mirror">
+    <meta name="description" content="{{ title }}">
+    <link rel="stylesheet" href="/static/styles/{{ theme }}.css">
+    <title>{{ title }} - MARMAK Mirror</title>
+</head>
+<body>
+    <div class="container">
+        {% include "nav" %}
+        <div class="main">
+            {% block content %}{% endblock content %}
+        </div>
+        {% include "footer" %}
+    </div>
+</body>
+</html>

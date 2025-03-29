@@ -1,0 +1,145 @@
+@import url('https://fonts.marmak.net.pl/Roboto.css');
+
+body {
+    margin: 0;
+    background: #fff;
+    color: #000;
+    font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 16px;
+}
+
+a {
+    color: #000;
+}
+
+a:hover {
+    color: crimson;
+}
+
+div.line {
+    border-bottom: 1px solid #000;
+    width: 100%;
+}
+
+.container {
+    max-width: 800px;
+    padding: 8px;
+    margin: 0 auto;
+}
+
+.header {
+    padding: 5px;
+    text-align: center;
+}
+
+.icon {
+    width: 1em;
+    height: 1em;
+    margin: 0px 4px -4px 0px;
+}
+
+.fullwidth {
+    width: 100%;
+}
+
+.header h1 {
+    margin: 10px 0;
+}
+
+.main {
+    margin-top: 20px;
+    padding: 5px;
+}
+
+.footer {
+    margin-top: 20px;
+    padding: 5px;
+    text-align: center;
+}
+
+table {
+    width: 100%;
+}
+
+.mark {
+    background-color: #879100;
+}
+
+select,
+button {
+	padding: 10px;
+	font-size: 16px;
+	border: 1px solid #000;
+	margin: 10px 0;
+    background: #fff;
+    color: #000;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+button:hover {
+    background: #000;
+    color: #fff;
+}
+
+input[type=text],
+input[type=password],
+button {
+	padding: 10px;
+	font-size: 16px;
+	border: 1px solid #000;
+	margin: 10px 0;
+    background: #fff;
+    color: #000;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+button:hover {
+    background: #000;
+    color: #fff;
+}
+
+form {
+    margin-top: 10px;
+}
+
+.message {
+    color: crimson;
+}
+
+input[type="file"] {
+    padding: 10px;
+	font-size: 16px;
+	border: 1px solid #000;
+	margin-bottom: 16px;
+    background: #fff;
+    color: #000;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+label input {
+    width: auto;
+}
+
+.dialog-content {
+    background: #fff;
+	border: 1px solid #000;
+    margin: 10% auto;
+    padding: 20px;
+    width: 50%;
+    text-align: center;
+}
+
+iframe {
+	border: none;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+@media only screen and (max-width: 600px) {
+    .dialog-content {
+        width: auto !important;
+    }
+}

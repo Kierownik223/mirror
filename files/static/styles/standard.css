@@ -1,0 +1,123 @@
+@import url('https://fonts.marmak.net.pl/Roboto.css');
+
+body {
+    margin: 0;
+    background-color: #181A1B;
+    color: white;
+    font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+a {
+    color: white;
+    transition: all ease-in-out .1s;
+}
+
+a:hover {
+    color: red;
+}
+
+.container {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 10px;
+}
+
+.header {
+    padding: 10px;
+    border-bottom: 1px solid #303436;
+    text-align: center;
+}
+
+.icon {
+    width: 1em;
+    height: 1em;
+    margin: 2px 4px -2px 0px;
+}
+
+.fullwidth {
+    width: 100%;
+}
+
+.header h1 {
+    margin: 10px 0;
+}
+
+div.line {
+    border-bottom: 1px solid #303436;
+    width: 100%;
+}
+
+.mark {
+    background-color: #eeff00;
+}
+
+.footer {
+    margin-top: 10px;
+    text-align: center;
+}
+
+table {
+    width: 100%;
+}
+
+th {
+    text-align: center;
+}
+
+input,
+select,
+button {
+	padding: 10px;
+	font-size: 16px;
+	border: 1px solid #303436;
+	margin: 10px 0;
+    background: #181A1B;
+    color: #fff;
+    box-sizing: border-box;
+    width: 100%;
+    border-radius: 4px;
+    transition: all ease-in-out .1s;
+}
+
+button:hover {
+    background: #303436;
+    color: #fff;
+    transform: scale(0.98);
+}
+
+progress {
+    width: 100%;
+    color: #303436;
+    accent-color: #303436;
+}
+
+form {
+    margin-top: 10px;
+}
+
+label input {
+    width: auto;
+}
+
+.dialog-content {
+    background: #181A1B;
+	border: 1px solid #303436;
+    margin: 10% auto;
+    padding: 20px;
+    width: 50%;
+    border-radius: 8px;
+    text-align: center;
+}
+
+iframe {
+	border: none;
+    box-sizing: border-box;
+    margin: 1px;
+    width: 100%;
+}
+
+@media only screen and (max-width: 600px) {
+    .dialog-content {
+        width: auto !important;
+    }
+}

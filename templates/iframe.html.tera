@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/styles/{{ theme }}.css">
+</head>
+
+<body>
+    <input type="hidden" name="path" value="{{ path | safe }}">
+    <table>
+        <tbody>
+            {% if notroot %}
+            <tr>
+                <td><a href="../"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png"
+                            class="icon">../</a></td>
+                <td>---</td>
+                <td>Directory</td>
+            </tr>
+            {% endif %}
+
+            {% for s in dirs %}
+            <tr>
+                <td><a href="{{ s.name }}/"><img
+                            src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{
+                        s.name }}/</a></td>
+                <td>---</td>
+                <td>Directory</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+
+</html>
