@@ -16,8 +16,8 @@ use rocket_db_pools::{Connection, Database};
 use rocket_multipart_form_data::{
     MultipartFormData, MultipartFormDataField, MultipartFormDataOptions, Repetition,
 };
-use serde_json::json;
 use serde::Deserialize;
+use serde_json::json;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::ffi::OsStr;
@@ -36,7 +36,6 @@ mod api;
 mod db;
 mod utils;
 
-
 #[derive(Debug, Deserialize)]
 struct Config {
     extensions: Vec<String>,
@@ -45,10 +44,8 @@ struct Config {
 
 impl Config {
     fn load() -> Self {
-        let config_str = fs::read_to_string("config.toml")
-            .expect("Failed to read config file");
-        toml::from_str(&config_str)
-            .expect("Failed to parse config file")
+        let config_str = fs::read_to_string("config.toml").expect("Failed to read config file");
+        toml::from_str(&config_str).expect("Failed to parse config file")
     }
 }
 
@@ -155,7 +152,11 @@ async fn download(file: PathBuf, jar: &CookieJar<'_>) -> Result<Option<HeaderFil
 }
 
 #[get("/<file..>")]
-async fn index<'a>(file: PathBuf, jar: &CookieJar<'_>, config: &rocket::State<Config>) -> Result<Result<Result<Template, Redirect>, Option<HeaderFile>>, Status> {
+async fn index<'a>(
+    file: PathBuf,
+    jar: &CookieJar<'_>,
+    config: &rocket::State<Config>,
+) -> Result<Result<Result<Template, Redirect>, Option<HeaderFile>>, Status> {
     let path = Path::new("files/").join(file.clone());
 
     let (username, perms) = get_session(jar);
@@ -597,23 +598,20 @@ fn sysinfo(jar: &CookieJar<'_>) -> Result<Template, Status> {
         let sys_ver = System::kernel_version().unwrap_or(String::from("21.3.7"));
         let hostname = System::host_name().unwrap_or(String::from("mirror"));
 
-        let mut disks: Vec<Disk> = Vec::new();
-
-        let sys_disks = Disks::new_with_refreshed_list();
-        for disk in &sys_disks {
-            if disk.total_space() != 0 {
-                disks.push(Disk {
-                    fs: disk.file_system().to_str().unwrap().to_string(),
-                    used_space: disk.total_space() - disk.available_space(),
-                    total_space: disk.total_space(),
-                    used_space_readable: format_size(
-                        disk.total_space() - disk.available_space(),
-                        DECIMAL,
-                    ),
-                    total_space_readable: format_size(disk.total_space(), DECIMAL),
-                });
-            }
-        }
+        let disks: Vec<Disk> = Disks::new_with_refreshed_list()
+            .iter()
+            .filter(|x| x.total_space() != 0)
+            .map(|x| {
+                let used_space = x.total_space() - x.available_space();
+                Disk {
+                    fs: x.file_system().to_str().unwrap().to_string(),
+                    used_space,
+                    total_space: x.total_space(),
+                    used_space_readable: format_size(used_space, DECIMAL),
+                    total_space_readable: format_size(x.total_space(), DECIMAL),
+                }
+            })
+            .collect();
 
         return Ok(Template::render(
             "sysinfo",
@@ -1013,28 +1011,33 @@ fn rocket() -> _ {
         .attach(Template::fairing())
         .attach(api::build_api())
         .attach(Db::init())
-        .register("/", catchers![
-            not_found,
-            unprocessable_entry,
-            forbidden,
-            internal_server_error,
-            bad_request
-        ])
-        .mount("/", routes![
-            settings,
-            download,
-            index,
-            upload,
-            uploader,
-            login,
-            login_page,
-            logout,
-            sysinfo,
-            fetch_settings,
-            sync_settings,
-            direct
-        ]);
+        .register(
+            "/",
+            catchers![
+                not_found,
+                unprocessable_entry,
+                forbidden,
+                internal_server_error,
+                bad_request
+            ],
+        )
+        .mount(
+            "/",
+            routes![
+                settings,
+                download,
+                index,
+                upload,
+                uploader,
+                login,
+                login_page,
+                logout,
+                sysinfo,
+                fetch_settings,
+                sync_settings,
+                direct
+            ],
+        );
 
     rocket
 }
-

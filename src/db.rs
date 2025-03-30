@@ -9,7 +9,13 @@ use crate::MarmakUser;
 #[database("marmak")]
 pub struct Db(sqlx::MySqlPool);
 
-pub async fn login_user(mut db: Connection<Db>, username: &str, password: &str, ip: &str, verify_password: bool) -> Option<MarmakUser> {
+pub async fn login_user(
+    mut db: Connection<Db>,
+    username: &str,
+    password: &str,
+    ip: &str,
+    verify_password: bool,
+) -> Option<MarmakUser> {
     let query_result =
         sqlx::query("SELECT password, perms, mirror_settings FROM users WHERE username = ?")
             .bind(username)
