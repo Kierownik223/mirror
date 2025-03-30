@@ -199,7 +199,7 @@ pub fn list_to_files(files: Vec<&str>) -> Result<Vec<MirrorFile>, Error> {
         let mut ext = get_extension_from_filename(file)
             .unwrap_or_else(|| "")
             .to_lowercase();
-        
+
         if file.ends_with("/") {
             ext = "Folder".to_string();
         } else {
@@ -207,7 +207,11 @@ pub fn list_to_files(files: Vec<&str>) -> Result<Vec<MirrorFile>, Error> {
         }
 
         let mut icon = &ext.as_str();
-        if !Path::new(&("files/static/images/icons/".to_owned() + &icon.to_lowercase() + ".png").to_string()).exists() {
+        if !Path::new(
+            &("files/static/images/icons/".to_owned() + &icon.to_lowercase() + ".png").to_string(),
+        )
+        .exists()
+        {
             icon = &"default";
         }
 
