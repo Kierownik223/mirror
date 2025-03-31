@@ -4,10 +4,10 @@
 <a href="/">MARMAK Mirror</a>/<a href="/upload">Uploader</a><br>
 Hi, {{ username }}!
 <br>
-<a href="/logout"><img src="/static/images/icons/{% if hires %}hires/{% endif %}login.png" class="icon">Log out</a>
+<a href="/account/logout"><img src="/static/images/icons/{% if hires %}hires/{% endif %}login.png" class="icon">Log out</a>
 <a href="/uploads/"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">Uploads</a>
 <a href="/sysinfo"><img src="/static/images/icons/{% if hires %}hires/{% endif %}config.png" class="icon">System information</a>
-<a href="/direct?to=account"><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">Manage account</a>
+<a href="/account/direct?to=account"><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">Manage account</a>
 {% for s in uploadedfiles %}
 {% if s.name != "" %}
 <a href="{{ s.ext }}"><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}</a> uploaded successfully!<br>

@@ -1,7 +1,7 @@
 {% extends "base" %}
 
 {% block content %}
-<a href="/">MARMAK Mirror</a>/<a href="/login">Login</a><br>
+<a href="/">MARMAK Mirror</a>/<a href="/account/login">Login</a><br>
 Log in with a <a href="https://account.marmak.net.pl/"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}key.png">MARMAK Account</a>
 <form method="post">
     {% if message != "" %}

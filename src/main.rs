@@ -1,11 +1,7 @@
 use ::sysinfo::{Disks, System};
-use base64::prelude::BASE64_STANDARD;
-use base64::Engine;
-use db::{fetch_user, login_user, Db};
+use db::{fetch_user, Db};
 use humansize::{format_size, DECIMAL};
-use openssl::rsa::{Padding, Rsa};
 use rocket::data::ToByteUnit;
-use rocket::form::Form;
 use rocket::http::{ContentType, Cookie, CookieJar, Status};
 use rocket::request::{FromRequest, Outcome};
 use rocket::response;
@@ -17,7 +13,6 @@ use rocket_multipart_form_data::{
     MultipartFormData, MultipartFormDataField, MultipartFormDataOptions, Repetition,
 };
 use serde::Deserialize;
-use serde_json::json;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::ffi::OsStr;
@@ -35,6 +30,7 @@ use rocket_dyn_templates::{context, Template};
 mod api;
 mod db;
 mod utils;
+mod account;
 
 #[derive(Debug, Deserialize)]
 struct Config {
@@ -666,201 +662,6 @@ fn uploader(jar: &CookieJar<'_>) -> Result<Template, Status> {
     }
 }
 
-#[get("/login")]
-fn login_page(jar: &CookieJar<'_>) -> Result<Template, Redirect> {
-    if is_logged_in(&jar) {
-        let perms = get_session(jar).1;
-        if perms == 0 {
-            return Err(Redirect::to("/upload"));
-        } else {
-            return Err(Redirect::to("/"));
-        }
-    }
-
-    Ok(Template::render(
-        "login",
-        context! {
-            title: "Login",
-            theme: get_theme(jar),
-            is_logged_in: is_logged_in(&jar),
-            username: "",
-            admin: false,
-            hires: get_bool_cookie(jar, "hires"),
-            smallhead: get_bool_cookie(jar, "smallhead"),
-            message: ""
-        },
-    ))
-}
-
-#[post("/login?<next>", data = "<user>")]
-async fn login(
-    db: Connection<Db>,
-    user: Form<MarmakUser>,
-    jar: &CookieJar<'_>,
-    ip: XForwardedFor<'_>,
-    next: Option<&str>,
-) -> Result<Redirect, Template> {
-    if let Some(db_user) = login_user(db, &user.username, &user.password, &ip.0, true).await {
-        if !get_bool_cookie(&jar, "nooverride") {
-            if let Some(mirror_settings) = db_user.mirror_settings {
-                let decoded: HashMap<String, String> =
-                    serde_json::from_str(&mirror_settings).expect("Failed to parse JSON");
-
-                for (key, value) in decoded {
-                    let mut now = OffsetDateTime::now_utc();
-                    now += Duration::days(365);
-                    let mut cookie = Cookie::new(key, value);
-                    cookie.set_expires(now);
-                    jar.add(cookie);
-                }
-            }
-        }
-
-        jar.add_private(Cookie::new(
-            "session",
-            format!(
-                "{}.{}",
-                &user.username,
-                &db_user.perms.unwrap_or_default().to_string()
-            ),
-        ));
-
-        println!("Login for user {} from {} succeeded", &user.username, &ip.0);
-
-        let mut redirect_url = next.unwrap_or("/").to_string();
-
-        if redirect_url == "/upload" {
-            return Ok(Redirect::to("/"));
-        }
-
-        if db_user.perms.unwrap_or(1) == 0 {
-            redirect_url = next.unwrap_or("/upload").to_string();
-        }
-
-        return Ok(Redirect::to(redirect_url));
-    } else {
-        println!(
-            "Failed login attempt to user {} with password {} from {}",
-            &user.username, &user.password, &ip.0
-        );
-        return Err(Template::render(
-            "login",
-            context! {
-                title: "Login",
-                theme: get_theme(jar),
-                is_logged_in: is_logged_in(&jar),
-                admin: get_session(&jar).1 == 0,
-                hires: get_bool_cookie(jar, "hires"),
-                smallhead: get_bool_cookie(jar, "smallhead"),
-                message: "Incorrect username or password"
-            },
-        ));
-    }
-}
-
-#[get("/direct?<token>&<to>")]
-async fn direct<'a>(
-    db: Connection<Db>,
-    jar: &CookieJar<'_>,
-    token: Option<String>,
-    to: Option<String>,
-    ip: XForwardedFor<'_>,
-) -> Result<Redirect, Status> {
-    if let Some(token) = token {
-        if is_logged_in(&jar) {
-            let perms = get_session(jar).1;
-            return Ok(Redirect::to(if perms == 1 { "/upload" } else { "/" }));
-        }
-
-        let private_key = fs::read("private.key").map_err(|_| Status::InternalServerError)?;
-        let rsa =
-            Rsa::private_key_from_pem(&private_key).map_err(|_| Status::InternalServerError)?;
-
-        let encrypted_data = base64::engine::general_purpose::URL_SAFE
-            .decode(&token.replace(".", "="))
-            .map_err(|_| Status::BadRequest)?;
-
-        let mut decrypted_data = vec![0; rsa.size() as usize];
-        let decrypted_len = rsa
-            .private_decrypt(&encrypted_data, &mut decrypted_data, Padding::PKCS1)
-            .map_err(|_| Status::InternalServerError)?;
-
-        let decrypted_data = &decrypted_data[..decrypted_len];
-
-        let mut json_bytes = Vec::new();
-        BASE64_STANDARD
-            .decode_vec(decrypted_data, &mut json_bytes)
-            .map_err(|_| Status::BadRequest)?;
-
-        let json = String::from_utf8(json_bytes).map_err(|_| Status::InternalServerError)?;
-        let received_user: UserToken =
-            serde_json::from_str(&json).map_err(|_| Status::BadRequest)?;
-
-        if let Some(db_user) = login_user(db, &received_user.username, "", ip.0, false).await {
-            if !get_bool_cookie(&jar, "nooverride") {
-                if let Some(mirror_settings) = db_user.mirror_settings {
-                    let decoded: HashMap<String, String> =
-                        serde_json::from_str(&mirror_settings).expect("Failed to parse JSON");
-
-                    for (key, value) in decoded {
-                        let mut now = OffsetDateTime::now_utc();
-                        now += Duration::days(365);
-                        let mut cookie = Cookie::new(key, value);
-                        cookie.set_expires(now);
-                        jar.add(cookie);
-                    }
-                }
-            }
-
-            jar.add_private(Cookie::new(
-                "session",
-                format!(
-                    "{}.{}",
-                    received_user.username,
-                    db_user.perms.unwrap_or_default()
-                ),
-            ));
-            return Ok(Redirect::to("/upload"));
-        }
-
-        return Ok(Redirect::to("/login"));
-    }
-
-    if let Some(_to) = to {
-        if is_logged_in(&jar) {
-            if let Some(db_user) = fetch_user(db, get_session(jar).0.as_str()).await {
-                let user_data =
-                    json!({"username": get_session(jar).0, "password_hash": db_user.password});
-                let b64token = BASE64_STANDARD.encode(user_data.to_string());
-
-                let public_key_pem =
-                    fs::read_to_string("public.key").expect("Failed to read public key");
-                let rsa = Rsa::public_key_from_pem(public_key_pem.as_bytes())
-                    .expect("Invalid public key");
-
-                let mut encrypted_data = vec![0; rsa.size() as usize];
-                rsa.public_encrypt(b64token.as_bytes(), &mut encrypted_data, Padding::PKCS1)
-                    .expect("Encryption failed");
-
-                let encrypted_b64 =
-                    base64::engine::general_purpose::URL_SAFE.encode(encrypted_data);
-                let redirect_url = format!(
-                    "https://account.marmak.net.pl/direct?token={}",
-                    encrypted_b64
-                );
-
-                return Ok(Redirect::to(redirect_url));
-            } else {
-                return Err(Status::Forbidden);
-            }
-        } else {
-            return Err(Status::Forbidden);
-        }
-    }
-
-    Err(Status::BadRequest)
-}
-
 #[get("/settings/fetch")]
 async fn fetch_settings(
     db: Connection<Db>,
@@ -921,12 +722,6 @@ async fn sync_settings(
     } else {
         return Err(Status::Forbidden);
     }
-}
-
-#[get("/logout")]
-fn logout(jar: &CookieJar<'_>) -> Redirect {
-    jar.remove_private("session");
-    Redirect::to("/login")
 }
 
 #[catch(404)]
@@ -999,7 +794,7 @@ fn unprocessable_entry(req: &Request) -> Template {
 
 #[catch(403)]
 fn forbidden(req: &Request) -> Redirect {
-    Redirect::to(format!("/login?next={}", req.uri()))
+    Redirect::to(format!("/account/login?next={}", req.uri()))
 }
 
 #[launch]
@@ -1010,6 +805,7 @@ fn rocket() -> _ {
         .manage(config)
         .attach(Template::fairing())
         .attach(api::build_api())
+        .attach(account::build_account())
         .attach(Db::init())
         .register(
             "/",
@@ -1029,13 +825,9 @@ fn rocket() -> _ {
                 index,
                 upload,
                 uploader,
-                login,
-                login_page,
-                logout,
                 sysinfo,
                 fetch_settings,
-                sync_settings,
-                direct
+                sync_settings
             ],
         );
 

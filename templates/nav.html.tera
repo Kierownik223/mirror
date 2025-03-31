@@ -4,13 +4,13 @@
     <a href="/settings"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png">Settings</a>
     <a href="https://marmak.net.pl"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}marmak.png">MARMAK</a>
     {% if not is_logged_in %}
-    <a href="/login"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}login.png">Log in</a>
+    <a href="/account/login"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}login.png">Log in</a>
     {% else %}
     {% if admin %}
     <a href="/upload"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png">Uploader</a>
     {% else %}
-    <a href="/direct?to=account"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png">Manage account</a>
+    <a href="/account/direct?to=account"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png">Manage account</a>
     {% endif %}
-    <a href="/logout"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}login.png">Log out</a>
+    <a href="/account/logout"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}login.png">Log out</a>
     {% endif %}
 </div>
