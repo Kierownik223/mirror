@@ -1,12 +1,25 @@
-use std::{io::{Read, Write}, path::Path};
+use std::{
+    io::{Read, Write},
+    path::Path,
+};
 
-use humansize::{format_size, DECIMAL};
-use rocket::{data::ToByteUnit, fairing::AdHoc, http::{ContentType, CookieJar, Status}, Data};
-use rocket_dyn_templates::{context, Template};
-use rocket_multipart_form_data::{MultipartFormData, MultipartFormDataField, MultipartFormDataOptions, Repetition};
 use ::sysinfo::{Disks, System};
+use humansize::{format_size, DECIMAL};
+use rocket::{
+    data::ToByteUnit,
+    fairing::AdHoc,
+    http::{ContentType, CookieJar, Status},
+    Data,
+};
+use rocket_dyn_templates::{context, Template};
+use rocket_multipart_form_data::{
+    MultipartFormData, MultipartFormDataField, MultipartFormDataOptions, Repetition,
+};
 
-use crate::{utils::{get_bool_cookie, get_extension_from_filename, get_session, get_theme, is_logged_in}, Disk, MirrorFile};
+use crate::{
+    utils::{get_bool_cookie, get_extension_from_filename, get_session, get_theme, is_logged_in},
+    Disk, MirrorFile,
+};
 
 #[post("/upload", data = "<data>")]
 async fn upload(
@@ -231,7 +244,6 @@ fn admin(jar: &CookieJar<'_>) -> Result<Template, Status> {
 }
 pub fn build() -> AdHoc {
     AdHoc::on_ignite("Admin", |rocket| async {
-        rocket
-            .mount("/admin", routes![upload, uploader, sysinfo, admin])
+        rocket.mount("/admin", routes![upload, uploader, sysinfo, admin])
     })
 }

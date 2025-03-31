@@ -20,8 +20,7 @@ struct FolderSize {
 
 pub fn get_folder_sizes(json_file: &str) -> Result<HashMap<String, u64>, Error> {
     let json_content = fs::read_to_string(json_file).unwrap_or_default();
-    let folder_sizes: Vec<FolderSize> =
-        serde_json::from_str(&json_content).unwrap_or_default();
+    let folder_sizes: Vec<FolderSize> = serde_json::from_str(&json_content).unwrap_or_default();
 
     let mut size_map = HashMap::new();
     for entry in folder_sizes {

@@ -2,13 +2,22 @@ use std::{collections::HashMap, fs};
 
 use base64::{prelude::BASE64_STANDARD, Engine};
 use openssl::rsa::{Padding, Rsa};
-use rocket::{fairing::AdHoc, form::Form, http::{Cookie, CookieJar, Status}, response::Redirect};
+use rocket::{
+    fairing::AdHoc,
+    form::Form,
+    http::{Cookie, CookieJar, Status},
+    response::Redirect,
+};
 use rocket_db_pools::Connection;
 use rocket_dyn_templates::{context, Template};
 use serde_json::json;
 use time::{Duration, OffsetDateTime};
 
-use crate::{db::{fetch_user, login_user, Db}, utils::{get_bool_cookie, get_session, get_theme, is_logged_in}, MarmakUser, UserToken, XForwardedFor};
+use crate::{
+    db::{fetch_user, login_user, Db},
+    utils::{get_bool_cookie, get_session, get_theme, is_logged_in},
+    MarmakUser, UserToken, XForwardedFor,
+};
 
 #[get("/login")]
 fn login_page(jar: &CookieJar<'_>) -> Result<Template, Redirect> {
@@ -213,7 +222,6 @@ fn logout(jar: &CookieJar<'_>) -> Redirect {
 
 pub fn build_account() -> AdHoc {
     AdHoc::on_ignite("Account", |rocket| async {
-        rocket
-            .mount("/account", routes![login_page, login, direct, logout])
+        rocket.mount("/account", routes![login_page, login, direct, logout])
     })
 }

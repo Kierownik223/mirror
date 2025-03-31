@@ -15,17 +15,17 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use time::{Duration, OffsetDateTime};
 use utils::{
-    create_cookie, get_bool_cookie, get_session, get_theme,
-    is_logged_in, is_restricted, list_to_files, open_file, read_dirs, read_files,
+    create_cookie, get_bool_cookie, get_session, get_theme, is_logged_in, is_restricted,
+    list_to_files, open_file, read_dirs, read_files,
 };
 
 use rocket_dyn_templates::{context, Template};
 
+mod account;
+mod admin;
 mod api;
 mod db;
 mod utils;
-mod account;
-mod admin;
 
 #[derive(Debug, Deserialize)]
 struct Config {
@@ -623,13 +623,7 @@ fn rocket() -> _ {
         )
         .mount(
             "/",
-            routes![
-                settings,
-                download,
-                index,
-                fetch_settings,
-                sync_settings
-            ],
+            routes![settings, download, index, fetch_settings, sync_settings],
         );
 
     rocket
