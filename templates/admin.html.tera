@@ -1,0 +1,18 @@
+{% extends "base" %}
+
+{% block content %}
+<a href="/">MARMAK Mirror</a>/<a href="/admin/">Admin panel</a><br>
+Hi, {{ username }}!
+<br>
+<a href="/admin/upload"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">Uploader</a>
+<a href="/admin/sysinfo"><img src="/static/images/icons/{% if hires %}hires/{% endif %}config.png" class="icon">System information</a>
+<a href="/account/direct?to=account"><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">Manage account</a>
+<br>
+<b>Disk usage:</b><br>
+<div id="disks">
+Loading...
+</div>
+
+<script src="/static/admin.js"></script>
+
+{% endblock content %}

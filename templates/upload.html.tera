@@ -4,10 +4,9 @@
 <a href="/">MARMAK Mirror</a>/<a href="/upload">Uploader</a><br>
 Hi, {{ username }}!
 <br>
-<a href="/account/logout"><img src="/static/images/icons/{% if hires %}hires/{% endif %}login.png" class="icon">Log out</a>
+<a href="/admin/"><img src="/static/images/icons/{% if hires %}hires/{% endif %}floppy.png" class="icon">Admin panel</a>
 <a href="/uploads/"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">Uploads</a>
-<a href="/sysinfo"><img src="/static/images/icons/{% if hires %}hires/{% endif %}config.png" class="icon">System information</a>
-<a href="/account/direct?to=account"><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">Manage account</a>
+<br>
 {% for s in uploadedfiles %}
 {% if s.name != "" %}
 <a href="{{ s.ext }}"><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}</a> uploaded successfully!<br>
@@ -23,7 +22,7 @@ Hi, {{ username }}!
     <center>
         <input type="text" id="path" name="path" placeholder="Leave empty for /uploads/">
         {% if filebrowser %}
-        <button type="button" onclick="openDialog()">Browse</button>
+        <button type="button" onclick="openDialog()"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">Browse</button>
         {% endif %}
     </center>
     <br>
@@ -31,7 +30,7 @@ Hi, {{ username }}!
     <img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}md.png">Maximum file size allowed is 100MB.<br>
     <br>
     <center>
-        <button type="submit">Upload</button>
+        <button type="submit"><img src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png" class="icon">Upload</button>
     </center>
 </form>
 

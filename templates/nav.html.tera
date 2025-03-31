@@ -7,7 +7,7 @@
     <a href="/account/login"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}login.png">Log in</a>
     {% else %}
     {% if admin %}
-    <a href="/upload"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png">Uploader</a>
+    <a href="/admin/"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}floppy.png">Admin panel</a>
     {% else %}
     <a href="/account/direct?to=account"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png">Manage account</a>
     {% endif %}

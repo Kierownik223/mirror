@@ -15,7 +15,7 @@ fn login_page(jar: &CookieJar<'_>) -> Result<Template, Redirect> {
     if is_logged_in(&jar) {
         let perms = get_session(jar).1;
         if perms == 0 {
-            return Err(Redirect::to("/upload"));
+            return Err(Redirect::to("/admin/"));
         } else {
             return Err(Redirect::to("/"));
         }
@@ -73,12 +73,12 @@ async fn login(
 
         let mut redirect_url = next.unwrap_or("/").to_string();
 
-        if redirect_url == "/upload" {
+        if redirect_url == "/admin" {
             return Ok(Redirect::to("/"));
         }
 
         if db_user.perms.unwrap_or(1) == 0 {
-            redirect_url = next.unwrap_or("/upload").to_string();
+            redirect_url = next.unwrap_or("/admin").to_string();
         }
 
         return Ok(Redirect::to(redirect_url));

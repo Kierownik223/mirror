@@ -4,7 +4,7 @@
 <a href="/">MARMAK Mirror</a>/<a href="/sysinfo">Server information</a><br>
 Hi, {{ username }}!
 <br>
-<a href="/upload"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">Uploader</a><br>
+<a href="/admin/"><img src="/static/images/icons/{% if hires %}hires/{% endif %}floppy.png" class="icon">Admin panel</a><br>
 <label for="mem_usage">Memory usage: <span id="used_mem_readable">{{ used_mem_readable }}</span>/<span id="total_mem_readable">{{ total_mem_readable }}</span></label>
 <progress style="width:100%;box-sizing:border-box;" id="mem_usage" max="{{ total_mem }}" value="{{ used_mem }}"></progress>
 <b>System</b>: <span id="sys_name">{{ sys_name }}</span> <br>
