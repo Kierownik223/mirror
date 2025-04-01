@@ -8,11 +8,10 @@ use rocket::{
     serde::json::Json,
     Request,
 };
-use rocket_dyn_templates::{context, Template};
 
 use crate::{
     read_dirs, read_files,
-    utils::{get_bool_cookie, get_theme, is_restricted},
+    utils::is_restricted,
     Config, Disk, MirrorFile, Sysinfo,
 };
 
@@ -54,48 +53,6 @@ async fn listing(
     dir_list.append(&mut file_list);
 
     Ok(Json(dir_list))
-}
-
-#[get("/iframe/<file..>")]
-async fn iframe(
-    file: PathBuf,
-    jar: &CookieJar<'_>,
-    config: &rocket::State<Config>,
-) -> Result<Template, Status> {
-    let path = Path::new("files/").join(file.clone());
-
-    if is_restricted(path.clone(), &jar) {
-        return Err(Status::Forbidden);
-    }
-
-    let mut notroot = true;
-
-    let path = Path::new("/").join(file).display().to_string();
-
-    if path == "/" {
-        notroot = false;
-    }
-
-    let mut dir_list = read_dirs(&path).unwrap_or_default();
-
-    if dir_list.is_empty() {
-        return Err(Status::NotFound);
-    }
-
-    dir_list.retain(|x| !config.hidden_files.contains(&x.name));
-
-    dir_list.sort();
-
-    Ok(Template::render(
-        "iframe",
-        context! {
-            path: path,
-            dirs: dir_list,
-            theme: get_theme(jar),
-            hires: get_bool_cookie(jar, "hires"),
-            notroot: notroot
-        },
-    ))
 }
 
 #[get("/sysinfo")]
@@ -156,7 +113,7 @@ fn default(status: Status, _req: &Request) -> Json<Error> {
 pub fn build_api() -> AdHoc {
     AdHoc::on_ignite("API", |rocket| async {
         rocket
-            .mount("/api", routes![index, listing, sysinfo, iframe])
+            .mount("/api", routes![index, listing, sysinfo])
             .register("/api", catchers![default])
     })
 }

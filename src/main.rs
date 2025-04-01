@@ -527,6 +527,48 @@ async fn sync_settings(
     }
 }
 
+#[get("/iframe/<file..>")]
+async fn iframe(
+    file: PathBuf,
+    jar: &CookieJar<'_>,
+    config: &rocket::State<Config>,
+) -> Result<Template, Status> {
+    let path = Path::new("files/").join(file.clone());
+
+    if is_restricted(path.clone(), &jar) {
+        return Err(Status::Forbidden);
+    }
+
+    let mut notroot = true;
+
+    let path = Path::new("/").join(file).display().to_string();
+
+    if path == "/" {
+        notroot = false;
+    }
+
+    let mut dir_list = read_dirs(&path).unwrap_or_default();
+
+    if dir_list.is_empty() {
+        return Err(Status::NotFound);
+    }
+
+    dir_list.retain(|x| !config.hidden_files.contains(&x.name));
+
+    dir_list.sort();
+
+    Ok(Template::render(
+        "iframe",
+        context! {
+            path: path,
+            dirs: dir_list,
+            theme: get_theme(jar),
+            hires: get_bool_cookie(jar, "hires"),
+            notroot: notroot
+        },
+    ))
+}
+
 #[catch(404)]
 fn not_found(req: &Request) -> Template {
     let jar = req.cookies();
@@ -623,7 +665,7 @@ fn rocket() -> _ {
         )
         .mount(
             "/",
-            routes![settings, download, index, fetch_settings, sync_settings],
+            routes![settings, download, index, fetch_settings, sync_settings, iframe],
         );
 
     rocket

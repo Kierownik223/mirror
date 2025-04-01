@@ -39,7 +39,7 @@ Hi, {{ username }}!
 <div id="browse_dialog" class="dialog">
     <div class="dialog-content">
         <img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">Select a folder:
-        <iframe id="browser_iframe" src="/api/iframe/"></iframe>
+        <iframe id="browser_iframe" src="/iframe/"></iframe>
         <center>
             <button onclick="selectPath()">OK</button>
             <button onclick="closeDialog()">Cancel</button>
