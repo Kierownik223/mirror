@@ -9,11 +9,7 @@ use rocket::{
     Request,
 };
 
-use crate::{
-    read_dirs, read_files,
-    utils::is_restricted,
-    Config, Disk, MirrorFile, Sysinfo,
-};
+use crate::{read_dirs, read_files, utils::is_restricted, Config, Disk, MirrorFile, Sysinfo};
 
 #[derive(serde::Serialize)]
 struct MirrorInfo {

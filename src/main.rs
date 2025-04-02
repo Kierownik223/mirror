@@ -2,9 +2,9 @@ use db::{fetch_user, Db};
 use humansize::{format_size, DECIMAL};
 use rocket::http::{Cookie, CookieJar, Status};
 use rocket::request::{FromRequest, Outcome};
-use rocket::response;
 use rocket::response::content::RawHtml;
 use rocket::response::{Redirect, Responder};
+use rocket::{response, State};
 use rocket::{Request, Response};
 use rocket_db_pools::{Connection, Database};
 use serde::Deserialize;
@@ -14,6 +14,7 @@ use std::ffi::OsStr;
 use std::fs;
 use std::path::{Path, PathBuf};
 use time::{Duration, OffsetDateTime};
+use toml::Value;
 use utils::{
     create_cookie, get_bool_cookie, get_session, get_theme, is_logged_in, is_restricted,
     list_to_files, open_file, read_dirs, read_files,
@@ -99,6 +100,32 @@ impl<'r> FromRequest<'r> for XForwardedFor<'r> {
     }
 }
 
+#[derive(serde::Serialize)]
+struct Language(String);
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for Language {
+    type Error = ();
+
+    async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
+        let cookies: &CookieJar = request.cookies();
+
+        if let Some(cookie_lang) = cookies.get("lang").map(|c| c.value().to_string()) {
+            return Outcome::Success(Language(cookie_lang));
+        }
+
+        if let Some(header_lang) = request.headers().get_one("Accept-Language") {
+            let lang = header_lang.to_string();
+            cookies.add(Cookie::new("lang", lang.clone()));
+            return Outcome::Success(Language(lang));
+        }
+
+        cookies.add(Cookie::new("lang", "en"));
+
+        Outcome::Success(Language("en".to_string()))
+    }
+}
+
 #[derive(Debug, PartialEq, Eq, FromForm)]
 struct MarmakUser {
     username: String,
@@ -131,6 +158,53 @@ struct Sysinfo {
     disks: Vec<Disk>,
 }
 
+type Translations = HashMap<String, HashMap<String, String>>;
+
+struct TranslationStore {
+    translations: Translations,
+}
+
+impl TranslationStore {
+    fn new() -> Self {
+        let mut translations = HashMap::new();
+
+        let lang_dir = Path::new("lang/");
+
+        if let Ok(entries) = fs::read_dir(lang_dir) {
+            for entry in entries.flatten() {
+                if let Some(lang) = entry.path().file_stem().and_then(|s| s.to_str()) {
+                    if let Ok(contents) = fs::read_to_string(entry.path()) {
+                        if let Ok(parsed) = contents.parse::<Value>() {
+                            if let Some(table) = parsed.as_table() {
+                                let lang_translations = table
+                                    .iter()
+                                    .filter_map(|(key, val)| {
+                                        val.as_str().map(|s| (key.clone(), s.to_string()))
+                                    })
+                                    .collect();
+
+                                println!("Loaded language {}", lang);
+
+                                translations.insert(lang.to_string(), lang_translations);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Self { translations }
+    }
+
+    fn get_translation(&self, lang: &str) -> &HashMap<String, String> {
+        if self.translations.contains_key(lang) {
+            self.translations.get(lang).unwrap()
+        } else {
+            self.translations.get("en").unwrap()
+        }
+    }
+}
+
 #[get("/<file..>?download")]
 async fn download(file: PathBuf, jar: &CookieJar<'_>) -> Result<Option<HeaderFile>, Status> {
     let path = Path::new("files/").join(file);
@@ -147,8 +221,11 @@ async fn index<'a>(
     file: PathBuf,
     jar: &CookieJar<'_>,
     config: &rocket::State<Config>,
+    translations: &rocket::State<TranslationStore>,
+    lang: Language,
 ) -> Result<Result<Result<Template, Redirect>, Option<HeaderFile>>, Status> {
     let path = Path::new("files/").join(file.clone());
+    let strings = translations.get_translation(&lang.0);
 
     let (username, perms) = get_session(jar);
 
@@ -178,7 +255,9 @@ async fn index<'a>(
             return Ok(Ok(Ok(Template::render(
                 "md",
                 context! {
-                    title: format!("Reading file {}", Path::new("/").join(file.clone()).display()),
+                    title: format!("{} {}", strings.get("reading_markdown").unwrap(), Path::new("/").join(file.clone()).display()),
+                    lang,
+                    strings,
                     path: Path::new("/").join(file.clone()).display().to_string(),
                     theme: theme,
                     is_logged_in: is_logged_in(&jar),
@@ -208,7 +287,9 @@ async fn index<'a>(
             Ok(Ok(Ok(Template::render(
                 "zip",
                 context! {
-                    title: format!("Viewing ZIP file {}", Path::new("/").join(file.clone()).display().to_string().as_str()),
+                    title: format!("{} {}", strings.get("viewing_zip").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
+                    lang,
+                    strings,
                     path: Path::new("/").join(file.clone()).display().to_string(),
                     files: file_list,
                     theme: theme,
@@ -253,13 +334,15 @@ async fn index<'a>(
 
                 details = markdown::to_html(&markdown);
             } else {
-                details = "No details available!".to_string();
+                details = strings.get("no_details").unwrap().to_string();
             }
 
             Ok(Ok(Ok(Template::render(
                 "video",
                 context! {
-                    title: format!("Watching {}", Path::new("/").join(file.clone()).display().to_string().as_str()),
+                    title: format!("{} {}", strings.get("watching").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
+                    lang,
+                    strings,
                     path: videopath,
                     poster: format!("/images/videoposters{}.jpg", videopath.replace("video/", "")),
                     vidtitle: vidtitle,
@@ -321,6 +404,20 @@ async fn index<'a>(
         file_list.sort();
 
         if file_list.contains(&MirrorFile {
+            name: format!("README.{}.md", lang.0),
+            ext: "md".to_string(),
+            icon: "default".to_string(),
+            size: String::new(),
+        }) {
+            let markdown_text = fs::read_to_string(
+                Path::new(&("files".to_string() + &path))
+                    .join(format!("README.{}.md", lang.0))
+                    .display()
+                    .to_string(),
+            )
+            .unwrap_or_else(|err| err.to_string());
+            markdown = markdown::to_html(&markdown_text);
+        } else if file_list.contains(&MirrorFile {
             name: "README.md".to_owned(),
             ext: "md".to_string(),
             icon: "default".to_string(),
@@ -341,6 +438,8 @@ async fn index<'a>(
                 "plain",
                 context! {
                     title: path.to_string(),
+                    lang,
+                    strings,
                     path_seg: path_seg,
                     dirs: dir_list,
                     files: file_list,
@@ -355,6 +454,8 @@ async fn index<'a>(
             "index",
             context! {
                 title: path.to_string(),
+                lang,
+                strings,
                 path_seg: path_seg,
                 dirs: dir_list,
                 files: file_list,
@@ -375,7 +476,9 @@ async fn index<'a>(
             return Ok(Ok(Ok(Template::render(
                 "details",
                 context! {
-                    title: format!("Details of file {}", Path::new("/").join(file.clone()).display().to_string().as_str()),
+                    title: format!("{} {}", strings.get("file_details").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
+                    lang,
+                    strings,
                     path: Path::new("/").join(file.clone()).display().to_string(),
                     theme: theme,
                     is_logged_in: is_logged_in(&jar),
@@ -396,8 +499,15 @@ async fn index<'a>(
 }
 
 #[get("/settings?<opt..>")]
-fn settings(jar: &CookieJar<'_>, opt: Settings<'_>) -> Result<Template, Redirect> {
+fn settings(
+    jar: &CookieJar<'_>,
+    opt: Settings<'_>,
+    lang: Language,
+    translations: &State<TranslationStore>,
+) -> Result<Template, Redirect> {
+    let mut lang = lang.0;
     let mut theme = get_theme(jar);
+    let strings = translations.get_translation(&lang);
 
     let settings_map = vec![
         ("hires", opt.hires),
@@ -420,6 +530,19 @@ fn settings(jar: &CookieJar<'_>, opt: Settings<'_>) -> Result<Template, Redirect
             redir = true;
         } else {
             jar.add(create_cookie("theme", "standard"));
+        }
+    }
+
+    if !Path::new(&format!("lang/{}.toml", lang)).exists() {
+        lang = "en".to_string();
+    }
+
+    if let Some(lang_opt) = opt.lang {
+        if Path::new(&format!("lang/{}.toml", lang_opt)).exists() {
+            jar.add(create_cookie("lang", &lang_opt));
+            redir = true;
+        } else {
+            jar.add(create_cookie("lang", "en"));
         }
     }
 
@@ -450,8 +573,10 @@ fn settings(jar: &CookieJar<'_>, opt: Settings<'_>) -> Result<Template, Redirect
     Ok(Template::render(
         "settings",
         context! {
-            title: "Settings",
+            title: strings.get("settings").unwrap(),
             theme,
+            lang,
+            strings,
             is_logged_in: is_logged_in(&jar),
             username,
             admin: get_session(jar).1 == 0,
@@ -469,8 +594,11 @@ fn settings(jar: &CookieJar<'_>, opt: Settings<'_>) -> Result<Template, Redirect
 async fn fetch_settings(
     db: Connection<Db>,
     jar: &CookieJar<'_>,
-) -> Result<RawHtml<&'static str>, Status> {
+    lang: Language,
+    translations: &State<TranslationStore>,
+) -> Result<RawHtml<String>, Status> {
     if is_logged_in(&jar) {
+        let strings = translations.get_translation(&lang.0);
         let username = get_session(jar).0;
 
         if let Some(db_user) = fetch_user(db, username.as_str()).await {
@@ -487,7 +615,10 @@ async fn fetch_settings(
             }
         }
 
-        return Ok(RawHtml("<script>alert(\"Settings fetched successfully!\");window.location.replace(\"/settings\");</script>"));
+        return Ok(RawHtml(format!(
+            "<script>alert(\"{}\");window.location.replace(\"/settings\");</script>",
+            strings.get("fetch_success").unwrap()
+        )));
     } else {
         return Err(Status::Forbidden);
     }
@@ -497,8 +628,11 @@ async fn fetch_settings(
 async fn sync_settings(
     db: Connection<Db>,
     jar: &CookieJar<'_>,
-) -> Result<RawHtml<&'static str>, Status> {
+    lang: Language,
+    translations: &State<TranslationStore>,
+) -> Result<RawHtml<String>, Status> {
     if is_logged_in(&jar) {
+        let strings = translations.get_translation(&lang.0);
         let username = get_session(jar).0;
 
         let keys = vec![
@@ -521,7 +655,10 @@ async fn sync_settings(
 
         db::update_settings(db, username.as_str(), settings.as_str()).await;
 
-        return Ok(RawHtml("<script>alert(\"Settings saved successfully!\");window.location.replace(\"/settings\");</script>"));
+        return Ok(RawHtml(format!(
+            "<script>alert(\"{}\");window.location.replace(\"/settings\");</script>",
+            strings.get("sync_success").unwrap()
+        )));
     } else {
         return Err(Status::Forbidden);
     }
@@ -570,13 +707,28 @@ async fn iframe(
 }
 
 #[catch(404)]
-fn not_found(req: &Request) -> Template {
+async fn not_found(req: &Request<'_>) -> Template {
     let jar = req.cookies();
+    let translations = req.guard::<&State<TranslationStore>>().await.unwrap();
+
+    let mut lang = "en";
+
+    if let Some(cookie_lang) = jar.get("lang").map(|c| c.value()) {
+        lang = cookie_lang;
+    }
+
+    if let Some(header_lang) = req.headers().get_one("Accept-Language") {
+        lang = header_lang;
+    }
+
+    let strings = translations.get_translation(lang);
 
     Template::render(
         "error/404",
         context! {
             title: "Error 404",
+            lang,
+            strings,
             theme: get_theme(jar),
             is_logged_in: is_logged_in(&jar),
             admin: get_session(&jar).1 == 0,
@@ -587,13 +739,28 @@ fn not_found(req: &Request) -> Template {
 }
 
 #[catch(400)]
-fn bad_request(req: &Request) -> Template {
+async fn bad_request(req: &Request<'_>) -> Template {
     let jar = req.cookies();
+    let translations = req.guard::<&State<TranslationStore>>().await.unwrap();
+
+    let mut lang = "en";
+
+    if let Some(cookie_lang) = jar.get("lang").map(|c| c.value()) {
+        lang = cookie_lang;
+    }
+
+    if let Some(header_lang) = req.headers().get_one("Accept-Language") {
+        lang = header_lang;
+    }
+
+    let strings = translations.get_translation(lang);
 
     Template::render(
         "error/400",
         context! {
             title: "Error 400",
+            lang,
+            strings,
             theme: get_theme(jar),
             is_logged_in: is_logged_in(&jar),
             admin: get_session(&jar).1 == 0,
@@ -604,13 +771,28 @@ fn bad_request(req: &Request) -> Template {
 }
 
 #[catch(500)]
-fn internal_server_error(req: &Request) -> Template {
+async fn internal_server_error(req: &Request<'_>) -> Template {
     let jar = req.cookies();
+    let translations = req.guard::<&State<TranslationStore>>().await.unwrap();
+
+    let mut lang = "en";
+
+    if let Some(cookie_lang) = jar.get("lang").map(|c| c.value()) {
+        lang = cookie_lang;
+    }
+
+    if let Some(header_lang) = req.headers().get_one("Accept-Language") {
+        lang = header_lang;
+    }
+
+    let strings = translations.get_translation(lang);
 
     Template::render(
         "error/500",
         context! {
             title: "Error 500",
+            lang,
+            strings,
             theme: get_theme(jar),
             is_logged_in: is_logged_in(&jar),
             admin: get_session(&jar).1 == 0,
@@ -628,6 +810,7 @@ fn unprocessable_entry(req: &Request) -> Template {
         "error/404",
         context! {
             title: "Error 404",
+            lang: "en",
             theme: get_theme(jar),
             is_logged_in: is_logged_in(&jar),
             admin: get_session(&jar).1 == 0,
@@ -653,6 +836,7 @@ fn rocket() -> _ {
         .attach(account::build_account())
         .attach(admin::build())
         .attach(Db::init())
+        .manage(TranslationStore::new())
         .register(
             "/",
             catchers![
@@ -665,7 +849,14 @@ fn rocket() -> _ {
         )
         .mount(
             "/",
-            routes![settings, download, index, fetch_settings, sync_settings, iframe],
+            routes![
+                settings,
+                download,
+                index,
+                fetch_settings,
+                sync_settings,
+                iframe
+            ],
         );
 
     rocket

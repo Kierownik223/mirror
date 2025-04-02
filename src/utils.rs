@@ -201,8 +201,6 @@ pub fn list_to_files(files: Vec<&str>) -> Result<Vec<MirrorFile>, Error> {
 
         if file.ends_with("/") {
             ext = "Folder".to_string();
-        } else {
-            ext += " file";
         }
 
         let mut icon = &ext.as_str();

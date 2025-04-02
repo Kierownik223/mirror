@@ -1,36 +1,36 @@
 {% extends "base" %}
 
 {% block content %}
-<a href="/">MARMAK Mirror</a>/<a href="/upload">Uploader</a><br>
-Hi, {{ username }}!
+<a href="/">MARMAK Mirror</a>/<a href="/admin/">{{ strings.admin }}</a>/<a href="/admin/upload">{{ strings.uploader }}</a><br>
+{{ strings.welcome }}, {{ username }}!
 <br>
-<a href="/admin/"><img src="/static/images/icons/{% if hires %}hires/{% endif %}floppy.png" class="icon">Admin panel</a>
+<a href="/admin/"><img src="/static/images/icons/{% if hires %}hires/{% endif %}floppy.png" class="icon">{{ strings.admin }}</a>
 <a href="/uploads/"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">Uploads</a>
 <br>
 {% for s in uploadedfiles %}
 {% if s.name != "" %}
-<a href="{{ s.ext }}"><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}</a> uploaded successfully!<br>
+<a href="{{ s.ext }}"><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}</a> {{ strings.upload_success }}<br>
 {% endif %}
 {% endfor %}
 <form method="post" enctype="multipart/form-data">
-    <label for="file"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}default.png">Select a file:</label>
+    <label for="file"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}default.png">{{ strings.select_file }}:</label>
     <center>
         <input type="file" name="files" id="file" multiple required>
     </center>
 
-    <label for="path"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png">Target directory:</label>
+    <label for="path"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png">{{ strings.target_dir }}:</label>
     <center>
-        <input type="text" id="path" name="path" placeholder="Leave empty for /uploads/">
+        <input type="text" id="path" name="path" placeholder="{{ strings.target_placeholder }}">
         {% if filebrowser %}
-        <button type="button" onclick="openDialog()"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">Browse</button>
+        <button type="button" onclick="openDialog()"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">{{ strings.browse }}</button>
         {% endif %}
     </center>
     <br>
 
-    <img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}md.png">Maximum file size allowed is 100MB.<br>
+    <img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}md.png">{{ strings.max_size }}<br>
     <br>
     <center>
-        <button type="submit"><img src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png" class="icon">Upload</button>
+        <button type="submit"><img src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png" class="icon">{{ strings.upload }}</button>
     </center>
 </form>
 
@@ -38,11 +38,11 @@ Hi, {{ username }}!
 
 <div id="browse_dialog" class="dialog">
     <div class="dialog-content">
-        <img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">Select a folder:
+        <img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">{{ strings.select_folder }}:
         <iframe id="browser_iframe" src="/iframe/"></iframe>
         <center>
-            <button onclick="selectPath()">OK</button>
-            <button onclick="closeDialog()">Cancel</button>
+            <button onclick="selectPath()">{{ strings.ok }}</button>
+            <button onclick="closeDialog()">{{ strings.cancel }}</button>
         </center>
     </div>
 </div>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ lang }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +11,7 @@
     <meta property="og:description" content="{{ details }}">
     <meta property="og:type" content=website>
     <meta property="og:image" content="{{ poster }}">
-    <meta property="og:locale" content="en">
+    <meta property="og:locale" content="{{ lang }}">
     <meta property="og:site_name" content="MARMAK Mirror">
     <meta property="og:video" content="https://dl.marmak.net.pl{{ path }}?download"/>
     <meta property="og:video:secure_url" content="https://dl.marmak.net.pl{{ path }}?download"/>
@@ -24,11 +24,11 @@
         {% include "nav" %}
         <div class="main">
             <div class="controls">
-                Watching file {{ path }}
+                {{ strings.watching }} {{ path }}
                 <div style="float: right;"><a href="?download" download><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">Download</a></div><br>
                 <a href="./"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png">./</a>
             </div>
-            <video src="?download" controls style="height: 60vh; width: 100%;" poster="{{ poster }}">Your browser does not support the video element.</video>
+            <video src="?download" controls style="height: 60vh; width: 100%;" poster="{{ poster }}">{{ strings.no_video }}</video>
             {% if displaydetails %}
             <b style="font-size: 24px;">{{ vidtitle }}</b>
             {{ details | safe }}

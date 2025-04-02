@@ -1,16 +1,16 @@
 <div class="header">
     <a href="/">{% if not smallhead %}<h1>{% endif %}<img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">MARMAK Mirror{% if not smallhead %}</h1>{% endif %}</a>
-    {% if not smallhead %}<a href="/"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}home.png">Start</a>{% endif %}
-    <a href="/settings"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png">Settings</a>
+    {% if not smallhead %}<a href="/"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}home.png">{{ strings.home }}</a>{% endif %}
+    <a href="/settings"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png">{{ strings.settings }}</a>
     <a href="https://marmak.net.pl"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}marmak.png">MARMAK</a>
     {% if not is_logged_in %}
-    <a href="/account/login"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}login.png">Log in</a>
+    <a href="/account/login"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}login.png">{{ strings.log_in }}</a>
     {% else %}
     {% if admin %}
-    <a href="/admin/"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}floppy.png">Admin panel</a>
+    <a href="/admin/"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}floppy.png">{{ strings.admin }}</a>
     {% else %}
-    <a href="/account/direct?to=account"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png">Manage account</a>
+    <a href="/account/direct?to=account"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png">{{ strings.manage_account }}</a>
     {% endif %}
-    <a href="/account/logout"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}login.png">Log out</a>
+    <a href="/account/logout"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}login.png">{{ strings.log_out }}</a>
     {% endif %}
 </div>

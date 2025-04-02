@@ -2,5 +2,5 @@
 
 {% block content %}
 <a href="/">MARMAK Mirror</a>/HTTP 400<br>
-The client sent an incorrect or malformed request. Please try again.
+{{ strings.error_400 }}
 {% endblock content %}

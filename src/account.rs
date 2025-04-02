@@ -16,11 +16,15 @@ use time::{Duration, OffsetDateTime};
 use crate::{
     db::{fetch_user, login_user, Db},
     utils::{get_bool_cookie, get_session, get_theme, is_logged_in},
-    MarmakUser, UserToken, XForwardedFor,
+    Language, MarmakUser, TranslationStore, UserToken, XForwardedFor,
 };
 
 #[get("/login")]
-fn login_page(jar: &CookieJar<'_>) -> Result<Template, Redirect> {
+fn login_page(
+    jar: &CookieJar<'_>,
+    translations: &rocket::State<TranslationStore>,
+    lang: Language,
+) -> Result<Template, Redirect> {
     if is_logged_in(&jar) {
         let perms = get_session(jar).1;
         if perms == 0 {
@@ -30,10 +34,14 @@ fn login_page(jar: &CookieJar<'_>) -> Result<Template, Redirect> {
         }
     }
 
+    let strings = translations.get_translation(&lang.0);
+
     Ok(Template::render(
         "login",
         context! {
             title: "Login",
+            lang,
+            strings,
             theme: get_theme(jar),
             is_logged_in: is_logged_in(&jar),
             username: "",
@@ -52,6 +60,8 @@ async fn login(
     jar: &CookieJar<'_>,
     ip: XForwardedFor<'_>,
     next: Option<&str>,
+    translations: &rocket::State<TranslationStore>,
+    lang: Language,
 ) -> Result<Redirect, Template> {
     if let Some(db_user) = login_user(db, &user.username, &user.password, &ip.0, true).await {
         if !get_bool_cookie(&jar, "nooverride") {
@@ -92,20 +102,24 @@ async fn login(
 
         return Ok(Redirect::to(redirect_url));
     } else {
+        let strings = translations.get_translation(&lang.0);
         println!(
             "Failed login attempt to user {} with password {} from {}",
             &user.username, &user.password, &ip.0
         );
+
         return Err(Template::render(
             "login",
             context! {
                 title: "Login",
+                lang,
+                strings,
                 theme: get_theme(jar),
                 is_logged_in: is_logged_in(&jar),
                 admin: get_session(&jar).1 == 0,
                 hires: get_bool_cookie(jar, "hires"),
                 smallhead: get_bool_cookie(jar, "smallhead"),
-                message: "Incorrect username or password"
+                message: strings.get("invalid_info")
             },
         ));
     }

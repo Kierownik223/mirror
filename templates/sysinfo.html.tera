@@ -1,27 +1,26 @@
 {% extends "base" %}
 
 {% block content %}
-<a href="/">MARMAK Mirror</a>/<a href="/sysinfo">Server information</a><br>
-Hi, {{ username }}!
+<a href="/">MARMAK Mirror</a>/<a href="/admin/">{{ strings.admin }}</a>/<a href="/admin/sysinfo">{{ strings.sysinfo }}</a><br>
+{{ strings.welcome }}, {{ username }}!
 <br>
-<a href="/admin/"><img src="/static/images/icons/{% if hires %}hires/{% endif %}floppy.png" class="icon">Admin panel</a><br>
-<label for="mem_usage">Memory usage: <span id="used_mem_readable">{{ used_mem_readable }}</span>/<span id="total_mem_readable">{{ total_mem_readable }}</span></label>
+<a href="/admin/"><img src="/static/images/icons/{% if hires %}hires/{% endif %}floppy.png" class="icon">{{ strings.admin }}</a><br>
+<label for="mem_usage"><b>{{ strings.memory_usage }}</b>: <span id="used_mem_readable">{{ used_mem_readable }}</span>/<span id="total_mem_readable">{{ total_mem_readable }}</span></label>
 <progress style="width:100%;box-sizing:border-box;" id="mem_usage" max="{{ total_mem }}" value="{{ used_mem }}"></progress>
-<b>System</b>: <span id="sys_name">{{ sys_name }}</span> <br>
-<b>Kernel version</b>: <span id="sys_ver">{{ sys_ver }}</span> <br>
-<b>Hostname</b>: <span id="hostname">{{ hostname }}</span> <br>
-<b>Disks:</b><br>
+<b>{{ strings.system }}</b>: <span id="sys_name">{{ sys_name }}</span> <br>
+<b>{{ strings.kernel_version }}</b>: <span id="sys_ver">{{ sys_ver }}</span> <br>
+<b>{{ strings.hostname }}</b>: <span id="hostname">{{ hostname }}</span> <br>
+<b>{{ strings.disk_usage }}</b>:<br>
 <div id="disks">
     {% for s in disks %}
     <div>
-        <label for="usage">Disk usage: <span class="free_space_readable">{{ s.used_space_readable }}</span>/<span
+        <label for="usage"><span class="free_space_readable">{{ s.used_space_readable }}</span>/<span
                 class="total_space_readable">{{ s.total_space_readable }}</span></label>
         <progress style="width:100%;box-sizing:border-box;" class="disk_usage" max="{{ s.total_space }}"
             value="{{ s.used_space }}"></progress>
     </div>
     {% endfor %}
 </div>
-<i>API endpoint (needs session): <a href="/api/sysinfo">/api/sysinfo</a></i>
 
 <script src="/static/sysinfo.js"></script>
 

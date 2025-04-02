@@ -2,5 +2,5 @@
 
 {% block content %}
 <a href="/">MARMAK Mirror</a>/HTTP 500<br>
-An internal server error has occured. Please reach out to us to report the issue.
+{{ strings.error_50x }}
 {% endblock content %}

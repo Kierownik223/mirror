@@ -17,7 +17,7 @@
         </tr>
     </tbody>
 </table>
-<p><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}md.png">README.md</p>
+<p><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}md.png">{{ strings.readme }}</p>
 {{ markdown | safe}}
 {% endif %}
 <table>
@@ -27,7 +27,7 @@
             <td><a href="../"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png"
                         class="icon">../</a></td>
             <td>---</td>
-            <td>Directory</td>
+            <td>{{ strings.folder }}</td>
         </tr>
         {% endif %}
 
@@ -36,7 +36,7 @@
             <td><a href="{{ s.name }}/"><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png"
                         class="icon">{{ s.name }}/</a></td>
             <td>{{ s.size }}</td>
-            <td>Directory</td>
+            <td>{{ strings.folder }}</td>
         </tr>
         {% endfor %}
         {% for s in files %}
@@ -44,7 +44,7 @@
             <td><a href="{{ s.name }}"><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png"
                         class="icon">{{ s.name }}</a></td>
             <td>{{ s.size }}</td>
-            <td>{{ s.ext }} file</td>
+            <td>{{ s.ext }} {{ strings.file }}</td>
         </tr>
         {% endfor %}
     </tbody>

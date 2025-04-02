@@ -3,9 +3,9 @@
 {% block content %}
 <link rel="stylesheet" href="/static/print.css">
 <div class="controls">
-    Reading file {{ path }}
-    <div style="float: right;"><a href="?download" download><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">Download</a>
-        <a href="#" onclick="window.print()"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}print.png">Print this page</a></div><br>
+    {{ strings.reading_markdown }} {{ path }}
+    <div style="float: right;"><a href="?download" download><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">{{ strings.download }}</a>
+        <a href="#" onclick="window.print()"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}print.png">{{ strings.print }}</a></div><br>
     <a href="./"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png">./</a>
 </div>
 {{ markdown | safe}}

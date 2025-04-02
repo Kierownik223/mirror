@@ -1,21 +1,20 @@
 {% extends "base" %}
 
 {% block content %}
-<a href="/">MARMAK Mirror</a>/<a href="/account/login">Login</a><br>
-Log in with a <a href="https://account.marmak.net.pl/"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}key.png">MARMAK Account</a>
+<a href="/">MARMAK Mirror</a>/<a href="/account/login">{{ strings.log_in }}</a><br>
+{{ strings.log_in_with_marmak | safe }}
 <form method="post">
     {% if message != "" %}
     <p class="message">{{ message }}</p>
     {% endif %}
-    <label for="username"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}login.png">Username:</label><br>
+    <label for="username"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}login.png">{{ strings.username }}:</label><br>
     <center><input type="text" name="username" id="username" required></center><br>
-    <label for="password"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}key.png">Password:</label><br>
+    <label for="password"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}key.png">{{ strings.password }}:</label><br>
     <center><input type="password" name="password" id="password" required></center><br>
     <center>
-        <button type="submit"><span><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}login.png">Log in</span></button>
+        <button type="submit"><span><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}login.png">{{ strings.log_in }}</span></button>
     </center>
-    <p><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}md.png">Tip</p>
-    If you want to keep your current settings, go to <a href="/settings"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png">Settings</a> and enable "Don't
-    overwrite settings".
+    <p><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}md.png">{{ strings.tip }}</p>
+    {{ strings.settings_tip1 }} <a href="/settings"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png">{{ strings.settings }}</a> {{ strings.settings_tip2 }}
 </form>
 {% endblock content %}

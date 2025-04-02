@@ -2,8 +2,8 @@
 
 {% block content %}
 <div class="controls">
-    Reading file {{ path }}
-    <div style="float: right;"><a href="?download" download><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">Download</a></div><br>
+    {{ strings.viewing_zip }} {{ path }}
+    <div style="float: right;"><a href="?download" download><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">{{ strings.download }}</a></div><br>
 </div>
 <table>
     <tbody>
@@ -11,7 +11,7 @@
             <td><a href="./"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png"
                         class="icon">../</a></td>
             <td>---</td>
-            <td>Directory</td>
+            <td>{{ strings.folder }}</td>
         </tr>
 
         {% for s in files %}
@@ -19,7 +19,11 @@
             <td><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name
                 }}</td>
             <td>{{ s.size }}</td>
-            <td>{{ s.ext }}</td>
+            {% if s.ext == "Folder" %}
+            <td>{{ strings.folder }}</td>
+            {% else %}
+            <td>{{ s.ext }} {{ strings.file }}</td>
+            {% endif %}
         </tr>
         {% endfor %}
     </tbody>

@@ -2,9 +2,9 @@
 
 {% block content %}
 <div class="controls">
-    Details of file {{ path }}<br>
-    <a href="./"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png">./</a><div style="float: right;"><a href="?download"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">Download</a></div><br>
+    {{ strings.file_details }} {{ path }}<br>
+    <a href="./"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png">./</a><div style="float: right;"><a href="?download"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">{{ strings.download }}</a></div><br>
 </div>
-<p><strong>File name:</strong> {{ filename }}</p>
-<p><strong>File size:</strong> {{ filesize }}</p>
+<p><strong>{{ strings.file_name }}:</strong> {{ filename }}</p>
+<p><strong>{{ strings.file_size }}:</strong> {{ filesize }}</p>
 {% endblock content %}

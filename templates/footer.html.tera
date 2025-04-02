@@ -1,6 +1,6 @@
 <div class="footer">
     <center>
-        Made by Kierownik223 &amp; <a href="/credits.md">others</a><br>
+        {{ strings.author }} &amp; <a href="/credits.md">{{ strings.others }}</a><br>
         <i>Things are getting rusty...</i>
     </center>
 </div>

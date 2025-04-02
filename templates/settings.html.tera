@@ -1,61 +1,62 @@
 {% extends "base" %}
 
 {% block content %}
-<a href="/">MARMAK Mirror</a>/<a href="/settings">Settings</a>/<br>
+<a href="/">MARMAK Mirror</a>/<a href="/settings">{{ strings.settings }}</a>/<br>
 {% if is_logged_in %}
-Hi, {{ username }}!
+{{ strings.welcome }}{{ username }}!
 <br>
-<a href="/settings/sync"><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">Sync settings</a>
-<a href="/settings/fetch"><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">Fetch settings</a>
+<a href="/settings/sync"><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.sync_settings }}</a>
+<a href="/settings/fetch"><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.fetch_settings }}</a>
 
 {% endif %}
 <form method="get">
-    <img src="/static/images/icons/{% if hires %}hires/{% endif %}theme.png" class="icon">Change theme<br>
+    <img src="/static/images/icons/{% if hires %}hires/{% endif %}lang.png" class="icon">{{ strings.change_lang }}<br>
+    <select name="lang">
+        <option value="en" {% if lang=="en" %} selected{% endif %}>English</option>
+        <option value="pl" {% if lang=="pl" %} selected{% endif %}>Polski</option>
+    </select>
+    <br>
+    <img src="/static/images/icons/{% if hires %}hires/{% endif %}theme.png" class="icon">{{ strings.change_theme }}<br>
     <select name="theme">
-        <option value="standard" {% if theme=="standard" %} selected{% endif %}>Default theme</option>
-        <option value="darkblu" {% if theme=="darkblu" %} selected{% endif %}>Darkblue theme</option>
-        <option value="greenish" {% if theme=="greenish" %} selected{% endif %}>Greenish theme</option>
-        <option value="antique" {% if theme=="antique" %} selected{% endif %}>Antique (original) theme</option>
+        <option value="standard" {% if theme=="standard" %} selected{% endif %}>{{ strings.theme_default }}</option>
+        <option value="darkblu" {% if theme=="darkblu" %} selected{% endif %}>{{ strings.theme_darkblu }}</option>
+        <option value="greenish" {% if theme=="greenish" %} selected{% endif %}>{{ strings.theme_greenish }}</option>
+        <option value="antique" {% if theme=="antique" %} selected{% endif %}>{{ strings.theme_antique }}</option>
         <option value="dark" {% if theme=="dark" %} selected{% endif %}>OLED</option>
         <option value="matrix" {% if theme=="matrix" %} selected{% endif %}>OLED Matrix</option>
         <option value="light" {% if theme=="light" %} selected{% endif %}>#fff</option>
         {% if theme == "venti" %}<option value="venti" selected>Venti by Olek47</option>{% endif %}
     </select>
     <br>
-    <label for="hires"><img src="/static/images/icons/{% if hires %}hires/{% endif %}floppy.png" class="icon">High resolution icons</label>
+    <label for="hires"><img src="/static/images/icons/{% if hires %}hires/{% endif %}floppy.png" class="icon">{{ strings.hires }}</label>
     <br>
-    <label><input type="radio" name="hires" value="true" {% if hires %}checked {% endif %}>Enable</label>
-    <label><input type="radio" name="hires" value="false" {% if not hires %}checked {% endif %}>Disable</label>
+    <label><input type="radio" name="hires" value="true" {% if hires %}checked {% endif %}>{{ strings.enable }}</label>
+    <label><input type="radio" name="hires" value="false" {% if not hires %}checked {% endif %}>{{ strings.disable }}</label>
     <br>
-    <label for="smallhead"><img src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png" class="icon">Small header logo</label>
+    <label for="smallhead"><img src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png" class="icon">{{ strings.smallhead }}</label>
     <br>
-    <label><input type="radio" name="smallhead" value="true" {% if smallhead %}checked {% endif %}>Enable</label>
-    <label><input type="radio" name="smallhead" value="false" {% if not smallhead %}checked {% endif %}>Disable</label>
+    <label><input type="radio" name="smallhead" value="true" {% if smallhead %}checked {% endif %}>{{ strings.enable }}</label>
+    <label><input type="radio" name="smallhead" value="false" {% if not smallhead %}checked {% endif %}>{{ strings.disable }}</label>
     <br>
-    <label for="nolang"><img src="/static/images/icons/{% if hires %}hires/{% endif %}lang.png" class="icon">Don't ask about languages</label>
+    <label for="plain"><img src="/static/images/icons/{% if hires %}hires/{% endif %}default.png" class="icon">{{ strings.plain }}</label>
     <br>
-    <label><input type="radio" name="nolang" value="true" {% if nolang %}checked {% endif %}>Enable</label>
-    <label><input type="radio" name="nolang" value="false" {% if not nolang %}checked {% endif %}>Disable</label>
+    <label><input type="radio" name="plain" value="true" {% if plain %}checked {% endif %}>{{ strings.enable }}</label>
+    <label><input type="radio" name="plain" value="false" {% if not plain %}checked {% endif %}>{{ strings.disable }}</label>
     <br>
-    <label for="plain"><img src="/static/images/icons/{% if hires %}hires/{% endif %}default.png" class="icon">Plain HTML Mode (unfinished)</label>
+    <label for="nooverride"><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.dont_override_settings }}</label>
     <br>
-    <label><input type="radio" name="plain" value="true" {% if plain %}checked {% endif %}>Enable</label>
-    <label><input type="radio" name="plain" value="false" {% if not plain %}checked {% endif %}>Disable</label>
-    <br>
-    <label for="nooverride"><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">Don't overwrite settings</label>
-    <br>
-    <label><input type="radio" name="nooverride" value="true" {% if nooverride %}checked {% endif %}>Enable</label>
-    <label><input type="radio" name="nooverride" value="false" {% if not nooverride %}checked {% endif %}>Disable</label>
+    <label><input type="radio" name="nooverride" value="true" {% if nooverride %}checked {% endif %}>{{ strings.enable }}</label>
+    <label><input type="radio" name="nooverride" value="false" {% if not nooverride %}checked {% endif %}>{{ strings.disable }}</label>
     {% if is_logged_in and admin %}
     <br>
     <label for="nooverride"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">Disable file browser in uploader</label>
     <br>
-    <label><input type="radio" name="filebrowser" value="true" {% if filebrowser %}checked {% endif %}>Enable</label>
-    <label><input type="radio" name="filebrowser" value="false" {% if not filebrowser %}checked {% endif %}>Disable</label>
+    <label><input type="radio" name="filebrowser" value="true" {% if filebrowser %}checked {% endif %}>{{ strings.enable }}</label>
+    <label><input type="radio" name="filebrowser" value="false" {% if not filebrowser %}checked {% endif %}>{{ strings.disable }}</label>
     {% endif %}
     <br>
     <center>
-        <button type="submit">Save settings</button>
+        <button type="submit">{{ strings.save_settings }}</button>
     </center>
 </form>
 {% endblock content %}

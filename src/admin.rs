@@ -18,7 +18,7 @@ use rocket_multipart_form_data::{
 
 use crate::{
     utils::{get_bool_cookie, get_extension_from_filename, get_session, get_theme, is_logged_in},
-    Disk, MirrorFile,
+    Disk, Language, MirrorFile, TranslationStore,
 };
 
 #[post("/upload", data = "<data>")]
@@ -26,6 +26,8 @@ async fn upload(
     content_type: &ContentType,
     data: Data<'_>,
     jar: &CookieJar<'_>,
+    translations: &rocket::State<TranslationStore>,
+    lang: Language,
 ) -> Result<Template, Status> {
     if is_logged_in(&jar) {
         let (username, perms) = get_session(jar);
@@ -107,10 +109,14 @@ async fn upload(
                 }
             }
 
+            let strings = translations.get_translation(&lang.0);
+
             return Ok(Template::render(
                 "upload",
                 context! {
-                    title: "File uploader",
+                    title: strings.get("uploader").unwrap(),
+                    lang,
+                    strings,
                     theme: get_theme(jar),
                     is_logged_in: is_logged_in(&jar),
                     hires: get_bool_cookie(jar, "hires"),
@@ -130,13 +136,19 @@ async fn upload(
 }
 
 #[get("/sysinfo")]
-fn sysinfo(jar: &CookieJar<'_>) -> Result<Template, Status> {
+fn sysinfo(
+    jar: &CookieJar<'_>,
+    translations: &rocket::State<TranslationStore>,
+    lang: Language,
+) -> Result<Template, Status> {
     if is_logged_in(&jar) {
         let (username, perms) = get_session(jar);
 
         if perms != 0 {
             return Err(Status::Forbidden);
         }
+
+        let strings = translations.get_translation(&lang.0);
 
         let mut sys = System::new_all();
 
@@ -167,7 +179,9 @@ fn sysinfo(jar: &CookieJar<'_>) -> Result<Template, Status> {
         return Ok(Template::render(
             "sysinfo",
             context! {
-                title: "Server information",
+                title: strings.get("sysinfo").unwrap(),
+                lang,
+                strings,
                 theme: get_theme(jar),
                 is_logged_in: is_logged_in(&jar),
                 hires: get_bool_cookie(jar, "hires"),
@@ -190,7 +204,11 @@ fn sysinfo(jar: &CookieJar<'_>) -> Result<Template, Status> {
 }
 
 #[get("/upload")]
-fn uploader(jar: &CookieJar<'_>) -> Result<Template, Status> {
+fn uploader(
+    jar: &CookieJar<'_>,
+    translations: &rocket::State<TranslationStore>,
+    lang: Language,
+) -> Result<Template, Status> {
     if is_logged_in(&jar) {
         let (username, perms) = get_session(jar);
 
@@ -198,10 +216,14 @@ fn uploader(jar: &CookieJar<'_>) -> Result<Template, Status> {
             return Err(Status::Forbidden);
         }
 
+        let strings = translations.get_translation(&lang.0);
+
         return Ok(Template::render(
             "upload",
             context! {
-                title: "File uploader",
+                title: strings.get("uploader").unwrap(),
+                lang,
+                strings,
                 theme: get_theme(jar),
                 is_logged_in: is_logged_in(&jar),
                 hires: get_bool_cookie(jar, "hires"),
@@ -218,7 +240,11 @@ fn uploader(jar: &CookieJar<'_>) -> Result<Template, Status> {
 }
 
 #[get("/")]
-fn admin(jar: &CookieJar<'_>) -> Result<Template, Status> {
+fn admin(
+    jar: &CookieJar<'_>,
+    translations: &rocket::State<TranslationStore>,
+    lang: Language,
+) -> Result<Template, Status> {
     if is_logged_in(&jar) {
         let (username, perms) = get_session(jar);
 
@@ -226,10 +252,14 @@ fn admin(jar: &CookieJar<'_>) -> Result<Template, Status> {
             return Err(Status::Forbidden);
         }
 
+        let strings = translations.get_translation(&lang.0);
+
         return Ok(Template::render(
             "admin",
             context! {
-                title: "Admin panel",
+                title: strings.get("admin").unwrap(),
+                lang,
+                strings,
                 theme: get_theme(jar),
                 is_logged_in: is_logged_in(&jar),
                 hires: get_bool_cookie(jar, "hires"),
