@@ -17,6 +17,8 @@
         <option value="ja" {% if lang=="ja" %}selected{% endif %}>日本語</option>
         <option value="csb" {% if lang=="csb" %}selected{% endif %}>Kaszëbsczi</option>
         <option value="pl" {% if lang=="pl" %}selected{% endif %}>Polski</option>
+        <option value="pt" {% if lang=="pt" %}selected{% endif %}>Português</option>
+        <option value="ru" {% if lang=="ru" %}selected{% endif %}>Русский</option>
         <option value="szl" {% if lang=="szl" %}selected{% endif %}>Ślōnskŏ</option>
         <option value="uk" {% if lang=="uk" %}selected{% endif %}>Українська</option>
     </select>
