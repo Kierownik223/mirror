@@ -68,7 +68,7 @@ async fn listing(
 
 #[get("/sysinfo")]
 fn sysinfo(jar: &CookieJar<'_>) -> Result<Json<Sysinfo>, Status> {
-    if crate::utils::is_logged_in(&jar) {
+    if is_logged_in(&jar) {
         let mut sys = System::new_all();
 
         sys.refresh_specifics(RefreshKind::without_processes(RefreshKind::without_cpu(

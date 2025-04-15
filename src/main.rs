@@ -16,7 +16,8 @@ use std::path::{Path, PathBuf};
 use time::{Duration, OffsetDateTime};
 use toml::Value;
 use utils::{
-    create_cookie, get_bool_cookie, get_session, get_theme, is_logged_in, is_restricted, list_to_files, open_file, parse_language, read_dirs, read_files
+    create_cookie, get_bool_cookie, get_session, get_theme, is_logged_in, is_restricted,
+    list_to_files, open_file, parse_language, read_dirs, read_files,
 };
 
 use rocket_dyn_templates::{context, Template};

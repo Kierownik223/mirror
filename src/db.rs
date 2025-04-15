@@ -16,11 +16,12 @@ pub async fn login_user(
     ip: &str,
     verify_password: bool,
 ) -> Option<MarmakUser> {
-    let query_result =
-        sqlx::query("SELECT username, password, perms, mirror_settings FROM users WHERE username = ?")
-            .bind(username)
-            .fetch_one(&mut **db)
-            .await;
+    let query_result = sqlx::query(
+        "SELECT username, password, perms, mirror_settings FROM users WHERE username = ?",
+    )
+    .bind(username)
+    .fetch_one(&mut **db)
+    .await;
 
     match query_result {
         Ok(row) => {

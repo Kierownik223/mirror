@@ -88,7 +88,10 @@ async fn login(
             ),
         ));
 
-        println!("Login for user {} from {} succeeded", &db_user.username, &ip.0);
+        println!(
+            "Login for user {} from {} succeeded",
+            &db_user.username, &ip.0
+        );
 
         let mut redirect_url = next.unwrap_or("/").to_string();
 
