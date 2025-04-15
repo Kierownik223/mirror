@@ -17,7 +17,7 @@ pub async fn login_user(
     verify_password: bool,
 ) -> Option<MarmakUser> {
     let query_result =
-        sqlx::query("SELECT password, perms, mirror_settings FROM users WHERE username = ?")
+        sqlx::query("SELECT username, password, perms, mirror_settings FROM users WHERE username = ?")
             .bind(username)
             .fetch_one(&mut **db)
             .await;
@@ -25,12 +25,13 @@ pub async fn login_user(
     match query_result {
         Ok(row) => {
             if let Some(stored_hash) = row.try_get::<String, _>("password").ok() {
+                let username = row.try_get::<String, _>("username").ok().unwrap();
                 if verify_password && verify(password, &stored_hash).unwrap_or(false) {
                     if let Some(perms) = row.try_get::<i32, _>("perms").ok() {
-                        add_login(db, username, ip).await;
+                        add_login(db, username.as_str(), ip).await;
                         let settings = row.try_get::<String, _>("mirror_settings").ok();
                         return Some(MarmakUser {
-                            username: username.to_string(),
+                            username: username,
                             password: password.to_string(),
                             perms: Some(perms),
                             mirror_settings: settings,
@@ -40,10 +41,10 @@ pub async fn login_user(
                     }
                 } else if !verify_password {
                     if let Some(perms) = row.try_get::<i32, _>("perms").ok() {
-                        add_login(db, username, ip).await;
+                        add_login(db, username.as_str(), ip).await;
                         let settings = row.try_get::<String, _>("mirror_settings").ok();
                         return Some(MarmakUser {
-                            username: username.to_string(),
+                            username: username,
                             password: password.to_string(),
                             perms: Some(perms),
                             mirror_settings: settings,

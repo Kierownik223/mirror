@@ -83,12 +83,12 @@ async fn login(
             "session",
             format!(
                 "{}.{}",
-                &user.username,
+                &db_user.username,
                 &db_user.perms.unwrap_or_default().to_string()
             ),
         ));
 
-        println!("Login for user {} from {} succeeded", &user.username, &ip.0);
+        println!("Login for user {} from {} succeeded", &db_user.username, &ip.0);
 
         let mut redirect_url = next.unwrap_or("/").to_string();
 
