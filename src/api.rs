@@ -1,4 +1,7 @@
-use std::path::{Path, PathBuf};
+use std::{
+    collections::HashMap,
+    path::{Path, PathBuf},
+};
 
 use ::sysinfo::{Disks, RefreshKind, System};
 use humansize::{format_size, DECIMAL};
@@ -9,7 +12,11 @@ use rocket::{
     Request,
 };
 
-use crate::{read_dirs, read_files, utils::is_restricted, Config, Disk, MirrorFile, Sysinfo};
+use crate::{
+    read_dirs, read_files,
+    utils::{get_session, is_logged_in, is_restricted},
+    Config, Disk, MirrorFile, Sysinfo,
+};
 
 #[derive(serde::Serialize)]
 struct MirrorInfo {
@@ -19,6 +26,14 @@ struct MirrorInfo {
 #[derive(serde::Serialize)]
 struct Error {
     message: String,
+}
+
+#[derive(serde::Serialize)]
+struct User {
+    username: String,
+    scope: String,
+    perms: i32,
+    settings: HashMap<String, String>,
 }
 
 #[get("/listing/<file..>")]
@@ -92,6 +107,41 @@ fn sysinfo(jar: &CookieJar<'_>) -> Result<Json<Sysinfo>, Status> {
     }
 }
 
+#[get("/user")]
+fn user(jar: &CookieJar<'_>) -> Result<Json<User>, Status> {
+    if is_logged_in(&jar) {
+        let (username, perms) = get_session(jar);
+
+        let keys = vec![
+            "lang",
+            "useajax",
+            "hires",
+            "smallhead",
+            "theme",
+            "nolang",
+            "nooverride",
+        ];
+
+        let mut settings: HashMap<String, String> = HashMap::new();
+        for key in keys {
+            let value = jar.get(key).map(|cookie| cookie.value().to_string());
+            settings.insert(key.to_string(), value.unwrap_or_default());
+        }
+
+        Ok(Json(User {
+            username,
+            scope: match perms {
+                0 => "admin".to_string(),
+                _ => "user".to_string(),
+            },
+            perms,
+            settings,
+        }))
+    } else {
+        return Err(Status::Forbidden);
+    }
+}
+
 #[get("/")]
 async fn index() -> Json<MirrorInfo> {
     Json(MirrorInfo {
@@ -109,7 +159,7 @@ fn default(status: Status, _req: &Request) -> Json<Error> {
 pub fn build_api() -> AdHoc {
     AdHoc::on_ignite("API", |rocket| async {
         rocket
-            .mount("/api", routes![index, listing, sysinfo])
+            .mount("/api", routes![index, listing, sysinfo, user])
             .register("/api", catchers![default])
     })
 }
