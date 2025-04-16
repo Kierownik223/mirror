@@ -711,17 +711,18 @@ async fn not_found(req: &Request<'_>) -> Template {
     let jar = req.cookies();
     let translations = req.guard::<&State<TranslationStore>>().await.unwrap();
 
-    let mut lang = "en";
+    let mut lang = "en".to_string();
 
     if let Some(cookie_lang) = jar.get("lang").map(|c| c.value()) {
-        lang = cookie_lang;
+        lang = cookie_lang.to_string();
     }
 
-    if let Some(header_lang) = req.headers().get_one("Accept-Language") {
+    if let Some(header) = req.headers().get_one("Accept-Language") {
+        let header_lang = parse_language(header).unwrap_or("en".to_string());
         lang = header_lang;
     }
 
-    let strings = translations.get_translation(lang);
+    let strings = translations.get_translation(lang.as_str());
 
     Template::render(
         "error/404",
@@ -743,17 +744,18 @@ async fn bad_request(req: &Request<'_>) -> Template {
     let jar = req.cookies();
     let translations = req.guard::<&State<TranslationStore>>().await.unwrap();
 
-    let mut lang = "en";
+    let mut lang = "en".to_string();
 
     if let Some(cookie_lang) = jar.get("lang").map(|c| c.value()) {
-        lang = cookie_lang;
+        lang = cookie_lang.to_string();
     }
 
-    if let Some(header_lang) = req.headers().get_one("Accept-Language") {
+    if let Some(header) = req.headers().get_one("Accept-Language") {
+        let header_lang = parse_language(header).unwrap_or("en".to_string());
         lang = header_lang;
     }
 
-    let strings = translations.get_translation(lang);
+    let strings = translations.get_translation(lang.as_str());
 
     Template::render(
         "error/400",
@@ -775,17 +777,18 @@ async fn internal_server_error(req: &Request<'_>) -> Template {
     let jar = req.cookies();
     let translations = req.guard::<&State<TranslationStore>>().await.unwrap();
 
-    let mut lang = "en";
+    let mut lang = "en".to_string();
 
     if let Some(cookie_lang) = jar.get("lang").map(|c| c.value()) {
-        lang = cookie_lang;
+        lang = cookie_lang.to_string();
     }
 
-    if let Some(header_lang) = req.headers().get_one("Accept-Language") {
+    if let Some(header) = req.headers().get_one("Accept-Language") {
+        let header_lang = parse_language(header).unwrap_or("en".to_string());
         lang = header_lang;
     }
 
-    let strings = translations.get_translation(lang);
+    let strings = translations.get_translation(lang.as_str());
 
     Template::render(
         "error/500",
