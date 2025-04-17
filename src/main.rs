@@ -637,7 +637,6 @@ async fn sync_settings(
 
         let keys = vec![
             "lang",
-            "useajax",
             "hires",
             "smallhead",
             "theme",
