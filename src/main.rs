@@ -603,7 +603,7 @@ async fn fetch_settings(
 
         if let Some(db_user) = fetch_user(db, username.as_str()).await {
             let decoded: HashMap<String, String> =
-                serde_json::from_str(&db_user.mirror_settings.unwrap())
+                serde_json::from_str(&db_user.mirror_settings.unwrap_or("{}".to_string()))
                     .expect("Failed to parse JSON");
 
             for (key, value) in decoded {
