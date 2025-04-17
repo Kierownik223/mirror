@@ -706,114 +706,35 @@ async fn iframe(
     ))
 }
 
-#[catch(404)]
-async fn not_found(req: &Request<'_>) -> Template {
-    let jar = req.cookies();
-    let translations = req.guard::<&State<TranslationStore>>().await.unwrap();
-
-    let mut lang = "en".to_string();
-
-    if let Some(cookie_lang) = jar.get("lang").map(|c| c.value()) {
-        lang = cookie_lang.to_string();
-    }
-
-    if let Some(header) = req.headers().get_one("Accept-Language") {
-        let header_lang = parse_language(header).unwrap_or("en".to_string());
-        lang = header_lang;
-    }
-
-    let strings = translations.get_translation(lang.as_str());
-
-    Template::render(
-        "error/404",
-        context! {
-            title: "Error 404",
-            lang,
-            strings,
-            theme: get_theme(jar),
-            is_logged_in: is_logged_in(&jar),
-            admin: get_session(&jar).1 == 0,
-            hires: get_bool_cookie(jar, "hires"),
-            smallhead: get_bool_cookie(jar, "smallhead"),
-        },
-    )
-}
-
-#[catch(400)]
-async fn bad_request(req: &Request<'_>) -> Template {
-    let jar = req.cookies();
-    let translations = req.guard::<&State<TranslationStore>>().await.unwrap();
-
-    let mut lang = "en".to_string();
-
-    if let Some(cookie_lang) = jar.get("lang").map(|c| c.value()) {
-        lang = cookie_lang.to_string();
-    }
-
-    if let Some(header) = req.headers().get_one("Accept-Language") {
-        let header_lang = parse_language(header).unwrap_or("en".to_string());
-        lang = header_lang;
-    }
-
-    let strings = translations.get_translation(lang.as_str());
-
-    Template::render(
-        "error/400",
-        context! {
-            title: "Error 400",
-            lang,
-            strings,
-            theme: get_theme(jar),
-            is_logged_in: is_logged_in(&jar),
-            admin: get_session(&jar).1 == 0,
-            hires: get_bool_cookie(jar, "hires"),
-            smallhead: get_bool_cookie(jar, "smallhead"),
-        },
-    )
-}
-
-#[catch(500)]
-async fn internal_server_error(req: &Request<'_>) -> Template {
-    let jar = req.cookies();
-    let translations = req.guard::<&State<TranslationStore>>().await.unwrap();
-
-    let mut lang = "en".to_string();
-
-    if let Some(cookie_lang) = jar.get("lang").map(|c| c.value()) {
-        lang = cookie_lang.to_string();
-    }
-
-    if let Some(header) = req.headers().get_one("Accept-Language") {
-        let header_lang = parse_language(header).unwrap_or("en".to_string());
-        lang = header_lang;
-    }
-
-    let strings = translations.get_translation(lang.as_str());
-
-    Template::render(
-        "error/500",
-        context! {
-            title: "Error 500",
-            lang,
-            strings,
-            theme: get_theme(jar),
-            is_logged_in: is_logged_in(&jar),
-            admin: get_session(&jar).1 == 0,
-            hires: get_bool_cookie(jar, "hires"),
-            smallhead: get_bool_cookie(jar, "smallhead"),
-        },
-    )
-}
-
 #[catch(422)]
-fn unprocessable_entry(req: &Request) -> Template {
+fn unprocessable_entry() -> Status {
+    Status::NotFound
+}
+
+#[catch(default)]
+async fn default(status: Status, req: &Request<'_>) -> Template {
     let jar = req.cookies();
+    let translations = req.guard::<&State<TranslationStore>>().await.unwrap();
+
+    let mut lang = "en".to_string();
+
+    if let Some(cookie_lang) = jar.get("lang").map(|c| c.value()) {
+        lang = cookie_lang.to_string();
+    }
+
+    if let Some(header) = req.headers().get_one("Accept-Language") {
+        let header_lang = parse_language(header).unwrap_or("en".to_string());
+        lang = header_lang;
+    }
+
+    let strings = translations.get_translation(lang.as_str());
 
     Template::render(
-        "error/404",
+        format!("error/{}", status.code),
         context! {
-            title: "Error 404",
-            lang: "en",
+            title: format!("HTTP {}", status.code),
+            lang,
+            strings,
             theme: get_theme(jar),
             is_logged_in: is_logged_in(&jar),
             admin: get_session(&jar).1 == 0,
@@ -822,6 +743,7 @@ fn unprocessable_entry(req: &Request) -> Template {
         },
     )
 }
+
 
 #[catch(403)]
 fn forbidden(req: &Request) -> Redirect {
@@ -843,11 +765,9 @@ fn rocket() -> _ {
         .register(
             "/",
             catchers![
-                not_found,
+                default,
                 unprocessable_entry,
-                forbidden,
-                internal_server_error,
-                bad_request
+                forbidden
             ],
         )
         .mount(
