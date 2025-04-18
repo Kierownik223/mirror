@@ -713,7 +713,7 @@ async fn iframe(
 
 #[catch(422)]
 fn unprocessable_entry() -> Status {
-    Status::NotFound
+    Status::BadRequest
 }
 
 #[catch(default)]
