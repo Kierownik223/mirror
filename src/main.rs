@@ -243,7 +243,7 @@ async fn index<'a>(
         return Err(Status::Forbidden);
     }
 
-    let ext_upper = path.extension().and_then(OsStr::to_str).unwrap_or("");
+    let ext_upper = if path.is_file() { path.extension().and_then(OsStr::to_str).unwrap_or("folder") } else { "folder" };
 
     let ext = ext_upper.to_lowercase();
 
@@ -359,7 +359,7 @@ async fn index<'a>(
         } else {
             return Err(Status::NotFound);
         }
-    } else if ext == "" {
+    } else if ext == "folder" {
         let mut notroot = true;
         let mut markdown: String = "".to_string();
         let mut topmarkdown = false;
