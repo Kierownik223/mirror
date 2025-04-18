@@ -247,195 +247,215 @@ async fn index<'a>(
 
     let ext = ext_upper.to_lowercase();
 
-    if ext == "md" {
-        if path.exists() {
-            let markdown_text = fs::read_to_string(path.display().to_string())
-                .unwrap_or_else(|err| err.to_string());
-            let markdown = markdown::to_html(&markdown_text);
-            return Ok(Ok(Ok(Template::render(
-                "md",
-                context! {
-                    title: format!("{} {}", strings.get("reading_markdown").unwrap(), Path::new("/").join(file.clone()).display()),
-                    lang,
-                    strings,
-                    path: Path::new("/").join(file.clone()).display().to_string(),
-                    theme: theme,
-                    is_logged_in: is_logged_in(&jar),
-                    hires: hires,
-                    admin: perms == 0,
-                    smallhead: smallhead,
-                    markdown: markdown
-                },
-            ))));
-        } else {
-            return Err(Status::NotFound);
-        }
-    } else if ext == "zip" {
-        if path.exists() {
-            let zip_file = fs::File::open(path.display().to_string()).unwrap();
-
-            let archive = zip::ZipArchive::new(zip_file).unwrap();
-
-            let file_names: Vec<&str> = archive.file_names().collect();
-
-            let file_list = list_to_files(file_names).unwrap_or_default();
-
-            if file_list.is_empty() {
+    match ext.as_str() {
+        "md" => {
+            if path.exists() {
+                let markdown_text = fs::read_to_string(path.display().to_string())
+                    .unwrap_or_else(|err| err.to_string());
+                let markdown = markdown::to_html(&markdown_text);
+                return Ok(Ok(Ok(Template::render(
+                    "md",
+                    context! {
+                        title: format!("{} {}", strings.get("reading_markdown").unwrap(), Path::new("/").join(file.clone()).display()),
+                        lang,
+                        strings,
+                        path: Path::new("/").join(file.clone()).display().to_string(),
+                        theme: theme,
+                        is_logged_in: is_logged_in(&jar),
+                        hires: hires,
+                        admin: perms == 0,
+                        smallhead: smallhead,
+                        markdown: markdown
+                    },
+                ))));
+            } else {
                 return Err(Status::NotFound);
             }
-
-            Ok(Ok(Ok(Template::render(
-                "zip",
-                context! {
-                    title: format!("{} {}", strings.get("viewing_zip").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
-                    lang,
-                    strings,
-                    path: Path::new("/").join(file.clone()).display().to_string(),
-                    files: file_list,
-                    theme: theme,
-                    is_logged_in: is_logged_in(&jar),
-                    username: username,
-                    admin: perms == 0,
-                    hires: hires,
-                    smallhead: smallhead
-                },
-            ))))
-        } else {
-            return Err(Status::NotFound);
-        }
-    } else if ext == "mp4" {
-        if path.exists() {
-            let displaydetails = true;
-
-            let videopath = Path::new("/").join(file.clone()).display().to_string();
-            let videopath = videopath.as_str();
-
-            let mdpath = format!("files/video/metadata{}.md", videopath.replace("video/", ""));
-            let mdpath = Path::new(mdpath.as_str());
-
-            let vidtitle = path.file_name();
-            let vidtitle = vidtitle.unwrap().to_str();
-            let mut vidtitle = vidtitle.unwrap().to_string();
-
-            let details: String;
-
-            if mdpath.exists() {
-                let markdown_text = fs::read_to_string(mdpath.display().to_string())
-                    .unwrap_or_else(|err| err.to_string());
-                let mut lines = markdown_text.lines();
-
-                vidtitle = lines
-                    .next()
-                    .unwrap_or("")
-                    .trim_start_matches('#')
-                    .trim()
-                    .to_string();
-                let markdown = lines.collect::<Vec<&str>>().join("\n");
-
-                details = markdown::to_html(&markdown);
+        },
+        "zip" => {
+            if path.exists() {
+                let zip_file = fs::File::open(path.display().to_string()).unwrap();
+    
+                let archive = zip::ZipArchive::new(zip_file).unwrap();
+    
+                let file_names: Vec<&str> = archive.file_names().collect();
+    
+                let file_list = list_to_files(file_names).unwrap_or_default();
+    
+                if file_list.is_empty() {
+                    return Err(Status::NotFound);
+                }
+    
+                Ok(Ok(Ok(Template::render(
+                    "zip",
+                    context! {
+                        title: format!("{} {}", strings.get("viewing_zip").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
+                        lang,
+                        strings,
+                        path: Path::new("/").join(file.clone()).display().to_string(),
+                        files: file_list,
+                        theme: theme,
+                        is_logged_in: is_logged_in(&jar),
+                        username: username,
+                        admin: perms == 0,
+                        hires: hires,
+                        smallhead: smallhead
+                    },
+                ))))
             } else {
-                details = strings.get("no_details").unwrap().to_string();
+                return Err(Status::NotFound);
             }
-
+        },
+        "mp4" => {
+            if path.exists() {
+                let displaydetails = true;
+    
+                let videopath = Path::new("/").join(file.clone()).display().to_string();
+                let videopath = videopath.as_str();
+    
+                let mdpath = format!("files/video/metadata{}.md", videopath.replace("video/", ""));
+                let mdpath = Path::new(mdpath.as_str());
+    
+                let vidtitle = path.file_name();
+                let vidtitle = vidtitle.unwrap().to_str();
+                let mut vidtitle = vidtitle.unwrap().to_string();
+    
+                let details: String;
+    
+                if mdpath.exists() {
+                    let markdown_text = fs::read_to_string(mdpath.display().to_string())
+                        .unwrap_or_else(|err| err.to_string());
+                    let mut lines = markdown_text.lines();
+    
+                    vidtitle = lines
+                        .next()
+                        .unwrap_or("")
+                        .trim_start_matches('#')
+                        .trim()
+                        .to_string();
+                    let markdown = lines.collect::<Vec<&str>>().join("\n");
+    
+                    details = markdown::to_html(&markdown);
+                } else {
+                    details = strings.get("no_details").unwrap().to_string();
+                }
+    
+                Ok(Ok(Ok(Template::render(
+                    "video",
+                    context! {
+                        title: format!("{} {}", strings.get("watching").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
+                        lang,
+                        strings,
+                        path: videopath,
+                        poster: format!("/images/videoposters{}.jpg", videopath.replace("video/", "")),
+                        vidtitle: vidtitle,
+                        theme: theme,
+                        is_logged_in: is_logged_in(&jar),
+                        username: username,
+                        admin: perms == 0,
+                        hires: hires,
+                        smallhead: smallhead,
+                        displaydetails: displaydetails,
+                        details: details
+                    },
+                ))))
+            } else {
+                return Err(Status::NotFound);
+            }
+        },
+        "folder" => {
+            let mut notroot = true;
+            let mut markdown: String = "".to_string();
+            let mut topmarkdown = false;
+            let path = Path::new("/").join(file).display().to_string();
+            let path_seg: Vec<&str> = path.split("/").collect();
+    
+            if path == "/" {
+                notroot = false;
+            }
+    
+            let mut file_list = read_files(&path).unwrap_or_default();
+            let mut dir_list = read_dirs(&path).unwrap_or_default();
+    
+            if dir_list.is_empty() && file_list.is_empty() {
+                return Err(Status::NotFound);
+            }
+    
+            if file_list.contains(&MirrorFile {
+                name: "top".to_owned(),
+                ext: String::new(),
+                icon: "default".to_string(),
+                size: String::new(),
+            }) {
+                topmarkdown = true;
+            }
+    
+            if file_list.contains(&MirrorFile {
+                name: "RESTRICTED".to_owned(),
+                ext: String::new(),
+                icon: "default".to_string(),
+                size: String::new(),
+            }) {
+                for dir in dir_list.iter_mut() {
+                    dir.icon = "lockedfolder".to_string();
+                }
+            }
+    
+            dir_list.retain(|x| !config.hidden_files.contains(&x.name));
+            file_list.retain(|x| !config.hidden_files.contains(&x.name));
+    
+            dir_list.sort();
+            file_list.sort();
+    
+            if file_list.contains(&MirrorFile {
+                name: format!("README.{}.md", lang.0),
+                ext: "md".to_string(),
+                icon: "default".to_string(),
+                size: String::new(),
+            }) {
+                let markdown_text = fs::read_to_string(
+                    Path::new(&("files".to_string() + &path))
+                        .join(format!("README.{}.md", lang.0))
+                        .display()
+                        .to_string(),
+                )
+                .unwrap_or_else(|err| err.to_string());
+                markdown = markdown::to_html(&markdown_text);
+            } else if file_list.contains(&MirrorFile {
+                name: "README.md".to_owned(),
+                ext: "md".to_string(),
+                icon: "default".to_string(),
+                size: String::new(),
+            }) {
+                let markdown_text = fs::read_to_string(
+                    Path::new(&("files".to_string() + &path))
+                        .join("README.md")
+                        .display()
+                        .to_string(),
+                )
+                .unwrap_or_else(|err| err.to_string());
+                markdown = markdown::to_html(&markdown_text);
+            }
+    
+            if plain {
+                return Ok(Ok(Ok(Template::render(
+                    "plain",
+                    context! {
+                        title: path.to_string(),
+                        lang,
+                        strings,
+                        path_seg: path_seg,
+                        dirs: dir_list,
+                        files: file_list,
+                        notroot: notroot,
+                        markdown: markdown,
+                        topmarkdown: topmarkdown
+                    },
+                ))));
+            }
+    
             Ok(Ok(Ok(Template::render(
-                "video",
-                context! {
-                    title: format!("{} {}", strings.get("watching").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
-                    lang,
-                    strings,
-                    path: videopath,
-                    poster: format!("/images/videoposters{}.jpg", videopath.replace("video/", "")),
-                    vidtitle: vidtitle,
-                    theme: theme,
-                    is_logged_in: is_logged_in(&jar),
-                    username: username,
-                    admin: perms == 0,
-                    hires: hires,
-                    smallhead: smallhead,
-                    displaydetails: displaydetails,
-                    details: details
-                },
-            ))))
-        } else {
-            return Err(Status::NotFound);
-        }
-    } else if ext == "folder" {
-        let mut notroot = true;
-        let mut markdown: String = "".to_string();
-        let mut topmarkdown = false;
-        let path = Path::new("/").join(file).display().to_string();
-        let path_seg: Vec<&str> = path.split("/").collect();
-
-        if path == "/" {
-            notroot = false;
-        }
-
-        let mut file_list = read_files(&path).unwrap_or_default();
-        let mut dir_list = read_dirs(&path).unwrap_or_default();
-
-        if dir_list.is_empty() && file_list.is_empty() {
-            return Err(Status::NotFound);
-        }
-
-        if file_list.contains(&MirrorFile {
-            name: "top".to_owned(),
-            ext: String::new(),
-            icon: "default".to_string(),
-            size: String::new(),
-        }) {
-            topmarkdown = true;
-        }
-
-        if file_list.contains(&MirrorFile {
-            name: "RESTRICTED".to_owned(),
-            ext: String::new(),
-            icon: "default".to_string(),
-            size: String::new(),
-        }) {
-            for dir in dir_list.iter_mut() {
-                dir.icon = "lockedfolder".to_string();
-            }
-        }
-
-        dir_list.retain(|x| !config.hidden_files.contains(&x.name));
-        file_list.retain(|x| !config.hidden_files.contains(&x.name));
-
-        dir_list.sort();
-        file_list.sort();
-
-        if file_list.contains(&MirrorFile {
-            name: format!("README.{}.md", lang.0),
-            ext: "md".to_string(),
-            icon: "default".to_string(),
-            size: String::new(),
-        }) {
-            let markdown_text = fs::read_to_string(
-                Path::new(&("files".to_string() + &path))
-                    .join(format!("README.{}.md", lang.0))
-                    .display()
-                    .to_string(),
-            )
-            .unwrap_or_else(|err| err.to_string());
-            markdown = markdown::to_html(&markdown_text);
-        } else if file_list.contains(&MirrorFile {
-            name: "README.md".to_owned(),
-            ext: "md".to_string(),
-            icon: "default".to_string(),
-            size: String::new(),
-        }) {
-            let markdown_text = fs::read_to_string(
-                Path::new(&("files".to_string() + &path))
-                    .join("README.md")
-                    .display()
-                    .to_string(),
-            )
-            .unwrap_or_else(|err| err.to_string());
-            markdown = markdown::to_html(&markdown_text);
-        }
-
-        if plain {
-            return Ok(Ok(Ok(Template::render(
-                "plain",
+                "index",
                 context! {
                     title: path.to_string(),
                     lang,
@@ -443,58 +463,44 @@ async fn index<'a>(
                     path_seg: path_seg,
                     dirs: dir_list,
                     files: file_list,
-                    notroot: notroot,
-                    markdown: markdown,
-                    topmarkdown: topmarkdown
-                },
-            ))));
-        }
-
-        Ok(Ok(Ok(Template::render(
-            "index",
-            context! {
-                title: path.to_string(),
-                lang,
-                strings,
-                path_seg: path_seg,
-                dirs: dir_list,
-                files: file_list,
-                theme: theme,
-                is_logged_in: is_logged_in(&jar),
-                username: username,
-                admin: perms == 0,
-                hires: hires,
-                notroot: notroot,
-                smallhead: smallhead,
-                markdown: markdown,
-                topmarkdown: topmarkdown,
-                filebrowser: !get_bool_cookie(jar, "filebrowser"),
-            },
-        ))))
-    } else if config.extensions.contains(&ext) {
-        if path.exists() {
-            return Ok(Ok(Ok(Template::render(
-                "details",
-                context! {
-                    title: format!("{} {}", strings.get("file_details").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
-                    lang,
-                    strings,
-                    path: Path::new("/").join(file.clone()).display().to_string(),
                     theme: theme,
                     is_logged_in: is_logged_in(&jar),
                     username: username,
                     admin: perms == 0,
                     hires: hires,
+                    notroot: notroot,
                     smallhead: smallhead,
-                    filename: path.file_name().unwrap().to_str(),
-                    filesize: format_size(fs::metadata(path.clone()).unwrap().len(), DECIMAL)
+                    markdown: markdown,
+                    topmarkdown: topmarkdown,
+                    filebrowser: !get_bool_cookie(jar, "filebrowser"),
                 },
-            ))));
+            ))))
+        },
+        _ => if config.extensions.contains(&ext) {
+            if path.exists() {
+                return Ok(Ok(Ok(Template::render(
+                    "details",
+                    context! {
+                        title: format!("{} {}", strings.get("file_details").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
+                        lang,
+                        strings,
+                        path: Path::new("/").join(file.clone()).display().to_string(),
+                        theme: theme,
+                        is_logged_in: is_logged_in(&jar),
+                        username: username,
+                        admin: perms == 0,
+                        hires: hires,
+                        smallhead: smallhead,
+                        filename: path.file_name().unwrap().to_str(),
+                        filesize: format_size(fs::metadata(path.clone()).unwrap().len(), DECIMAL)
+                    },
+                ))));
+            } else {
+                return Err(Status::NotFound);
+            }
         } else {
-            return Err(Status::NotFound);
+            return Ok(Err(open_file(path)));
         }
-    } else {
-        return Ok(Err(open_file(path)));
     }
 }
 
