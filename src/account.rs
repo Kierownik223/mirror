@@ -5,7 +5,7 @@ use openssl::rsa::{Padding, Rsa};
 use rocket::{
     fairing::AdHoc,
     form::Form,
-    http::{uri::Uri, Cookie, CookieJar, Status},
+    http::{Cookie, CookieJar, Status},
     response::Redirect,
 };
 use rocket_db_pools::Connection;
