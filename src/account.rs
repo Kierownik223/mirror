@@ -5,7 +5,7 @@ use openssl::rsa::{Padding, Rsa};
 use rocket::{
     fairing::AdHoc,
     form::Form,
-    http::{Cookie, CookieJar, Status},
+    http::{uri::Uri, Cookie, CookieJar, Status},
     response::Redirect,
 };
 use rocket_db_pools::Connection;
@@ -93,17 +93,17 @@ async fn login(
             &db_user.username, &ip.0
         );
 
-        let mut redirect_url = next.unwrap_or("/").to_string();
+        let mut redirect_url = next.unwrap_or("/");
 
         if redirect_url == "/admin" {
             return Ok(Redirect::to("/"));
         }
 
         if db_user.perms.unwrap_or(1) == 0 {
-            redirect_url = next.unwrap_or("/admin").to_string();
+            redirect_url = next.unwrap_or("/admin");
         }
 
-        return Ok(Redirect::to(redirect_url));
+        return Ok(Redirect::to(redirect_url.replace(" ", "%20")));
     } else {
         let strings = translations.get_translation(&lang.0);
         println!(
