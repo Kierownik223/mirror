@@ -244,7 +244,7 @@ async fn index<'a>(
     }
 
     let ext_upper = if path.is_file() {
-        path.extension().and_then(OsStr::to_str).unwrap_or("folder")
+        path.extension().and_then(OsStr::to_str).unwrap_or("")
     } else {
         "folder"
     };
