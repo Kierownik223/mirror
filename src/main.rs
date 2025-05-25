@@ -93,8 +93,15 @@ impl<'r> FromRequest<'r> for XForwardedFor<'r> {
     type Error = ();
 
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        match request.headers().get_one("Cf-Connecting-Ip") {
-            Some(value) => Outcome::Success(XForwardedFor(value)),
+        match request.headers().get_one("X-Forwarded-For") {
+            Some(value) => {
+                let ip = value
+                    .split(',')
+                    .next()
+                    .map(str::trim)
+                    .unwrap_or(value);
+                Outcome::Success(XForwardedFor(ip))
+            }
             None => Outcome::Error((Status::BadRequest, ())),
         }
     }
