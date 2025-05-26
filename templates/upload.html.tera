@@ -50,6 +50,8 @@
 <script>
 function uploadViaAPI() {
     const input = document.getElementById('file');
+    const path_input = document.getElementById('path');
+    const path = path_input.value;
     const files = input.files;
     if (!files.length) {
         alert("{{ strings.select_files }}");
@@ -81,6 +83,7 @@ function uploadViaAPI() {
 
         const formData = new FormData();
         formData.append("files", file);
+        formData.append("path", path);
 
         const xhr = new XMLHttpRequest();
         xhr.open("POST", "/api/upload", true);
