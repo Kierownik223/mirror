@@ -240,7 +240,6 @@ pub fn parse_language(header: &str) -> Option<String> {
         let short_code = code.split('-').next()?.to_lowercase();
 
         if fs::metadata(format!("{}/{}.toml", lang_dir, short_code)).is_ok() {
-            println!("{}", short_code);
             return Some(short_code);
         }
     }
