@@ -107,6 +107,22 @@ impl<'r> FromRequest<'r> for XForwardedFor<'r> {
     }
 }
 
+struct Host<'r>(&'r str);
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for Host<'r> {
+    type Error = ();
+
+    async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
+        match request.headers().get_one("Host") {
+            Some(value) => {
+                Outcome::Success(Host(value))
+            }
+            None => Outcome::Error((Status::BadRequest, ())),
+        }
+    }
+}
+
 #[derive(serde::Serialize)]
 struct Language(String);
 

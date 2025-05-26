@@ -1,21 +1,16 @@
 use std::{
-    collections::HashMap,
-    path::{Path, PathBuf},
+    collections::HashMap, io::{Read, Write}, path::{Path, PathBuf}
 };
 
+use rocket_multipart_form_data::{MultipartFormData, MultipartFormDataField, MultipartFormDataOptions, Repetition};
 use ::sysinfo::{Disks, RefreshKind, System};
 use humansize::{format_size, DECIMAL};
 use rocket::{
-    fairing::AdHoc,
-    http::{CookieJar, Status},
-    serde::json::Json,
-    Request,
+    data::ToByteUnit, fairing::AdHoc, http::{ContentType, CookieJar, Status}, serde::json::Json, Data, Request
 };
 
 use crate::{
-    read_dirs, read_files,
-    utils::{get_session, is_logged_in, is_restricted},
-    Config, Disk, MirrorFile, Sysinfo,
+    read_dirs, read_files, utils::{get_extension_from_filename, get_session, is_logged_in, is_restricted}, Config, Disk, Host, MirrorFile, Sysinfo
 };
 
 #[derive(serde::Serialize)]
@@ -34,6 +29,14 @@ struct User {
     scope: String,
     perms: i32,
     settings: HashMap<String, String>,
+}
+
+#[derive(serde::Serialize, serde::Deserialize)]
+pub struct UploadFile {
+    name: String,
+    url: Option<String>,
+    error: Option<String>,
+    icon: Option<String>,
 }
 
 #[get("/listing/<file..>")]
@@ -142,6 +145,108 @@ fn user(jar: &CookieJar<'_>) -> Result<Json<User>, Status> {
     }
 }
 
+#[post("/upload", data = "<data>")]
+async fn upload(
+    content_type: &ContentType,
+    data: Data<'_>,
+    jar: &CookieJar<'_>,
+    host: Host<'_>
+) -> Result<Json<Vec<UploadFile>>, Status> {
+    if is_logged_in(&jar) {
+        let perms = get_session(jar).1;
+
+        if perms != 0 {
+            return Err(Status::Forbidden);
+        }
+
+        let options = MultipartFormDataOptions::with_multipart_form_data_fields(vec![
+            MultipartFormDataField::file("files")
+                .repetition(Repetition::infinite())
+                .size_limit(u64::from(1.gigabytes())),
+            MultipartFormDataField::text("path"),
+        ]);
+
+        let form_data = match MultipartFormData::parse(content_type, data, options).await {
+            Ok(data) => data,
+            Err(err) => {
+                eprintln!("Failed to parse multipart form data: {:?}", err);
+                return Err(Status::BadRequest);
+            }
+        };
+
+        let mut user_path = form_data
+            .texts
+            .get("path")
+            .and_then(|paths| paths.first().map(|p| p.text.trim_matches('/').to_string()))
+            .unwrap_or("uploads".to_string());
+
+        if user_path.is_empty() {
+            user_path = "uploads".to_string();
+        }
+
+        let mut uploaded_files: Vec<UploadFile> = Vec::new();
+
+        if let Some(file_fields) = form_data.files.get("files") {
+            for file_field in file_fields {
+                if let Some(file_name) = &file_field.file_name {
+                    let upload_path = format!("files/{}/{}", user_path, file_name);
+
+                    match std::fs::File::create(&upload_path) {
+                        Ok(mut file) => {
+                            if let Ok(mut temp_file) = std::fs::File::open(&file_field.path) {
+                                let mut buffer = Vec::new();
+                                let _ = temp_file.read_to_end(&mut buffer);
+
+                                let _ = file.write_all(&buffer);
+                                let mut icon = get_extension_from_filename(file_name)
+                                    .unwrap_or("")
+                                    .to_string()
+                                    .to_lowercase();
+                                if !Path::new(
+                                    &("files/static/images/icons/".to_owned() + &icon + ".png")
+                                        .to_string(),
+                                )
+                                .exists()
+                                {
+                                    icon = "default".to_string();
+                                }
+                                uploaded_files.push(UploadFile {
+                                    name: file_name.to_string(),
+                                    url: Some(format!("http://{}/{}/{}", host.0, user_path, file_name)),
+                                    icon: Some(icon),
+                                    error: None
+                                });
+                            } else {
+                                eprintln!("Failed to open temp file for: {}", file_name);
+                                return Err(Status::InternalServerError);
+                            }
+                        }
+                        Err(err) => {
+                            uploaded_files.push(UploadFile {
+                                name: file_name.to_string(),
+                                url: None,
+                                icon: None,
+                                error: Some(format!("Failed to create target file {}: {:?}", upload_path, err))
+                            });
+                            eprintln!("Failed to create target file {}: {:?}", upload_path, err);
+                            continue;
+                        }
+                    }
+                } else {
+                    eprintln!("A file was uploaded without a name, skipping.");
+                    continue;
+                }
+            }
+
+            return Ok(Json(uploaded_files));
+        } else {
+            return Err(Status::BadRequest);
+        }
+    } else {
+        return Err(Status::Forbidden);
+    }
+}
+
 #[get("/")]
 async fn index() -> Json<MirrorInfo> {
     Json(MirrorInfo {
@@ -159,7 +264,7 @@ fn default(status: Status, _req: &Request) -> Json<Error> {
 pub fn build_api() -> AdHoc {
     AdHoc::on_ignite("API", |rocket| async {
         rocket
-            .mount("/api", routes![index, listing, sysinfo, user])
+            .mount("/api", routes![index, listing, sysinfo, user, upload])
             .register("/api", catchers![default])
     })
 }
