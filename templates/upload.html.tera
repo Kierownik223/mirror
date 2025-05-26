@@ -112,7 +112,7 @@ function uploadViaAPI() {
                 try {
                     const response = JSON.parse(xhr.responseText);
 
-                    if (response.error) {
+                    if (response.url == null) {
                         label.textContent = `{{ strings.upload_error }} ${response.error}`;
                         return;
                     }
