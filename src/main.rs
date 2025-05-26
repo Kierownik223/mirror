@@ -719,8 +719,9 @@ async fn iframe(
     }
 
     let mut dir_list = read_dirs(&path).unwrap_or_default();
+    let file_list = read_files(&path).unwrap_or_default();
 
-    if dir_list.is_empty() {
+    if dir_list.is_empty() && file_list.is_empty() {
         return Err(Status::NotFound);
     }
 
