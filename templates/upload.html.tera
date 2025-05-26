@@ -12,27 +12,137 @@
 <a href="{{ s.ext }}"><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}</a> {{ strings.upload_success }}<br>
 {% endif %}
 {% endfor %}
-<form method="post" enctype="multipart/form-data">
-    <label for="file"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}default.png">{{ strings.select_file }}:</label>
+
+<div id="uploadResults" style="margin-top: 10px; box-sizing: border-box;"></div>
+
+<form method="post" enctype="multipart/form-data" id="uploadForm">
+    <label for="file">
+        <img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}default.png">{{ strings.select_file }}:
+    </label>
     <center>
         <input type="file" name="files" id="file" multiple required>
     </center>
 
-    <label for="path"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png">{{ strings.target_dir }}:</label>
+    <label for="path">
+        <img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png">{{ strings.target_dir }}:
+    </label>
     <center>
         <input type="text" id="path" name="path" placeholder="{{ strings.target_placeholder }}">
         {% if filebrowser %}
-        <button type="button" onclick="openDialog()"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">{{ strings.browse }}</button>
+        <button type="button" onclick="openDialog()">
+            <img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">{{ strings.browse }}
+        </button>
         {% endif %}
     </center>
     <br>
 
-    <img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}md.png">{{ strings.max_size }}<br>
-    <br>
+    <img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}md.png">{{ strings.max_size }}<br><br>
+
     <center>
         <button type="submit"><img src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png" class="icon">{{ strings.upload }}</button>
+
+        <button type="button" onclick="uploadViaAPI()">
+            <img src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png" class="icon">{{ strings.upload }} (JavaScript)
+        </button>
     </center>
 </form>
+
+<script>
+function uploadViaAPI() {
+    const input = document.getElementById('file');
+    const files = input.files;
+    if (!files.length) {
+        alert("{{ strings.select_files }}");
+        return;
+    }
+
+    const resultsDiv = document.getElementById('uploadResults');
+    resultsDiv.innerHTML = "";
+
+    for (const file of files) {
+        const container = document.createElement("div");
+
+        const label = document.createElement("div");
+        label.textContent = `{{ strings.uploading }} ${file.name}`;
+        container.appendChild(label);
+
+        const progressBar = document.createElement("progress");
+        progressBar.max = 100;
+        progressBar.value = 0;
+        progressBar.style.width = "100%";
+        container.appendChild(progressBar);
+
+        const info = document.createElement("div");
+        info.style.fontSize = "small";
+        info.textContent = "0% - 0 B / " + formatBytes(file.size) + " @ 0 KB/s";
+        container.appendChild(info);
+
+        resultsDiv.appendChild(container);
+
+        const formData = new FormData();
+        formData.append("files", file);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "/api/upload", true);
+
+        const startTime = Date.now();
+
+        xhr.upload.onprogress = function (e) {
+            if (e.lengthComputable) {
+                const percent = (e.loaded / e.total) * 100;
+                const elapsed = (Date.now() - startTime) / 1000;
+                const speed = e.loaded / elapsed;
+
+                progressBar.value = percent;
+
+                info.textContent =
+                    `${percent.toFixed(1)}% - ${formatBytes(e.loaded)} / ${formatBytes(e.total)} ` +
+                    `@ ${formatBytes(speed)}/s`;
+            }
+        };
+
+        xhr.onload = function () {
+            progressBar.style.display = "none";
+            info.style.display = "none";
+
+            if (xhr.status === 200) {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    const result = response.find(f => f.name === file.name);
+                    if (result) {
+                        const iconPath = `/static/images/icons/{% if hires %}hires/{% endif %}${result.icon || 'default'}.png`;
+                        const successText = `{{ strings.upload_success }}`;
+
+                        label.innerHTML = `<a href="${result.url}"><img src="${iconPath}" class="icon">${result.name}</a> ${successText}<br>`;
+                    }
+                } catch {
+                    label.textContent = `${file.name} {{ strings.upload_parse_error }}`;
+                }
+            } else {
+                label.textContent = `${file.name} {{ strings.upload_failed_status }} ${xhr.status}`;
+            }
+        };
+
+        xhr.onerror = function () {
+            progressBar.style.display = "none";
+            info.style.display = "none";
+            label.textContent = `${file.name} {{ strings.upload_failed_network }}`;
+        };
+
+        xhr.send(formData);
+    }
+}
+
+function formatBytes(bytes) {
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    let i = 0;
+    while (bytes >= 1024 && i < units.length - 1) {
+        bytes /= 1024;
+        i++;
+    }
+    return bytes.toFixed(1) + ' ' + units[i];
+}
+</script>
 
 {% if filebrowser %}
 
