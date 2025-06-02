@@ -24,6 +24,7 @@ fn login_page(
     jar: &CookieJar<'_>,
     translations: &rocket::State<TranslationStore>,
     lang: Language,
+    host: Host<'_>
 ) -> Result<Template, Redirect> {
     if is_logged_in(&jar) {
         let perms = get_session(jar).1;
@@ -36,12 +37,15 @@ fn login_page(
 
     let strings = translations.get_translation(&lang.0);
 
+    let root_domain = host.0.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
+
     Ok(Template::render(
         "login",
         context! {
             title: "Login",
             lang,
             strings,
+            root_domain,
             theme: get_theme(jar),
             is_logged_in: is_logged_in(&jar),
             username: "",
@@ -62,6 +66,7 @@ async fn login(
     next: Option<&str>,
     translations: &rocket::State<TranslationStore>,
     lang: Language,
+    host: Host<'_>
 ) -> Result<Redirect, Template> {
     if let Some(db_user) = login_user(db, &user.username, &user.password, &ip.0, true).await {
         if !get_bool_cookie(&jar, "nooverride") {
@@ -106,6 +111,9 @@ async fn login(
         return Ok(Redirect::to(redirect_url.replace(" ", "%20")));
     } else {
         let strings = translations.get_translation(&lang.0);
+
+        let root_domain = host.0.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
+
         println!(
             "Failed login attempt to user {} with password {} from {}",
             &user.username, &user.password, &ip.0
@@ -117,6 +125,7 @@ async fn login(
                 title: "Login",
                 lang,
                 strings,
+                root_domain,
                 theme: get_theme(jar),
                 is_logged_in: is_logged_in(&jar),
                 admin: get_session(&jar).1 == 0,
