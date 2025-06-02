@@ -111,13 +111,13 @@ function uploadViaAPI() {
             if (xhr.status === 200) {
                 try {
                     const response = JSON.parse(xhr.responseText);
+                    const result = response[0];
 
-                    if (response.url == null) {
-                        label.textContent = `{{ strings.upload_error }} ${response.error}`;
+                    if (result.url == null) {
+                        label.textContent = `{{ strings.upload_error }} ${result.error}`;
                         return;
                     }
 
-                    const result = response.find(f => f.name === file.name);
                     if (result) {
                         const iconPath = `/static/images/icons/{% if hires %}hires/{% endif %}${result.icon || 'default'}.png`;
                         const successText = `{{ strings.upload_success }}`;
