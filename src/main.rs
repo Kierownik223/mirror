@@ -776,12 +776,17 @@ async fn default(status: Status, req: &Request<'_>) -> Template {
 
     let strings = translations.get_translation(lang.as_str());
 
+    let host = req.host().unwrap().to_string();
+
+    let root_domain = host.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
+
     Template::render(
         format!("error/{}", status.code),
         context! {
             title: format!("HTTP {}", status.code),
             lang,
             strings,
+            root_domain,
             theme: get_theme(jar),
             is_logged_in: is_logged_in(&jar),
             admin: get_session(&jar).1 == 0,
