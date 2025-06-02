@@ -95,11 +95,7 @@ impl<'r> FromRequest<'r> for XForwardedFor<'r> {
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         match request.headers().get_one("X-Forwarded-For") {
             Some(value) => {
-                let mut ip = value
-                    .split(',')
-                    .next()
-                    .map(str::trim)
-                    .unwrap_or(value);
+                let mut ip = value.split(',').next().map(str::trim).unwrap_or(value);
 
                 if ip == "127.0.0.1" || ip == "::1" {
                     ip = "(unknown)";
@@ -120,9 +116,7 @@ impl<'r> FromRequest<'r> for Host<'r> {
 
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         match request.headers().get_one("Host") {
-            Some(value) => {
-                Outcome::Success(Host(value))
-            }
+            Some(value) => Outcome::Success(Host(value)),
             None => Outcome::Error((Status::BadRequest, ())),
         }
     }
@@ -251,7 +245,7 @@ async fn index<'a>(
     config: &rocket::State<Config>,
     translations: &rocket::State<TranslationStore>,
     lang: Language,
-    host: Host<'_>
+    host: Host<'_>,
 ) -> Result<Result<Result<Template, Redirect>, Option<HeaderFile>>, Status> {
     let path = Path::new("files/").join(file.clone());
     let strings = translations.get_translation(&lang.0);
@@ -553,7 +547,7 @@ fn settings(
     opt: Settings<'_>,
     lang: Language,
     translations: &State<TranslationStore>,
-    host: Host<'_>
+    host: Host<'_>,
 ) -> Result<Template, Redirect> {
     let mut lang = lang.0;
     let mut theme = get_theme(jar);

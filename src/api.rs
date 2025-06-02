@@ -1,16 +1,26 @@
 use std::{
-    collections::HashMap, io::{Read, Write}, path::{Path, PathBuf}
+    collections::HashMap,
+    io::{Read, Write},
+    path::{Path, PathBuf},
 };
 
-use rocket_multipart_form_data::{MultipartFormData, MultipartFormDataField, MultipartFormDataOptions, Repetition};
 use ::sysinfo::{Disks, RefreshKind, System};
 use humansize::{format_size, DECIMAL};
 use rocket::{
-    data::ToByteUnit, fairing::AdHoc, http::{ContentType, CookieJar, Status}, serde::json::Json, Data, Request
+    data::ToByteUnit,
+    fairing::AdHoc,
+    http::{ContentType, CookieJar, Status},
+    serde::json::Json,
+    Data, Request,
+};
+use rocket_multipart_form_data::{
+    MultipartFormData, MultipartFormDataField, MultipartFormDataOptions, Repetition,
 };
 
 use crate::{
-    read_dirs, read_files, utils::{get_extension_from_filename, get_session, is_logged_in, is_restricted}, Config, Disk, Host, MirrorFile, Sysinfo
+    read_dirs, read_files,
+    utils::{get_extension_from_filename, get_session, is_logged_in, is_restricted},
+    Config, Disk, Host, MirrorFile, Sysinfo,
 };
 
 #[derive(serde::Serialize)]
@@ -150,7 +160,7 @@ async fn upload(
     content_type: &ContentType,
     data: Data<'_>,
     jar: &CookieJar<'_>,
-    host: Host<'_>
+    host: Host<'_>,
 ) -> Result<Json<Vec<UploadFile>>, Status> {
     if is_logged_in(&jar) {
         let perms = get_session(jar).1;
@@ -212,9 +222,12 @@ async fn upload(
                                 }
                                 uploaded_files.push(UploadFile {
                                     name: file_name.to_string(),
-                                    url: Some(format!("http://{}/{}/{}", host.0, user_path, file_name)),
+                                    url: Some(format!(
+                                        "http://{}/{}/{}",
+                                        host.0, user_path, file_name
+                                    )),
                                     icon: Some(icon),
-                                    error: None
+                                    error: None,
                                 });
                             } else {
                                 eprintln!("Failed to open temp file for: {}", file_name);
@@ -226,7 +239,10 @@ async fn upload(
                                 name: file_name.to_string(),
                                 url: None,
                                 icon: None,
-                                error: Some(format!("Failed to create target file {}: {:?}", upload_path, err))
+                                error: Some(format!(
+                                    "Failed to create target file {}: {:?}",
+                                    upload_path, err
+                                )),
                             });
                             eprintln!("Failed to create target file {}: {:?}", upload_path, err);
                             continue;

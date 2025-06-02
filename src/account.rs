@@ -16,7 +16,7 @@ use time::{Duration, OffsetDateTime};
 use crate::{
     db::{fetch_user, login_user, Db},
     utils::{get_bool_cookie, get_session, get_theme, is_logged_in},
-    Language, MarmakUser, TranslationStore, UserToken, XForwardedFor,
+    Host, Language, MarmakUser, TranslationStore, UserToken, XForwardedFor,
 };
 
 #[get("/login")]
@@ -135,6 +135,7 @@ async fn direct<'a>(
     token: Option<String>,
     to: Option<String>,
     ip: XForwardedFor<'_>,
+    host: Host<'_>,
 ) -> Result<Redirect, Status> {
     if let Some(token) = token {
         if is_logged_in(&jar) {
@@ -214,9 +215,12 @@ async fn direct<'a>(
 
                 let encrypted_b64 =
                     base64::engine::general_purpose::URL_SAFE.encode(encrypted_data);
+
+                let root_domain = host.0.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
+
                 let redirect_url = format!(
-                    "https://account.marmak.net.pl/direct?token={}",
-                    encrypted_b64
+                    "https://account.{}/direct?token={}",
+                    root_domain, encrypted_b64
                 );
 
                 return Ok(Redirect::to(redirect_url));
