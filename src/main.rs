@@ -251,9 +251,12 @@ async fn index<'a>(
     config: &rocket::State<Config>,
     translations: &rocket::State<TranslationStore>,
     lang: Language,
+    host: Host<'_>
 ) -> Result<Result<Result<Template, Redirect>, Option<HeaderFile>>, Status> {
     let path = Path::new("files/").join(file.clone());
     let strings = translations.get_translation(&lang.0);
+
+    let root_domain = host.0.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
 
     let (username, perms) = get_session(jar);
 
@@ -291,6 +294,7 @@ async fn index<'a>(
                         title: format!("{} {}", strings.get("reading_markdown").unwrap(), Path::new("/").join(file.clone()).display()),
                         lang,
                         strings,
+                        root_domain,
                         path: Path::new("/").join(file.clone()).display().to_string(),
                         theme: theme,
                         is_logged_in: is_logged_in(&jar),
@@ -324,6 +328,7 @@ async fn index<'a>(
                         title: format!("{} {}", strings.get("viewing_zip").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
                         lang,
                         strings,
+                        root_domain,
                         path: Path::new("/").join(file.clone()).display().to_string(),
                         files: file_list,
                         theme: theme,
@@ -378,6 +383,7 @@ async fn index<'a>(
                         title: format!("{} {}", strings.get("watching").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
                         lang,
                         strings,
+                        root_domain,
                         path: videopath,
                         poster: format!("/images/videoposters{}.jpg", videopath.replace("video/", "")),
                         vidtitle: vidtitle,
@@ -476,6 +482,7 @@ async fn index<'a>(
                         title: path.to_string(),
                         lang,
                         strings,
+                        root_domain,
                         path_seg: path_seg,
                         dirs: dir_list,
                         files: file_list,
@@ -492,6 +499,7 @@ async fn index<'a>(
                     title: path.to_string(),
                     lang,
                     strings,
+                    root_domain,
                     path_seg: path_seg,
                     dirs: dir_list,
                     files: file_list,
@@ -517,6 +525,7 @@ async fn index<'a>(
                             title: format!("{} {}", strings.get("file_details").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
                             lang,
                             strings,
+                            root_domain,
                             path: Path::new("/").join(file.clone()).display().to_string(),
                             theme: theme,
                             is_logged_in: is_logged_in(&jar),
@@ -544,10 +553,13 @@ fn settings(
     opt: Settings<'_>,
     lang: Language,
     translations: &State<TranslationStore>,
+    host: Host<'_>
 ) -> Result<Template, Redirect> {
     let mut lang = lang.0;
     let mut theme = get_theme(jar);
     let strings = translations.get_translation(&lang);
+
+    let root_domain = host.0.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
 
     let settings_map = vec![
         ("hires", opt.hires),
@@ -617,6 +629,7 @@ fn settings(
             theme,
             lang,
             strings,
+            root_domain,
             is_logged_in: is_logged_in(&jar),
             username,
             admin: get_session(jar).1 == 0,
