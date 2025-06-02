@@ -95,11 +95,16 @@ impl<'r> FromRequest<'r> for XForwardedFor<'r> {
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         match request.headers().get_one("X-Forwarded-For") {
             Some(value) => {
-                let ip = value
+                let mut ip = value
                     .split(',')
                     .next()
                     .map(str::trim)
                     .unwrap_or(value);
+
+                if ip == "127.0.0.1" || ip == "::1" {
+                    ip = "(unknown)";
+                }
+
                 Outcome::Success(XForwardedFor(ip))
             }
             None => Outcome::Error((Status::BadRequest, ())),
