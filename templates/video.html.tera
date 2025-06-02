@@ -7,14 +7,14 @@
     <link rel="shortcut icon" href="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png" type="image/x-icon">
     <link rel="icon" href="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">
     <meta property="og:title" content="{{ vidtitle }}">
-    <meta property="og:url" content="dl.marmak.net.pl/">
+    <meta property="og:url" content="dl.{{ root_domain }}/">
     <meta property="og:description" content="{{ details }}">
     <meta property="og:type" content=website>
     <meta property="og:image" content="{{ poster }}">
     <meta property="og:locale" content="{{ lang }}">
     <meta property="og:site_name" content="MARMAK Mirror">
-    <meta property="og:video" content="https://dl.marmak.net.pl{{ path }}?download"/>
-    <meta property="og:video:secure_url" content="https://dl.marmak.net.pl{{ path }}?download"/>
+    <meta property="og:video" content="https://dl.{{ root_domain }}{{ path }}?download"/>
+    <meta property="og:video:secure_url" content="https://dl.{{ root_domain }}{{ path }}?download"/>
     <meta name="description" content="{{ title }}">
     <link rel="stylesheet" href="/static/styles/{{ theme }}.css">
     <title>{{ vidtitle }} - MARMAK Mirror</title>

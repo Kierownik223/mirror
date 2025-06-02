@@ -7,7 +7,7 @@
     <link rel="shortcut icon" href="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png" type="image/x-icon">
     <link rel="icon" href="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">
     <meta property="og:title" content="{{ title }}">
-    <meta property="og:url" content="dl.marmak.net.pl/">
+    <meta property="og:url" content="dl.{{ root_domain }}/">
     <meta property="og:description" content="{{ title }}">
     <meta property="og:type" content=website>
     <meta property="og:image" content="/static/images/icons/hires/favicon.png">
