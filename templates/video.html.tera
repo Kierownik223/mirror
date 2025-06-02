@@ -25,7 +25,7 @@
         <div class="main">
             <div class="controls">
                 {{ strings.watching }} {{ path }}
-                <div style="float: right;"><a href="?download" download><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">Download</a></div><br>
+                <div style="float: right;"><a href="?download" download><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">{{ strings.download }}</a></div><br>
                 <a href="./"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png">./</a>
             </div>
             <video src="?download" controls style="height: 60vh; width: 100%;" poster="{{ poster }}">{{ strings.no_video }}</video>
