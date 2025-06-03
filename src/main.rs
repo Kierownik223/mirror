@@ -761,14 +761,14 @@ async fn default(status: Status, req: &Request<'_>) -> Template {
     let translations = req.guard::<&State<TranslationStore>>().await.unwrap();
 
     let mut lang = "en".to_string();
-
-    if let Some(cookie_lang) = jar.get("lang").map(|c| c.value()) {
-        lang = cookie_lang.to_string();
-    }
-
+    
     if let Some(header) = req.headers().get_one("Accept-Language") {
         let header_lang = parse_language(header).unwrap_or("en".to_string());
         lang = header_lang;
+    }
+
+    if let Some(cookie_lang) = jar.get("lang").map(|c| c.value()) {
+        lang = cookie_lang.to_string();
     }
 
     let strings = translations.get_translation(lang.as_str());
