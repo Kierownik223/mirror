@@ -72,7 +72,7 @@ async fn login(
         if !get_bool_cookie(&jar, "nooverride") {
             if let Some(mirror_settings) = db_user.mirror_settings {
                 let decoded: HashMap<String, String> =
-                    serde_json::from_str(&mirror_settings).expect("Failed to parse JSON");
+                    serde_json::from_str(&mirror_settings).unwrap_or_default();
 
                 for (key, value) in decoded {
                     let mut now = OffsetDateTime::now_utc();

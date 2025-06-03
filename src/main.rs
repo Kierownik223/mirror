@@ -72,7 +72,6 @@ struct Settings<'r> {
     lang: Option<&'r str>,
     hires: Option<&'r str>,
     smallhead: Option<&'r str>,
-    nolang: Option<&'r str>,
     plain: Option<&'r str>,
     nooverride: Option<&'r str>,
     filebrowser: Option<&'r str>,
@@ -558,7 +557,6 @@ fn settings(
     let settings_map = vec![
         ("hires", opt.hires),
         ("smallhead", opt.smallhead),
-        ("nolang", opt.nolang),
         ("plain", opt.plain),
         ("nooverride", opt.nooverride),
         ("filebrowser", opt.filebrowser),
