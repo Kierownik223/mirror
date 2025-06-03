@@ -685,7 +685,6 @@ async fn sync_settings(
             "hires",
             "smallhead",
             "theme",
-            "nolang",
             "nooverride",
         ];
 
