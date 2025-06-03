@@ -228,7 +228,7 @@ async fn direct<'a>(
                 let root_domain = host.0.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
 
                 let redirect_url = format!(
-                    "https://account.{}/direct?token={}",
+                    "http://account.{}/direct?token={}",
                     root_domain, encrypted_b64
                 );
 
