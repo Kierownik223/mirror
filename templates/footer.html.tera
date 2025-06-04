@@ -1,6 +1,6 @@
 <div class="footer">
     <center>
         {{ strings.author }} &amp; <a href="/credits.md">{{ strings.others }}</a><br>
-        <i>Things are getting rusty...</i>
+        <small>{{ strings.translated_by }}</i>
     </center>
 </div>
