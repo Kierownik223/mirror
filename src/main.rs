@@ -627,7 +627,6 @@ fn settings(
             admin: get_session(jar).1 == 0,
             hires: get_bool_cookie(jar, "hires"),
             smallhead: get_bool_cookie(jar, "smallhead"),
-            nolang: get_bool_cookie(jar, "nolang"),
             plain: get_bool_cookie(jar, "plain"),
             nooverride: get_bool_cookie(jar, "nooverride"),
             filebrowser: get_bool_cookie(jar, "filebrowser")
