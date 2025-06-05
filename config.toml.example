@@ -1,2 +1,10 @@
+# File extensions to show the details page for
 extensions = ["exe", "cab", "appx", "xap", "appxbundle", "zip", "7z", "apk", "rar"]
+# File and directory names that will be hidden on any directory listing
 hidden_files = ["static", "uploads", "private", "robots.txt", "favicon.ico", "top", "RESTRICTED", "metadata"]
+# Enable login functionality (disable to run with no database)
+enable_login = true
+# Enable /api
+enable_api = true
+# Enable MARMAK link in the header
+enable_marmak_link = true
