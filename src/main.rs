@@ -32,7 +32,8 @@ mod utils;
 struct Config {
     extensions: Vec<String>,
     hidden_files: Vec<String>,
-    enable_login: bool
+    enable_login: bool,
+    enable_api: bool
 }
 
 impl Config {
@@ -813,7 +814,6 @@ fn rocket() -> _ {
     let mut rocket = rocket::build()
         .manage(config.clone())
         .attach(Template::fairing())
-        .attach(api::build_api())
         .manage(TranslationStore::new())
         .register("/", catchers![default, unprocessable_entry, forbidden])
         .mount(
@@ -835,6 +835,11 @@ fn rocket() -> _ {
                 fetch_settings,
                 sync_settings,
             ]);
+    }
+
+    if config.enable_api {
+        rocket = rocket
+            .attach(api::build_api());
     }
 
     rocket
