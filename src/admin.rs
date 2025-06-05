@@ -9,7 +9,7 @@ use rocket::{
     data::ToByteUnit,
     fairing::AdHoc,
     http::{ContentType, CookieJar, Status},
-    Data,
+    Data, State,
 };
 use rocket_dyn_templates::{context, Template};
 use rocket_multipart_form_data::{
@@ -17,7 +17,7 @@ use rocket_multipart_form_data::{
 };
 
 use crate::{
-    utils::{get_bool_cookie, get_extension_from_filename, get_session, get_theme, is_logged_in}, Disk, Host, Language, MirrorFile, TranslationStore
+    utils::{get_bool_cookie, get_extension_from_filename, get_session, get_theme, is_logged_in}, Config, Disk, Host, Language, MirrorFile, TranslationStore
 };
 
 #[post("/upload", data = "<data>")]
@@ -27,7 +27,8 @@ async fn upload(
     jar: &CookieJar<'_>,
     translations: &rocket::State<TranslationStore>,
     lang: Language,
-    host: Host<'_>
+    host: Host<'_>,
+    config: &State<Config>
 ) -> Result<Template, Status> {
     if is_logged_in(&jar) {
         let (username, perms) = get_session(jar);
@@ -120,6 +121,8 @@ async fn upload(
                     lang,
                     strings,
                     root_domain,
+                    login: config.enable_login,
+                    marmak_link: config.enable_marmak_link,
                     theme: get_theme(jar),
                     is_logged_in: is_logged_in(&jar),
                     hires: get_bool_cookie(jar, "hires"),
@@ -143,7 +146,8 @@ fn sysinfo(
     jar: &CookieJar<'_>,
     translations: &rocket::State<TranslationStore>,
     lang: Language,
-    host: Host<'_>
+    host: Host<'_>,
+    config: &State<Config>
 ) -> Result<Template, Status> {
     if is_logged_in(&jar) {
         let (username, perms) = get_session(jar);
@@ -189,6 +193,8 @@ fn sysinfo(
                 lang,
                 strings,
                 root_domain,
+                login: config.enable_login,
+                marmak_link: config.enable_marmak_link,
                 theme: get_theme(jar),
                 is_logged_in: is_logged_in(&jar),
                 hires: get_bool_cookie(jar, "hires"),
@@ -215,7 +221,8 @@ fn uploader(
     jar: &CookieJar<'_>,
     translations: &rocket::State<TranslationStore>,
     lang: Language,
-    host: Host<'_>
+    host: Host<'_>,
+    config: &State<Config>
 ) -> Result<Template, Status> {
     if is_logged_in(&jar) {
         let (username, perms) = get_session(jar);
@@ -235,6 +242,8 @@ fn uploader(
                 lang,
                 strings,
                 root_domain,
+                login: config.enable_login,
+                marmak_link: config.enable_marmak_link,
                 theme: get_theme(jar),
                 is_logged_in: is_logged_in(&jar),
                 hires: get_bool_cookie(jar, "hires"),
@@ -255,7 +264,8 @@ fn admin(
     jar: &CookieJar<'_>,
     translations: &rocket::State<TranslationStore>,
     lang: Language,
-    host: Host<'_>
+    host: Host<'_>,
+    config: &State<Config>
 ) -> Result<Template, Status> {
     if is_logged_in(&jar) {
         let (username, perms) = get_session(jar);
@@ -275,6 +285,8 @@ fn admin(
                 lang,
                 strings,
                 root_domain,
+                login: config.enable_login,
+                marmak_link: config.enable_marmak_link,
                 theme: get_theme(jar),
                 is_logged_in: is_logged_in(&jar),
                 hires: get_bool_cookie(jar, "hires"),

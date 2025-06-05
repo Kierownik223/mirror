@@ -33,7 +33,8 @@ struct Config {
     extensions: Vec<String>,
     hidden_files: Vec<String>,
     enable_login: bool,
-    enable_api: bool
+    enable_api: bool,
+    enable_marmak_link: bool
 }
 
 impl Config {
@@ -291,6 +292,7 @@ async fn index<'a>(
                         strings,
                         root_domain,
                         login: config.enable_login,
+                        marmak_link: config.enable_marmak_link,
                         path: Path::new("/").join(file.clone()).display().to_string(),
                         theme: theme,
                         is_logged_in: is_logged_in(&jar),
@@ -326,6 +328,7 @@ async fn index<'a>(
                         strings,
                         root_domain,
                         login: config.enable_login,
+                        marmak_link: config.enable_marmak_link,
                         path: Path::new("/").join(file.clone()).display().to_string(),
                         files: file_list,
                         theme: theme,
@@ -382,6 +385,7 @@ async fn index<'a>(
                         strings,
                         root_domain,
                         login: config.enable_login,
+                        marmak_link: config.enable_marmak_link,
                         path: videopath,
                         poster: format!("/images/videoposters{}.jpg", videopath.replace("video/", "")),
                         vidtitle: vidtitle,
@@ -482,6 +486,7 @@ async fn index<'a>(
                         strings,
                         root_domain,
                         login: config.enable_login,
+                        marmak_link: config.enable_marmak_link,
                         path_seg: path_seg,
                         dirs: dir_list,
                         files: file_list,
@@ -500,6 +505,7 @@ async fn index<'a>(
                     strings,
                     root_domain,
                     login: config.enable_login,
+                    marmak_link: config.enable_marmak_link,
                     path_seg: path_seg,
                     dirs: dir_list,
                     files: file_list,
@@ -527,6 +533,7 @@ async fn index<'a>(
                             strings,
                             root_domain,
                             login: config.enable_login,
+                            marmak_link: config.enable_marmak_link,
                             path: Path::new("/").join(file.clone()).display().to_string(),
                             theme: theme,
                             is_logged_in: is_logged_in(&jar),
@@ -632,6 +639,7 @@ fn settings(
             strings,
             root_domain,
             login: config.enable_login,
+            marmak_link: config.enable_marmak_link,
             is_logged_in: is_logged_in(&jar),
             username,
             admin: get_session(jar).1 == 0,
@@ -786,6 +794,8 @@ async fn default(status: Status, req: &Request<'_>) -> Template {
 
     let root_domain = host.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
 
+    let config = Config::load();
+
     Template::render(
         format!("error/{}", status.code),
         context! {
@@ -793,6 +803,8 @@ async fn default(status: Status, req: &Request<'_>) -> Template {
             lang,
             strings,
             root_domain,
+            login: config.enable_login,
+            marmak_link: config.enable_marmak_link,
             theme: get_theme(jar),
             is_logged_in: is_logged_in(&jar),
             admin: get_session(&jar).1 == 0,

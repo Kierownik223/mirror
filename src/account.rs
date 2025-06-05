@@ -6,7 +6,7 @@ use rocket::{
     fairing::AdHoc,
     form::Form,
     http::{Cookie, CookieJar, Status},
-    response::Redirect,
+    response::Redirect, State,
 };
 use rocket_db_pools::Connection;
 use rocket_dyn_templates::{context, Template};
@@ -14,9 +14,7 @@ use serde_json::json;
 use time::{Duration, OffsetDateTime};
 
 use crate::{
-    db::{fetch_user, login_user, Db},
-    utils::{get_bool_cookie, get_session, get_theme, is_logged_in},
-    Host, Language, MarmakUser, TranslationStore, UserToken, XForwardedFor,
+    db::{fetch_user, login_user, Db}, utils::{get_bool_cookie, get_session, get_theme, is_logged_in}, Config, Host, Language, MarmakUser, TranslationStore, UserToken, XForwardedFor
 };
 
 #[get("/login")]
@@ -24,7 +22,8 @@ fn login_page(
     jar: &CookieJar<'_>,
     translations: &rocket::State<TranslationStore>,
     lang: Language,
-    host: Host<'_>
+    host: Host<'_>,
+    config: &State<Config>
 ) -> Result<Template, Redirect> {
     if is_logged_in(&jar) {
         let perms = get_session(jar).1;
@@ -46,6 +45,8 @@ fn login_page(
             lang,
             strings,
             root_domain,
+            login: config.enable_login,
+            marmak_link: config.enable_marmak_link,
             theme: get_theme(jar),
             is_logged_in: is_logged_in(&jar),
             username: "",
@@ -64,9 +65,10 @@ async fn login(
     jar: &CookieJar<'_>,
     ip: XForwardedFor<'_>,
     next: Option<&str>,
-    translations: &rocket::State<TranslationStore>,
+    translations: &State<TranslationStore>,
     lang: Language,
-    host: Host<'_>
+    host: Host<'_>,
+    config: &State<Config>
 ) -> Result<Redirect, Template> {
     if let Some(db_user) = login_user(db, &user.username, &user.password, &ip.0, true).await {
         if !get_bool_cookie(&jar, "nooverride") {
@@ -126,6 +128,8 @@ async fn login(
                 lang,
                 strings,
                 root_domain,
+                login: config.enable_login,
+                marmak_link: config.enable_marmak_link,
                 theme: get_theme(jar),
                 is_logged_in: is_logged_in(&jar),
                 admin: get_session(&jar).1 == 0,
