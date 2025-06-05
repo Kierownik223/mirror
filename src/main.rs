@@ -28,10 +28,11 @@ mod api;
 mod db;
 mod utils;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 struct Config {
     extensions: Vec<String>,
     hidden_files: Vec<String>,
+    enable_login: bool
 }
 
 impl Config {
@@ -288,6 +289,7 @@ async fn index<'a>(
                         lang,
                         strings,
                         root_domain,
+                        login: config.enable_login,
                         path: Path::new("/").join(file.clone()).display().to_string(),
                         theme: theme,
                         is_logged_in: is_logged_in(&jar),
@@ -322,6 +324,7 @@ async fn index<'a>(
                         lang,
                         strings,
                         root_domain,
+                        login: config.enable_login,
                         path: Path::new("/").join(file.clone()).display().to_string(),
                         files: file_list,
                         theme: theme,
@@ -377,6 +380,7 @@ async fn index<'a>(
                         lang,
                         strings,
                         root_domain,
+                        login: config.enable_login,
                         path: videopath,
                         poster: format!("/images/videoposters{}.jpg", videopath.replace("video/", "")),
                         vidtitle: vidtitle,
@@ -476,6 +480,7 @@ async fn index<'a>(
                         lang,
                         strings,
                         root_domain,
+                        login: config.enable_login,
                         path_seg: path_seg,
                         dirs: dir_list,
                         files: file_list,
@@ -493,6 +498,7 @@ async fn index<'a>(
                     lang,
                     strings,
                     root_domain,
+                    login: config.enable_login,
                     path_seg: path_seg,
                     dirs: dir_list,
                     files: file_list,
@@ -519,6 +525,7 @@ async fn index<'a>(
                             lang,
                             strings,
                             root_domain,
+                            login: config.enable_login,
                             path: Path::new("/").join(file.clone()).display().to_string(),
                             theme: theme,
                             is_logged_in: is_logged_in(&jar),
@@ -547,6 +554,7 @@ fn settings(
     lang: Language,
     translations: &State<TranslationStore>,
     host: Host<'_>,
+    config: &State<Config>
 ) -> Result<Template, Redirect> {
     let mut lang = lang.0;
     let mut theme = get_theme(jar);
@@ -622,6 +630,7 @@ fn settings(
             lang,
             strings,
             root_domain,
+            login: config.enable_login,
             is_logged_in: is_logged_in(&jar),
             username,
             admin: get_session(jar).1 == 0,
@@ -801,13 +810,10 @@ fn forbidden(req: &Request) -> Redirect {
 fn rocket() -> _ {
     let config = Config::load();
 
-    let rocket = rocket::build()
-        .manage(config)
+    let mut rocket = rocket::build()
+        .manage(config.clone())
         .attach(Template::fairing())
         .attach(api::build_api())
-        .attach(account::build_account())
-        .attach(admin::build())
-        .attach(Db::init())
         .manage(TranslationStore::new())
         .register("/", catchers![default, unprocessable_entry, forbidden])
         .mount(
@@ -816,11 +822,20 @@ fn rocket() -> _ {
                 settings,
                 download,
                 index,
-                fetch_settings,
-                sync_settings,
                 iframe
             ],
         );
+
+    if config.enable_login {
+        rocket = rocket
+            .attach(account::build_account())
+            .attach(admin::build())
+            .attach(Db::init())
+            .mount("/", routes![
+                fetch_settings,
+                sync_settings,
+            ]);
+    }
 
     rocket
 }
