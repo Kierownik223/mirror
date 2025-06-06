@@ -153,7 +153,7 @@ async fn direct<'a>(
     if let Some(token) = token {
         if is_logged_in(&jar) {
             let perms = get_session(jar).1;
-            return Ok(Redirect::to(if perms == 1 { "/upload" } else { "/" }));
+            return Ok(Redirect::to(if perms == 0 { "/admin" } else { "/" }));
         }
 
         let private_key = fs::read("private.key").map_err(|_| Status::InternalServerError)?;
