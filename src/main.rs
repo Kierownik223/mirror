@@ -411,14 +411,14 @@ async fn index<'a>(
                 let audiopath = Path::new("/").join(file.clone()).display().to_string();
                 let audiopath = audiopath.as_str();
 
-                let tag = Tag::new().read_from_path(path).unwrap();
+                let tag = Tag::new().read_from_path(&path).unwrap();
 
-                let vidtitle = tag.title();
+                let audiotitle = tag.title().unwrap_or(&path.file_name().unwrap().to_str().unwrap());
 
                 let details = strings.get("no_details").unwrap();
 
                 Ok(Ok(Ok(Template::render(
-                    "video",
+                    "audio",
                     context! {
                         title: format!("{} {}", strings.get("watching").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
                         lang,
@@ -427,16 +427,15 @@ async fn index<'a>(
                         login: config.enable_login,
                         marmak_link: config.enable_marmak_link,
                         path: audiopath,
-                        poster: format!("/images/videoposters{}.jpg", audiopath.replace("video/", "")),
-                        vidtitle: vidtitle,
-                        theme: theme,
+                        audiotitle,
+                        theme,
                         is_logged_in: is_logged_in(&jar),
                         username: username,
                         admin: perms == 0,
-                        hires: hires,
-                        smallhead: smallhead,
-                        displaydetails: displaydetails,
-                        details: details
+                        hires,
+                        smallhead,
+                        displaydetails,
+                        details
                     },
                 ))))
             } else {
