@@ -5,6 +5,7 @@ edition = "2021"
 publish = false
 
 [dependencies]
+audiotags = "0.5.0"
 base64 = "0.22.1"
 bcrypt = "0.16.0"
 humansize = "2.1.3"

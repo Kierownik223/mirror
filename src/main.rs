@@ -1,3 +1,4 @@
+use audiotags::Tag;
 use db::{fetch_user, Db};
 use humansize::{format_size, DECIMAL};
 use rocket::http::{Cookie, CookieJar, Status};
@@ -388,6 +389,45 @@ async fn index<'a>(
                         marmak_link: config.enable_marmak_link,
                         path: videopath,
                         poster: format!("/images/videoposters{}.jpg", videopath.replace("video/", "")),
+                        vidtitle: vidtitle,
+                        theme: theme,
+                        is_logged_in: is_logged_in(&jar),
+                        username: username,
+                        admin: perms == 0,
+                        hires: hires,
+                        smallhead: smallhead,
+                        displaydetails: displaydetails,
+                        details: details
+                    },
+                ))))
+            } else {
+                return Err(Status::NotFound);
+            }
+        }        
+        "mp3" => {
+            if path.exists() {
+                let displaydetails = true;
+
+                let audiopath = Path::new("/").join(file.clone()).display().to_string();
+                let audiopath = audiopath.as_str();
+
+                let tag = Tag::new().read_from_path(path).unwrap();
+
+                let vidtitle = tag.title();
+
+                let details = strings.get("no_details").unwrap();
+
+                Ok(Ok(Ok(Template::render(
+                    "video",
+                    context! {
+                        title: format!("{} {}", strings.get("watching").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
+                        lang,
+                        strings,
+                        root_domain,
+                        login: config.enable_login,
+                        marmak_link: config.enable_marmak_link,
+                        path: audiopath,
+                        poster: format!("/images/videoposters{}.jpg", audiopath.replace("video/", "")),
                         vidtitle: vidtitle,
                         theme: theme,
                         is_logged_in: is_logged_in(&jar),
