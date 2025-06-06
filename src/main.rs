@@ -1,4 +1,6 @@
-use audiotags::Tag;
+use audiotags::{MimeType, Tag};
+use base64::engine::general_purpose;
+use base64::Engine;
 use db::{fetch_user, Db};
 use humansize::{format_size, DECIMAL};
 use rocket::http::{Cookie, CookieJar, Status};
@@ -404,18 +406,36 @@ async fn index<'a>(
                 return Err(Status::NotFound);
             }
         }        
-        "mp3" => {
+        "mp3" | "m4a" | "m4b" | "flac" => {
             if path.exists() {
-                let displaydetails = true;
-
                 let audiopath = Path::new("/").join(file.clone()).display().to_string();
                 let audiopath = audiopath.as_str();
 
                 let tag = Tag::new().read_from_path(&path).unwrap();
 
                 let audiotitle = tag.title().unwrap_or(&path.file_name().unwrap().to_str().unwrap());
+                let artist = tag.artist().unwrap_or_default();
+                let year = tag.year().unwrap_or(0);
+                let album = tag.album_title().unwrap_or_default();
+                let genre = tag.genre().unwrap_or_default();
+                let track = tag.track_number().unwrap_or(0);
 
-                let details = strings.get("no_details").unwrap();
+                let mut cover_data = String::new();
+
+                if let Some(picture) = tag.album_cover() {
+                    let base64_string = general_purpose::STANDARD.encode(picture.data);
+                    let mime_type = match picture.mime_type {
+                        MimeType::Png => "image/png",
+                        MimeType::Bmp => "image/bmp",
+                        MimeType::Gif => "image/gif",
+                        MimeType::Jpeg => "image/jpeg",
+                        MimeType::Tiff => "image/tiff"
+                    };
+                    cover_data = format!(
+                        "data:{};base64,{}",
+                        mime_type, base64_string
+                    );
+                }
 
                 Ok(Ok(Ok(Template::render(
                     "audio",
@@ -430,12 +450,16 @@ async fn index<'a>(
                         audiotitle,
                         theme,
                         is_logged_in: is_logged_in(&jar),
-                        username: username,
+                        username,
                         admin: perms == 0,
                         hires,
                         smallhead,
-                        displaydetails,
-                        details
+                        artist,
+                        year,
+                        album,
+                        genre,
+                        track,
+                        cover_data
                     },
                 ))))
             } else {

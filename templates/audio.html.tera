@@ -8,7 +8,7 @@
     <link rel="icon" href="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">
     <meta property="og:title" content="{{ audiotitle }}">
     <meta property="og:url" content="dl.{{ root_domain }}/">
-    <meta property="og:description" content="{{ details }}">
+    <meta property="og:description" content="{{ title }}">
     <meta property="og:type" content=website>
     <meta property="og:image" content="http://dl.{{ root_domain }}{{ path }}?poster">
     <meta property="og:locale" content="{{ lang }}">
@@ -29,10 +29,17 @@
                 <a href="./"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png">./</a>
             </div>
             <audio src="?download" controls style="width: 100%;" poster="http://dl.{{ root_domain }}{{ path }}?poster">{{ strings.no_video }}</audio>
-            {% if displaydetails %}
-            <b style="font-size: 24px;">{{ audiotitle }}</b>
-            {{ details | safe }}
-            {% endif %}
+            {% if artist != "" %}{{ artist }} - {% endif %}<b style="font-size: 24px;">{% if track != 0 %}{{ track }}. {% endif %}{{ audiotitle }}</b>
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="flex: 1;">
+                    {% if album != "" %}Album: <b>{{ album }}</b><br>{% endif %}
+                    {% if year != 0 %}Year: <b>{{ year }}</b><br>{% endif %}
+                    {% if genre != "" %}Genre: <b>{{ genre }}</b><br>{% endif %}
+                </div>
+                {% if cover_data != "" %}
+                <img src="{{ cover_data }}" alt="Album cover" style="width: 30%; max-height: 100%;">
+                {% endif %}
+            </div>
         </div>
         {% include "footer" %}
     </div>
