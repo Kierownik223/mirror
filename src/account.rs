@@ -210,7 +210,7 @@ async fn direct<'a>(
         return Ok(Redirect::to("/account/login"));
     }
 
-    if let Some(_to) = to {
+    if let Some(to) = to {
         if is_logged_in(&jar) {
             if let Some(db_user) = fetch_user(db, get_session(jar).0.as_str()).await {
                 let user_data =
@@ -232,8 +232,14 @@ async fn direct<'a>(
                 let root_domain = host.0.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
 
                 let redirect_url = format!(
-                    "http://account.{}/direct?token={}",
-                    root_domain, encrypted_b64
+                    "http://{}/direct?token={}",
+                    match to.as_str() {
+                        "account" => format!("account.{}", root_domain),
+                        "marmak" => root_domain.to_string(),
+                        "karol" => format!("karol.{}", root_domain),
+                        _ => format!("dl.{}", root_domain),
+                    },
+                    encrypted_b64
                 );
 
                 return Ok(Redirect::to(redirect_url));
