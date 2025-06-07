@@ -45,6 +45,7 @@ fn login_page(
             lang,
             strings,
             root_domain,
+            host: host.0,
             config: config.inner(),
             theme: get_theme(jar),
             is_logged_in: is_logged_in(&jar),
@@ -127,6 +128,7 @@ async fn login(
                 lang,
                 strings,
                 root_domain,
+                host: host.0,
                 config: config.inner(),
                 theme: get_theme(jar),
                 is_logged_in: is_logged_in(&jar),
@@ -235,7 +237,7 @@ async fn direct<'a>(
                         "account" => format!("account.{}", root_domain),
                         "marmak" => root_domain.to_string(),
                         "karol" => format!("karol.{}", root_domain),
-                        _ => format!("dl.{}", root_domain),
+                        _ => host.0.to_string()
                     },
                     encrypted_b64
                 );
