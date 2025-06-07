@@ -8,3 +8,5 @@ enable_login = true
 enable_api = true
 # Enable MARMAK link in the header
 enable_marmak_link = true
+# Enable /direct (requires public/private.key)
+enable_direct = false
