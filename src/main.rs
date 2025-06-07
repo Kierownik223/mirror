@@ -297,12 +297,12 @@ async fn index<'a>(
                         login: config.enable_login,
                         marmak_link: config.enable_marmak_link,
                         path: Path::new("/").join(file.clone()).display().to_string(),
-                        theme: theme,
+                        theme,
                         is_logged_in: is_logged_in(&jar),
-                        hires: hires,
+                        hires,
                         admin: perms == 0,
-                        smallhead: smallhead,
-                        markdown: markdown
+                        smallhead,
+                        markdown
                     },
                 ))));
             } else {
@@ -317,9 +317,9 @@ async fn index<'a>(
 
                 let file_names: Vec<&str> = archive.file_names().collect();
 
-                let file_list = list_to_files(file_names).unwrap_or_default();
+                let files = list_to_files(file_names).unwrap_or_default();
 
-                if file_list.is_empty() {
+                if files.is_empty() {
                     return Err(Status::NotFound);
                 }
 
@@ -333,13 +333,13 @@ async fn index<'a>(
                         login: config.enable_login,
                         marmak_link: config.enable_marmak_link,
                         path: Path::new("/").join(file.clone()).display().to_string(),
-                        files: file_list,
-                        theme: theme,
+                        files,
+                        theme,
                         is_logged_in: is_logged_in(&jar),
-                        username: username,
+                        username,
                         admin: perms == 0,
-                        hires: hires,
-                        smallhead: smallhead
+                        hires,
+                        smallhead
                     },
                 ))))
             } else {
@@ -391,15 +391,15 @@ async fn index<'a>(
                         marmak_link: config.enable_marmak_link,
                         path: videopath,
                         poster: format!("/images/videoposters{}.jpg", videopath.replace("video/", "")),
-                        vidtitle: vidtitle,
-                        theme: theme,
+                        vidtitle,
+                        theme,
                         is_logged_in: is_logged_in(&jar),
-                        username: username,
+                        username,
                         admin: perms == 0,
-                        hires: hires,
-                        smallhead: smallhead,
-                        displaydetails: displaydetails,
-                        details: details
+                        hires,
+                        smallhead,
+                        displaydetails,
+                        details
                     },
                 ))))
             } else {
@@ -477,14 +477,14 @@ async fn index<'a>(
                 notroot = false;
             }
 
-            let mut file_list = read_files(&path).unwrap_or_default();
-            let mut dir_list = read_dirs(&path).unwrap_or_default();
+            let mut files = read_files(&path).unwrap_or_default();
+            let mut dirs = read_dirs(&path).unwrap_or_default();
 
-            if dir_list.is_empty() && file_list.is_empty() {
+            if dirs.is_empty() && files.is_empty() {
                 return Err(Status::NotFound);
             }
 
-            if file_list.contains(&MirrorFile {
+            if files.contains(&MirrorFile {
                 name: "top".to_owned(),
                 ext: String::new(),
                 icon: "default".to_string(),
@@ -493,24 +493,24 @@ async fn index<'a>(
                 topmarkdown = true;
             }
 
-            if file_list.contains(&MirrorFile {
+            if files.contains(&MirrorFile {
                 name: "RESTRICTED".to_owned(),
                 ext: String::new(),
                 icon: "default".to_string(),
                 size: String::new(),
             }) {
-                for dir in dir_list.iter_mut() {
+                for dir in dirs.iter_mut() {
                     dir.icon = "lockedfolder".to_string();
                 }
             }
 
-            dir_list.retain(|x| !config.hidden_files.contains(&x.name));
-            file_list.retain(|x| !config.hidden_files.contains(&x.name));
+            dirs.retain(|x| !config.hidden_files.contains(&x.name));
+            files.retain(|x| !config.hidden_files.contains(&x.name));
 
-            dir_list.sort();
-            file_list.sort();
+            dirs.sort();
+            files.sort();
 
-            if file_list.contains(&MirrorFile {
+            if files.contains(&MirrorFile {
                 name: format!("README.{}.md", lang.0),
                 ext: "md".to_string(),
                 icon: "default".to_string(),
@@ -524,7 +524,7 @@ async fn index<'a>(
                 )
                 .unwrap_or_else(|err| err.to_string());
                 markdown = markdown::to_html(&markdown_text);
-            } else if file_list.contains(&MirrorFile {
+            } else if files.contains(&MirrorFile {
                 name: "README.md".to_owned(),
                 ext: "md".to_string(),
                 icon: "default".to_string(),
@@ -550,12 +550,12 @@ async fn index<'a>(
                         root_domain,
                         login: config.enable_login,
                         marmak_link: config.enable_marmak_link,
-                        path_seg: path_seg,
-                        dirs: dir_list,
-                        files: file_list,
-                        notroot: notroot,
-                        markdown: markdown,
-                        topmarkdown: topmarkdown
+                        path_seg,
+                        dirs,
+                        files,
+                        notroot,
+                        markdown,
+                        topmarkdown
                     },
                 ))));
             }
@@ -569,18 +569,18 @@ async fn index<'a>(
                     root_domain,
                     login: config.enable_login,
                     marmak_link: config.enable_marmak_link,
-                    path_seg: path_seg,
-                    dirs: dir_list,
-                    files: file_list,
-                    theme: theme,
+                    path_seg,
+                    dirs,
+                    files,
+                    theme,
                     is_logged_in: is_logged_in(&jar),
-                    username: username,
+                    username,
                     admin: perms == 0,
-                    hires: hires,
-                    notroot: notroot,
-                    smallhead: smallhead,
-                    markdown: markdown,
-                    topmarkdown: topmarkdown,
+                    hires,
+                    notroot,
+                    smallhead,
+                    markdown,
+                    topmarkdown,
                     filebrowser: !get_bool_cookie(jar, "filebrowser"),
                 },
             ))))
@@ -598,12 +598,12 @@ async fn index<'a>(
                             login: config.enable_login,
                             marmak_link: config.enable_marmak_link,
                             path: Path::new("/").join(file.clone()).display().to_string(),
-                            theme: theme,
+                            theme,
                             is_logged_in: is_logged_in(&jar),
-                            username: username,
+                            username,
                             admin: perms == 0,
-                            hires: hires,
-                            smallhead: smallhead,
+                            hires,
+                            smallhead,
                             filename: path.file_name().unwrap().to_str(),
                             filesize: format_size(fs::metadata(path.clone()).unwrap().len(), DECIMAL)
                         },
@@ -807,25 +807,25 @@ async fn iframe(
         notroot = false;
     }
 
-    let mut dir_list = read_dirs(&path).unwrap_or_default();
+    let mut dirs = read_dirs(&path).unwrap_or_default();
     let file_list = read_files(&path).unwrap_or_default();
 
-    if dir_list.is_empty() && file_list.is_empty() {
+    if dirs.is_empty() && file_list.is_empty() {
         return Err(Status::NotFound);
     }
 
-    dir_list.retain(|x| !config.hidden_files.contains(&x.name));
+    dirs.retain(|x| !config.hidden_files.contains(&x.name));
 
-    dir_list.sort();
+    dirs.sort();
 
     Ok(Template::render(
         "iframe",
         context! {
-            path: path,
-            dirs: dir_list,
+            path,
+            dirs,
             theme: get_theme(jar),
             hires: get_bool_cookie(jar, "hires"),
-            notroot: notroot
+            notroot
         },
     ))
 }
