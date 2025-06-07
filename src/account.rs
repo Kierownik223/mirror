@@ -262,6 +262,15 @@ fn logout(jar: &CookieJar<'_>) -> Redirect {
 
 pub fn build_account() -> AdHoc {
     AdHoc::on_ignite("Account", |rocket| async {
-        rocket.mount("/account", routes![login_page, login, direct, logout])
+        let config = Config::load();
+
+        let mut rocket = rocket.mount("/account", routes![login_page, login, logout]);
+
+        if config.enable_direct {
+            rocket = rocket
+                .mount("/account", routes![direct]);
+        }
+
+        rocket
     })
 }

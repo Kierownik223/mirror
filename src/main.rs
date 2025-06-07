@@ -37,7 +37,8 @@ struct Config {
     hidden_files: Vec<String>,
     enable_login: bool,
     enable_api: bool,
-    enable_marmak_link: bool
+    enable_marmak_link: bool,
+    enable_direct: bool
 }
 
 impl Config {
