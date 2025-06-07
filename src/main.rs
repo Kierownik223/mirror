@@ -10,7 +10,7 @@ use rocket::response::{Redirect, Responder};
 use rocket::{response, State};
 use rocket::{Request, Response};
 use rocket_db_pools::{Connection, Database};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::ffi::OsStr;
@@ -31,7 +31,7 @@ mod api;
 mod db;
 mod utils;
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone, Serialize)]
 struct Config {
     extensions: Vec<String>,
     hidden_files: Vec<String>,
