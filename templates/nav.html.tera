@@ -2,8 +2,8 @@
     <a href="/">{% if not smallhead %}<h1>{% endif %}<img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">MARMAK Mirror{% if not smallhead %}</h1>{% endif %}</a>
     {% if not smallhead %}<a href="/"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}home.png">{{ strings.home }}</a>{% endif %}
     <a href="/settings"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png">{{ strings.settings }}</a>
-    <a href="http://{{ root_domain }}"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}marmak.png">MARMAK</a>
-    {% if login %}
+    {% if config.enable_marmak_link %}<a href="http://{{ root_domain }}"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}marmak.png">MARMAK</a>{% endif %}
+    {% if config.enable_login %}
     {% if not is_logged_in %}
     <a href="/account/login"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}login.png">{{ strings.log_in }}</a>
     {% else %}
