@@ -38,7 +38,8 @@ struct Config {
     enable_login: bool,
     enable_api: bool,
     enable_marmak_link: bool,
-    enable_direct: bool
+    enable_direct: bool,
+    instance_info: String
 }
 
 impl Config {

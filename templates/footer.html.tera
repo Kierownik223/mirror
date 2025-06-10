@@ -1,6 +1,7 @@
 <div class="footer">
     <center>
         {{ strings.author }} &amp; <a href="/credits.md">{{ strings.others }}</a><br>
-        <small>{{ strings.translated_by }}</i>
+        <small>{{ strings.translated_by }}</small>
+        {% if config.instance_info != "" %}<small>{{ config.instance_info }}</small>{% endif %}
     </center>
 </div>

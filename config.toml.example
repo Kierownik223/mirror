@@ -10,3 +10,5 @@ enable_api = true
 enable_marmak_link = true
 # Enable /direct (requires public/private.key)
 enable_direct = false
+# Instance info to show in footer, leave empty to hide
+instance_info = "My Mirror instance!"
