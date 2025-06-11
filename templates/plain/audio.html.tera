@@ -10,7 +10,4 @@
 {% if album != "" %}{{ strings.album }}: <b>{{ album }}</b><br>{% endif %}
 {% if year != 0 %}{{ strings.year }}: <b>{{ year }}</b><br>{% endif %}
 {% if genre != "" %}{{ strings.genre }}: <b>{{ genre }}</b><br>{% endif %}
-{% if cover_data != "" %}
-<img src="{{ cover_data }}" alt="{{ strings.album_cover }}" style="width: 30%; max-height: 100%;">
-{% endif %}
 {% endblock content %}
