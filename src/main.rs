@@ -265,7 +265,6 @@ async fn index<'a>(
 
     let hires = get_bool_cookie(jar, "hires");
     let smallhead = get_bool_cookie(jar, "smallhead");
-    let plain = get_bool_cookie(jar, "plain");
 
     if !Path::new(&("files/static/styles/".to_owned() + &theme + ".css").to_string()).exists() {
         theme = "standard".to_string();
@@ -290,7 +289,7 @@ async fn index<'a>(
                     .unwrap_or_else(|err| err.to_string());
                 let markdown = markdown::to_html(&markdown_text);
                 return Ok(Ok(Ok(Template::render(
-                    "md",
+                    if get_bool_cookie(jar, "plain") { "plain/md" } else { "md" },
                     context! {
                         title: format!("{} {}", strings.get("reading_markdown").unwrap(), Path::new("/").join(file.clone()).display()),
                         lang,
@@ -326,7 +325,7 @@ async fn index<'a>(
                 }
 
                 Ok(Ok(Ok(Template::render(
-                    "zip",
+                    if get_bool_cookie(jar, "plain") { "plain/zip" } else { "zip" },
                     context! {
                         title: format!("{} {}", strings.get("viewing_zip").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
                         lang,
@@ -383,7 +382,7 @@ async fn index<'a>(
                 }
 
                 Ok(Ok(Ok(Template::render(
-                    "video",
+                    if get_bool_cookie(jar, "plain") { "plain/video" } else { "video" },
                     context! {
                         title: format!("{} {}", strings.get("watching").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
                         lang,
@@ -440,7 +439,7 @@ async fn index<'a>(
                 }
 
                 Ok(Ok(Ok(Template::render(
-                    "audio",
+                    if get_bool_cookie(jar, "plain") { "plain/audio" } else { "audio" },
                     context! {
                         title: format!("{} {}", strings.get("watching").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
                         lang,
@@ -542,28 +541,8 @@ async fn index<'a>(
                 markdown = markdown::to_html(&markdown_text);
             }
 
-            if plain {
-                return Ok(Ok(Ok(Template::render(
-                    "plain",
-                    context! {
-                        title: path.to_string(),
-                        lang,
-                        strings,
-                        root_domain,
-                        host: host.0,
-                        config: config.inner(),
-                        path_seg,
-                        dirs,
-                        files,
-                        notroot,
-                        markdown,
-                        topmarkdown
-                    },
-                ))));
-            }
-
             Ok(Ok(Ok(Template::render(
-                "index",
+                if get_bool_cookie(jar, "plain") { "plain/index" } else { "index" },
                 context! {
                     title: path.to_string(),
                     lang,
@@ -591,7 +570,7 @@ async fn index<'a>(
             if config.extensions.contains(&ext) {
                 if path.exists() {
                     return Ok(Ok(Ok(Template::render(
-                        "details",
+                        if get_bool_cookie(jar, "plain") { "plain/details" } else { "details" },
                         context! {
                             title: format!("{} {}", strings.get("file_details").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
                             lang,
@@ -695,8 +674,8 @@ fn settings(
         String::new()
     };
 
-    Ok(Template::render(
-        "settings",
+    return Ok(Template::render(
+        if get_bool_cookie(jar, "plain") { "plain/settings" } else { "settings" },
         context! {
             title: strings.get("settings").unwrap(),
             theme,
@@ -714,7 +693,7 @@ fn settings(
             nooverride: get_bool_cookie(jar, "nooverride"),
             filebrowser: get_bool_cookie(jar, "filebrowser")
         },
-    ))
+    ));
 }
 
 #[get("/settings/fetch")]
@@ -862,7 +841,7 @@ async fn default(status: Status, req: &Request<'_>) -> Template {
     let config = Config::load();
 
     Template::render(
-        format!("error/{}", status.code),
+        if get_bool_cookie(jar, "plain") { format!("plain/error/{}", status.code) } else { format!("error/{}", status.code) } ,
         context! {
             title: format!("HTTP {}", status.code),
             lang,

@@ -39,7 +39,7 @@ fn login_page(
     let root_domain = host.0.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
 
     Ok(Template::render(
-        "login",
+        if get_bool_cookie(jar, "plain") { "plain/login" } else { "login" },
         context! {
             title: "Login",
             lang,
@@ -122,7 +122,7 @@ async fn login(
         );
 
         return Err(Template::render(
-            "login",
+            if get_bool_cookie(jar, "plain") { "plain/login" } else { "login" },
             context! {
                 title: "Login",
                 lang,

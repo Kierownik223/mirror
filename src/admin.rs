@@ -115,7 +115,7 @@ async fn upload(
             let root_domain = host.0.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
 
             return Ok(Template::render(
-                "upload",
+                if get_bool_cookie(jar, "plain") { "plain/upload" } else { "upload" },
                 context! {
                     title: strings.get("uploader").unwrap(),
                     lang,
@@ -187,7 +187,7 @@ fn sysinfo(
             .collect();
 
         return Ok(Template::render(
-            "sysinfo",
+            if get_bool_cookie(jar, "plain") { "plain/sysinfo" } else { "sysinfo" },
             context! {
                 title: strings.get("sysinfo").unwrap(),
                 lang,
@@ -236,7 +236,7 @@ fn uploader(
         let root_domain = host.0.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
 
         return Ok(Template::render(
-            "upload",
+            if get_bool_cookie(jar, "plain") { "plain/upload" } else { "upload" },
             context! {
                 title: strings.get("uploader").unwrap(),
                 lang,
@@ -279,7 +279,7 @@ fn admin(
         let root_domain = host.0.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
 
         return Ok(Template::render(
-            "admin",
+            if get_bool_cookie(jar, "plain") { "plain/admin" } else { "admin" },
             context! {
                 title: strings.get("admin").unwrap(),
                 lang,
