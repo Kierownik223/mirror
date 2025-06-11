@@ -1,0 +1,16 @@
+{% extends "plain/base" %}
+
+{% block content %}
+{{ strings.listening }} {{ path }}
+<a href="?download" download>{{ strings.download }}</a><br>
+<hr>
+<a href="./">./</a>
+<audio src="?download" controls style="width: 100%;" poster="http://{{ host }}{{ path }}?poster">{{ strings.no_audio }}</audio>
+{% if artist != "" %}{{ artist }} - {% endif %}<b style="font-size: 24px;">{% if track != 0 %}{{ track }}. {% endif %}{{ audiotitle }}</b><br>
+{% if album != "" %}{{ strings.album }}: <b>{{ album }}</b><br>{% endif %}
+{% if year != 0 %}{{ strings.year }}: <b>{{ year }}</b><br>{% endif %}
+{% if genre != "" %}{{ strings.genre }}: <b>{{ genre }}</b><br>{% endif %}
+{% if cover_data != "" %}
+<img src="{{ cover_data }}" alt="{{ strings.album_cover }}" style="width: 30%; max-height: 100%;">
+{% endif %}
+{% endblock content %}

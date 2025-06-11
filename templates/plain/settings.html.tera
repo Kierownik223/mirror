@@ -1,0 +1,42 @@
+{% extends "plain/base" %}
+
+{% block content %}
+<a href="/">MARMAK Mirror</a>/<a href="/settings">{{ strings.settings }}</a>/<br>
+{% if is_logged_in %}
+{{ strings.welcome }}, {{ username }}!
+<br>
+{% if config.enable_login %}
+<a href="/settings/sync"><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.sync_settings }}</a>
+<a href="/settings/fetch"><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.fetch_settings }}</a>
+{% endif %}
+
+{% endif %}
+<form method="get">
+    {{ strings.change_lang }}<br>
+    <select name="lang">
+        <option value="de" {% if lang=="de" %}selected{% endif %}>Deutsch</option>
+        <option value="en" {% if lang=="en" %}selected{% endif %}>English</option>
+        <option value="ja" {% if lang=="ja" %}selected{% endif %}>日本語</option>
+        <option value="csb" {% if lang=="csb" %}selected{% endif %}>Kaszëbsczi</option>
+        <option value="pl" {% if lang=="pl" %}selected{% endif %}>Polski</option>
+        <option value="pt" {% if lang=="pt" %}selected{% endif %}>Português</option>
+        <option value="ru" {% if lang=="ru" %}selected{% endif %}>Русский</option>
+        <option value="szl" {% if lang=="szl" %}selected{% endif %}>Ślōnskŏ</option>
+        <option value="uk" {% if lang=="uk" %}selected{% endif %}>Українська</option>
+    </select>
+    <br>
+    <label for="smallhead">{{ strings.smallhead }}</label>
+    <br>
+    <label><input type="radio" name="smallhead" value="true" {% if smallhead %}checked {% endif %}>{{ strings.enable }}</label>
+    <label><input type="radio" name="smallhead" value="false" {% if not smallhead %}checked {% endif %}>{{ strings.disable }}</label>
+    <br>
+    <label for="plain">{{ strings.plain }}</label>
+    <br>
+    <label><input type="radio" name="plain" value="true" {% if plain %}checked {% endif %}>{{ strings.enable }}</label>
+    <label><input type="radio" name="plain" value="false" {% if not plain %}checked {% endif %}>{{ strings.disable }}</label>
+    <br>
+    <center>
+        <button type="submit">{{ strings.save_settings }}</button>
+    </center>
+</form>
+{% endblock content %}

@@ -1,0 +1,13 @@
+{% extends "plain/base" %}
+
+{% block content %}
+<div class="controls">
+    {{ strings.file_details }} {{ path }}
+    <a href="?download">{{ strings.download }}</a>
+</div>
+<hr>
+<a href="./">./</a>
+<p><strong>{{ strings.file_name }}:</strong> {{ filename }}</p>
+<p><strong>{{ strings.file_size }}:</strong> {{ filesize }}</p>
+<a href="?download">{{ strings.download }}</a>
+{% endblock content %}

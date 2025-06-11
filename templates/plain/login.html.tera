@@ -1,0 +1,20 @@
+{% extends "plain/base" %}
+
+{% block content %}
+<a href="/">MARMAK Mirror</a>/<a href="/account/login">{{ strings.log_in }}</a><br>
+{{ strings.log_in_with_marmak | safe }}
+<form method="post">
+    {% if message != "" %}
+    <p class="message">{{ message }}</p>
+    {% endif %}
+    <label for="username">{{ strings.username }}:</label><br>
+    <center><input type="text" name="username" id="username" required></center><br>
+    <label for="password">{{ strings.password }}:</label><br>
+    <center><input type="password" name="password" id="password" required></center><br>
+    <center>
+        <button type="submit"><span>{{ strings.log_in }}</span></button>
+    </center>
+    <p>{{ strings.tip }}</p>
+    {{ strings.settings_tip1 }} <a href="/settings">{{ strings.settings }}</a> {{ strings.settings_tip2 }}
+</form>
+{% endblock content %}

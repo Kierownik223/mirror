@@ -1,0 +1,39 @@
+{% extends "plain/base" %}
+
+{% block content %}
+<a href="/">MARMAK Mirror</a>/<a href="/admin/">{{ strings.admin }}</a>/<a href="/admin/upload">{{ strings.uploader }}</a><br>
+{{ strings.welcome }}, {{ username }}!
+<br>
+<a href="/admin/">{{ strings.admin }}</a>
+<a href="/uploads/">Uploads</a>
+<br>
+{% for s in uploadedfiles %}
+{% if s.name != "" %}
+<a href="{{ s.ext }}">{{ s.name }}</a> {{ strings.upload_success }}<br>
+{% endif %}
+{% endfor %}
+
+<form method="post" enctype="multipart/form-data">
+    <label for="file">
+        {{ strings.select_file }}:
+    </label>
+    <center>
+        <input type="file" name="files" id="file" multiple required>
+    </center>
+
+    <label for="path">
+        {{ strings.target_dir }}:
+    </label>
+    <center>
+        <input type="text" id="path" name="path" placeholder="{{ strings.target_placeholder }}">
+    </center>
+    <br>
+
+    {{ strings.max_size }}<br><br>
+
+    <center>
+        <button type="submit">{{ strings.upload }}</button>
+    </center>
+</form>
+
+{% endblock content %}

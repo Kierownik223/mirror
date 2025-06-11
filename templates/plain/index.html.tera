@@ -1,0 +1,30 @@
+{% extends "plain/base" %}
+
+{% block content %}
+<a href="/">MARMAK Mirror</a>/
+{% for s in path_seg %}
+{% if s != "" %}
+{{s}}/
+{% endif %}
+{% endfor %}
+{% if markdown != "" and topmarkdown %}
+<a href="../">../</a><br>
+<p>{{ strings.readme }}</p>
+{{ markdown | safe}}
+{% endif %}
+<hr>
+{% if notroot and not topmarkdown %}
+<a href="../">../</a><br>
+{% endif %}
+{% for s in dirs %}
+<a href="{{ s.name }}/">{{ s.name }}/</a><br>
+{% endfor %}
+{% for s in files %}
+<a href="{{ s.name }}">{{ s.name }}</a><br>
+{% endfor %}
+{% if markdown != "" and not topmarkdown %}
+<hr>
+README.md<br>
+{{ markdown | safe}}
+{% endif %}
+{% endblock content %}

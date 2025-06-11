@@ -1,0 +1,11 @@
+{% extends "plain/base" %}
+
+{% block content %}
+<div>
+    {{ strings.reading_markdown }} {{ path }}
+    <a href="?download" download>{{ strings.download }}</a><br>
+</div>
+<hr>
+<a href="./">./</a>
+{{ markdown | safe}}
+{% endblock content %}

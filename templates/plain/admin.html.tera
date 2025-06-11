@@ -1,0 +1,13 @@
+{% extends "plain/base" %}
+
+{% block content %}
+<a href="/">MARMAK Mirror</a>/<a href="/admin/">{{ strings.admin }}</a><br>
+{{ strings.welcome }}, {{ username }}!
+<br>
+<a href="/admin/upload">{{ strings.uploader }}</a>
+<a href="/admin/sysinfo">{{ strings.sysinfo }}</a>
+{% if config.enable_direct %}
+<a href="/account/direct?to=account">{{ strings.manage_account }}</a>
+{% endif %}
+
+{% endblock content %}

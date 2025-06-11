@@ -1,0 +1,13 @@
+{% extends "plain/base" %}
+
+{% block content %}
+<div>
+    {{ strings.viewing_zip }} {{ path }}
+    <a href="?download" download>{{ strings.download }}</a><br>
+</div>
+<hr>
+<a href="./">./</a><br>
+{% for s in files %}
+{{ s.name }}<br>
+{% endfor %}
+{% endblock content %}

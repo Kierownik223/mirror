@@ -1,0 +1,20 @@
+<div>
+    <a href="/">{% if not smallhead %}<h1>{% endif %}MARMAK Mirror{% if not smallhead %}</h1>{% endif %}</a>
+    {% if not smallhead %}<a href="/">{{ strings.home }}</a>{% endif %}
+    <a href="/settings">{{ strings.settings }}</a>
+    {% if config.enable_marmak_link %}<a href="http://{{ root_domain }}">MARMAK</a>{% endif %}
+    {% if config.enable_login %}
+    {% if not is_logged_in %}
+    <a href="/account/login">{{ strings.log_in }}</a>
+    {% else %}
+    {% if admin %}
+    <a href="/admin/">{{ strings.admin }}</a>
+    {% else %}
+    {% if config.enable_direct %}
+    <a href="/account/direct?to=account">{{ strings.manage_account }}</a>
+    {% endif %}
+    {% endif %}
+    <a href="/account/logout">{{ strings.log_out }}</a>
+    {% endif %}
+    {% endif %}
+</div>
