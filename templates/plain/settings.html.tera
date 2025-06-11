@@ -6,8 +6,8 @@
 {{ strings.welcome }}, {{ username }}!
 <br>
 {% if config.enable_login %}
-<a href="/settings/sync"><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.sync_settings }}</a>
-<a href="/settings/fetch"><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.fetch_settings }}</a>
+<a href="/settings/sync">{{ strings.sync_settings }}</a>
+<a href="/settings/fetch">{{ strings.fetch_settings }}</a>
 {% endif %}
 
 {% endif %}
