@@ -17,7 +17,7 @@
     <meta property="og:video:secure_url" content="http://{{ host }}{{ path }}?download"/>
     <meta name="description" content="{{ title }}">
     <link rel="stylesheet" href="/static/styles/{{ theme }}.css">
-    <title>{{ vidtitle }} - MARMAK Mirror</title>
+    <title>{{ vidtitle | safe }} - MARMAK Mirror</title>
 </head>
 <body>
     <div class="container">

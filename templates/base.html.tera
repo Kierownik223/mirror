@@ -15,7 +15,7 @@
     <meta property="og:site_name" content="MARMAK Mirror">
     <meta name="description" content="{{ title }}">
     <link rel="stylesheet" href="/static/styles/{{ theme }}.css">
-    <title>{{ title }} - MARMAK Mirror</title>
+    <title>{{ title | safe }} - MARMAK Mirror</title>
 </head>
 <body>
     <div class="container">
