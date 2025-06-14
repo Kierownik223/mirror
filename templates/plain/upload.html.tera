@@ -32,7 +32,7 @@
     {{ strings.max_size }}<br><br>
 
     <center>
-        <button type="submit">{{ strings.upload }}</button>
+        <input type="submit" value="{{ strings.upload }}">
     </center>
 </form>
 

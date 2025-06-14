@@ -36,7 +36,7 @@
     <label><input type="radio" name="plain" value="false" {% if not plain %}checked {% endif %}>{{ strings.disable }}</label>
     <br>
     <center>
-        <button type="submit">{{ strings.save_settings }}</button>
+        <input type="submit" value="{{ strings.save_settings }}">
     </center>
 </form>
 {% endblock content %}

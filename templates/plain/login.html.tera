@@ -12,7 +12,7 @@
     <label for="password">{{ strings.password }}:</label><br>
     <center><input type="password" name="password" id="password" required></center><br>
     <center>
-        <button type="submit"><span>{{ strings.log_in }}</span></button>
+        <input type="submit" value="{{ strings.log_in }}">
     </center>
     <p>{{ strings.tip }}</p>
     {{ strings.settings_tip1 }} <a href="/settings">{{ strings.settings }}</a> {{ strings.settings_tip2 }}
