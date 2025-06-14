@@ -8,6 +8,7 @@
 {% endif %}
 {% endfor %}
 {% if markdown != "" and topmarkdown %}
+<hr>
 <a href="../">../</a><br>
 <p>{{ strings.readme }}</p>
 {{ markdown | safe}}
