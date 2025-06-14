@@ -14,7 +14,7 @@ use serde_json::json;
 use time::{Duration, OffsetDateTime};
 
 use crate::{
-    db::{fetch_user, login_user, Db}, utils::{get_bool_cookie, get_session, get_theme, is_logged_in}, Config, Host, Language, MarmakUser, TranslationStore, UserToken, XForwardedFor
+    db::{fetch_user, login_user, Db}, utils::{get_bool_cookie, get_session, get_theme, is_logged_in}, Config, Host, Language, MarmakUser, TranslationStore, UsePlain, UserToken, XForwardedFor
 };
 
 #[get("/login")]
@@ -23,7 +23,8 @@ fn login_page(
     translations: &rocket::State<TranslationStore>,
     lang: Language,
     host: Host<'_>,
-    config: &State<Config>
+    config: &State<Config>,
+    useplain: UsePlain<'_>
 ) -> Result<Template, Redirect> {
     if is_logged_in(&jar) {
         let perms = get_session(jar).1;
@@ -39,7 +40,7 @@ fn login_page(
     let root_domain = host.0.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
 
     Ok(Template::render(
-        if get_bool_cookie(jar, "plain") { "plain/login" } else { "login" },
+        if *useplain.0 { "plain/login" } else { "login" },
         context! {
             title: "Login",
             lang,
@@ -68,7 +69,8 @@ async fn login(
     translations: &State<TranslationStore>,
     lang: Language,
     host: Host<'_>,
-    config: &State<Config>
+    config: &State<Config>,
+    useplain: UsePlain<'_>
 ) -> Result<Redirect, Template> {
     if let Some(db_user) = login_user(db, &user.username, &user.password, &ip.0, true).await {
         if !get_bool_cookie(&jar, "nooverride") {
@@ -122,7 +124,7 @@ async fn login(
         );
 
         return Err(Template::render(
-            if get_bool_cookie(jar, "plain") { "plain/login" } else { "login" },
+            if *useplain.0 { "plain/login" } else { "login" },
             context! {
                 title: "Login",
                 lang,
@@ -148,7 +150,7 @@ async fn direct<'a>(
     token: Option<String>,
     to: Option<String>,
     ip: XForwardedFor<'_>,
-    host: Host<'_>,
+    host: Host<'_>
 ) -> Result<Redirect, Status> {
     if let Some(token) = token {
         if is_logged_in(&jar) {

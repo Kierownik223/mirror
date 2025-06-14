@@ -17,7 +17,7 @@ use rocket_multipart_form_data::{
 };
 
 use crate::{
-    utils::{get_bool_cookie, get_extension_from_filename, get_session, get_theme, is_logged_in}, Config, Disk, Host, Language, MirrorFile, TranslationStore
+    utils::{get_bool_cookie, get_extension_from_filename, get_session, get_theme, is_logged_in}, Config, Disk, Host, Language, MirrorFile, TranslationStore, UsePlain
 };
 
 #[post("/upload", data = "<data>")]
@@ -28,7 +28,8 @@ async fn upload(
     translations: &rocket::State<TranslationStore>,
     lang: Language,
     host: Host<'_>,
-    config: &State<Config>
+    config: &State<Config>,
+    useplain: UsePlain<'_>
 ) -> Result<Template, Status> {
     if is_logged_in(&jar) {
         let (username, perms) = get_session(jar);
@@ -115,7 +116,7 @@ async fn upload(
             let root_domain = host.0.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
 
             return Ok(Template::render(
-                if get_bool_cookie(jar, "plain") { "plain/upload" } else { "upload" },
+                if *useplain.0 { "plain/upload" } else { "upload" },
                 context! {
                     title: strings.get("uploader").unwrap(),
                     lang,
@@ -147,7 +148,8 @@ fn sysinfo(
     translations: &rocket::State<TranslationStore>,
     lang: Language,
     host: Host<'_>,
-    config: &State<Config>
+    config: &State<Config>,
+    useplain: UsePlain<'_>
 ) -> Result<Template, Status> {
     if is_logged_in(&jar) {
         let (username, perms) = get_session(jar);
@@ -187,7 +189,7 @@ fn sysinfo(
             .collect();
 
         return Ok(Template::render(
-            if get_bool_cookie(jar, "plain") { "plain/sysinfo" } else { "sysinfo" },
+            if *useplain.0 { "plain/sysinfo" } else { "sysinfo" },
             context! {
                 title: strings.get("sysinfo").unwrap(),
                 lang,
@@ -222,7 +224,8 @@ fn uploader(
     translations: &rocket::State<TranslationStore>,
     lang: Language,
     host: Host<'_>,
-    config: &State<Config>
+    config: &State<Config>,
+    useplain: UsePlain<'_>
 ) -> Result<Template, Status> {
     if is_logged_in(&jar) {
         let (username, perms) = get_session(jar);
@@ -236,7 +239,7 @@ fn uploader(
         let root_domain = host.0.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
 
         return Ok(Template::render(
-            if get_bool_cookie(jar, "plain") { "plain/upload" } else { "upload" },
+            if *useplain.0 { "plain/upload" } else { "upload" },
             context! {
                 title: strings.get("uploader").unwrap(),
                 lang,
@@ -265,7 +268,8 @@ fn admin(
     translations: &rocket::State<TranslationStore>,
     lang: Language,
     host: Host<'_>,
-    config: &State<Config>
+    config: &State<Config>,
+    useplain: UsePlain<'_>
 ) -> Result<Template, Status> {
     if is_logged_in(&jar) {
         let (username, perms) = get_session(jar);
@@ -279,7 +283,7 @@ fn admin(
         let root_domain = host.0.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
 
         return Ok(Template::render(
-            if get_bool_cookie(jar, "plain") { "plain/admin" } else { "admin" },
+            if *useplain.0 { "plain/admin" } else { "admin" },
             context! {
                 title: strings.get("admin").unwrap(),
                 lang,

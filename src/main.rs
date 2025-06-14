@@ -115,6 +115,30 @@ impl<'r> FromRequest<'r> for XForwardedFor<'r> {
     }
 }
 
+struct UsePlain<'r>(&'r bool);
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for UsePlain<'r> {
+    type Error = ();
+
+    async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
+        match request.headers().get_one("User-Agent") {
+            Some(value) => {
+                if get_bool_cookie(request.cookies(), "plain") {
+                    return Outcome::Success(UsePlain(&true));
+                }
+
+                if value.starts_with("Mozilla/1") || value.starts_with("Mozilla/2") {
+                    return Outcome::Success(UsePlain(&true));
+                }
+
+                Outcome::Success(UsePlain(&false))
+            }
+            None => Outcome::Success(UsePlain(&true)),
+        }
+    }
+}
+
 struct Host<'r>(&'r str);
 
 #[rocket::async_trait]
@@ -253,6 +277,7 @@ async fn index<'a>(
     translations: &rocket::State<TranslationStore>,
     lang: Language,
     host: Host<'_>,
+    useplain: UsePlain<'_>
 ) -> Result<Result<Result<Template, Redirect>, Option<HeaderFile>>, Status> {
     let path = Path::new("files/").join(file.clone());
     let strings = translations.get_translation(&lang.0);
@@ -289,7 +314,7 @@ async fn index<'a>(
                     .unwrap_or_else(|err| err.to_string());
                 let markdown = markdown::to_html(&markdown_text);
                 return Ok(Ok(Ok(Template::render(
-                    if get_bool_cookie(jar, "plain") { "plain/md" } else { "md" },
+                    if *useplain.0 { "plain/md" } else { "md" },
                     context! {
                         title: format!("{} {}", strings.get("reading_markdown").unwrap(), Path::new("/").join(file.clone()).display()),
                         lang,
@@ -325,7 +350,7 @@ async fn index<'a>(
                 }
 
                 Ok(Ok(Ok(Template::render(
-                    if get_bool_cookie(jar, "plain") { "plain/zip" } else { "zip" },
+                    if *useplain.0 { "plain/zip" } else { "zip" },
                     context! {
                         title: format!("{} {}", strings.get("viewing_zip").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
                         lang,
@@ -382,7 +407,7 @@ async fn index<'a>(
                 }
 
                 Ok(Ok(Ok(Template::render(
-                    if get_bool_cookie(jar, "plain") { "plain/video" } else { "video" },
+                    if *useplain.0 { "plain/video" } else { "video" },
                     context! {
                         title: format!("{} {}", strings.get("watching").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
                         lang,
@@ -439,7 +464,7 @@ async fn index<'a>(
                 }
 
                 Ok(Ok(Ok(Template::render(
-                    if get_bool_cookie(jar, "plain") { "plain/audio" } else { "audio" },
+                    if *useplain.0 { "plain/audio" } else { "audio" },
                     context! {
                         title: format!("{} {}", strings.get("watching").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
                         lang,
@@ -542,7 +567,7 @@ async fn index<'a>(
             }
 
             Ok(Ok(Ok(Template::render(
-                if get_bool_cookie(jar, "plain") { "plain/index" } else { "index" },
+                if *useplain.0 { "plain/index" } else { "index" },
                 context! {
                     title: path.to_string(),
                     lang,
@@ -570,7 +595,7 @@ async fn index<'a>(
             if config.extensions.contains(&ext) {
                 if path.exists() {
                     return Ok(Ok(Ok(Template::render(
-                        if get_bool_cookie(jar, "plain") { "plain/details" } else { "details" },
+                        if *useplain.0 { "plain/details" } else { "details" },
                         context! {
                             title: format!("{} {}", strings.get("file_details").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
                             lang,
@@ -606,7 +631,8 @@ fn settings(
     lang: Language,
     translations: &State<TranslationStore>,
     host: Host<'_>,
-    config: &State<Config>
+    config: &State<Config>,
+    useplain: UsePlain<'_>
 ) -> Result<Template, Redirect> {
     let mut lang = lang.0;
     let mut theme = get_theme(jar);
@@ -675,7 +701,7 @@ fn settings(
     };
 
     return Ok(Template::render(
-        if get_bool_cookie(jar, "plain") { "plain/settings" } else { "settings" },
+        if *useplain.0 { "plain/settings" } else { "settings" },
         context! {
             title: strings.get("settings").unwrap(),
             theme,
@@ -820,6 +846,7 @@ fn unprocessable_entry() -> Status {
 async fn default(status: Status, req: &Request<'_>) -> Template {
     let jar = req.cookies();
     let translations = req.guard::<&State<TranslationStore>>().await.unwrap();
+    let useplain = req.guard::<UsePlain<'_>>().await.unwrap();
 
     let mut lang = "en".to_string();
     
@@ -841,7 +868,7 @@ async fn default(status: Status, req: &Request<'_>) -> Template {
     let config = Config::load();
 
     Template::render(
-        if get_bool_cookie(jar, "plain") { format!("plain/error/{}", status.code) } else { format!("error/{}", status.code) } ,
+        if *useplain.0 { format!("plain/error/{}", status.code) } else { format!("error/{}", status.code) } ,
         context! {
             title: format!("HTTP {}", status.code),
             lang,
