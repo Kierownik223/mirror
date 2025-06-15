@@ -12,3 +12,7 @@ enable_marmak_link = true
 enable_direct = false
 # Instance info to show in footer, leave empty to hide
 instance_info = "My Mirror instance!"
+# X-Send-File header to handle file serving
+x_sendfile_header = "X-Send-File"
+# X-Send-File header path prefix (needed for Apache2 configuration)
+x_sendfile_prefix = "/opt/mirror/"

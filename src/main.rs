@@ -39,7 +39,9 @@ struct Config {
     enable_api: bool,
     enable_marmak_link: bool,
     enable_direct: bool,
-    instance_info: String
+    instance_info: String,
+    x_sendfile_header: String,
+    x_sendfile_prefix: String
 }
 
 impl Config {
@@ -89,7 +91,9 @@ struct HeaderFile(String);
 
 impl<'r> Responder<'r, 'r> for HeaderFile {
     fn respond_to(self, _: &Request) -> response::Result<'r> {
-        Response::build().raw_header("X-Send-File", self.0).ok()
+        let config = Config::load();
+
+        Response::build().raw_header(config.x_sendfile_header, format!("{}{}", config.x_sendfile_prefix, self.0)).ok()
     }
 }
 
