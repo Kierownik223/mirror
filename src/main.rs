@@ -25,6 +25,8 @@ use utils::{
 
 use rocket_dyn_templates::{context, Template};
 
+use crate::utils::is_hidden;
+
 mod account;
 mod admin;
 mod api;
@@ -497,6 +499,9 @@ async fn index<'a>(
             }
         }
         "folder" => {
+            if is_hidden(path.clone(), &jar) {
+                return Err(Status::NotFound);
+            }
             let mut notroot = true;
             let mut markdown: String = "".to_string();
             let mut topmarkdown = false;

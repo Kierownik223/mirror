@@ -183,6 +183,27 @@ pub fn is_restricted(mut path: PathBuf, jar: &CookieJar<'_>) -> bool {
     false
 }
 
+pub fn is_hidden(mut path: PathBuf, jar: &CookieJar<'_>) -> bool {
+    if path.join("HIDDEN").exists() {
+        return true;
+    }
+    while let Some(parent) = path.parent() {
+        if parent.join("HIDDEN").exists() {
+            if !is_logged_in(&jar) {
+                if get_session(&jar).1 != 0 {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+        path = parent.to_path_buf();
+    }
+    false
+}
+
 pub fn open_file(path: PathBuf) -> Option<HeaderFile> {
     if path.exists() {
         return Some(HeaderFile(path.display().to_string()));
