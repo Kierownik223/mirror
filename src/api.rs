@@ -5,11 +5,7 @@ use std::{
 use ::sysinfo::{Disks, RefreshKind, System};
 use humansize::{format_size, DECIMAL};
 use rocket::{
-    data::ToByteUnit,
-    fairing::AdHoc,
-    http::{ContentType, CookieJar, Status},
-    serde::json::Json,
-    Data, Request,
+    data::ToByteUnit, fairing::AdHoc, http::{ContentType, CookieJar, Status}, serde::json::Json, Data, Request
 };
 use rocket_multipart_form_data::{
     MultipartFormData, MultipartFormDataField, MultipartFormDataOptions, Repetition,
@@ -186,12 +182,13 @@ fn user(jar: &CookieJar<'_>) -> Result<Json<User>, Status> {
     }
 }
 
-#[post("/upload", data = "<data>")]
+#[post("/upload?<path>", data = "<data>")]
 async fn upload(
     content_type: &ContentType,
     data: Data<'_>,
     jar: &CookieJar<'_>,
     host: Host<'_>,
+    path: Option<String>
 ) -> Result<Json<Vec<UploadFile>>, Status> {
     if is_logged_in(&jar) {
         let perms = get_session(jar).1;
@@ -223,6 +220,10 @@ async fn upload(
 
         if user_path.is_empty() {
             user_path = "uploads".to_string();
+        }
+
+        if let Some(query_path) = path {
+            user_path = query_path.trim_matches('/').to_string();
         }
 
         let mut uploaded_files: Vec<UploadFile> = Vec::new();
