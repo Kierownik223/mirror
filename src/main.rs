@@ -738,7 +738,9 @@ async fn fetch_settings(
     lang: Language,
     translations: &State<TranslationStore>,
 ) -> Result<RawHtml<String>, Status> {
-    if is_logged_in(&jar) {
+    if !is_logged_in(&jar) {
+        return Err(Status::Unauthorized);
+    } else {
         let strings = translations.get_translation(&lang.0);
         let username = get_session(jar).0;
 
@@ -760,8 +762,6 @@ async fn fetch_settings(
             "<script>alert(\"{}\");window.location.replace(\"/settings\");</script>",
             strings.get("fetch_success").unwrap()
         )));
-    } else {
-        return Err(Status::Forbidden);
     }
 }
 
@@ -772,7 +772,9 @@ async fn sync_settings(
     lang: Language,
     translations: &State<TranslationStore>,
 ) -> Result<RawHtml<String>, Status> {
-    if is_logged_in(&jar) {
+    if !is_logged_in(&jar) {
+        return Err(Status::Unauthorized);
+    } else {
         let strings = translations.get_translation(&lang.0);
         let username = get_session(jar).0;
 
@@ -798,8 +800,6 @@ async fn sync_settings(
             "<script>alert(\"{}\");window.location.replace(\"/settings\");</script>",
             strings.get("sync_success").unwrap()
         )));
-    } else {
-        return Err(Status::Forbidden);
     }
 }
 
@@ -894,7 +894,7 @@ async fn default(status: Status, req: &Request<'_>) -> Template {
     )
 }
 
-#[catch(403)]
+#[catch(401)]
 fn forbidden(req: &Request) -> Redirect {
     Redirect::to(format!("/account/login?next={}", req.uri()))
 }

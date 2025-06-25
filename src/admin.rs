@@ -31,7 +31,9 @@ async fn upload(
     config: &State<Config>,
     useplain: UsePlain<'_>
 ) -> Result<Template, Status> {
-    if is_logged_in(&jar) {
+    if !is_logged_in(&jar) {
+        return Err(Status::Unauthorized);
+    } else {
         let (username, perms) = get_session(jar);
 
         if perms != 0 {
@@ -137,8 +139,6 @@ async fn upload(
         } else {
             return Err(Status::BadRequest);
         }
-    } else {
-        return Err(Status::Forbidden);
     }
 }
 
@@ -151,7 +151,9 @@ fn sysinfo(
     config: &State<Config>,
     useplain: UsePlain<'_>
 ) -> Result<Template, Status> {
-    if is_logged_in(&jar) {
+    if !is_logged_in(&jar) {
+        return Err(Status::Unauthorized);
+    } else {
         let (username, perms) = get_session(jar);
 
         if perms != 0 {
@@ -213,8 +215,6 @@ fn sysinfo(
                 disks: disks
             },
         ));
-    } else {
-        return Err(Status::Forbidden);
     }
 }
 
@@ -227,7 +227,9 @@ fn uploader(
     config: &State<Config>,
     useplain: UsePlain<'_>
 ) -> Result<Template, Status> {
-    if is_logged_in(&jar) {
+    if !is_logged_in(&jar) {
+        return Err(Status::Unauthorized);
+    } else {
         let (username, perms) = get_session(jar);
 
         if perms != 0 {
@@ -257,8 +259,6 @@ fn uploader(
                 uploadedfiles: vec![MirrorFile { name: "".to_string(), ext: "".to_string(), icon: "default".to_string(), size: String::new()}]
             },
         ));
-    } else {
-        return Err(Status::Forbidden);
     }
 }
 
@@ -271,7 +271,9 @@ fn admin(
     config: &State<Config>,
     useplain: UsePlain<'_>
 ) -> Result<Template, Status> {
-    if is_logged_in(&jar) {
+    if !is_logged_in(&jar) {
+        return Err(Status::Unauthorized);
+    } else {
         let (username, perms) = get_session(jar);
 
         if perms != 0 {
@@ -299,8 +301,6 @@ fn admin(
                 admin: perms == 0,
             },
         ));
-    } else {
-        return Err(Status::Forbidden);
     }
 }
 pub fn build() -> AdHoc {

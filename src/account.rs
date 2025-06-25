@@ -213,7 +213,9 @@ async fn direct<'a>(
     }
 
     if let Some(to) = to {
-        if is_logged_in(&jar) {
+        if !is_logged_in(&jar) {
+            return Err(Status::Unauthorized);
+        } else {
             if let Some(db_user) = fetch_user(db, get_session(jar).0.as_str()).await {
                 let user_data =
                     json!({"username": get_session(jar).0, "password_hash": db_user.password});
@@ -248,8 +250,6 @@ async fn direct<'a>(
             } else {
                 return Err(Status::Forbidden);
             }
-        } else {
-            return Err(Status::Forbidden);
         }
     }
 

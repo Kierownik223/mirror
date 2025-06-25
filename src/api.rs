@@ -78,7 +78,9 @@ async fn delete<'a>(
     file: PathBuf,
     jar: &CookieJar<'_>
 ) -> Result<Status, (Status, Json<Error>)> {
-    if is_logged_in(&jar) {
+    if !is_logged_in(&jar) {
+        return Ok(Status::Unauthorized);
+    } else {
         let perms = get_session(jar).1;
 
         if perms != 0 {
@@ -101,14 +103,14 @@ async fn delete<'a>(
             Ok(_) => Ok(Status::NoContent),
             Err(e) => Err((Status::InternalServerError, Json(Error{ message: format!("An error occured: {}", e) })))
         }
-    } else {
-        return Ok(Status::Forbidden);
     }
 }
 
 #[get("/sysinfo")]
 fn sysinfo(jar: &CookieJar<'_>) -> Result<Json<Sysinfo>, Status> {
-    if is_logged_in(&jar) {
+    if !is_logged_in(&jar) {
+        return Err(Status::Unauthorized);
+    } else {
         let mut sys = System::new_all();
 
         sys.refresh_specifics(RefreshKind::without_processes(RefreshKind::without_cpu(
@@ -142,14 +144,14 @@ fn sysinfo(jar: &CookieJar<'_>) -> Result<Json<Sysinfo>, Status> {
             used_mem_readable: format_size(used_mem, DECIMAL),
             disks: disks,
         }));
-    } else {
-        return Err(Status::Forbidden);
     }
 }
 
 #[get("/user")]
 fn user(jar: &CookieJar<'_>) -> Result<Json<User>, Status> {
-    if is_logged_in(&jar) {
+    if !is_logged_in(&jar) {
+        return Err(Status::Unauthorized);
+    } else {
         let (username, perms) = get_session(jar);
 
         let keys = vec![
@@ -177,8 +179,6 @@ fn user(jar: &CookieJar<'_>) -> Result<Json<User>, Status> {
             perms,
             settings,
         }))
-    } else {
-        return Err(Status::Forbidden);
     }
 }
 
@@ -190,7 +190,9 @@ async fn upload(
     host: Host<'_>,
     path: Option<String>
 ) -> Result<Json<Vec<UploadFile>>, Status> {
-    if is_logged_in(&jar) {
+    if !is_logged_in(&jar) {
+        return Err(Status::Unauthorized);
+    } else {
         let perms = get_session(jar).1;
 
         if perms != 0 {
@@ -290,8 +292,6 @@ async fn upload(
         } else {
             return Err(Status::BadRequest);
         }
-    } else {
-        return Err(Status::Forbidden);
     }
 }
 
