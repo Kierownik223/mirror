@@ -269,7 +269,7 @@ async fn download(file: PathBuf, jar: &CookieJar<'_>) -> Result<Option<HeaderFil
     let path = Path::new("files/").join(file);
 
     if is_restricted(path.clone(), &jar) {
-        return Err(Status::Forbidden);
+        return Err(Status::Unauthorized);
     }
 
     Ok(open_file(path))
@@ -302,7 +302,7 @@ async fn index<'a>(
     }
 
     if is_restricted(path.clone(), &jar) {
-        return Err(Status::Forbidden);
+        return Err(Status::Unauthorized);
     }
 
     let ext_upper = if path.is_file() {
@@ -812,7 +812,7 @@ async fn iframe(
     let path = Path::new("files/").join(file.clone());
 
     if is_restricted(path.clone(), &jar) {
-        return Err(Status::Forbidden);
+        return Err(Status::Unauthorized);
     }
 
     let mut notroot = true;
