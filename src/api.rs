@@ -1,7 +1,5 @@
 use std::{
-    collections::HashMap,
-    io::{Read, Write},
-    path::{Path, PathBuf},
+    collections::HashMap, fs::{remove_dir, remove_file}, io::{Read, Write}, path::{Path, PathBuf}
 };
 
 use ::sysinfo::{Disks, RefreshKind, System};
@@ -77,6 +75,39 @@ async fn listing(
     dir_list.append(&mut file_list);
 
     Ok(Json(dir_list))
+}
+
+#[delete("/<file..>")]
+async fn delete<'a>(
+    file: PathBuf,
+    jar: &CookieJar<'_>
+) -> Result<Status, (Status, Json<Error>)> {
+    if is_logged_in(&jar) {
+        let perms = get_session(jar).1;
+
+        if perms != 0 {
+            return Ok(Status::Forbidden);
+        }
+        let path = Path::new("files/").join(file.clone());
+
+        if path.is_dir() {
+            if path.read_dir().map(|mut i| i.next().is_none()).unwrap_or(false) {
+                return match remove_dir(path) {
+                    Ok(_) => Ok(Status::NoContent),
+                    Err(e) => Err((Status::InternalServerError, Json(Error{ message: format!("An error occured: {}", e) })))
+                }
+            } else {
+                return Err((Status::Conflict, Json(Error{ message: "Directory is not empty!".to_string() })))
+            }
+        }
+
+        return match remove_file(path) {
+            Ok(_) => Ok(Status::NoContent),
+            Err(e) => Err((Status::InternalServerError, Json(Error{ message: format!("An error occured: {}", e) })))
+        }
+    } else {
+        return Ok(Status::Forbidden);
+    }
 }
 
 #[get("/sysinfo")]
@@ -280,7 +311,7 @@ fn default(status: Status, _req: &Request) -> Json<Error> {
 pub fn build_api() -> AdHoc {
     AdHoc::on_ignite("API", |rocket| async {
         rocket
-            .mount("/api", routes![index, listing, sysinfo, user, upload])
+            .mount("/api", routes![index, listing, sysinfo, user, upload, delete])
             .register("/api", catchers![default])
     })
 }
