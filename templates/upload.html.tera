@@ -120,9 +120,9 @@ function uploadViaAPI() {
 
                     if (result) {
                         const iconPath = `/static/images/icons/{% if hires %}hires/{% endif %}${result.icon || 'default'}.png`;
-                        const successText = `{{ strings.upload_success }}`;
+                        const filePath = new URL(result.url).pathname;
 
-                        label.innerHTML = `<a href="${result.url}"><img src="${iconPath}" class="icon">${result.name}</a> ${successText}<br>`;
+                        label.innerHTML = `<a href="${filePath}"><img src="${iconPath}" class="icon">${result.name}</a> {{ strings.upload_success }} <a style="cursor: pointer;" onclick="deleteFile('${filePath}')">{{ strings.delete }}</a><br>`;
                     }
                 } catch {
                     label.textContent = `${file.name} {{ strings.upload_parse_error }}`;
@@ -150,6 +150,33 @@ function formatBytes(bytes) {
         i++;
     }
     return bytes.toFixed(1) + ' ' + units[i];
+}
+
+function deleteFile(filePath) {
+    if (!confirm(`{{ strings.delete_confirmation }} ${decodeURIComponent(filePath)}?`)) {
+        return;
+    }
+
+    fetch(`/api${filePath}`, {
+        method: 'DELETE'
+    })
+    .then(async response => {
+        if (response.status === 204) {
+            const button = document.querySelector(`a[onclick="deleteFile('${filePath}')"]`);
+            if (button) {
+                const container = button.closest('div, span, p, li, tr') || button.parentElement;
+                if (container) container.remove();
+            }
+            alert(`${decodeURIComponent(filePath)} {{ strings.delete_success }}`)
+        } else {
+            const errorResponse = await response.json();
+            alert(`{{ strings.error_occured }} ${errorResponse.message}`);
+        }
+    })
+    .catch(error => {
+        console.error('Error deleting file:', error);
+        alert('{{ strings.error_deleting }}');
+    });
 }
 </script>
 
