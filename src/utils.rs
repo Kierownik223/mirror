@@ -1,16 +1,17 @@
 use std::{
-    collections::HashMap,
     ffi::OsStr,
     fs,
     io::Error,
     path::{Path, PathBuf},
+    sync::Arc,
 };
 
 use humansize::{format_size, DECIMAL};
 use rocket::http::{Cookie, CookieJar};
 use time::{Duration, OffsetDateTime};
+use tokio::sync::RwLock;
 
-use crate::{HeaderFile, MirrorFile};
+use crate::{FileEntry, HeaderFile, MirrorFile};
 
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
 struct FolderSize {
@@ -18,21 +19,8 @@ struct FolderSize {
     file: String,
 }
 
-pub fn get_folder_sizes(json_file: &str) -> Result<HashMap<String, u64>, Error> {
-    let json_content = fs::read_to_string(json_file).unwrap_or_default();
-    let folder_sizes: Vec<FolderSize> = serde_json::from_str(&json_content).unwrap_or_default();
-
-    let mut size_map = HashMap::new();
-    for entry in folder_sizes {
-        size_map.insert(entry.file, entry.size);
-    }
-
-    Ok(size_map)
-}
-
 pub fn read_dirs(path: &str) -> Result<Vec<MirrorFile>, Error> {
     let mut dir_list = Vec::new();
-    let size_map = get_folder_sizes("sizes.json")?;
 
     let paths = match fs::read_dir("files".to_owned() + &path) {
         Ok(paths) => paths,
@@ -44,25 +32,61 @@ pub fn read_dirs(path: &str) -> Result<Vec<MirrorFile>, Error> {
         let md = fs::metadata(file_path.path())?;
 
         if md.is_dir() {
-            let full_path = file_path.path();
-            let relative_path = full_path
-                .strip_prefix(std::env::current_dir()?)
-                .unwrap_or(&full_path);
-
             if let Some(file_name) = file_path.file_name().to_str() {
-                let folder_size = size_map
-                    .get(&relative_path.display().to_string())
-                    .cloned()
-                    .unwrap_or(0);
-
                 let file: MirrorFile = MirrorFile {
                     name: file_name.to_owned(),
                     ext: "folder".to_string(),
                     icon: "folder".to_string(),
-                    size: format_size(folder_size, DECIMAL),
+                    size: "---".to_string(),
                 };
 
                 dir_list.push(file);
+            }
+        }
+    }
+
+    Ok(dir_list)
+}
+
+pub async fn read_dirs_async(
+    path: &str,
+    sizes_state: &Arc<RwLock<Vec<FileEntry>>>,
+) -> Result<Vec<MirrorFile>, Error> {
+    let mut dir_list = Vec::new();
+
+    let size_list = sizes_state.read().await;
+
+    let base_path = format!("files{}", path);
+    let paths = match fs::read_dir(&base_path) {
+        Ok(paths) => paths,
+        Err(e) => return Err(e),
+    };
+
+    for file_path in paths {
+        let file_path = file_path?;
+        let metadata = fs::metadata(file_path.path())?;
+
+        if metadata.is_dir() {
+            let full_path = file_path.path();
+            let rel_path = full_path
+                .strip_prefix(std::env::current_dir()?)
+                .unwrap_or(&full_path)
+                .display()
+                .to_string();
+
+            let folder_size = size_list
+                .iter()
+                .find(|entry| entry.file == rel_path)
+                .map(|entry| entry.size)
+                .unwrap_or(0);
+
+            if let Some(file_name) = file_path.file_name().to_str() {
+                dir_list.push(MirrorFile {
+                    name: file_name.to_string(),
+                    ext: "folder".to_string(),
+                    icon: "folder".to_string(),
+                    size: format_size(folder_size, DECIMAL),
+                });
             }
         }
     }

@@ -18,7 +18,9 @@ serde_json = "1.0.135"
 sysinfo = "0.33.1"
 tera = "1.20.0"
 time = "0.3.37"
+tokio = { version = "1.45.1", features = ["macros", "rt-multi-thread", "time"] }
 toml = "0.8.20"
+walkdir = "2.5.0"
 zip = "2.2.2"
 
 [dependencies.rocket_dyn_templates]

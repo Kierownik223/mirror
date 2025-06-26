@@ -16,16 +16,20 @@ use std::collections::HashMap;
 use std::ffi::OsStr;
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 use time::{Duration, OffsetDateTime};
+use tokio::sync::RwLock;
+use tokio::time::sleep;
 use toml::Value;
 use utils::{
     create_cookie, get_bool_cookie, get_session, get_theme, is_logged_in, is_restricted,
     list_to_files, open_file, parse_language, read_dirs, read_files,
 };
+use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::utils::is_hidden;
+use crate::utils::{is_hidden, read_dirs_async};
 
 mod account;
 mod admin;
@@ -43,7 +47,7 @@ struct Config {
     enable_direct: bool,
     instance_info: String,
     x_sendfile_header: String,
-    x_sendfile_prefix: String
+    x_sendfile_prefix: String,
 }
 
 impl Config {
@@ -95,7 +99,12 @@ impl<'r> Responder<'r, 'r> for HeaderFile {
     fn respond_to(self, _: &Request) -> response::Result<'r> {
         let config = Config::load();
 
-        Response::build().raw_header(config.x_sendfile_header, format!("{}{}", config.x_sendfile_prefix, self.0)).ok()
+        Response::build()
+            .raw_header(
+                config.x_sendfile_header,
+                format!("{}{}", config.x_sendfile_prefix, self.0),
+            )
+            .ok()
     }
 }
 
@@ -264,6 +273,14 @@ impl TranslationStore {
     }
 }
 
+type FileSizes = Arc<RwLock<Vec<FileEntry>>>;
+
+#[derive(Debug, Serialize, Clone)]
+struct FileEntry {
+    size: u64,
+    file: String,
+}
+
 #[get("/<file..>?download")]
 async fn download(file: PathBuf, jar: &CookieJar<'_>) -> Result<Option<HeaderFile>, Status> {
     let path = Path::new("files/").join(file);
@@ -283,7 +300,8 @@ async fn index<'a>(
     translations: &rocket::State<TranslationStore>,
     lang: Language,
     host: Host<'_>,
-    useplain: UsePlain<'_>
+    useplain: UsePlain<'_>,
+    sizes: &State<FileSizes>,
 ) -> Result<Result<Result<Template, Redirect>, Option<HeaderFile>>, Status> {
     let path = Path::new("files/").join(file.clone());
     let strings = translations.get_translation(&lang.0);
@@ -437,7 +455,7 @@ async fn index<'a>(
             } else {
                 return Err(Status::NotFound);
             }
-        }        
+        }
         "mp3" | "m4a" | "m4b" | "flac" => {
             if path.exists() {
                 let audiopath = Path::new("/").join(file.clone()).display().to_string();
@@ -445,7 +463,9 @@ async fn index<'a>(
 
                 let tag = Tag::new().read_from_path(&path).unwrap();
 
-                let audiotitle = tag.title().unwrap_or(&path.file_name().unwrap().to_str().unwrap());
+                let audiotitle = tag
+                    .title()
+                    .unwrap_or(&path.file_name().unwrap().to_str().unwrap());
                 let artist = tag.artist().unwrap_or_default();
                 let year = tag.year().unwrap_or(0);
                 let album = tag.album_title().unwrap_or_default();
@@ -461,12 +481,9 @@ async fn index<'a>(
                         MimeType::Bmp => "image/bmp",
                         MimeType::Gif => "image/gif",
                         MimeType::Jpeg => "image/jpeg",
-                        MimeType::Tiff => "image/tiff"
+                        MimeType::Tiff => "image/tiff",
                     };
-                    cover_data = format!(
-                        "data:{};base64,{}",
-                        mime_type, base64_string
-                    );
+                    cover_data = format!("data:{};base64,{}", mime_type, base64_string);
                 }
 
                 Ok(Ok(Ok(Template::render(
@@ -513,7 +530,7 @@ async fn index<'a>(
             }
 
             let mut files = read_files(&path).unwrap_or_default();
-            let mut dirs = read_dirs(&path).unwrap_or_default();
+            let mut dirs = read_dirs_async(&path, sizes).await.unwrap_or_default();
 
             if dirs.is_empty() && files.is_empty() {
                 return Err(Status::NotFound);
@@ -604,7 +621,11 @@ async fn index<'a>(
             if config.extensions.contains(&ext) {
                 if path.exists() {
                     return Ok(Ok(Ok(Template::render(
-                        if *useplain.0 { "plain/details" } else { "details" },
+                        if *useplain.0 {
+                            "plain/details"
+                        } else {
+                            "details"
+                        },
                         context! {
                             title: format!("{} {}", strings.get("file_details").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
                             lang,
@@ -641,7 +662,7 @@ fn settings(
     translations: &State<TranslationStore>,
     host: Host<'_>,
     config: &State<Config>,
-    useplain: UsePlain<'_>
+    useplain: UsePlain<'_>,
 ) -> Result<Template, Redirect> {
     let mut lang = lang.0;
     let mut theme = get_theme(jar);
@@ -710,7 +731,11 @@ fn settings(
     };
 
     return Ok(Template::render(
-        if *useplain.0 { "plain/settings" } else { "settings" },
+        if *useplain.0 {
+            "plain/settings"
+        } else {
+            "settings"
+        },
         context! {
             title: strings.get("settings").unwrap(),
             theme,
@@ -778,13 +803,7 @@ async fn sync_settings(
         let strings = translations.get_translation(&lang.0);
         let username = get_session(jar).0;
 
-        let keys = vec![
-            "lang",
-            "hires",
-            "smallhead",
-            "theme",
-            "nooverride",
-        ];
+        let keys = vec!["lang", "hires", "smallhead", "theme", "nooverride"];
 
         let mut cookie_map: HashMap<String, Option<String>> = HashMap::new();
         for key in keys {
@@ -858,7 +877,7 @@ async fn default(status: Status, req: &Request<'_>) -> Template {
     let useplain = req.guard::<UsePlain<'_>>().await.unwrap();
 
     let mut lang = "en".to_string();
-    
+
     if let Some(header) = req.headers().get_one("Accept-Language") {
         let header_lang = parse_language(header).unwrap_or("en".to_string());
         lang = header_lang;
@@ -877,7 +896,11 @@ async fn default(status: Status, req: &Request<'_>) -> Template {
     let config = Config::load();
 
     Template::render(
-        if *useplain.0 { format!("plain/error/{}", status.code) } else { format!("error/{}", status.code) } ,
+        if *useplain.0 {
+            format!("plain/error/{}", status.code)
+        } else {
+            format!("error/{}", status.code)
+        },
         context! {
             title: format!("HTTP {}", status.code),
             lang,
@@ -899,39 +922,78 @@ fn forbidden(req: &Request) -> Redirect {
     Redirect::to(format!("/account/login?next={}", req.uri()))
 }
 
+async fn calculate_sizes(state: FileSizes) {
+    loop {
+        let mut file_sizes = Vec::new();
+        let mut dir_sizes: HashMap<String, u64> = HashMap::new();
+
+        for entry in WalkDir::new("files").into_iter().filter_map(Result::ok) {
+            let path = entry.path().to_path_buf();
+            if let Ok(metadata) = fs::metadata(&path) {
+                let size = metadata.len();
+                let path_str = path.display().to_string();
+
+                if metadata.is_file() {
+                    file_sizes.push(FileEntry {
+                        size,
+                        file: path_str.clone(),
+                    });
+
+                    let mut current = path.as_path();
+                    while let Some(parent) = current.parent() {
+                        let parent_str = parent.display().to_string();
+                        *dir_sizes.entry(parent_str).or_insert(0) += size;
+                        current = parent;
+                    }
+                }
+            }
+        }
+
+        let mut all_entries = file_sizes;
+
+        all_entries.extend(
+            dir_sizes
+                .into_iter()
+                .map(|(dir, size)| FileEntry { size, file: dir }),
+        );
+
+        {
+            let mut state_lock = state.write().await;
+            *state_lock = all_entries.clone();
+        }
+
+        sleep(tokio::time::Duration::from_secs(60)).await;
+    }
+}
+
 #[launch]
-fn rocket() -> _ {
+#[tokio::main]
+async fn rocket() -> _ {
     let config = Config::load();
+
+    let size_state: FileSizes = Arc::new(RwLock::new(Vec::new()));
+
+    let background_size_state = Arc::clone(&size_state);
+    tokio::spawn(calculate_sizes(background_size_state));
 
     let mut rocket = rocket::build()
         .manage(config.clone())
         .attach(Template::fairing())
         .manage(TranslationStore::new())
+        .manage(size_state)
         .register("/", catchers![default, unprocessable_entry, forbidden])
-        .mount(
-            "/",
-            routes![
-                settings,
-                download,
-                index,
-                iframe
-            ],
-        );
+        .mount("/", routes![settings, download, index, iframe]);
 
     if config.enable_login {
         rocket = rocket
             .attach(account::build_account())
             .attach(admin::build())
             .attach(Db::init())
-            .mount("/", routes![
-                fetch_settings,
-                sync_settings,
-            ]);
+            .mount("/", routes![fetch_settings, sync_settings,]);
     }
 
     if config.enable_api {
-        rocket = rocket
-            .attach(api::build_api());
+        rocket = rocket.attach(api::build_api());
     }
 
     rocket

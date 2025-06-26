@@ -1,20 +1,29 @@
 use std::{
-    collections::HashMap, fs::{remove_dir, remove_file}, io::{Read, Write}, path::{Path, PathBuf}
+    collections::HashMap,
+    fs::{remove_dir, remove_file},
+    io::{Read, Write},
+    path::{Path, PathBuf},
 };
 
 use ::sysinfo::{Disks, RefreshKind, System};
 use humansize::{format_size, DECIMAL};
 use rocket::{
-    data::ToByteUnit, fairing::AdHoc, http::{ContentType, CookieJar, Status}, serde::json::Json, Data, Request
+    data::ToByteUnit,
+    fairing::AdHoc,
+    http::{ContentType, CookieJar, Status},
+    serde::json::Json,
+    Data, Request, State,
 };
 use rocket_multipart_form_data::{
     MultipartFormData, MultipartFormDataField, MultipartFormDataOptions, Repetition,
 };
 
 use crate::{
-    read_dirs, read_files,
-    utils::{get_extension_from_filename, get_session, is_logged_in, is_restricted},
-    Config, Disk, Host, MirrorFile, Sysinfo,
+    read_files,
+    utils::{
+        get_extension_from_filename, get_session, is_logged_in, is_restricted, read_dirs_async,
+    },
+    Config, Disk, FileSizes, Host, MirrorFile, Sysinfo,
 };
 
 #[derive(serde::Serialize)]
@@ -48,11 +57,12 @@ async fn listing(
     file: PathBuf,
     jar: &CookieJar<'_>,
     config: &rocket::State<Config>,
+    sizes: &State<FileSizes>,
 ) -> Result<Json<Vec<MirrorFile>>, Status> {
     let path = Path::new("/").join(file.clone()).display().to_string();
 
     let mut file_list = read_files(&path).unwrap_or_default();
-    let mut dir_list = read_dirs(&path).unwrap_or_default();
+    let mut dir_list = read_dirs_async(&path, sizes).await.unwrap_or_default();
 
     if dir_list.is_empty() && file_list.is_empty() {
         return Err(Status::NotFound);
@@ -74,10 +84,7 @@ async fn listing(
 }
 
 #[delete("/<file..>")]
-async fn delete<'a>(
-    file: PathBuf,
-    jar: &CookieJar<'_>
-) -> Result<Status, (Status, Json<Error>)> {
+async fn delete<'a>(file: PathBuf, jar: &CookieJar<'_>) -> Result<Status, (Status, Json<Error>)> {
     if !is_logged_in(&jar) {
         return Ok(Status::Unauthorized);
     } else {
@@ -89,20 +96,39 @@ async fn delete<'a>(
         let path = Path::new("files/").join(file.clone());
 
         if path.is_dir() {
-            if path.read_dir().map(|mut i| i.next().is_none()).unwrap_or(false) {
+            if path
+                .read_dir()
+                .map(|mut i| i.next().is_none())
+                .unwrap_or(false)
+            {
                 return match remove_dir(path) {
                     Ok(_) => Ok(Status::NoContent),
-                    Err(e) => Err((Status::InternalServerError, Json(Error{ message: format!("An error occured: {}", e) })))
-                }
+                    Err(e) => Err((
+                        Status::InternalServerError,
+                        Json(Error {
+                            message: format!("An error occured: {}", e),
+                        }),
+                    )),
+                };
             } else {
-                return Err((Status::Conflict, Json(Error{ message: "Directory is not empty!".to_string() })))
+                return Err((
+                    Status::Conflict,
+                    Json(Error {
+                        message: "Directory is not empty!".to_string(),
+                    }),
+                ));
             }
         }
 
         return match remove_file(path) {
             Ok(_) => Ok(Status::NoContent),
-            Err(e) => Err((Status::InternalServerError, Json(Error{ message: e.to_string() })))
-        }
+            Err(e) => Err((
+                Status::InternalServerError,
+                Json(Error {
+                    message: e.to_string(),
+                }),
+            )),
+        };
     }
 }
 
@@ -188,7 +214,7 @@ async fn upload(
     data: Data<'_>,
     jar: &CookieJar<'_>,
     host: Host<'_>,
-    path: Option<String>
+    path: Option<String>,
 ) -> Result<Json<Vec<UploadFile>>, Status> {
     if !is_logged_in(&jar) {
         return Err(Status::Unauthorized);
@@ -312,7 +338,10 @@ fn default(status: Status, _req: &Request) -> Json<Error> {
 pub fn build_api() -> AdHoc {
     AdHoc::on_ignite("API", |rocket| async {
         rocket
-            .mount("/api", routes![index, listing, sysinfo, user, upload, delete])
+            .mount(
+                "/api",
+                routes![index, listing, sysinfo, user, upload, delete],
+            )
             .register("/api", catchers![default])
     })
 }
