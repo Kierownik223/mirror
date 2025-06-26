@@ -109,6 +109,7 @@ td:first-child {
     color: #32a852;
 }
 
+td:nth-child(3),
 td:last-child {
     text-align: right;
 }
