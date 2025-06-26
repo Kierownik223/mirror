@@ -1,6 +1,34 @@
 {% extends "base" %}
 
 {% block content %}
+{% if admin and filebrowser %}
+<script>
+    function deleteFile(element, filePath) {
+        const path = `${new URL(window.location.href).pathname}${filePath}`;
+        if (!confirm(`{{ strings.delete_confirmation }} ${decodeURIComponent(path)}?`)) {
+            return;
+        }
+
+        fetch(`/api${path}`, {
+            method: 'DELETE'
+        })
+        .then(async response => {
+            if (response.status === 204) {
+                const container = element.closest('tr') || element.parentElement;
+                if (container) container.remove();
+                alert(`${decodeURIComponent(path)} {{ strings.delete_success }}`);
+            } else {
+                const errorResponse = await response.json();
+                alert(`{{ strings.error_occured }} ${errorResponse.message}`);
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting file:', error);
+            alert('{{ strings.error_deleting }}');
+        });
+    }
+</script>
+{% endif %}
 <a href="/">MARMAK Mirror</a>/
 {% for s in path_seg %}
 {% if s != "" %}
@@ -45,6 +73,7 @@
                         class="icon">{{ s.name }}</a></td>
             <td>{{ s.size }}</td>
             <td>{{ s.ext }} {{ strings.file }}</td>
+            {% if admin and filebrowser %}<td><a style="cursor: pointer;" onclick="deleteFile(this, '{{ s.name }}')">{{ strings.delete }}</a></td>{% endif %}
         </tr>
         {% endfor %}
     </tbody>
