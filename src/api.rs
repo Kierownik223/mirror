@@ -101,7 +101,7 @@ async fn delete<'a>(
 
         return match remove_file(path) {
             Ok(_) => Ok(Status::NoContent),
-            Err(e) => Err((Status::InternalServerError, Json(Error{ message: format!("An error occured: {}", e) })))
+            Err(e) => Err((Status::InternalServerError, Json(Error{ message: e.to_string() })))
         }
     }
 }
