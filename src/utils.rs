@@ -209,18 +209,26 @@ pub fn is_restricted(mut path: PathBuf, jar: &CookieJar<'_>) -> bool {
 
 pub fn is_hidden(mut path: PathBuf, jar: &CookieJar<'_>) -> bool {
     if path.join("HIDDEN").exists() {
-        return true;
+        if is_logged_in(&jar) {
+            if get_session(&jar).1 == 0 {
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            return true;
+        }
     }
     while let Some(parent) = path.parent() {
         if parent.join("HIDDEN").exists() {
-            if !is_logged_in(&jar) {
-                if get_session(&jar).1 != 0 {
-                    return true;
-                } else {
+            if is_logged_in(&jar) {
+                if get_session(&jar).1 == 0 {
                     return false;
+                } else {
+                    return true;
                 }
             } else {
-                return false;
+                return true;
             }
         }
         path = parent.to_path_buf();
