@@ -62,12 +62,27 @@ pub async fn read_dirs_async(
         Err(e) => return Err(e),
     };
 
-    for file_path in paths {
+    'main: for file_path in paths {
         let file_path = file_path?;
         let metadata = fs::metadata(file_path.path())?;
 
         if metadata.is_dir() {
             let full_path = file_path.path();
+
+            let subdir_paths = match fs::read_dir(&full_path) {
+                Ok(e) => e,
+                Err(_) => continue,
+            };
+            
+            for subdir_path in subdir_paths {
+                let subdir_path = subdir_path?;
+                if let Some(file_name) = subdir_path.file_name().to_str() {
+                    if file_name == "HIDDEN" {
+                        continue 'main;
+                    }
+                }
+            }
+
             let rel_path = full_path
                 .strip_prefix(std::env::current_dir()?)
                 .unwrap_or(&full_path)
