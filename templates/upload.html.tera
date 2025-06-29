@@ -155,13 +155,15 @@ function formatBytes(bytes) {
 }
 
 function deleteFile(element, filePath) {
-    var path = "/" + filePath;
+    var path = "/" + filePath.replace(/^\/+/, '');
+
     if (!confirm("{{ strings.delete_confirmation }} " + decodeURIComponent(path) + "?")) {
         return;
     }
 
     var xhr = new XMLHttpRequest();
     xhr.open("DELETE", "/api" + path, true);
+
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if (xhr.status === 204) {
@@ -182,10 +184,12 @@ function deleteFile(element, filePath) {
             }
         }
     };
+
     xhr.onerror = function () {
         console.error("Error deleting file.");
         alert("{{ strings.error_deleting }}");
     };
+
     xhr.send();
 }
 </script>
