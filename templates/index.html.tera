@@ -58,7 +58,6 @@
                         class="icon">../</a></td>
             <td>---</td>
             <td>{{ strings.folder }}</td>
-            {% if admin and filebrowser %}<td><a style="cursor: pointer;" onclick="deleteFile(this, '{{ s.name }}')">{{ strings.delete }}</a></td>{% endif %}
         </tr>
         {% endif %}
 
@@ -68,6 +67,7 @@
                         class="icon">{{ s.name }}/</a></td>
             <td>{{ s.size }}</td>
             <td>{{ strings.folder }}</td>
+            {% if admin and filebrowser %}<td><a style="cursor: pointer;" onclick="deleteFile(this, '{{ s.name }}')">{{ strings.delete }}</a></td>{% endif %}
         </tr>
         {% endfor %}
         {% for s in files %}
