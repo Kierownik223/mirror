@@ -18,7 +18,7 @@
                 if (container) container.remove();
                 alert(`${decodeURIComponent(path)} {{ strings.delete_success }}`);
             } else if (response.status === 409) {
-                alert(`{{ strings.directory_not_empty }} ${errorResponse.message}`);
+                alert(`{{ strings.directory_not_empty }}`);
             } else {
                 const errorResponse = await response.json();
                 alert(`{{ strings.error_occured }} ${errorResponse.message}`);
