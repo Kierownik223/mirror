@@ -4,30 +4,38 @@
 {% if admin and filebrowser %}
 <script>
     function deleteFile(element, filePath) {
-        const path = `${new URL(window.location.href).pathname}${filePath}`;
-        if (!confirm(`{{ strings.delete_confirmation }} ${decodeURIComponent(path)}?`)) {
+        var path = window.location.pathname + filePath;
+        if (!confirm("{{ strings.delete_confirmation }} " + decodeURIComponent(path) + "?")) {
             return;
         }
 
-        fetch(`/api${path}`, {
-            method: 'DELETE'
-        })
-        .then(async response => {
-            if (response.status === 204) {
-                const container = element.closest('tr') || element.parentElement;
-                if (container) container.remove();
-                alert(`${decodeURIComponent(path)} {{ strings.delete_success }}`);
-            } else if (response.status === 409) {
-                alert(`{{ strings.directory_not_empty }}`);
-            } else {
-                const errorResponse = await response.json();
-                alert(`{{ strings.error_occured }} ${errorResponse.message}`);
+        var xhr = new XMLHttpRequest();
+        xhr.open("DELETE", "/api" + path, true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 204) {
+                    var row = element.parentNode.parentElement;
+                    if (row && row.parentNode) {
+                        row.parentNode.removeChild(row);
+                    }
+                    alert(decodeURIComponent(path) + " {{ strings.delete_success }}");
+                } else if (xhr.status === 409) {
+                    alert("{{ strings.directory_not_empty }}");
+                } else {
+                    try {
+                        var errorResponse = JSON.parse(xhr.responseText);
+                        alert("{{ strings.error_occured }} " + errorResponse.message);
+                    } catch (e) {
+                        alert("{{ strings.error_occured }}");
+                    }
+                }
             }
-        })
-        .catch(error => {
-            console.error('Error deleting file:', error);
-            alert('{{ strings.error_deleting }}');
-        });
+        };
+        xhr.onerror = function () {
+            console.error("Error deleting file.");
+            alert("{{ strings.error_deleting }}");
+        };
+        xhr.send();
     }
 </script>
 {% endif %}

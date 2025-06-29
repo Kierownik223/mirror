@@ -49,134 +49,144 @@
 
 <script>
 function uploadViaAPI() {
-    const input = document.getElementById('file');
-    const path_input = document.getElementById('path');
-    const path = path_input.value;
-    const files = input.files;
+    var input = document.getElementById('file');
+    var path_input = document.getElementById('path');
+    var path = path_input.value;
+    var files = input.files;
+
     if (!files.length) {
         alert("{{ strings.select_files }}");
         return;
     }
 
-    const resultsDiv = document.getElementById('uploadResults');
+    var resultsDiv = document.getElementById('uploadResults');
     resultsDiv.innerHTML = "";
 
-    for (const file of files) {
-        const container = document.createElement("div");
+    for (var i = 0; i < files.length; i++) {
+        (function(file) {
+            var container = document.createElement("div");
 
-        const label = document.createElement("div");
-        label.textContent = `{{ strings.uploading }} ${file.name}`;
-        container.appendChild(label);
+            var label = document.createElement("div");
+            label.textContent = "{{ strings.uploading }} " + file.name;
+            container.appendChild(label);
 
-        const progressBar = document.createElement("progress");
-        progressBar.max = 100;
-        progressBar.value = 0;
-        progressBar.style.width = "100%";
-        container.appendChild(progressBar);
+            var progressBar = document.createElement("progress");
+            progressBar.max = 100;
+            progressBar.value = 0;
+            progressBar.style.width = "100%";
+            container.appendChild(progressBar);
 
-        const info = document.createElement("div");
-        info.style.fontSize = "small";
-        info.textContent = "0% - 0 B / " + formatBytes(file.size) + " @ 0 KB/s";
-        container.appendChild(info);
+            var info = document.createElement("div");
+            info.style.fontSize = "small";
+            info.textContent = "0% - 0 B / " + formatBytes(file.size) + " @ 0 KB/s";
+            container.appendChild(info);
 
-        resultsDiv.appendChild(container);
+            resultsDiv.appendChild(container);
 
-        const formData = new FormData();
-        formData.append("files", file);
-        formData.append("path", path);
+            var formData = new FormData();
+            formData.append("files", file);
+            formData.append("path", path);
 
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", "/api/upload", true);
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/api/upload", true);
 
-        const startTime = Date.now();
+            var startTime = new Date().getTime();
 
-        xhr.upload.onprogress = function (e) {
-            if (e.lengthComputable) {
-                const percent = (e.loaded / e.total) * 100;
-                const elapsed = (Date.now() - startTime) / 1000;
-                const speed = e.loaded / elapsed;
+            xhr.upload.onprogress = function(e) {
+                if (e.lengthComputable) {
+                    var percent = (e.loaded / e.total) * 100;
+                    var elapsed = (new Date().getTime() - startTime) / 1000;
+                    var speed = e.loaded / elapsed;
 
-                progressBar.value = percent;
+                    progressBar.value = percent;
 
-                info.textContent =
-                    `${percent.toFixed(1)}% - ${formatBytes(e.loaded)} / ${formatBytes(e.total)} ` +
-                    `@ ${formatBytes(speed)}/s`;
-            }
-        };
-
-        xhr.onload = function () {
-            progressBar.style.display = "none";
-            info.style.display = "none";
-
-            if (xhr.status === 200) {
-                try {
-                    const response = JSON.parse(xhr.responseText);
-                    const result = response[0];
-
-                    if (result.url == null) {
-                        label.textContent = `{{ strings.upload_error }} ${result.error}`;
-                        return;
-                    }
-
-                    if (result) {
-                        const iconPath = `/static/images/icons/{% if hires %}hires/{% endif %}${result.icon || 'default'}.png`;
-                        const filePath = new URL(result.url).pathname;
-
-                        label.innerHTML = `<a href="${filePath}"><img src="${iconPath}" class="icon">${result.name}</a> {{ strings.upload_success }} <a style="cursor: pointer;" onclick="deleteFile('${filePath}')">{{ strings.delete }}</a><br>`;
-                    }
-                } catch {
-                    label.textContent = `${file.name} {{ strings.upload_parse_error }}`;
+                    info.textContent =
+                        percent.toFixed(1) + "% - " + formatBytes(e.loaded) + " / " + formatBytes(e.total) +
+                        " @ " + formatBytes(speed) + "/s";
                 }
-            } else {
-                label.textContent = `${file.name} {{ strings.upload_failed_status }} ${xhr.status}`;
-            }
-        };
+            };
 
-        xhr.onerror = function () {
-            progressBar.style.display = "none";
-            info.style.display = "none";
-            label.textContent = `${file.name} {{ strings.upload_failed_network }}`;
-        };
+            xhr.onload = function() {
+                progressBar.style.display = "none";
+                info.style.display = "none";
 
-        xhr.send(formData);
+                if (xhr.status === 200) {
+                    try {
+                        var response = JSON.parse(xhr.responseText);
+                        var result = response[0];
+
+                        if (!result || result.url == null) {
+                            label.textContent = "{{ strings.upload_error }} " + (result && result.error ? result.error : "");
+                            return;
+                        }
+
+                        const iconPath = '/static/images/icons/{% if hires | safe %}hires/{% endif %}' + result.icon || 'default' + '.png';
+
+                        var a = document.createElement('a');
+                        a.href = result.url;
+                        var filePath = a.pathname;
+
+                        label.innerHTML = '<a href="' + result.url + '"><img src="' + iconPath + '" class="icon">' + result.name + '</a> {{ strings.upload_success }} <a style="cursor: pointer;" onclick="deleteFile(this, \'' + filePath + '\')">{{ strings.delete }}</a><br>';
+                    } catch (e) {
+                        label.textContent = file.name + " {{ strings.upload_parse_error }}";
+                    }
+                } else {
+                    label.textContent = file.name + " {{ strings.upload_failed_status }} " + xhr.status;
+                }
+            };
+
+            xhr.onerror = function() {
+                progressBar.style.display = "none";
+                info.style.display = "none";
+                label.textContent = file.name + " {{ strings.upload_failed_network }}";
+            };
+
+            xhr.send(formData);
+        })(files[i]);
     }
 }
 
 function formatBytes(bytes) {
-    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-    let i = 0;
-    while (bytes >= 1024 && i < units.length - 1) {
-        bytes /= 1024;
-        i++;
-    }
-    return bytes.toFixed(1) + ' ' + units[i];
+    if (bytes === 0) return "0 B";
+    var k = 1024;
+    var sizes = ["B", "KB", "MB", "GB", "TB"];
+    var i = Math.floor(Math.log(bytes) / Math.log(k));
+    return (bytes / Math.pow(k, i)).toFixed(1) + " " + sizes[i];
 }
 
-function deleteFile(filePath) {
-    if (!confirm(`{{ strings.delete_confirmation }} ${decodeURIComponent(filePath)}?`)) {
+function deleteFile(element, filePath) {
+    var path = "/" + filePath;
+    if (!confirm("{{ strings.delete_confirmation }} " + decodeURIComponent(path) + "?")) {
         return;
     }
 
-    fetch(`/api${filePath}`, {
-        method: 'DELETE'
-    })
-    .then(async response => {
-        if (response.status === 204) {
-            const button = document.querySelector(`a[onclick="deleteFile('${filePath}')"]`);
-            if (button) {
-                const container = button.closest('div, span, p, li, tr') || button.parentElement;
-                if (container) container.remove();
+    var xhr = new XMLHttpRequest();
+    xhr.open("DELETE", "/api" + path, true);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 204) {
+                var row = element.parentNode.parentElement;
+                if (row && row.parentNode) {
+                    row.parentNode.removeChild(row);
+                }
+                alert(decodeURIComponent(path) + " {{ strings.delete_success }}");
+            } else if (xhr.status === 409) {
+                alert("{{ strings.directory_not_empty }}");
+            } else {
+                try {
+                    var errorResponse = JSON.parse(xhr.responseText);
+                    alert("{{ strings.error_occured }} " + errorResponse.message);
+                } catch (e) {
+                    alert("{{ strings.error_occured }}");
+                }
             }
-            alert(`${decodeURIComponent(filePath)} {{ strings.delete_success }}`)
-        } else {
-            const errorResponse = await response.json();
-            alert(`{{ strings.error_occured }} ${errorResponse.message}`);
         }
-    })
-    .catch(error => {
-        console.error('Error deleting file:', error);
-        alert('{{ strings.error_deleting }}');
-    });
+    };
+    xhr.onerror = function () {
+        console.error("Error deleting file.");
+        alert("{{ strings.error_deleting }}");
+    };
+    xhr.send();
 }
 </script>
 
