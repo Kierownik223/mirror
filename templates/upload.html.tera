@@ -120,7 +120,7 @@ function uploadViaAPI() {
                             return;
                         }
 
-                        const iconPath = '/static/images/icons/{% if hires | safe %}hires/{% endif %}' + result.icon || 'default' + '.png';
+                        var iconPath = '/static/images/icons/{% if hires | safe %}hires/{% endif %}' + result.icon + '.png';
 
                         var a = document.createElement('a');
                         a.href = result.url;
