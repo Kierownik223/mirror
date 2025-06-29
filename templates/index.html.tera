@@ -17,6 +17,8 @@
                 const container = element.closest('tr') || element.parentElement;
                 if (container) container.remove();
                 alert(`${decodeURIComponent(path)} {{ strings.delete_success }}`);
+            } else if (response.status === 409) {
+                alert(`{{ strings.directory_not_empty }} ${errorResponse.message}`);
             } else {
                 const errorResponse = await response.json();
                 alert(`{{ strings.error_occured }} ${errorResponse.message}`);
@@ -56,6 +58,7 @@
                         class="icon">../</a></td>
             <td>---</td>
             <td>{{ strings.folder }}</td>
+            {% if admin and filebrowser %}<td><a style="cursor: pointer;" onclick="deleteFile(this, '{{ s.name }}')">{{ strings.delete }}</a></td>{% endif %}
         </tr>
         {% endif %}
 
