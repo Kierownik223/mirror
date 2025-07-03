@@ -15,7 +15,7 @@
     <img src="/static/images/icons/{% if hires %}hires/{% endif %}lang.png" class="icon">{{ strings.change_lang }}<br>
     <select name="lang">
         {% for s in language_names %}
-        <option value="{{ s.0 }}" {% if lang==s.0 %}selected{% endif %}>{{ s.1 }}</option>
+        <option value="{{ s.0 }}" {% if lang==s.0 %}selected{% endif %}>{{ s.1 }} ({{ s.0 }})</option>
         {% endfor %}
     </select>
     <br>
