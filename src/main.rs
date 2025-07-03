@@ -246,13 +246,7 @@ impl TranslationStore {
                     if let Ok(contents) = fs::read_to_string(entry.path()) {
                         if let Ok(parsed) = contents.parse::<Value>() {
                             if let Some(table) = parsed.as_table() {
-                                // Extract translations
-                                let lang_translations = table
-                                    .iter()
-                                    .filter_map(|(key, val)| {
-                                        val.as_str().map(|s| (key.clone(), s.to_string()))
-                                    })
-                                    .collect();
+                                let lang_translations = table.iter().filter_map(|(key, val)| {val.as_str().map(|s| (key.clone(), s.to_string()))}).collect();
 
                                 if let Some(lang_name) = table.get("language_name").and_then(|v| v.as_str()) {
                                     language_names.push((lang.to_string(), lang_name.to_string()));
@@ -266,6 +260,8 @@ impl TranslationStore {
                 }
             }
         }
+
+        language_names.sort_by_key(|value| value.0.clone());
 
         Self {
             translations,
