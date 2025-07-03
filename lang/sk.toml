@@ -1,0 +1,130 @@
+# Metadata
+
+language_name = "Slovenčina"
+translated_by = "Preklad: AI"
+author = "Vytvoril Kierownik223"
+
+# Header
+
+home = "Hlavná stránka"
+settings = "Nastavenia"
+log_in = "Prihlásiť sa"
+manage_account = "Správa účtu"
+admin = "Admin panel"
+log_out = "Odhlásiť sa"
+
+# Settings
+
+sync_settings = "Synchronizovať nastavenia"
+sync_success = "Nastavenia boli úspešne uložené."
+fetch_settings = "Načítať nastavenia"
+fetch_success = "Nastavenia boli úspešne načítané!"
+language = "Jazyk"
+theme = "Téma"
+change_lang = "Zmeniť jazyk (NOVÉ!)"
+change_theme = "Zmeniť tému"
+theme_default = "Predvolená téma"
+theme_darkblu = "Tmavomodrá téma"
+theme_greenish = "Zelenkastá téma"
+theme_antique = "Antická (pôvodná) téma"
+plain = "Čisté HTML"
+enable = "Povoliť"
+disable = "Zakázať"
+hires = "Ikony vo vysokom rozlíšení"
+smallhead = "Malé logo hlavičky"
+dont_override_settings = "Neprepísať nastavenia"
+save_settings = "Uložiť nastavenia"
+
+# Files
+
+readme = "Informácie"
+download = "Stiahnuť"
+file = "súbor"
+folder = "Priečinok súborov"
+archive = "Archív"
+zipviewer_title = "ZIP prehliadač"
+zip_file = "ZIP súbor"
+mdreader_title = "MD čítačka"
+reading_markdown = "Čítanie súboru"
+file_details = "Podrobnosti o súbore"
+file_name = "Názov súboru"
+file_size = "Veľkosť súboru"
+file_downloads = "Stiahnutia"
+print = "Tlačiť"
+viewing_zip = "Zobrazenie ZIP súboru"
+watching = "Zobrazenie súboru"
+
+# Uploader
+
+uploader = "Nahrávač"
+upload = "Nahrať"
+select_file = "Vybrať súbor"
+upload_success = "úspešne nahraný!"
+upload_error = "Pri nahrávaní súboru došlo k chybe."
+uploader_title = "Nahrávač súborov"
+target_dir = "Cieľový adresár"
+target_placeholder = "Nechajte prázdne pre /uploads/"
+max_size = "Maximálna povolená veľkosť súboru je 100MB."
+select_folder = "Vybrať priečinok"
+browse = "Prehliadať"
+select_files = "Vyberte súbory na nahratie."
+uploading = "Nahráva sa"
+
+# Account
+
+username = "Používateľské meno"
+password = "Heslo"
+invalid_info = "Neplatné používateľské meno alebo heslo."
+log_in_with_marmak = "Prihlásiť sa pomocou účtu MARMAK&trade;"
+welcome = "Ahoj"
+tip = "Tip"
+settings_tip1 = "Ak chcete ponechať svoje aktuálne nastavenia, prejdite na"
+settings_tip2 = "a povoľte \"Neprepísať nastavenia\"."
+
+# Admin
+
+usage = "Využitie"
+disk_usage = "Využitie disku"
+sysinfo = "Informácie o serveri"
+memory_usage = "Využitie pamäte"
+system = "Systém"
+kernel_version = "Verzia jadra"
+hostname = "Názov hostiteľa"
+
+# Audio player
+
+listening = "Počúvate súbor"
+album = "Album"
+year = "Rok"
+genre = "Žáner"
+album_cover = "Obal albumu"
+
+# File deletion
+
+delete_success = "úspešne odstránený!"
+delete_confirmation = "Naozaj chcete odstrániť"
+delete = "Odstrániť"
+
+# Errors
+
+error = "Chyba"
+not_found = "Nenájdené"
+error_400 = "Klient poslal neplatnú požiadavku. Skúste to znova."
+error_404 = "Požadovaný zdroj sa nepodarilo nájsť. Skontrolujte URL a skúste to znova."
+error_50x = "Došlo k internej chybe servera. Prosím, nahláste nám to."
+error_403 = "Momentálne nemáte prístup k tomuto zdroju. Prihláste sa ako používateľ s vyššími právami."
+no_details = "Nie sú k dispozícii žiadne podrobnosti!"
+no_video = "Váš prehliadač nepodporuje video prvok."
+no_audio = "Váš prehliadač nepodporuje audio prvok."
+upload_parse_error = "nahrané, ale odpoveď sa nepodarilo spracovať."
+upload_failed_status = "zlyhalo so stavom"
+upload_failed_network = "nahrávanie zlyhalo kvôli chybe siete."
+error_occured = "Došlo k chybe:"
+error_deleting = "Pri mazaní súboru došlo k chybe."
+directory_not_empty = "Tento priečinok nie je prázdny!"
+
+# Generic UI strings
+
+ok = "OK"
+cancel = "Zrušiť"
+others = "ostatní"
