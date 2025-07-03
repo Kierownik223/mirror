@@ -230,11 +230,13 @@ type Translations = HashMap<String, HashMap<String, String>>;
 
 struct TranslationStore {
     translations: Translations,
+    language_names: Vec<(String, String)>
 }
 
 impl TranslationStore {
     fn new() -> Self {
         let mut translations = HashMap::new();
+        let mut language_names = Vec::new();
 
         let lang_dir = Path::new("lang/");
 
@@ -244,6 +246,7 @@ impl TranslationStore {
                     if let Ok(contents) = fs::read_to_string(entry.path()) {
                         if let Ok(parsed) = contents.parse::<Value>() {
                             if let Some(table) = parsed.as_table() {
+                                // Extract translations
                                 let lang_translations = table
                                     .iter()
                                     .filter_map(|(key, val)| {
@@ -251,8 +254,11 @@ impl TranslationStore {
                                     })
                                     .collect();
 
-                                println!("Loaded language {}", lang);
+                                if let Some(lang_name) = table.get("language_name").and_then(|v| v.as_str()) {
+                                    language_names.push((lang.to_string(), lang_name.to_string()));
+                                }
 
+                                println!("Loaded language {}", lang);
                                 translations.insert(lang.to_string(), lang_translations);
                             }
                         }
@@ -261,15 +267,22 @@ impl TranslationStore {
             }
         }
 
-        Self { translations }
+        Self {
+            translations,
+            language_names,
+        }
     }
 
     fn get_translation(&self, lang: &str) -> &HashMap<String, String> {
-        if self.translations.contains_key(lang) {
-            self.translations.get(lang).unwrap()
-        } else {
-            self.translations.get("en").unwrap()
-        }
+        self.translations.get(lang).unwrap_or_else(|| {
+            self.translations
+                .get("en")
+                .expect("English fallback translation not found")
+        })
+    }
+
+    fn available_languages(&self) -> &Vec<(String, String)> {
+        &self.language_names
     }
 }
 
@@ -668,6 +681,8 @@ fn settings(
     let mut theme = get_theme(jar);
     let strings = translations.get_translation(&lang);
 
+    let language_names = translations.available_languages();
+
     let root_domain = host.0.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
 
     let settings_map = vec![
@@ -751,7 +766,8 @@ fn settings(
             smallhead: get_bool_cookie(jar, "smallhead"),
             plain: get_bool_cookie(jar, "plain"),
             nooverride: get_bool_cookie(jar, "nooverride"),
-            filebrowser: get_bool_cookie(jar, "filebrowser")
+            filebrowser: get_bool_cookie(jar, "filebrowser"),
+            language_names
         },
     ));
 }

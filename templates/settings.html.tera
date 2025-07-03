@@ -14,15 +14,9 @@
 <form method="get">
     <img src="/static/images/icons/{% if hires %}hires/{% endif %}lang.png" class="icon">{{ strings.change_lang }}<br>
     <select name="lang">
-        <option value="de" {% if lang=="de" %}selected{% endif %}>Deutsch</option>
-        <option value="en" {% if lang=="en" %}selected{% endif %}>English</option>
-        <option value="ja" {% if lang=="ja" %}selected{% endif %}>日本語</option>
-        <option value="csb" {% if lang=="csb" %}selected{% endif %}>Kaszëbsczi</option>
-        <option value="pl" {% if lang=="pl" %}selected{% endif %}>Polski</option>
-        <option value="pt" {% if lang=="pt" %}selected{% endif %}>Português</option>
-        <option value="ru" {% if lang=="ru" %}selected{% endif %}>Русский</option>
-        <option value="szl" {% if lang=="szl" %}selected{% endif %}>Ślōnskŏ</option>
-        <option value="uk" {% if lang=="uk" %}selected{% endif %}>Українська</option>
+        {% for s in language_names %}
+        <option value="{{ s.0 }}" {% if lang==s.0 %}selected{% endif %}>{{ s.1 }}</option>
+        {% endfor %}
     </select>
     <br>
     <img src="/static/images/icons/{% if hires %}hires/{% endif %}theme.png" class="icon">{{ strings.change_theme }}<br>
