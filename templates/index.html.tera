@@ -83,7 +83,7 @@
             <td><a href="{{ s.name }}"><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png"
                         class="icon">{{ s.name }}</a></td>
             <td>{{ s.size }}</td>
-            <td>{{ s.ext }} {{ strings.file }}</td>
+            <td>{{ strings.file }}</td>
             {% if admin and filebrowser %}<td><a style="cursor: pointer;" onclick="deleteFile(this, '{{ s.name }}')">{{ strings.delete }}</a></td>{% endif %}
         </tr>
         {% endfor %}

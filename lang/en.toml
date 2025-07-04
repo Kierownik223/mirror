@@ -39,7 +39,7 @@ save_settings = "Save settings"
 
 readme = "Information"
 download = "Download"
-file = "file"
+file = "File"
 folder = "File folder"
 archive = "Archive"
 zipviewer_title = "ZIP viewer"

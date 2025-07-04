@@ -39,7 +39,7 @@ save_settings = "Beállítások mentése"
 
 readme = "Információ"
 download = "Letöltés"
-file = "fájl"
+file = "Fájl"
 folder = "Fájlmappa"
 archive = "Archívum"
 zipviewer_title = "ZIP megtekintő"

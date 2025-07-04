@@ -39,7 +39,7 @@ save_settings = "Uložiť nastavenia"
 
 readme = "Informácie"
 download = "Stiahnuť"
-file = "súbor"
+file = "Súbor"
 folder = "Priečinok súborov"
 archive = "Archív"
 zipviewer_title = "ZIP prehliadač"

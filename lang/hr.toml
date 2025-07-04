@@ -39,7 +39,7 @@ save_settings = "Spremi postavke"
 
 readme = "Informacije"
 download = "Preuzmi"
-file = "datoteka"
+file = "Datoteka"
 folder = "Mapa datoteka"
 archive = "Arhiva"
 zipviewer_title = "ZIP preglednik"

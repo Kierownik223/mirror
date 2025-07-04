@@ -39,7 +39,7 @@ save_settings = "Salvează setările"
 
 readme = "Informații"
 download = "Descarcă"
-file = "fișier"
+file = "Fișier"
 folder = "Director de fișiere"
 archive = "Arhivă"
 zipviewer_title = "Vizualizator ZIP"
