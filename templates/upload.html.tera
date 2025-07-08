@@ -20,14 +20,16 @@
         <img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}default.png">{{ strings.select_file }}:
     </label>
     <center>
-        <input type="file" name="files" id="file" multiple required>
+        <input type="file" name="files" id="file" class="text" multiple required>
     </center>
 
     <label for="path">
         <img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png">{{ strings.target_dir }}:
     </label>
     <center>
-        <input type="text" id="path" name="path" placeholder="{{ strings.target_placeholder }}">
+        <div class="textbox-container">
+            <input type="text" id="path" name="path" class="text" placeholder="{{ strings.target_placeholder }}">
+        </div>
         {% if filebrowser %}
         <button type="button" onclick="openDialog()">
             <img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">{{ strings.browse }}

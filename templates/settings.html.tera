@@ -59,7 +59,7 @@
     {% endif %}
     <br>
     <center>
-        <button type="submit">{{ strings.save_settings }}</button>
+        <input type="submit" class="submit" value="{{ strings.save_settings }}">
     </center>
 </form>
 {% endblock content %}

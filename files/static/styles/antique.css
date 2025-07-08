@@ -1,7 +1,7 @@
 @import url('/static/fonts/OpenSans.css');
 
 body {
-    margin: 0;
+    margin: 10px;
     background-color: antiquewhite;
     color: black;
     font-family: 'Open Sans', sans-serif;
@@ -43,8 +43,8 @@ a:hover {
 
 .main {
     margin-top: 20px;
-    padding: 5px;
-    border: 1px solid black;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
 }
 
 div.line {
@@ -52,7 +52,9 @@ div.line {
     width: 100%;
 }
 
-input,
+input.text,
+input.submit,
+select,
 button {
 	padding: 10px;
 	font-size: 16px;

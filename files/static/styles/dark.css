@@ -65,8 +65,8 @@ th {
     text-align: center;
 }
 
-input[type=text],
-input[type=password],
+input.text,
+input.submit,
 select,
 button {
 	padding: 10px;

@@ -69,7 +69,8 @@ th {
     text-align: center;
 }
 
-input,
+input.text,
+input.submit,
 select,
 button {
 	padding: 10px;

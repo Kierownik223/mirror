@@ -15,6 +15,13 @@
     <meta property="og:site_name" content="MARMAK Mirror">
     <meta name="description" content="{{ title }}">
     <link rel="stylesheet" href="/static/styles/{{ theme }}.css">
+    <!--[if IE 6]>
+    <style>
+    input.text {
+        width: expression((document.documentElement.clientWidth || document.body.clientWidth) - 42 + 'px');
+    }
+    </style>
+    <![endif]-->
     <title>{{ title | safe }} - MARMAK Mirror</title>
 </head>
 <body>
