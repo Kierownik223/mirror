@@ -15,6 +15,7 @@
 Loading...
 </div>
 
+<script src="/static/json.js"></script>
 <script src="/static/admin.js"></script>
 
 {% endblock content %}

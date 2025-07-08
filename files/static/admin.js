@@ -1,13 +1,28 @@
 (function () {
+  function logError(msg, err) {
+    if (window.console && typeof console.error === "function") {
+      console.error(msg, err || "");
+    }
+  }
+
   function updateDisks() {
-    var xhr = new XMLHttpRequest();
+    var xhr;
+    if (window.XMLHttpRequest) {
+      xhr = new XMLHttpRequest();
+    } else {
+      xhr = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+
     xhr.open("GET", "/api/sysinfo", true);
+
     xhr.onreadystatechange = function () {
       if (xhr.readyState === 4) {
-        if (xhr.status === 200) {
+        if (xhr.status === 200 || xhr.status === 0) {
           try {
             var data = JSON.parse(xhr.responseText);
             var disksContainer = document.getElementById("disks");
+            if (!disksContainer) return;
+
             disksContainer.innerHTML = "";
 
             for (var i = 0; i < data.disks.length; i++) {
@@ -20,30 +35,34 @@
               disksContainer.appendChild(diskDiv);
             }
           } catch (e) {
-            if (window.console) console.error("JSON parse error:", e);
+            logError("JSON parse error:", e);
           }
         } else {
-          if (window.console) console.error("HTTP error:", xhr.status);
+          logError("HTTP error:", xhr.status);
         }
       }
     };
-    xhr.onerror = function () {
-      if (window.console)
-        console.error("Network error occurred during /api/sysinfo fetch.");
-    };
-    xhr.send();
+
+    try {
+      xhr.send();
+    } catch (e) {
+      logError("XHR send error:", e);
+    }
   }
 
-  if (
-    document.readyState === "complete" ||
-    document.readyState === "interactive"
-  ) {
-    setTimeout(updateDisks, 0);
-  } else if (document.addEventListener) {
-    document.addEventListener("DOMContentLoaded", updateDisks, false);
-  } else if (document.attachEvent) {
-    document.attachEvent("onreadystatechange", function () {
-      if (document.readyState === "complete") updateDisks();
-    });
+  function domReady(fn) {
+    if (document.readyState === "complete" || document.readyState === "interactive") {
+      setTimeout(fn, 0);
+    } else if (document.addEventListener) {
+      document.addEventListener("DOMContentLoaded", fn, false);
+    } else if (document.attachEvent) {
+      document.attachEvent("onreadystatechange", function () {
+        if (document.readyState === "complete") fn();
+      });
+    } else {
+      window.onload = fn;
+    }
   }
+
+  domReady(updateDisks);
 })();

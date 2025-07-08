@@ -3,18 +3,34 @@
 {% block content %}
 {% if admin and filebrowser %}
 <script>
+    if (!window.JSON) {
+    window.JSON = {
+        parse: function (s) {
+            return eval('(' + s + ')');
+        }
+    };
+    }
+
     function deleteFile(element, filePath) {
         var path = window.location.pathname + filePath;
         if (!confirm("{{ strings.delete_confirmation }} " + decodeURIComponent(path) + "?")) {
             return;
         }
 
-        var xhr = new XMLHttpRequest();
+        var xhr;
+        if (window.XMLHttpRequest) {
+            xhr = new XMLHttpRequest();
+        } else {
+            xhr = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+
         xhr.open("DELETE", "/api" + path, true);
+
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 204) {
-                    var row = element.parentNode.parentElement;
+                    var row = element.parentNode;
+                    if (row) row = row.parentNode;
                     if (row && row.parentNode) {
                         row.parentNode.removeChild(row);
                     }
@@ -31,11 +47,12 @@
                 }
             }
         };
-        xhr.onerror = function () {
-            console.error("Error deleting file.");
+
+        try {
+            xhr.send();
+        } catch (e) {
             alert("{{ strings.error_deleting }}");
-        };
-        xhr.send();
+        }
     }
 </script>
 {% endif %}

@@ -1,17 +1,37 @@
 function openDialog() {
-    document.getElementById("browse_dialog").style.display = "block";
+    var dialog = document.getElementById("browse_dialog");
+    if (dialog) dialog.style.display = "block";
 }
 
 function closeDialog() {
-    document.getElementById("browse_dialog").style.display = "none";
+    var dialog = document.getElementById("browse_dialog");
+    if (dialog) dialog.style.display = "none";
 }
 
 function selectPath() {
-    const iframe = document.getElementById("browser_iframe").contentWindow;
-    const pathInput = iframe.document.querySelector("input[name='path']");
-    
-    if (pathInput) {
-        document.getElementById("path").value = pathInput.value;
+    var iframe = document.getElementById("browser_iframe");
+    var iframeDoc;
+
+    try {
+        iframeDoc = iframe.contentWindow ? iframe.contentWindow.document : iframe.document;
+    } catch (e) {
+        alert("Unable to access iframe content.");
+        return;
+    }
+
+    var inputs = iframeDoc.getElementsByTagName("input");
+    var pathValue = "";
+
+    for (var i = 0; i < inputs.length; i++) {
+        if (inputs[i].name === "path") {
+            pathValue = inputs[i].value;
+            break;
+        }
+    }
+
+    var pathField = document.getElementById("path");
+    if (pathField) {
+        pathField.value = pathValue;
     }
 
     closeDialog();

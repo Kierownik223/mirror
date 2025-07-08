@@ -1,7 +1,20 @@
 (function () {
+  function logError(msg, err) {
+    if (window.console && typeof console.error === "function") {
+      console.error(msg, err || "");
+    }
+  }
+
   function updateInfo() {
-    var xhr = new XMLHttpRequest();
+    var xhr;
+    if (window.XMLHttpRequest) {
+      xhr = new XMLHttpRequest();
+    } else {
+      xhr = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+
     xhr.open("GET", "/api/sysinfo", true);
+
     xhr.onreadystatechange = function () {
       if (xhr.readyState === 4) {
         if (xhr.status === 200 || xhr.status === 0) {
@@ -14,19 +27,19 @@
             var disksContainer = document.getElementById("disks");
 
             if (usedMem) {
-                if ('textContent' in usedMem) {
-                    usedMem.textContent = data.used_mem_readable;
-                } else {
-                    usedMem.innerText = data.used_mem_readable;
-                }
+              if ("textContent" in usedMem) {
+                usedMem.textContent = data.used_mem_readable;
+              } else {
+                usedMem.innerText = data.used_mem_readable;
+              }
             }
 
             if (totalMem) {
-                if ('textContent' in totalMem) {
-                    totalMem.textContent = data.total_mem_readable;
-                } else {
-                    totalMem.innerText = data.total_mem_readable;
-                }
+              if ("textContent" in totalMem) {
+                totalMem.textContent = data.total_mem_readable;
+              } else {
+                totalMem.innerText = data.total_mem_readable;
+              }
             }
 
             if (memUsage) {
@@ -47,21 +60,19 @@
               }
             }
           } catch (e) {
-            if (window.console) console.error("JSON parse error:", e);
+            logError("JSON parse error:", e);
           }
         } else {
-          if (window.console)
-            console.error("Failed to fetch system info. Status:", xhr.status);
+          logError("Failed to fetch system info. Status:", xhr.status);
         }
       }
     };
 
-    xhr.onerror = function () {
-      if (window.console)
-        console.error("Request failed while fetching system info.");
-    };
-
-    xhr.send();
+    try {
+      xhr.send();
+    } catch (e) {
+      logError("Request send error:", e);
+    }
   }
 
   function init() {
@@ -69,16 +80,19 @@
     setInterval(updateInfo, 2500);
   }
 
-  if (
-    document.readyState === "complete" ||
-    document.readyState === "interactive"
-  ) {
-    setTimeout(init, 0);
-  } else if (document.addEventListener) {
-    document.addEventListener("DOMContentLoaded", init, false);
-  } else if (document.attachEvent) {
-    document.attachEvent("onreadystatechange", function () {
-      if (document.readyState === "complete") init();
-    });
+  function domReady(fn) {
+    if (document.readyState === "complete" || document.readyState === "interactive") {
+      setTimeout(fn, 0);
+    } else if (document.addEventListener) {
+      document.addEventListener("DOMContentLoaded", fn, false);
+    } else if (document.attachEvent) {
+      document.attachEvent("onreadystatechange", function () {
+        if (document.readyState === "complete") fn();
+      });
+    } else {
+      window.onload = fn;
+    }
   }
+
+  domReady(init);
 })();
