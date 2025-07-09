@@ -1,0 +1,130 @@
+# Metadata
+
+language_name = "Қазақша"
+translated_by = "Аударған: AI"
+author = "Жасады: Kierownik223"
+
+# Header
+
+home = "Басты бет"
+settings = "Баптаулар"
+log_in = "Кіру"
+manage_account = "Есептік жазбаны басқару"
+admin = "Әкімші панелі"
+log_out = "Шығу"
+
+# Settings
+
+sync_settings = "Баптауларды синхрондау"
+sync_success = "Баптаулар сәтті сақталды."
+fetch_settings = "Баптауларды жүктеу"
+fetch_success = "Баптаулар сәтті жүктелді!"
+language = "Тіл"
+theme = "Тақырып"
+change_lang = "Тілді өзгерту (ЖАҢА!)"
+change_theme = "Тақырыпты өзгерту"
+theme_default = "Әдепкі тақырып"
+theme_darkblu = "Қара көк тақырып"
+theme_greenish = "Жасыл реңк"
+theme_antique = "Антикалық (түпнұсқа) тақырып"
+plain = "Қарапайым HTML"
+enable = "Қосу"
+disable = "Өшіру"
+hires = "Жоғары ажыратымдылықтағы белгілер"
+smallhead = "Кіші тақырып логотипі"
+dont_override_settings = "Баптауларды қайта жазбау"
+save_settings = "Баптауларды сақтау"
+
+# Files
+
+readme = "Ақпарат"
+download = "Жүктеу"
+file = "Файл"
+folder = "Қалтa"
+archive = "Архив"
+zipviewer_title = "ZIP қарау құралы"
+zip_file = "ZIP файл"
+mdreader_title = "MD оқу құралы"
+reading_markdown = "Файл оқылуда"
+file_details = "Файл туралы ақпарат"
+file_name = "Файл атауы"
+file_size = "Файл көлемі"
+file_downloads = "Жүктеулер"
+print = "Басып шығару"
+viewing_zip = "ZIP файл қаралуда"
+watching = "Файл қаралуда"
+
+# Uploader
+
+uploader = "Жүктеуші"
+upload = "Жүктеу"
+select_file = "Файлды таңдау"
+upload_success = "сәтті жүктелді!"
+upload_error = "Жүктеу кезінде қате пайда болды."
+uploader_title = "Файлдарды жүктеуші"
+target_dir = "Мақсатты қалта"
+target_placeholder = "Бос қалдырыңыз /uploads/"
+max_size = "Максималды файл өлшемі 100МБ."
+select_folder = "Қалтаны таңдаңыз"
+browse = "Шолу"
+select_files = "Жүктеу үшін файлдарды таңдаңыз."
+uploading = "Жүктелуде"
+
+# Account
+
+username = "Пайдаланушы аты"
+password = "Құпия сөз"
+invalid_info = "Қате пайдаланушы аты немесе құпия сөз."
+log_in_with_marmak = "MARMAK аккаунтымен кіріңіз™"
+welcome = "Қош келдіңіз"
+tip = "Кеңес"
+settings_tip1 = "Ағымдағы баптауларды сақтау үшін өтіңіз"
+settings_tip2 = "және \"Баптауларды қайта жазбау\" функциясын қосыңыз."
+
+# Admin
+
+usage = "Қолдану"
+disk_usage = "Диск пайдалану"
+sysinfo = "Сервер туралы ақпарат"
+memory_usage = "Жадыны пайдалану"
+system = "Жүйе"
+kernel_version = "Ядро нұсқасы"
+hostname = "Хост атауы"
+
+# Audio player
+
+listening = "Файл тыңдалуда"
+album = "Альбом"
+year = "Жыл"
+genre = "Жанр"
+album_cover = "Альбом мұқабасы"
+
+# File deletion
+
+delete_success = "сәтті жойылды!"
+delete_confirmation = "Осыны жойғыңыз келетініне сенімдісіз бе?"
+delete = "Жою"
+
+# Errors
+
+error = "Қате"
+not_found = "Табылмады"
+error_400 = "Клиент дұрыс емес сұраныс жіберді. Қайталап көріңіз."
+error_404 = "Сұралған ресурс табылмады. URL мекенжайын тексеріп, қайта көріңіз."
+error_50x = "Серверде ішкі қате болды. Бізге хабарлаңыз."
+error_403 = "Бұл ресурсқа кіруге рұқсатыңыз жоқ. Жоғары құқықтары бар пайдаланушы ретінде кіріңіз."
+no_details = "Мәліметтер жоқ!"
+no_video = "Браузеріңіз видео элементін қолдамайды."
+no_audio = "Браузеріңіз аудио элементін қолдамайды."
+upload_parse_error = "жүктелді, бірақ жауап өңделмеді."
+upload_failed_status = "статусымен сәтсіз болды"
+upload_failed_network = "жүктеу желі қатесі себепті сәтсіз болды."
+error_occured = "Қате орын алды:"
+error_deleting = "Файлды жою кезінде қате пайда болды."
+directory_not_empty = "Бұл каталог бос емес!"
+
+# Generic UI strings
+
+ok = "Жарайды"
+cancel = "Бас тарту"
+others = "басқалар"

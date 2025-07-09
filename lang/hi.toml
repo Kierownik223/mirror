@@ -1,0 +1,130 @@
+# Metadata
+
+language_name = "हिन्दी"
+translated_by = "अनुवाद: AI"
+author = "निर्माता: Kierownik223"
+
+# Header
+
+home = "मुखपृष्ठ"
+settings = "सेटिंग्स"
+log_in = "लॉग इन"
+manage_account = "खाता प्रबंधन"
+admin = "एडमिन पैनल"
+log_out = "लॉग आउट"
+
+# Settings
+
+sync_settings = "सेटिंग्स सिंक करें"
+sync_success = "सेटिंग्स सफलतापूर्वक सहेजी गईं।"
+fetch_settings = "सेटिंग्स प्राप्त करें"
+fetch_success = "सेटिंग्स सफलतापूर्वक प्राप्त हुईं!"
+language = "भाषा"
+theme = "थीम"
+change_lang = "भाषा बदलें (नया!)"
+change_theme = "थीम बदलें"
+theme_default = "डिफ़ॉल्ट थीम"
+theme_darkblu = "डार्क ब्लू थीम"
+theme_greenish = "हरा-सा थीम"
+theme_antique = "एंटीक (मूल) थीम"
+plain = "साधारण HTML"
+enable = "सक्षम करें"
+disable = "अक्षम करें"
+hires = "उच्च-रिज़ॉल्यूशन आइकन"
+smallhead = "छोटा हेडर लोगो"
+dont_override_settings = "सेटिंग्स ओवरराइड न करें"
+save_settings = "सेटिंग्स सहेजें"
+
+# Files
+
+readme = "जानकारी"
+download = "डाउनलोड"
+file = "फ़ाइल"
+folder = "फ़ोल्डर"
+archive = "आर्काइव"
+zipviewer_title = "ZIP दर्शक"
+zip_file = "ZIP फ़ाइल"
+mdreader_title = "MD रीडर"
+reading_markdown = "फ़ाइल पढ़ी जा रही है"
+file_details = "फ़ाइल विवरण"
+file_name = "फ़ाइल का नाम"
+file_size = "फ़ाइल का आकार"
+file_downloads = "डाउनलोड"
+print = "प्रिंट"
+viewing_zip = "ZIP फ़ाइल देख रहे हैं"
+watching = "फ़ाइल देख रहे हैं"
+
+# Uploader
+
+uploader = "अपलोडर"
+upload = "अपलोड करें"
+select_file = "फ़ाइल चुनें"
+upload_success = "सफलतापूर्वक अपलोड किया गया!"
+upload_error = "फ़ाइल अपलोड करते समय त्रुटि हुई।"
+uploader_title = "फ़ाइल अपलोडर"
+target_dir = "लक्षित निर्देशिका"
+target_placeholder = "/uploads/ के लिए खाली छोड़ें"
+max_size = "अधिकतम फ़ाइल आकार 100MB है।"
+select_folder = "फ़ोल्डर चुनें"
+browse = "ब्राउज़ करें"
+select_files = "अपलोड के लिए फ़ाइलें चुनें।"
+uploading = "अपलोड हो रहा है"
+
+# Account
+
+username = "उपयोगकर्ता नाम"
+password = "पासवर्ड"
+invalid_info = "अमान्य उपयोगकर्ता नाम या पासवर्ड।"
+log_in_with_marmak = "MARMAK खाता से लॉग इन करें™"
+welcome = "नमस्ते"
+tip = "टिप"
+settings_tip1 = "यदि आप अपनी वर्तमान सेटिंग्स रखना चाहते हैं, तो जाएँ"
+settings_tip2 = "और \"सेटिंग्स ओवरराइड न करें\" सक्षम करें।"
+
+# Admin
+
+usage = "उपयोग"
+disk_usage = "डिस्क उपयोग"
+sysinfo = "सर्वर जानकारी"
+memory_usage = "मेमोरी उपयोग"
+system = "सिस्टम"
+kernel_version = "कर्नेल संस्करण"
+hostname = "होस्टनाम"
+
+# Audio player
+
+listening = "फ़ाइल सुन रहे हैं"
+album = "एल्बम"
+year = "साल"
+genre = "शैली"
+album_cover = "एल्बम कवर"
+
+# File deletion
+
+delete_success = "सफलतापूर्वक हटाया गया!"
+delete_confirmation = "क्या आप वाकई इसे हटाना चाहते हैं?"
+delete = "हटाएँ"
+
+# Errors
+
+error = "त्रुटि"
+not_found = "मिला नहीं"
+error_400 = "क्लाइंट ने एक अमान्य अनुरोध भेजा। कृपया पुनः प्रयास करें।"
+error_404 = "अनुरोधित संसाधन नहीं मिला। कृपया URL जांचें और पुनः प्रयास करें।"
+error_50x = "आंतरिक सर्वर त्रुटि हुई। कृपया हमें रिपोर्ट करें।"
+error_403 = "आपके पास इस संसाधन तक पहुँच नहीं है। कृपया उच्चाधिकार वाले उपयोगकर्ता के रूप में लॉग इन करें।"
+no_details = "कोई विवरण उपलब्ध नहीं!"
+no_video = "आपका ब्राउज़र वीडियो तत्व का समर्थन नहीं करता।"
+no_audio = "आपका ब्राउज़र ऑडियो तत्व का समर्थन नहीं करता।"
+upload_parse_error = "अपलोड तो हो गया, पर प्रतिक्रिया पार्स नहीं हो सकी।"
+upload_failed_status = "स्थिति के साथ विफल"
+upload_failed_network = "नेटवर्क त्रुटि के कारण अपलोड विफल।"
+error_occured = "त्रुटि हुई:"
+error_deleting = "फ़ाइल हटाते समय त्रुटि हुई।"
+directory_not_empty = "यह निर्देशिका खाली नहीं है!"
+
+# Generic UI strings
+
+ok = "ठीक है"
+cancel = "रद्द करें"
+others = "अन्य"

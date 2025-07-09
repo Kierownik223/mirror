@@ -1,0 +1,130 @@
+# Metadata
+
+language_name = "Lietuvių"
+translated_by = "Vertimas: AI"
+author = "Sukurta Kierownik223"
+
+# Header
+
+home = "Pagrindinis"
+settings = "Nustatymai"
+log_in = "Prisijungti"
+manage_account = "Valdyti paskyrą"
+admin = "Administratoriaus panelė"
+log_out = "Atsijungti"
+
+# Settings
+
+sync_settings = "Sinchronizuoti nustatymus"
+sync_success = "Nustatymai sėkmingai išsaugoti."
+fetch_settings = "Gauti nustatymus"
+fetch_success = "Nustatymai sėkmingai gauti!"
+language = "Kalba"
+theme = "Tema"
+change_lang = "Pakeisti kalbą (NAUJAS!)"
+change_theme = "Pakeisti temą"
+theme_default = "Numatytoji tema"
+theme_darkblu = "Tamsiai mėlyna tema"
+theme_greenish = "Žalsva tema"
+theme_antique = "Antikinė (originali) tema"
+plain = "Paprastas HTML"
+enable = "Įjungti"
+disable = "Išjungti"
+hires = "Didelės raiškos piktogramos"
+smallhead = "Mažas antraštės logotipas"
+dont_override_settings = "Nepiesti nustatymų"
+save_settings = "Išsaugoti nustatymus"
+
+# Files
+
+readme = "Informacija"
+download = "Atsisiųsti"
+file = "Failas"
+folder = "Aplankas"
+archive = "Archyvas"
+zipviewer_title = "ZIP peržiūros programa"
+zip_file = "ZIP failas"
+mdreader_title = "MD skaitytuvas"
+reading_markdown = "Skaitomas failas"
+file_details = "Failo detalės"
+file_name = "Failo pavadinimas"
+file_size = "Failo dydis"
+file_downloads = "Atsisiuntimai"
+print = "Spausdinti"
+viewing_zip = "Peržiūrimas ZIP failas"
+watching = "Peržiūrimas failas"
+
+# Uploader
+
+uploader = "Įkėlėjas"
+upload = "Įkelti"
+select_file = "Pasirinkite failą"
+upload_success = "įkeltas sėkmingai!"
+upload_error = "Įvyko klaida įkeliant."
+uploader_title = "Failų įkėlėjas"
+target_dir = "Tikslinė direktorija"
+target_placeholder = "Palikite tuščią /uploads/"
+max_size = "Maksimalus failo dydis 100MB."
+select_folder = "Pasirinkite aplanką"
+browse = "Naršyti"
+select_files = "Pasirinkite failus įkėlimui."
+uploading = "Įkeliama"
+
+# Account
+
+username = "Vartotojo vardas"
+password = "Slaptažodis"
+invalid_info = "Neteisingas vartotojo vardas arba slaptažodis."
+log_in_with_marmak = "Prisijungti su MARMAK paskyra™"
+welcome = "Sveiki"
+tip = "Patarimas"
+settings_tip1 = "Jei norite išsaugoti dabartinius nustatymus, eikite į"
+settings_tip2 = "ir įjunkite \"Nepakeisti nustatymų\"."
+
+# Admin
+
+usage = "Naudojimas"
+disk_usage = "Disko naudojimas"
+sysinfo = "Serverio informacija"
+memory_usage = "Atminties naudojimas"
+system = "Sistema"
+kernel_version = "Branduolio versija"
+hostname = "Kompiuterio vardas"
+
+# Audio player
+
+listening = "Klausoma failo"
+album = "Albumas"
+year = "Metai"
+genre = "Žanras"
+album_cover = "Albumo viršelis"
+
+# File deletion
+
+delete_success = "sėkmingai ištrintas!"
+delete_confirmation = "Ar tikrai norite tai ištrinti?"
+delete = "Ištrinti"
+
+# Errors
+
+error = "Klaida"
+not_found = "Nerasta"
+error_400 = "Klientas išsiuntė neteisingą užklausą. Prašome bandyti dar kartą."
+error_404 = "Prašomas resursas nerastas. Patikrinkite URL ir bandykite dar kartą."
+error_50x = "Įvyko vidinė serverio klaida. Prašome pranešti mums."
+error_403 = "Neturite prieigos prie šio resurso. Prisijunkite kaip vartotojas su aukštesnėmis teisėmis."
+no_details = "Nėra detalių!"
+no_video = "Jūsų naršyklė nepalaiko video elemento."
+no_audio = "Jūsų naršyklė nepalaiko audio elemento."
+upload_parse_error = "įkeltas, bet atsakymas nebuvo apdorotas."
+upload_failed_status = "nepavyko su statusu"
+upload_failed_network = "įkėlimas nepavyko dėl tinklo klaidos."
+error_occured = "Įvyko klaida:"
+error_deleting = "Įvyko klaida trinant failą."
+directory_not_empty = "Šis katalogas nėra tuščias!"
+
+# Generic UI strings
+
+ok = "Gerai"
+cancel = "Atšaukti"
+others = "kiti"

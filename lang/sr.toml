@@ -1,0 +1,130 @@
+# Metadata
+
+language_name = "Srpski"
+translated_by = "Prevod: AI"
+author = "Autor: Kierownik223"
+
+# Header
+
+home = "Početna"
+settings = "Podešavanja"
+log_in = "Prijava"
+manage_account = "Upravljanje nalogom"
+admin = "Admin panel"
+log_out = "Odjava"
+
+# Settings
+
+sync_settings = "Sinhronizuj podešavanja"
+sync_success = "Podešavanja uspešno sačuvana."
+fetch_settings = "Preuzmi podešavanja"
+fetch_success = "Podešavanja uspešno preuzeta!"
+language = "Jezik"
+theme = "Tema"
+change_lang = "Promeni jezik (NOVO!)"
+change_theme = "Promeni temu"
+theme_default = "Podrazumevana tema"
+theme_darkblu = "Tamnoplava tema"
+theme_greenish = "Zelenkasta tema"
+theme_antique = "Antička (originalna) tema"
+plain = "Običan HTML"
+enable = "Omogući"
+disable = "Onemogući"
+hires = "Ikonice visoke rezolucije"
+smallhead = "Mali logo u zaglavlju"
+dont_override_settings = "Ne prepisuj podešavanja"
+save_settings = "Sačuvaj podešavanja"
+
+# Files
+
+readme = "Informacije"
+download = "Preuzmi"
+file = "Fajl"
+folder = "Fascikla"
+archive = "Arhiva"
+zipviewer_title = "ZIP pregledač"
+zip_file = "ZIP fajl"
+mdreader_title = "MD čitač"
+reading_markdown = "Čitanje fajla"
+file_details = "Detalji fajla"
+file_name = "Naziv fajla"
+file_size = "Veličina fajla"
+file_downloads = "Preuzimanja"
+print = "Štampa"
+viewing_zip = "Pregled ZIP fajla"
+watching = "Gledanje fajla"
+
+# Uploader
+
+uploader = "Otpremalac"
+upload = "Otpremi"
+select_file = "Izaberi fajl"
+upload_success = "uspešno otpremljeno!"
+upload_error = "Došlo je do greške pri otpremanju fajla."
+uploader_title = "Otpremalac fajlova"
+target_dir = "Ciljna fascikla"
+target_placeholder = "Ostavite prazno za /uploads/"
+max_size = "Maksimalna dozvoljena veličina fajla je 100MB."
+select_folder = "Izaberi fasciklu"
+browse = "Pregledaj"
+select_files = "Izaberi fajlove za otpremanje."
+uploading = "Otpremanje"
+
+# Account
+
+username = "Korisničko ime"
+password = "Lozinka"
+invalid_info = "Neispravno korisničko ime ili lozinka."
+log_in_with_marmak = "Prijavi se sa MARMAK nalogom™"
+welcome = "Zdravo"
+tip = "Savet"
+settings_tip1 = "Ako želiš da zadržiš trenutna podešavanja, idi na"
+settings_tip2 = "i omogući \"Ne prepisuj podešavanja\"."
+
+# Admin
+
+usage = "Iskorišćenost"
+disk_usage = "Iskorišćenost diska"
+sysinfo = "Informacije o serveru"
+memory_usage = "Iskorišćenost memorije"
+system = "Sistem"
+kernel_version = "Verzija kernela"
+hostname = "Naziv hosta"
+
+# Audio player
+
+listening = "Slušanje fajla"
+album = "Album"
+year = "Godina"
+genre = "Žanr"
+album_cover = "Naslovna strana albuma"
+
+# File deletion
+
+delete_success = "uspešno obrisano!"
+delete_confirmation = "Da li ste sigurni da želite da obrišete"
+delete = "Obriši"
+
+# Errors
+
+error = "Greška"
+not_found = "Nije pronađeno"
+error_400 = "Klijent je poslao nevažeći zahtev. Pokušajte ponovo."
+error_404 = "Traženi resurs nije pronađen. Proverite URL i pokušajte ponovo."
+error_50x = "Došlo je do interne greške servera. Molimo prijavite ovo."
+error_403 = "Nemate pristup ovom resursu. Prijavite se kao korisnik sa višim privilegijama."
+no_details = "Nema dostupnih detalja!"
+no_video = "Vaš pregledač ne podržava video element."
+no_audio = "Vaš pregledač ne podržava audio element."
+upload_parse_error = "otpremljeno, ali odgovor ne može biti parsiran."
+upload_failed_status = "nije uspelo sa statusom"
+upload_failed_network = "otpremanje nije uspelo zbog mrežne greške."
+error_occured = "Došlo je do greške:"
+error_deleting = "Greška prilikom brisanja fajla."
+directory_not_empty = "Ova fascikla nije prazna!"
+
+# Generic UI strings
+
+ok = "U redu"
+cancel = "Otkaži"
+others = "ostali"

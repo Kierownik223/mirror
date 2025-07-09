@@ -1,0 +1,130 @@
+# Metadata
+
+language_name = "Bahasa Indonesia"
+translated_by = "Terjemahan: AI"
+author = "Dibuat oleh Kierownik223"
+
+# Header
+
+home = "Beranda"
+settings = "Pengaturan"
+log_in = "Masuk"
+manage_account = "Kelola akun"
+admin = "Panel admin"
+log_out = "Keluar"
+
+# Settings
+
+sync_settings = "Sinkronkan pengaturan"
+sync_success = "Pengaturan berhasil disimpan."
+fetch_settings = "Ambil pengaturan"
+fetch_success = "Pengaturan berhasil diambil!"
+language = "Bahasa"
+theme = "Tema"
+change_lang = "Ganti bahasa (BARU!)"
+change_theme = "Ganti tema"
+theme_default = "Tema default"
+theme_darkblu = "Tema biru gelap"
+theme_greenish = "Tema kehijauan"
+theme_antique = "Tema antik (asli)"
+plain = "HTML polos"
+enable = "Aktifkan"
+disable = "Nonaktifkan"
+hires = "Ikon resolusi tinggi"
+smallhead = "Logo header kecil"
+dont_override_settings = "Jangan timpa pengaturan"
+save_settings = "Simpan pengaturan"
+
+# Files
+
+readme = "Informasi"
+download = "Unduh"
+file = "Berkas"
+folder = "Folder"
+archive = "Arsip"
+zipviewer_title = "Penampil ZIP"
+zip_file = "Berkas ZIP"
+mdreader_title = "Pembaca MD"
+reading_markdown = "Membaca berkas"
+file_details = "Detail berkas"
+file_name = "Nama berkas"
+file_size = "Ukuran berkas"
+file_downloads = "Unduhan"
+print = "Cetak"
+viewing_zip = "Melihat berkas ZIP"
+watching = "Melihat berkas"
+
+# Uploader
+
+uploader = "Pengunggah"
+upload = "Unggah"
+select_file = "Pilih berkas"
+upload_success = "berhasil diunggah!"
+upload_error = "Terjadi kesalahan saat mengunggah berkas."
+uploader_title = "Pengunggah Berkas"
+target_dir = "Direktori tujuan"
+target_placeholder = "Kosongkan untuk /uploads/"
+max_size = "Ukuran berkas maksimal 100MB."
+select_folder = "Pilih folder"
+browse = "Telusuri"
+select_files = "Pilih berkas untuk diunggah."
+uploading = "Mengunggah"
+
+# Account
+
+username = "Nama pengguna"
+password = "Kata sandi"
+invalid_info = "Nama pengguna atau kata sandi tidak valid."
+log_in_with_marmak = "Masuk dengan Akun MARMAK™"
+welcome = "Halo"
+tip = "Tips"
+settings_tip1 = "Jika ingin mempertahankan pengaturan saat ini, buka"
+settings_tip2 = "dan aktifkan \"Jangan timpa pengaturan\"."
+
+# Admin
+
+usage = "Penggunaan"
+disk_usage = "Penggunaan disk"
+sysinfo = "Informasi server"
+memory_usage = "Penggunaan memori"
+system = "Sistem"
+kernel_version = "Versi kernel"
+hostname = "Nama host"
+
+# Audio player
+
+listening = "Mendengarkan berkas"
+album = "Album"
+year = "Tahun"
+genre = "Genre"
+album_cover = "Sampul album"
+
+# File deletion
+
+delete_success = "berhasil dihapus!"
+delete_confirmation = "Apakah Anda yakin ingin menghapus ini?"
+delete = "Hapus"
+
+# Errors
+
+error = "Kesalahan"
+not_found = "Tidak ditemukan"
+error_400 = "Klien mengirimkan permintaan yang tidak valid. Silakan coba lagi."
+error_404 = "Sumber yang diminta tidak ditemukan. Periksa URL dan coba lagi."
+error_50x = "Terjadi kesalahan server internal. Harap laporkan kepada kami."
+error_403 = "Anda tidak memiliki akses ke sumber ini. Silakan masuk sebagai pengguna dengan hak akses lebih tinggi."
+no_details = "Tidak ada detail tersedia!"
+no_video = "Browser Anda tidak mendukung elemen video."
+no_audio = "Browser Anda tidak mendukung elemen audio."
+upload_parse_error = "Telah diunggah, tetapi respons tidak dapat diurai."
+upload_failed_status = "gagal dengan status"
+upload_failed_network = "unggahan gagal karena kesalahan jaringan."
+error_occured = "Terjadi kesalahan:"
+error_deleting = "Terjadi kesalahan saat menghapus berkas."
+directory_not_empty = "Direktori ini tidak kosong!"
+
+# Generic UI strings
+
+ok = "OK"
+cancel = "Batal"
+others = "lainnya"

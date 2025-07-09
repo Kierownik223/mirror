@@ -1,0 +1,130 @@
+# Metadata
+
+language_name = "Español"
+translated_by = "Traducción: AI"
+author = "Creado por Kierownik223"
+
+# Header
+
+home = "Inicio"
+settings = "Configuración"
+log_in = "Iniciar sesión"
+manage_account = "Administrar cuenta"
+admin = "Panel de administración"
+log_out = "Cerrar sesión"
+
+# Settings
+
+sync_settings = "Sincronizar configuración"
+sync_success = "Configuración guardada con éxito."
+fetch_settings = "Obtener configuración"
+fetch_success = "¡Configuración obtenida con éxito!"
+language = "Idioma"
+theme = "Tema"
+change_lang = "Cambiar idioma (¡NUEVO!)"
+change_theme = "Cambiar tema"
+theme_default = "Tema predeterminado"
+theme_darkblu = "Tema azul oscuro"
+theme_greenish = "Tema verdoso"
+theme_antique = "Tema antiguo (original)"
+plain = "HTML simple"
+enable = "Habilitar"
+disable = "Deshabilitar"
+hires = "Íconos en alta resolución"
+smallhead = "Logo de cabecera pequeña"
+dont_override_settings = "No sobrescribir configuración"
+save_settings = "Guardar configuración"
+
+# Files
+
+readme = "Información"
+download = "Descargar"
+file = "Archivo"
+folder = "Carpeta"
+archive = "Archivo comprimido"
+zipviewer_title = "Visor de ZIP"
+zip_file = "Archivo ZIP"
+mdreader_title = "Visor MD"
+reading_markdown = "Leyendo archivo"
+file_details = "Detalles del archivo"
+file_name = "Nombre del archivo"
+file_size = "Tamaño del archivo"
+file_downloads = "Descargas"
+print = "Imprimir"
+viewing_zip = "Viendo archivo ZIP"
+watching = "Viendo archivo"
+
+# Uploader
+
+uploader = "Subidor"
+upload = "Subir"
+select_file = "Seleccionar un archivo"
+upload_success = "¡subido con éxito!"
+upload_error = "Ocurrió un error al subir el archivo."
+uploader_title = "Subidor de archivos"
+target_dir = "Directorio de destino"
+target_placeholder = "Dejar vacío para /uploads/"
+max_size = "El tamaño máximo permitido es 100 MB."
+select_folder = "Seleccionar una carpeta"
+browse = "Explorar"
+select_files = "Seleccionar archivos para subir."
+uploading = "Subiendo"
+
+# Account
+
+username = "Nombre de usuario"
+password = "Contraseña"
+invalid_info = "Nombre de usuario o contraseña inválidos."
+log_in_with_marmak = "Iniciar sesión con cuenta MARMAK™"
+welcome = "Hola"
+tip = "Consejo"
+settings_tip1 = "Si quieres conservar tu configuración actual, ve a"
+settings_tip2 = "y habilita \"No sobrescribir configuración\"."
+
+# Admin
+
+usage = "Uso"
+disk_usage = "Uso del disco"
+sysinfo = "Información del servidor"
+memory_usage = "Uso de memoria"
+system = "Sistema"
+kernel_version = "Versión del kernel"
+hostname = "Nombre del host"
+
+# Audio player
+
+listening = "Escuchando archivo"
+album = "Álbum"
+year = "Año"
+genre = "Género"
+album_cover = "Portada del álbum"
+
+# File deletion
+
+delete_success = "¡eliminado con éxito!"
+delete_confirmation = "¿Estás seguro de que deseas eliminar"
+delete = "Eliminar"
+
+# Errors
+
+error = "Error"
+not_found = "No encontrado"
+error_400 = "La solicitud enviada no es válida. Por favor, inténtalo de nuevo."
+error_404 = "No se pudo encontrar el recurso solicitado. Verifica la URL e inténtalo nuevamente."
+error_50x = "Ocurrió un error interno en el servidor. Por favor, repórtalo."
+error_403 = "Actualmente no tienes acceso a este recurso. Inicia sesión con un usuario con más privilegios."
+no_details = "¡No hay detalles disponibles!"
+no_video = "Tu navegador no admite el elemento de video."
+no_audio = "Tu navegador no admite el elemento de audio."
+upload_parse_error = "subido, pero la respuesta no se pudo analizar."
+upload_failed_status = "falló con el estado"
+upload_failed_network = "la subida falló debido a un error de red."
+error_occured = "Ocurrió un error:"
+error_deleting = "Ocurrió un error al eliminar el archivo."
+directory_not_empty = "¡Este directorio no está vacío!"
+
+# Generic UI strings
+
+ok = "Aceptar"
+cancel = "Cancelar"
+others = "otros"

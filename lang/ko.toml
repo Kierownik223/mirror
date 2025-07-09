@@ -1,0 +1,130 @@
+# Metadata
+
+language_name = "한국어"
+translated_by = "번역: AI"
+author = "제작자: Kierownik223"
+
+# Header
+
+home = "홈"
+settings = "설정"
+log_in = "로그인"
+manage_account = "계정 관리"
+admin = "관리자 패널"
+log_out = "로그아웃"
+
+# Settings
+
+sync_settings = "설정 동기화"
+sync_success = "설정이 성공적으로 저장되었습니다."
+fetch_settings = "설정 불러오기"
+fetch_success = "설정을 성공적으로 불러왔습니다!"
+language = "언어"
+theme = "테마"
+change_lang = "언어 변경 (새로 추가!)"
+change_theme = "테마 변경"
+theme_default = "기본 테마"
+theme_darkblu = "진한 파란색 테마"
+theme_greenish = "녹색 테마"
+theme_antique = "앤틱 (원본) 테마"
+plain = "기본 HTML"
+enable = "사용"
+disable = "사용 안 함"
+hires = "고해상도 아이콘"
+smallhead = "작은 헤더 로고"
+dont_override_settings = "설정 덮어쓰기 금지"
+save_settings = "설정 저장"
+
+# Files
+
+readme = "정보"
+download = "다운로드"
+file = "파일"
+folder = "폴더"
+archive = "아카이브"
+zipviewer_title = "ZIP 뷰어"
+zip_file = "ZIP 파일"
+mdreader_title = "MD 리더"
+reading_markdown = "파일 읽는 중"
+file_details = "파일 세부 정보"
+file_name = "파일 이름"
+file_size = "파일 크기"
+file_downloads = "다운로드 수"
+print = "인쇄"
+viewing_zip = "ZIP 파일 보기"
+watching = "파일 보기"
+
+# Uploader
+
+uploader = "업로더"
+upload = "업로드"
+select_file = "파일 선택"
+upload_success = "성공적으로 업로드되었습니다!"
+upload_error = "파일 업로드 중 오류가 발생했습니다."
+uploader_title = "파일 업로더"
+target_dir = "대상 디렉토리"
+target_placeholder = "/uploads/ 기본값"
+max_size = "최대 허용 파일 크기는 100MB입니다."
+select_folder = "폴더 선택"
+browse = "찾아보기"
+select_files = "업로드할 파일 선택"
+uploading = "업로드 중"
+
+# Account
+
+username = "사용자 이름"
+password = "비밀번호"
+invalid_info = "잘못된 사용자 이름 또는 비밀번호입니다."
+log_in_with_marmak = "MARMAK 계정으로 로그인™"
+welcome = "안녕하세요"
+tip = "팁"
+settings_tip1 = "현재 설정을 유지하려면,"
+settings_tip2 = "로 이동하여 \"설정 덮어쓰기 금지\"를 활성화하세요."
+
+# Admin
+
+usage = "사용량"
+disk_usage = "디스크 사용량"
+sysinfo = "서버 정보"
+memory_usage = "메모리 사용량"
+system = "시스템"
+kernel_version = "커널 버전"
+hostname = "호스트 이름"
+
+# Audio player
+
+listening = "파일 듣는 중"
+album = "앨범"
+year = "연도"
+genre = "장르"
+album_cover = "앨범 커버"
+
+# File deletion
+
+delete_success = "성공적으로 삭제되었습니다!"
+delete_confirmation = "정말 삭제하시겠습니까?"
+delete = "삭제"
+
+# Errors
+
+error = "오류"
+not_found = "찾을 수 없음"
+error_400 = "잘못된 요청입니다. 다시 시도해주세요."
+error_404 = "요청한 리소스를 찾을 수 없습니다. URL을 확인하고 다시 시도하세요."
+error_50x = "서버 내부 오류가 발생했습니다. 관리자에게 보고해주세요."
+error_403 = "이 리소스에 접근할 권한이 없습니다. 더 높은 권한으로 로그인하세요."
+no_details = "세부 정보가 없습니다!"
+no_video = "브라우저가 비디오 요소를 지원하지 않습니다."
+no_audio = "브라우저가 오디오 요소를 지원하지 않습니다."
+upload_parse_error = "업로드는 되었으나 응답을 파싱할 수 없습니다."
+upload_failed_status = "상태 실패"
+upload_failed_network = "네트워크 오류로 업로드 실패"
+error_occured = "오류 발생:"
+error_deleting = "파일 삭제 중 오류 발생"
+directory_not_empty = "이 디렉토리는 비어 있지 않습니다!"
+
+# Generic UI strings
+
+ok = "확인"
+cancel = "취소"
+others = "기타"

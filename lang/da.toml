@@ -1,0 +1,130 @@
+# Metadata
+
+language_name = "Dansk"
+translated_by = "Oversættelse: AI"
+author = "Lavet af Kierownik223"
+
+# Header
+
+home = "Hjem"
+settings = "Indstillinger"
+log_in = "Log ind"
+manage_account = "Administrer konto"
+admin = "Adminpanel"
+log_out = "Log ud"
+
+# Settings
+
+sync_settings = "Synkroniser indstillinger"
+sync_success = "Indstillinger gemt med succes."
+fetch_settings = "Hent indstillinger"
+fetch_success = "Indstillinger hentet med succes!"
+language = "Sprog"
+theme = "Tema"
+change_lang = "Skift sprog (NYT!)"
+change_theme = "Skift tema"
+theme_default = "Standardtema"
+theme_darkblu = "Mørkeblåt tema"
+theme_greenish = "Grønligt tema"
+theme_antique = "Antikt (originalt) tema"
+plain = "Simpel HTML"
+enable = "Aktivér"
+disable = "Deaktivér"
+hires = "Ikoner i høj opløsning"
+smallhead = "Lille logo i header"
+dont_override_settings = "Overskriv ikke indstillinger"
+save_settings = "Gem indstillinger"
+
+# Files
+
+readme = "Information"
+download = "Download"
+file = "Fil"
+folder = "Mappe"
+archive = "Arkiv"
+zipviewer_title = "ZIP-fremviser"
+zip_file = "ZIP-fil"
+mdreader_title = "MD-fremviser"
+reading_markdown = "Læser fil"
+file_details = "Fildetaljer"
+file_name = "Filnavn"
+file_size = "Filstørrelse"
+file_downloads = "Downloads"
+print = "Udskriv"
+viewing_zip = "Viser ZIP-fil"
+watching = "Viser fil"
+
+# Uploader
+
+uploader = "Uploader"
+upload = "Upload"
+select_file = "Vælg en fil"
+upload_success = "uploadet med succes!"
+upload_error = "Der opstod en fejl under upload af filen."
+uploader_title = "Filuploader"
+target_dir = "Målmappe"
+target_placeholder = "Lad stå tomt for /uploads/"
+max_size = "Maksimal filstørrelse er 100 MB."
+select_folder = "Vælg en mappe"
+browse = "Gennemse"
+select_files = "Vælg filer til upload."
+uploading = "Uploader"
+
+# Account
+
+username = "Brugernavn"
+password = "Adgangskode"
+invalid_info = "Ugyldigt brugernavn eller adgangskode."
+log_in_with_marmak = "Log ind med en MARMAK-konto™"
+welcome = "Hej"
+tip = "Tip"
+settings_tip1 = "Hvis du vil beholde dine nuværende indstillinger, gå til"
+settings_tip2 = "og aktivér \"Overskriv ikke indstillinger\"."
+
+# Admin
+
+usage = "Forbrug"
+disk_usage = "Diskforbrug"
+sysinfo = "Serverinformation"
+memory_usage = "Hukommelsesforbrug"
+system = "System"
+kernel_version = "Kernelversion"
+hostname = "Værtsnavn"
+
+# Audio player
+
+listening = "Lytter til fil"
+album = "Album"
+year = "År"
+genre = "Genre"
+album_cover = "Albumcover"
+
+# File deletion
+
+delete_success = "fjernet med succes!"
+delete_confirmation = "Er du sikker på, at du vil slette"
+delete = "Slet"
+
+# Errors
+
+error = "Fejl"
+not_found = "Ikke fundet"
+error_400 = "Klienten sendte en ugyldig anmodning. Prøv igen."
+error_404 = "Den ønskede ressource kunne ikke findes. Kontrollér URL'en og prøv igen."
+error_50x = "En intern serverfejl opstod. Venligst rapportér det til os."
+error_403 = "Du har ikke adgang til denne ressource. Log ind med en bruger med højere rettigheder."
+no_details = "Ingen detaljer tilgængelige!"
+no_video = "Din browser understøtter ikke videoelementet."
+no_audio = "Din browser understøtter ikke lyd-elementet."
+upload_parse_error = "uploadet, men svaret kunne ikke fortolkes."
+upload_failed_status = "fejlede med status"
+upload_failed_network = "upload fejlede pga. netværksfejl."
+error_occured = "En fejl opstod:"
+error_deleting = "Der opstod en fejl under sletning af filen."
+directory_not_empty = "Denne mappe er ikke tom!"
+
+# Generic UI strings
+
+ok = "OK"
+cancel = "Annullér"
+others = "andre"

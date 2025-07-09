@@ -1,0 +1,130 @@
+# Metadata
+
+language_name = "Français"
+translated_by = "Traduction: AI"
+author = "Créé par Kierownik223"
+
+# Header
+
+home = "Accueil"
+settings = "Paramètres"
+log_in = "Connexion"
+manage_account = "Gérer le compte"
+admin = "Panneau d'administration"
+log_out = "Déconnexion"
+
+# Settings
+
+sync_settings = "Synchroniser les paramètres"
+sync_success = "Paramètres enregistrés avec succès."
+fetch_settings = "Récupérer les paramètres"
+fetch_success = "Paramètres récupérés avec succès !"
+language = "Langue"
+theme = "Thème"
+change_lang = "Changer de langue (NOUVEAU !)"
+change_theme = "Changer de thème"
+theme_default = "Thème par défaut"
+theme_darkblu = "Thème bleu foncé"
+theme_greenish = "Thème verdâtre"
+theme_antique = "Thème antique (original)"
+plain = "HTML simple"
+enable = "Activer"
+disable = "Désactiver"
+hires = "Icônes haute résolution"
+smallhead = "Petit logo d'en-tête"
+dont_override_settings = "Ne pas écraser les paramètres"
+save_settings = "Enregistrer les paramètres"
+
+# Files
+
+readme = "Informations"
+download = "Télécharger"
+file = "Fichier"
+folder = "Dossier"
+archive = "Archive"
+zipviewer_title = "Visionneuse ZIP"
+zip_file = "Fichier ZIP"
+mdreader_title = "Lecteur MD"
+reading_markdown = "Lecture du fichier"
+file_details = "Détails du fichier"
+file_name = "Nom du fichier"
+file_size = "Taille du fichier"
+file_downloads = "Téléchargements"
+print = "Imprimer"
+viewing_zip = "Affichage du fichier ZIP"
+watching = "Affichage du fichier"
+
+# Uploader
+
+uploader = "Téléverseur"
+upload = "Téléverser"
+select_file = "Sélectionner un fichier"
+upload_success = "téléversé avec succès !"
+upload_error = "Une erreur est survenue lors du téléversement du fichier."
+uploader_title = "Téléverseur de fichiers"
+target_dir = "Répertoire cible"
+target_placeholder = "Laisser vide pour /uploads/"
+max_size = "La taille maximale autorisée est de 100 Mo."
+select_folder = "Sélectionner un dossier"
+browse = "Parcourir"
+select_files = "Sélectionnez les fichiers à téléverser."
+uploading = "Téléversement en cours"
+
+# Account
+
+username = "Nom d'utilisateur"
+password = "Mot de passe"
+invalid_info = "Nom d'utilisateur ou mot de passe invalide."
+log_in_with_marmak = "Se connecter avec un compte MARMAK™"
+welcome = "Bonjour"
+tip = "Astuce"
+settings_tip1 = "Si vous souhaitez conserver vos paramètres actuels, allez dans"
+settings_tip2 = "et activez \"Ne pas écraser les paramètres\"."
+
+# Admin
+
+usage = "Utilisation"
+disk_usage = "Utilisation du disque"
+sysinfo = "Informations sur le serveur"
+memory_usage = "Utilisation de la mémoire"
+system = "Système"
+kernel_version = "Version du noyau"
+hostname = "Nom d'hôte"
+
+# Audio player
+
+listening = "Écoute du fichier"
+album = "Album"
+year = "Année"
+genre = "Genre"
+album_cover = "Pochette de l'album"
+
+# File deletion
+
+delete_success = "supprimé avec succès !"
+delete_confirmation = "Êtes-vous sûr de vouloir supprimer"
+delete = "Supprimer"
+
+# Errors
+
+error = "Erreur"
+not_found = "Introuvable"
+error_400 = "La requête envoyée est invalide. Veuillez réessayer."
+error_404 = "La ressource demandée est introuvable. Vérifiez l'URL et réessayez."
+error_50x = "Une erreur interne du serveur s'est produite. Veuillez nous la signaler."
+error_403 = "Vous n'avez actuellement pas accès à cette ressource. Veuillez vous connecter avec un compte disposant de plus de privilèges."
+no_details = "Aucun détail disponible !"
+no_video = "Votre navigateur ne prend pas en charge l'élément vidéo."
+no_audio = "Votre navigateur ne prend pas en charge l'élément audio."
+upload_parse_error = "téléversé, mais la réponse n'a pas pu être analysée."
+upload_failed_status = "échec avec le statut"
+upload_failed_network = "échec du téléversement à cause d'une erreur réseau."
+error_occured = "Une erreur s'est produite :"
+error_deleting = "Une erreur s'est produite lors de la suppression du fichier."
+directory_not_empty = "Ce répertoire n'est pas vide !"
+
+# Generic UI strings
+
+ok = "OK"
+cancel = "Annuler"
+others = "autres"

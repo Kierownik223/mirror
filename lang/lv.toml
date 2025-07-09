@@ -1,0 +1,130 @@
+# Metadata
+
+language_name = "Latviešu"
+translated_by = "Tulkojums: AI"
+author = "Izveidoja Kierownik223"
+
+# Header
+
+home = "Sākums"
+settings = "Iestatījumi"
+log_in = "Pierakstīties"
+manage_account = "Pārvaldīt kontu"
+admin = "Admin paneļi"
+log_out = "Izrakstīties"
+
+# Settings
+
+sync_settings = "Sinhronizēt iestatījumus"
+sync_success = "Iestatījumi veiksmīgi saglabāti."
+fetch_settings = "Iegūt iestatījumus"
+fetch_success = "Iestatījumi veiksmīgi iegūti!"
+language = "Valoda"
+theme = "Tēma"
+change_lang = "Mainīt valodu (JAUNS!)"
+change_theme = "Mainīt tēmu"
+theme_default = "Noklusējuma tēma"
+theme_darkblu = "Tumši zila tēma"
+theme_greenish = "Zaļgani toņi"
+theme_antique = "Antīkā (oriģinālā) tēma"
+plain = "Vienkāršs HTML"
+enable = "Iespējot"
+disable = "Atspējot"
+hires = "Augstas izšķirtspējas ikonas"
+smallhead = "Mazs galvenes logotips"
+dont_override_settings = "Neaizvietot iestatījumus"
+save_settings = "Saglabāt iestatījumus"
+
+# Files
+
+readme = "Informācija"
+download = "Lejupielādēt"
+file = "Fails"
+folder = "Mape"
+archive = "Arhīvs"
+zipviewer_title = "ZIP skatītājs"
+zip_file = "ZIP fails"
+mdreader_title = "MD lasītājs"
+reading_markdown = "Lasīšana no faila"
+file_details = "Faila detaļas"
+file_name = "Faila nosaukums"
+file_size = "Faila izmērs"
+file_downloads = "Lejupielādes"
+print = "Drukāt"
+viewing_zip = "Skatot ZIP failu"
+watching = "Skatīšanās"
+
+# Uploader
+
+uploader = "Augšupielādētājs"
+upload = "Augšupielādēt"
+select_file = "Izvēlieties failu"
+upload_success = "augšupielādēts veiksmīgi!"
+upload_error = "Radās kļūda augšupielādes laikā."
+uploader_title = "Failu augšupielādētājs"
+target_dir = "Mērķa direktorija"
+target_placeholder = "Atstājiet tukšu, lai /uploads/"
+max_size = "Maksimālais faila lielums ir 100MB."
+select_folder = "Izvēlieties mapi"
+browse = "Pārlūkot"
+select_files = "Izvēlieties failus augšupielādei."
+uploading = "Augšupielādē"
+
+# Account
+
+username = "Lietotājvārds"
+password = "Parole"
+invalid_info = "Nederīgs lietotājvārds vai parole."
+log_in_with_marmak = "Pierakstīties ar MARMAK kontu™"
+welcome = "Sveiki"
+tip = "Padoms"
+settings_tip1 = "Ja vēlaties saglabāt pašreizējos iestatījumus, dodieties uz"
+settings_tip2 = "un iespējojiet \"Neaizvietot iestatījumus\"."
+
+# Admin
+
+usage = "Izmantošana"
+disk_usage = "Diska lietojums"
+sysinfo = "Servera informācija"
+memory_usage = "Atmiņas lietojums"
+system = "Sistēma"
+kernel_version = "Kodola versija"
+hostname = "Datora nosaukums"
+
+# Audio player
+
+listening = "Klausās failu"
+album = "Albums"
+year = "Gads"
+genre = "Žanrs"
+album_cover = "Albuma vāks"
+
+# File deletion
+
+delete_success = "noņemts veiksmīgi!"
+delete_confirmation = "Vai tiešām vēlaties to izdzēst?"
+delete = "Dzēst"
+
+# Errors
+
+error = "Kļūda"
+not_found = "Nav atrasts"
+error_400 = "Klients nosūtīja nederīgu pieprasījumu. Lūdzu, mēģiniet vēlreiz."
+error_404 = "Pieprasītais resurss netika atrasts. Pārbaudiet URL un mēģiniet vēlreiz."
+error_50x = "Notikusi iekšēja servera kļūda. Lūdzu, ziņojiet mums."
+error_403 = "Jums nav piekļuves šim resursam. Lūdzu, piesakieties kā lietotājs ar augstākiem privilēģijām."
+no_details = "Nav pieejamu detaļu!"
+no_video = "Jūsu pārlūkprogramma neatbalsta video elementu."
+no_audio = "Jūsu pārlūkprogramma neatbalsta audio elementu."
+upload_parse_error = "augšupielādēts, bet atbilde netika apstrādāta."
+upload_failed_status = "neizdevās ar statusu"
+upload_failed_network = "augšupielāde neizdevās tīkla kļūdas dēļ."
+error_occured = "Radās kļūda:"
+error_deleting = "Radās kļūda faila dzēšanas laikā."
+directory_not_empty = "Šī direktorija nav tukša!"
+
+# Generic UI strings
+
+ok = "Labi"
+cancel = "Atcelt"
+others = "citi"
