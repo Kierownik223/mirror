@@ -2,15 +2,18 @@
 
 {% block content %}
 <a href="/">MARMAK Mirror</a>/<a href="/settings">{{ strings.settings }}</a>/<br>
-{% if is_logged_in %}
+{% if config.enable_login and is_logged_in %}
 {{ strings.welcome }}, {{ username }}!
 <br>
-{% if config.enable_login %}
 <a href="/settings/sync"><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.sync_settings }}</a>
 <a href="/settings/fetch"><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.fetch_settings }}</a>
-{% endif %}
 
 {% endif %}
+
+{% if show_cookie_notice %}
+<p>{{ strings.cookie_notice }}</p>
+{% endif %}
+
 <form method="get">
     <img src="/static/images/icons/{% if hires %}hires/{% endif %}lang.png" class="icon">{{ strings.change_lang }}<br>
     <select name="lang">

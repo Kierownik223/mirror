@@ -733,6 +733,8 @@ fn settings(
         return Err(Redirect::to(uri!("/")));
     }
 
+    let show_cookie_notice = jar.iter().next().is_none();
+
     let username = if is_logged_in(&jar) {
         get_session(jar).0
     } else {
@@ -761,7 +763,8 @@ fn settings(
             plain: get_bool_cookie(jar, "plain"),
             nooverride: get_bool_cookie(jar, "nooverride"),
             filebrowser: get_bool_cookie(jar, "filebrowser"),
-            language_names
+            language_names,
+            show_cookie_notice,
         },
     ));
 }
