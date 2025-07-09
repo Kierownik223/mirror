@@ -34,6 +34,7 @@ hires = "Wëżokòrozlëszczi ikònë"
 smallhead = "Môłô lëżba w gùłówce"
 dont_override_settings = "Nie nadpisëwôj ùstawiënkòw"
 save_settings = "Zapisz ùstawiënka"
+reset_settings = "Resetëjë nastôwënié"
 
 # Files
 
@@ -128,3 +129,4 @@ directory_not_empty = "Ti katalog nie je pùsté!"
 ok = "W porzãdku"
 cancel = "Anulëjë"
 others = "jiné"
+cookie_notice = "Ùżëwómë kùksów blós dlô przechòwaniô ùżëkòwniczych preferencjów. Jeżlë nie chcesz z nich kòrzëstac, nie zmieniaj nic na ti starnie."

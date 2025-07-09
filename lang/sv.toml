@@ -34,6 +34,7 @@ hires = "Ikoner med hög upplösning"
 smallhead = "Liten header-logga"
 dont_override_settings = "Skriv inte över inställningar"
 save_settings = "Spara inställningar"
+reset_settings = "Återställ inställningar"
 
 # Files
 
@@ -128,3 +129,4 @@ directory_not_empty = "Denna katalog är inte tom!"
 ok = "OK"
 cancel = "Avbryt"
 others = "andra"
+cookie_notice = "Vi använder cookies endast för att spara användarinställningar. Om du inte vill använda dem, ändra inget på denna sida."

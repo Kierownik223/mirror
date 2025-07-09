@@ -34,6 +34,7 @@ hires = "Augstas izšķirtspējas ikonas"
 smallhead = "Mazs galvenes logotips"
 dont_override_settings = "Neaizvietot iestatījumus"
 save_settings = "Saglabāt iestatījumus"
+reset_settings = "Atiestatīt iestatījumus"
 
 # Files
 
@@ -128,3 +129,4 @@ directory_not_empty = "Šī direktorija nav tukša!"
 ok = "Labi"
 cancel = "Atcelt"
 others = "citi"
+cookie_notice = "Mēs izmantojam sīkfailus tikai lietotāja iestatījumu saglabāšanai. Ja nevēlaties tos izmantot, nemainiet neko šajā lapā."

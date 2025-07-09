@@ -34,6 +34,7 @@ hires = "Ikonice visoke rezolucije"
 smallhead = "Mali logo u zaglavlju"
 dont_override_settings = "Ne prepisuj podešavanja"
 save_settings = "Sačuvaj podešavanja"
+reset_settings = "Ресетуј подешавања"
 
 # Files
 
@@ -128,3 +129,4 @@ directory_not_empty = "Ova fascikla nije prazna!"
 ok = "U redu"
 cancel = "Otkaži"
 others = "ostali"
+cookie_notice = "Koristimo kolačiće samo za čuvanje korisničkih podešavanja. Ako ne želite da ih koristimo, nemojte menjati ništa na ovoj stranici."

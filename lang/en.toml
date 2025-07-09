@@ -34,6 +34,7 @@ hires = "High-resolution icons"
 smallhead = "Small header logo"
 dont_override_settings = "Don't override settings"
 save_settings = "Save settings"
+reset_settings = "Reset settings"
 
 # Files
 
@@ -128,3 +129,4 @@ directory_not_empty = "This directory is not empty!"
 ok = "OK"
 cancel = "Cancel"
 others = "others"
+cookie_notice = "We use cookies only to store user preferences. If you wish not to use them, don't change anything on this page."

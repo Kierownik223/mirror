@@ -34,6 +34,7 @@ hires = "Ícones de alta-resolução"
 smallhead = "Logo header pequeno"
 dont_override_settings = "Não sobrescrever configurações"
 save_settings = "Salvar configurações"
+reset_settings = "Redefinir configurações"
 
 # Files
 
@@ -128,3 +129,4 @@ directory_not_empty = "Este diretório não está vazio!"
 ok = "OK"
 cancel = "Cancelar"
 others = "Outros"
+cookie_notice = "Usamos cookies apenas para armazenar preferências do usuário. Se não quiser usá-las, não altere nada nesta página."

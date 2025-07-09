@@ -34,6 +34,7 @@ hires = "고해상도 아이콘"
 smallhead = "작은 헤더 로고"
 dont_override_settings = "설정 덮어쓰기 금지"
 save_settings = "설정 저장"
+reset_settings = "설정 재설정"
 
 # Files
 
@@ -128,3 +129,4 @@ directory_not_empty = "이 디렉토리는 비어 있지 않습니다!"
 ok = "확인"
 cancel = "취소"
 others = "기타"
+cookie_notice = "사용자 설정을 저장하기 위해서만 쿠키를 사용합니다. 쿠키 사용을 원하지 않는 경우, 이 페이지에서 아무 것도 변경하지 마세요."

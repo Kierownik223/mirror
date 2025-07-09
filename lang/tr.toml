@@ -34,6 +34,7 @@ hires = "Yüksek çözünürlüklü simgeler"
 smallhead = "Küçük başlık logosu"
 dont_override_settings = "Ayarları geçersiz kılma"
 save_settings = "Ayarları Kaydet"
+reset_settings = "Ayarları sıfırla"
 
 # Files
 
@@ -128,3 +129,4 @@ directory_not_empty = "Bu dizin boş değil!"
 ok = "Tamam"
 cancel = "İptal"
 others = "diğerleri"
+cookie_notice = "Çerezleri yalnızca kullanıcı tercihlerini saklamak için kullanıyoruz. Bunları kullanmak istemiyorsanız, bu sayfada hiçbir şeyi değiştirmeyin."

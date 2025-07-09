@@ -34,6 +34,7 @@ hires = "Kõrge resolutsiooniga ikoonid"
 smallhead = "Väike päise logo"
 dont_override_settings = "Ära ülekirjuta seadeid"
 save_settings = "Salvesta seaded"
+reset_settings = "Lähtesta seaded"
 
 # Files
 
@@ -128,3 +129,4 @@ directory_not_empty = "See kataloog ei ole tühi!"
 ok = "OK"
 cancel = "Tühista"
 others = "teised"
+cookie_notice = "Kasutame küpsiseid ainult kasutajaseadete salvestamiseks. Kui sa ei soovi neid kasutada, ära muuda sellel lehel midagi."

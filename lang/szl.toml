@@ -34,6 +34,7 @@ hires = "Ikōny we wysokij rozprawie"
 smallhead = "Mały znak w głōwce"
 dont_override_settings = "Niŏ nadpisuj ustawiyn"
 save_settings = "Zapiś ustawiynia"
+reset_settings = "Resetuj ustawiynia"
 
 # Files
 
@@ -128,3 +129,4 @@ directory_not_empty = "Ten folder niy je pusty!"
 ok = "OK"
 cancel = "Ôdwołŏj"
 others = "inksy"
+cookie_notice = "Używomy cookies ino do przechowywaniŏ preferyncyj używŏczŏ. Jak niy chcesz ich używŏć, niy zmiynej nic na tyj strōnie."

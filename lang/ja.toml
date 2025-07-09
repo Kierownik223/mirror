@@ -34,6 +34,7 @@ hires = "高解像度アイコン"
 smallhead = "小さなヘッダーロゴ"
 dont_override_settings = "設定を上書きしない"
 save_settings = "設定を保存"
+reset_settings = "設定をリセット"
 
 # Files
 
@@ -128,3 +129,4 @@ directory_not_empty = "このディレクトリは空ではありません！"
 ok = "OK"
 cancel = "キャンセル"
 others = "その他"
+cookie_notice = "ユーザーの設定を保存するためにのみクッキーを使用しています。使用したくない場合は、このページで何も変更しないでください。"

@@ -34,6 +34,7 @@ hires = "Ikone visoke ločljivosti"
 smallhead = "Majhen logotip v glavi"
 dont_override_settings = "Ne prepiši nastavitev"
 save_settings = "Shrani nastavitve"
+reset_settings = "Ponastavi nastavitve"
 
 # Files
 
@@ -128,3 +129,4 @@ directory_not_empty = "Mapa ni prazna!"
 ok = "V redu"
 cancel = "Prekliči"
 others = "drugi"
+cookie_notice = "Piškotke uporabljamo samo za shranjevanje uporabniških nastavitev. Če jih ne želite uporabljati, na tej strani ničesar ne spreminjajte."

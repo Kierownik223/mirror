@@ -34,6 +34,7 @@ hires = "Icoane de înaltă rezoluție"
 smallhead = "Logo mic antet"
 dont_override_settings = "Nu suprascrie setările"
 save_settings = "Salvează setările"
+reset_settings = "Resetează setările"
 
 # Files
 
@@ -128,3 +129,4 @@ directory_not_empty = "Acest director nu este gol!"
 ok = "OK"
 cancel = "Anulează"
 others = "alții"
+cookie_notice = "Folosim cookie-uri doar pentru a stoca preferințele utilizatorului. Dacă nu doriți să le utilizați, nu schimbați nimic pe această pagină."

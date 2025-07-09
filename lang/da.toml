@@ -34,6 +34,7 @@ hires = "Ikoner i høj opløsning"
 smallhead = "Lille logo i header"
 dont_override_settings = "Overskriv ikke indstillinger"
 save_settings = "Gem indstillinger"
+reset_settings = "Nulstil indstillinger"
 
 # Files
 
@@ -128,3 +129,4 @@ directory_not_empty = "Denne mappe er ikke tom!"
 ok = "OK"
 cancel = "Annullér"
 others = "andre"
+cookie_notice = "Vi bruger kun cookies til at gemme brugerpræferencer. Hvis du ikke ønsker at bruge dem, så ændr ikke noget på denne side."
