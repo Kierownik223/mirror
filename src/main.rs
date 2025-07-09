@@ -184,12 +184,10 @@ impl<'r> FromRequest<'r> for Language {
 
         if let Some(header_lang) = request.headers().get_one("Accept-Language") {
             if let Some(lang) = parse_language(header_lang) {
-                cookies.add(Cookie::new("lang", lang.clone()));
                 return Outcome::Success(Language(lang));
             }
         }
 
-        cookies.add(Cookie::new("lang", "en"));
         Outcome::Success(Language("en".to_string()))
     }
 }
