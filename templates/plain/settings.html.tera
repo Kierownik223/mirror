@@ -32,5 +32,7 @@
     <center>
         <input type="submit" value="{{ strings.save_settings }}">
     </center>
+    <br>
+    <a href="/settings/reset">{{ strings.reset_settings }}</a>
 </form>
 {% endblock content %}

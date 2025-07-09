@@ -832,6 +832,19 @@ async fn sync_settings(
     }
 }
 
+#[get("/settings/reset")]
+async fn reset_settings(
+    jar: &CookieJar<'_>,
+) -> Redirect {
+    let keys = vec!["lang", "hires", "smallhead", "theme", "nooverride", "plain"];
+
+    for key in keys {
+        jar.remove(key);
+    }
+
+    return Redirect::to("/");
+}
+
 #[get("/iframe/<file..>")]
 async fn iframe(
     file: PathBuf,
@@ -992,7 +1005,7 @@ async fn rocket() -> _ {
         .manage(TranslationStore::new())
         .manage(size_state)
         .register("/", catchers![default, unprocessable_entry, forbidden])
-        .mount("/", routes![settings, download, index, iframe]);
+        .mount("/", routes![settings, reset_settings, download, index, iframe]);
 
     if config.enable_login {
         rocket = rocket

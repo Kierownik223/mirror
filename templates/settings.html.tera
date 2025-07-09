@@ -61,5 +61,7 @@
     <center>
         <input type="submit" class="submit" value="{{ strings.save_settings }}">
     </center>
+    <br>
+    <a href="/settings/reset"><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.reset_settings }}</a>
 </form>
 {% endblock content %}
