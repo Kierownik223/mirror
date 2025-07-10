@@ -53,6 +53,15 @@
 function uploadViaAPI() {
     var input = document.getElementById('file');
     var path_input = document.getElementById('path');
+
+    var hasFormData = typeof window.FormData !== "undefined";
+    var hasFiles = input && typeof input.files !== "undefined";
+
+    if (!input || !path_input || !hasFormData || !hasFiles) {
+        alert("{{ strings.upload_not_supported }}");
+        return;
+    }
+
     var path = path_input.value;
     var files = input.files;
 
@@ -94,19 +103,21 @@ function uploadViaAPI() {
 
             var startTime = new Date().getTime();
 
-            xhr.upload.onprogress = function(e) {
-                if (e.lengthComputable) {
-                    var percent = (e.loaded / e.total) * 100;
-                    var elapsed = (new Date().getTime() - startTime) / 1000;
-                    var speed = e.loaded / elapsed;
+            if (xhr.upload && typeof xhr.upload.onprogress === "function") {
+                xhr.upload.onprogress = function(e) {
+                    if (e.lengthComputable) {
+                        var percent = (e.loaded / e.total) * 100;
+                        var elapsed = (new Date().getTime() - startTime) / 1000;
+                        var speed = e.loaded / elapsed;
 
-                    progressBar.value = percent;
+                        progressBar.value = percent;
 
-                    info.textContent =
-                        percent.toFixed(1) + "% - " + formatBytes(e.loaded) + " / " + formatBytes(e.total) +
-                        " @ " + formatBytes(speed) + "/s";
-                }
-            };
+                        info.textContent =
+                            percent.toFixed(1) + "% - " + formatBytes(e.loaded) + " / " + formatBytes(e.total) +
+                            " @ " + formatBytes(speed) + "/s";
+                    }
+                };
+            }
 
             xhr.onload = function() {
                 progressBar.style.display = "none";
@@ -114,7 +125,7 @@ function uploadViaAPI() {
 
                 if (xhr.status === 200) {
                     try {
-                        var response = JSON.parse(xhr.responseText);
+                        var response = window.JSON && JSON.parse ? JSON.parse(xhr.responseText) : eval('(' + xhr.responseText + ')');
                         var result = response[0];
 
                         if (!result || result.url == null) {
@@ -143,7 +154,11 @@ function uploadViaAPI() {
                 label.textContent = file.name + " {{ strings.upload_failed_network }}";
             };
 
-            xhr.send(formData);
+            try {
+                xhr.send(formData);
+            } catch (e) {
+                label.textContent = file.name + " {{ strings.upload_error }}";
+            }
         })(files[i]);
     }
 }
