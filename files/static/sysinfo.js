@@ -1,98 +1,94 @@
 (function () {
-  function logError(msg, err) {
-    if (window.console && typeof console.error === "function") {
-      console.error(msg, err || "");
-    }
-  }
-
-  function updateInfo() {
-    var xhr;
-    if (window.XMLHttpRequest) {
-      xhr = new XMLHttpRequest();
-    } else {
-      xhr = new ActiveXObject("Microsoft.XMLHTTP");
-    }
-
-    xhr.open("GET", "/api/sysinfo", true);
-
-    xhr.onreadystatechange = function () {
-      if (xhr.readyState === 4) {
-        if (xhr.status === 200 || xhr.status === 0) {
-          try {
-            var data = JSON.parse(xhr.responseText);
-
-            var usedMem = document.getElementById("used_mem_readable");
-            var totalMem = document.getElementById("total_mem_readable");
-            var memUsage = document.getElementById("mem_usage");
-            var disksContainer = document.getElementById("disks");
-
-            if (usedMem) {
-              if ("textContent" in usedMem) {
-                usedMem.textContent = data.used_mem_readable;
-              } else {
-                usedMem.innerText = data.used_mem_readable;
-              }
-            }
-
-            if (totalMem) {
-              if ("textContent" in totalMem) {
-                totalMem.textContent = data.total_mem_readable;
-              } else {
-                totalMem.innerText = data.total_mem_readable;
-              }
-            }
-
-            if (memUsage) {
-              memUsage.max = data.total_mem;
-              memUsage.value = data.used_mem;
-            }
-
-            if (disksContainer) {
-              disksContainer.innerHTML = "";
-
-              for (var i = 0; i < data.disks.length; i++) {
-                var disk = data.disks[i];
-                var diskDiv = document.createElement("div");
-
-                diskDiv.innerHTML = '<label for="usage">' + disk.used_space_readable + "/" + disk.total_space_readable + '</label>' + '<progress style="width:100%; box-sizing:border-box;" class="disk_usage" max="' + disk.total_space + '" value="' + disk.used_space + '"></progress>';
-
-                disksContainer.appendChild(diskDiv);
-              }
-            }
-          } catch (e) {
-            logError("JSON parse error:", e);
-          }
+    function logError(msg, err) {
+        if (window.console && typeof console.error === "function") {
+            console.error(msg, err || "");
         } else {
-          logError("Failed to fetch system info. Status:", xhr.status);
+            alert("Error: " + msg + (err ? " - " + err : ""));
         }
-      }
-    };
-
-    try {
-      xhr.send();
-    } catch (e) {
-      logError("Request send error:", e);
     }
-  }
 
-  function init() {
-    updateInfo();
-    setInterval(updateInfo, 2500);
-  }
+    function setText(el, text) {
+        if (!el) return;
+        if (typeof el.textContent !== "undefined") {
+            el.textContent = text;
+        } else {
+            el.innerText = text;
+        }
+    }
 
-  function domReady(fn) {
+    function updateInfo() {
+        var xhr;
+        if (window.XMLHttpRequest) {
+            xhr = new XMLHttpRequest();
+        } else {
+            try {
+                xhr = new ActiveXObject("Microsoft.XMLHTTP");
+            } catch (e) {
+                logError("AJAX not supported", e.message);
+                return;
+            }
+        }
+
+        xhr.open("GET", "/api/sysinfo", true);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4) {
+                if (xhr.status == 200 || xhr.status == 0) {
+                    try {
+                        var data = JSON.parse(xhr.responseText);
+
+                        setText(document.getElementById("used_mem_readable"), data.used_mem_readable);
+                        setText(document.getElementById("total_mem_readable"), data.total_mem_readable);
+
+                        var memUsage = document.getElementById("mem_usage");
+                        if (memUsage) {
+                            memUsage.max = data.total_mem;
+                            memUsage.value = data.used_mem;
+                        }
+
+                        var disksContainer = document.getElementById("disks");
+                        if (disksContainer) {
+                            disksContainer.innerHTML = "";
+
+                            for (var i = 0; i < data.disks.length; i++) {
+                                var disk = data.disks[i];
+                                var div = document.createElement("div");
+                                div.innerHTML = '<label for="usage">' + disk.used_space_readable + "/" + disk.total_space_readable + '</label>' + '<progress style="width:100%; box-sizing:border-box;" class="disk_usage" max="' + disk.total_space + '" value="' + disk.used_space + '"></progress>';
+                                disksContainer.appendChild(div);
+                            }
+                        }
+                    } catch (e) {
+                        logError("JSON parse error", e.message);
+                    }
+                } else {
+                    logError("HTTP error", xhr.status);
+                }
+            }
+        };
+
+        try {
+            xhr.send();
+        } catch (e) {
+            logError("Request send error", e.message);
+        }
+    }
+
+    function init() {
+        updateInfo();
+        setInterval(updateInfo, 2500);
+    }
+
     if (document.readyState === "complete" || document.readyState === "interactive") {
-      setTimeout(fn, 0);
+        setTimeout(init, 0);
     } else if (document.addEventListener) {
-      document.addEventListener("DOMContentLoaded", fn, false);
+        document.addEventListener("DOMContentLoaded", init, false);
     } else if (document.attachEvent) {
-      document.attachEvent("onreadystatechange", function () {
-        if (document.readyState === "complete") fn();
-      });
+        document.attachEvent("onreadystatechange", function () {
+            if (document.readyState === "complete") {
+                init();
+            }
+        });
     } else {
-      window.onload = fn;
+        window.onload = init;
     }
-  }
-
-  domReady(init);
 })();
