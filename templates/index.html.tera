@@ -2,18 +2,17 @@
 
 {% block content %}
 {% if admin and filebrowser %}
+<script src="/static/polyfills.js"></script>
 <script>
-    if (!window.JSON) {
-    window.JSON = {
-        parse: function (s) {
-            return eval('(' + s + ')');
-        }
-    };
-    }
-
     function deleteFile(element, filePath) {
-        var path = window.location.pathname + filePath;
-        if (!confirm("{{ strings.delete_confirmation }} " + decodeURIComponent(path) + "?")) {
+        var pathname = "/";
+        if (window.location && typeof window.location.pathname === "string") {
+            pathname = window.location.pathname;
+        }
+        var path = pathname + filePath;
+        var confirmMsg = "{{ strings.delete_confirmation }} " + decodeURIComponent(path) + "?";
+
+        if (!confirm(confirmMsg)) {
             return;
         }
 
@@ -21,21 +20,31 @@
         if (window.XMLHttpRequest) {
             xhr = new XMLHttpRequest();
         } else {
-            xhr = new ActiveXObject("Microsoft.XMLHTTP");
+            try {
+                xhr = new ActiveXObject("Microsoft.XMLHTTP");
+            } catch (e) {
+                alert("{{ strings.error_deleting }}");
+                return;
+            }
         }
 
-        xhr.open("DELETE", "/api" + path, true);
+        try {
+            xhr.open("DELETE", "/api" + path, true);
+        } catch (e) {
+            alert("{{ strings.error_deleting }}");
+            return;
+        }
 
         xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4) {
-                if (xhr.status === 204) {
+            if (xhr.readyState == 4) {
+                if (xhr.status == 204) {
                     var row = element.parentNode;
                     if (row) row = row.parentNode;
                     if (row && row.parentNode) {
                         row.parentNode.removeChild(row);
                     }
                     alert(decodeURIComponent(path) + " {{ strings.delete_success }}");
-                } else if (xhr.status === 409) {
+                } else if (xhr.status == 409) {
                     alert("{{ strings.directory_not_empty }}");
                 } else {
                     try {
