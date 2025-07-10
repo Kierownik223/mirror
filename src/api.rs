@@ -259,6 +259,9 @@ async fn upload(
         if let Some(file_fields) = form_data.files.get("files") {
             for file_field in file_fields {
                 if let Some(file_name) = &file_field.file_name {
+                    let normalized_path = file_name.replace('\\', "/");
+                    let file_name = &Path::new(&normalized_path) .file_name().and_then(|name| name.to_str()).unwrap().to_string();
+
                     let upload_path = format!("files/{}/{}", user_path, file_name);
 
                     match std::fs::File::create(&upload_path) {
