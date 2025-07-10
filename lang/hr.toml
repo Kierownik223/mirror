@@ -123,6 +123,7 @@ upload_failed_network = "prijenos nije uspio zbog mrežne pogreške."
 error_occured = "Došlo je do pogreške:"
 error_deleting = "Došlo je do pogreške prilikom brisanja datoteke."
 directory_not_empty = "Ovaj direktorij nije prazan!"
+upload_not_supported = "JavaScript otpremanje nije podržano u ovom pregledniku."
 
 # Generic UI strings
 

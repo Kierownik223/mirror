@@ -123,6 +123,7 @@ upload_failed_network = "Hochladen fehlgeschlagen aufgrund eines Netzwerkfehlers
 error_occured = "Ein Fehler ist aufgetreten:"
 error_deleting = "Fehler beim Löschen der Datei aufgetreten."
 directory_not_empty = "Dieses Verzeichnis ist nicht leer!"
+upload_not_supported = "Der JavaScript-Uploader wird von diesem Browser nicht unterstützt."
 
 # Generic UI strings
 

@@ -123,6 +123,7 @@ upload_failed_network = "unggahan gagal karena kesalahan jaringan."
 error_occured = "Terjadi kesalahan:"
 error_deleting = "Terjadi kesalahan saat menghapus berkas."
 directory_not_empty = "Direktori ini tidak kosong!"
+upload_not_supported = "Pengunggah JavaScript tidak didukung oleh browser ini."
 
 # Generic UI strings
 

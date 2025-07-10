@@ -123,6 +123,7 @@ upload_failed_network = "caricamento fallito a causa di errore di rete."
 error_occured = "Si è verificato un errore:"
 error_deleting = "Si è verificato un errore durante la cancellazione del file."
 directory_not_empty = "Questa directory non è vuota!"
+upload_not_supported = "Il caricamento JavaScript non è supportato da questo browser."
 
 # Generic UI strings
 

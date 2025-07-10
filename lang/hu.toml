@@ -123,6 +123,7 @@ upload_failed_network = "a feltöltés hálózati hiba miatt meghiúsult."
 error_occured = "Hiba történt:"
 error_deleting = "Hiba történt a fájl törlése közben."
 directory_not_empty = "Ez a mappa nem üres!"
+upload_not_supported = "A JavaScript feltöltés nem támogatott ebben a böngészőben."
 
 # Generic UI strings
 

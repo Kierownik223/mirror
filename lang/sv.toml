@@ -123,6 +123,7 @@ upload_failed_network = "uppladdning misslyckades på grund av nätverksfel."
 error_occured = "Ett fel uppstod:"
 error_deleting = "Ett fel uppstod vid borttagning av fil."
 directory_not_empty = "Denna katalog är inte tom!"
+upload_not_supported = "JavaScript-uppladdning stöds inte av den här webbläsaren."
 
 # Generic UI strings
 

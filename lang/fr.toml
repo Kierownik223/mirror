@@ -123,6 +123,7 @@ upload_failed_network = "échec du téléversement à cause d'une erreur réseau
 error_occured = "Une erreur s'est produite :"
 error_deleting = "Une erreur s'est produite lors de la suppression du fichier."
 directory_not_empty = "Ce répertoire n'est pas vide !"
+upload_not_supported = "Le téléversement JavaScript n’est pas pris en charge par ce navigateur."
 
 # Generic UI strings
 

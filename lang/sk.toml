@@ -123,6 +123,7 @@ upload_failed_network = "nahrávanie zlyhalo kvôli chybe siete."
 error_occured = "Došlo k chybe:"
 error_deleting = "Pri mazaní súboru došlo k chybe."
 directory_not_empty = "Tento priečinok nie je prázdny!"
+upload_not_supported = "Tento prehliadač nepodporuje nahrávanie cez JavaScript."
 
 # Generic UI strings
 

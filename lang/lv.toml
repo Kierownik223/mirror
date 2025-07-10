@@ -123,6 +123,7 @@ upload_failed_network = "augšupielāde neizdevās tīkla kļūdas dēļ."
 error_occured = "Radās kļūda:"
 error_deleting = "Radās kļūda faila dzēšanas laikā."
 directory_not_empty = "Šī direktorija nav tukša!"
+upload_not_supported = "Šis pārlūks neatbalsta JavaScript augšupielādi."
 
 # Generic UI strings
 

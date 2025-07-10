@@ -123,6 +123,7 @@ upload_failed_network = "nalaganje ni uspelo zaradi napake omrežja."
 error_occured = "Prišlo je do napake:"
 error_deleting = "Napaka pri brisanju datoteke."
 directory_not_empty = "Mapa ni prazna!"
+upload_not_supported = "Ta brskalnik ne podpira JavaScript nalaganja."
 
 # Generic UI strings
 

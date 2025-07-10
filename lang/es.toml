@@ -123,6 +123,7 @@ upload_failed_network = "la subida falló debido a un error de red."
 error_occured = "Ocurrió un error:"
 error_deleting = "Ocurrió un error al eliminar el archivo."
 directory_not_empty = "¡Este directorio no está vacío!"
+upload_not_supported = "La subida por JavaScript no es compatible con este navegador."
 
 # Generic UI strings
 

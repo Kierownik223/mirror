@@ -123,6 +123,7 @@ upload_failed_network = "wgrywanie sie niy udało prze sieciowy feler."
 error_occured = "Feler sie zdarzōł:"
 error_deleting = "Feler przi kasowaniy pliku."
 directory_not_empty = "Ten folder niy je pusty!"
+upload_not_supported = "Tyn przeglōndorz niy wspiyro ładowanio z JavaScriptym."
 
 # Generic UI strings
 

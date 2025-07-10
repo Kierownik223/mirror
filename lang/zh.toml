@@ -123,6 +123,7 @@ upload_failed_network = "由於網路錯誤，上傳失敗。"
 error_occured = "發生錯誤："
 error_deleting = "刪除檔案時發生錯誤。"
 directory_not_empty = "此目錄非空！"
+upload_not_supported = "此浏览器不支持 JavaScript 上传器。"
 
 # Generic UI strings
 

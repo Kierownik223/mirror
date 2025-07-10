@@ -123,6 +123,7 @@ upload_failed_network = "įkėlimas nepavyko dėl tinklo klaidos."
 error_occured = "Įvyko klaida:"
 error_deleting = "Įvyko klaida trinant failą."
 directory_not_empty = "Šis katalogas nėra tuščias!"
+upload_not_supported = "Ši naršyklė nepalaiko JavaScript įkėlimo funkcijos."
 
 # Generic UI strings
 

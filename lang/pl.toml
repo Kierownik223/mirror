@@ -123,6 +123,7 @@ upload_failed_network = "nie wrzucony, ponieważ wystąpił błąd sieci."
 error_occured = "Wystąpił błąd:"
 error_deleting = "Podczas usuwania pliku wystąpił błąd."
 directory_not_empty = "Ten katalog nie jest pusty!"
+upload_not_supported = "Wrzucarka JavaScript nie jest wspierana przez tę przeglądarkę."
 
 # Generic UI strings
 

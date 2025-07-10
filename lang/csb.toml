@@ -123,6 +123,7 @@ upload_failed_network = "wësłanié nie darziło sã przez felera z netã."
 error_occured = "Wëstąpił feler:"
 error_deleting = "Wëstąpił feler przë rëmnëniô plika."
 directory_not_empty = "Ti katalog nie je pùsté!"
+upload_not_supported = "Ùpladowanié z JavaScriptã ni je wspieróné przez tã przeglãdarka."
 
 # Generic UI strings
 

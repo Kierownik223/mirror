@@ -123,6 +123,7 @@ upload_failed_network = "η μεταφόρτωση απέτυχε λόγω σφ�
 error_occured = "Παρουσιάστηκε σφάλμα:"
 error_deleting = "Παρουσιάστηκε σφάλμα κατά τη διαγραφή του αρχείου."
 directory_not_empty = "Ο φάκελος δεν είναι κενός!"
+upload_not_supported = "Η μεταφόρτωση με JavaScript δεν υποστηρίζεται από αυτόν τον περιηγητή."
 
 # Generic UI strings
 

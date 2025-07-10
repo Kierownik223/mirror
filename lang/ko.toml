@@ -123,6 +123,7 @@ upload_failed_network = "네트워크 오류로 업로드 실패"
 error_occured = "오류 발생:"
 error_deleting = "파일 삭제 중 오류 발생"
 directory_not_empty = "이 디렉토리는 비어 있지 않습니다!"
+upload_not_supported = "이 브라우저에서는 JavaScript 업로더가 지원되지 않습니다."
 
 # Generic UI strings
 

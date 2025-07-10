@@ -123,6 +123,7 @@ upload_failed_network = "muat naik gagal kerana ralat rangkaian."
 error_occured = "Ralat berlaku:"
 error_deleting = "Ralat berlaku semasa memadam fail."
 directory_not_empty = "Direktori ini tidak kosong!"
+upload_not_supported = "Pemuat naik JavaScript tidak disokong oleh pelayar ini."
 
 # Generic UI strings
 

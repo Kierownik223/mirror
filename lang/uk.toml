@@ -123,6 +123,7 @@ upload_failed_network = "завантаження не вдалося через
 error_occured = "Виникла помилка:"
 error_deleting = "Сталася помилка під час видалення файлу."
 directory_not_empty = "Ця тека не пуста!"
+upload_not_supported = "Цей браузер не підтримує завантаження через JavaScript."
 
 # Generic UI strings
 

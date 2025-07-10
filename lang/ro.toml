@@ -123,6 +123,7 @@ upload_failed_network = "încărcarea a eșuat din cauza unei erori de rețea."
 error_occured = "A apărut o eroare:"
 error_deleting = "A apărut o eroare la ștergerea fișierului."
 directory_not_empty = "Acest director nu este gol!"
+upload_not_supported = "Încărcarea JavaScript nu este acceptată de acest browser."
 
 # Generic UI strings
 

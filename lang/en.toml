@@ -123,6 +123,7 @@ upload_failed_network = "upload failed due to network error."
 error_occured = "An error occured:"
 error_deleting = "An error occurred while deleting the file."
 directory_not_empty = "This directory is not empty!"
+upload_not_supported = "The JavaScript uploader is not supported by this browser."
 
 # Generic UI strings
 
