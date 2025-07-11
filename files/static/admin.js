@@ -31,13 +31,16 @@
                             var disk = data.disks[i];
 
                             var diskDiv = document.createElement("div");
-
-                            diskDiv.innerHTML = '<label for="usage">' + disk.used_space_readable + "/" + disk.total_space_readable + '</label>' + '<progress style="width:100%; box-sizing:border-box;" class="disk_usage" max="' + disk.total_space + '" value="' + disk.used_space + '"></progress>';
-
                             disksContainer.appendChild(diskDiv);
+
+                            try {
+                                diskDiv.innerHTML = '<label for="usage">' + disk.used_space_readable + "/" + disk.total_space_readable + '</label><progress style="width:100%; box-sizing:border-box;" class="disk_usage" max="' + disk.total_space + '" value="' + disk.used_space + '"></progress>';
+                            } catch (e) {
+                                diskDiv.innerHTML = disk.used_space_readable + "/" + disk.total_space_readable;
+                            }
                         }
                     } catch (e) {
-                        logError("JSON parse error:", e);
+                        logError("JSON parse error:", e.message);
                     }
                 } else {
                     logError("HTTP error:", xhr.status);

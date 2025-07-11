@@ -38,14 +38,30 @@
         xhr.onreadystatechange = function () {
             if (xhr.readyState == 4) {
                 if (xhr.status == 204) {
-                    var row = element.parentNode;
-                    if (row) row = row.parentNode;
-                    if (row && row.parentNode) {
-                        row.parentNode.removeChild(row);
+                    try {
+                        var row = element;
+                        while (row && row.nodeType === 1) {
+                            if (String(row.tagName).toLowerCase() === 'tr') break;
+                            row = row.parentNode;
+                        }
+
+                        if (row && row.parentNode) {
+                            try {
+                                row.parentNode.removeChild(row);
+                            } catch (e) {
+                                row.outerHTML = "";
+                            }
+                        }
+
+                        alert(decodeURIComponent(path) + " {{ strings.delete_success }}");
+
+                    } catch (e) {
+                        alert("{{ strings.error_occured }} " + (e.message || ""));
                     }
-                    alert(decodeURIComponent(path) + " {{ strings.delete_success }}");
                 } else if (xhr.status == 409) {
                     alert("{{ strings.directory_not_empty }}");
+                } else if (xhr.status == 404) {
+                    alert("{{ strings.not_found }}");
                 } else {
                     try {
                         var errorResponse = JSON.parse(xhr.responseText);

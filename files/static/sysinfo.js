@@ -53,8 +53,12 @@
                             for (var i = 0; i < data.disks.length; i++) {
                                 var disk = data.disks[i];
                                 var div = document.createElement("div");
-                                div.innerHTML = '<label for="usage">' + disk.used_space_readable + "/" + disk.total_space_readable + '</label>' + '<progress style="width:100%; box-sizing:border-box;" class="disk_usage" max="' + disk.total_space + '" value="' + disk.used_space + '"></progress>';
                                 disksContainer.appendChild(div);
+                                try {
+                                    div.innerHTML = '<label for="usage">' + disk.used_space_readable + "/" + disk.total_space_readable + '</label><progress style="width:100%; box-sizing:border-box;" class="disk_usage" max="' + disk.total_space + '" value="' + disk.used_space + '"></progress>';
+                                } catch (e) {
+                                    div.innerHTML = disk.used_space_readable + "/" + disk.total_space_readable;
+                                }
                             }
                         }
                     } catch (e) {
@@ -74,7 +78,6 @@
     }
 
     function init() {
-        updateInfo();
         setInterval(updateInfo, 2500);
     }
 
