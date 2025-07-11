@@ -95,6 +95,10 @@ async fn delete<'a>(file: PathBuf, jar: &CookieJar<'_>) -> Result<Status, (Statu
         }
         let path = Path::new("files/").join(file.clone());
 
+        if !path.exists() {
+            return Ok(Status::NotFound);
+        }
+
         if path.is_dir() {
             if path
                 .read_dir()
