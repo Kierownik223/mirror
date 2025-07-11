@@ -1,10 +1,12 @@
 function openDialog() {
     var dialog = document.getElementById("browse_dialog");
+    window.location.href = "#browse_dialog";
     if (dialog) dialog.style.display = "block";
 }
 
 function closeDialog() {
     var dialog = document.getElementById("browse_dialog");
+    window.location.href = "#";
     if (dialog) dialog.style.display = "none";
 }
 
