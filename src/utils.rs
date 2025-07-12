@@ -159,16 +159,10 @@ pub fn get_extension_from_filename(filename: &str) -> Option<&str> {
     Path::new(filename).extension().and_then(OsStr::to_str)
 }
 
-pub fn get_bool_cookie(jar: &CookieJar, key: &str) -> bool {
-    match jar
-        .get(key)
-        .map(|cookie| cookie.value())
-        .unwrap_or_else(|| "false")
-    {
-        "true" => true,
-        "false" => false,
-        _ => false,
-    }
+pub fn get_bool_cookie(jar: &CookieJar<'_>, name: &str, default: bool) -> bool {
+    jar.get(name)
+        .map(|c| c.value() == "true")
+        .unwrap_or(default)
 }
 
 pub fn get_session<'a>(jar: &CookieJar<'_>) -> (String, i32) {

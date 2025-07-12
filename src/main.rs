@@ -142,7 +142,7 @@ impl<'r> FromRequest<'r> for UsePlain<'r> {
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         match request.headers().get_one("User-Agent") {
             Some(value) => {
-                if get_bool_cookie(request.cookies(), "plain") {
+                if get_bool_cookie(request.cookies(), "plain", false) {
                     return Outcome::Success(UsePlain(&true));
                 }
 
@@ -338,8 +338,8 @@ async fn index<'a>(
 
     let mut theme = get_theme(jar);
 
-    let hires = get_bool_cookie(jar, "hires");
-    let smallhead = get_bool_cookie(jar, "smallhead");
+    let hires = get_bool_cookie(jar, "hires", false);
+    let smallhead = get_bool_cookie(jar, "smallhead", false);
 
     if !Path::new(&("files/static/styles/".to_owned() + &theme + ".css").to_string()).exists() {
         theme = "standard".to_string();
@@ -387,7 +387,7 @@ async fn index<'a>(
         }
         "zip" => {
             if path.exists() {
-                if !get_bool_cookie(jar, "viewers") {
+                if !get_bool_cookie(jar, "viewers", true) {
                     return if config.standalone {
                         Ok(Err(Err(open_namedfile(path).await)))
                     } else {
@@ -438,7 +438,7 @@ async fn index<'a>(
         }
         "mp4" => {
             if path.exists() {
-                if !get_bool_cookie(jar, "viewers") {
+                if !get_bool_cookie(jar, "viewers", true) {
                     return if config.standalone {
                         Ok(Err(Err(open_namedfile(path).await)))
                     } else {
@@ -506,7 +506,7 @@ async fn index<'a>(
         }
         "mp3" | "m4a" | "m4b" | "flac" => {
             if path.exists() {
-                if !get_bool_cookie(jar, "viewers") {
+                if !get_bool_cookie(jar, "viewers", true) {
                     return if config.standalone {
                         Ok(Err(Err(open_namedfile(path).await)))
                     } else {
@@ -675,13 +675,13 @@ async fn index<'a>(
                     smallhead,
                     markdown,
                     topmarkdown,
-                    filebrowser: !get_bool_cookie(jar, "filebrowser"),
+                    filebrowser: !get_bool_cookie(jar, "filebrowser", false),
                 },
             ))))
         }
         _ => {
             if path.exists() {
-                if !get_bool_cookie(jar, "viewers") {
+                if !get_bool_cookie(jar, "viewers", true) {
                     return if config.standalone {
                         Ok(Err(Err(open_namedfile(path).await)))
                     } else {
@@ -826,12 +826,12 @@ fn settings(
             is_logged_in: is_logged_in(&jar),
             username,
             admin: get_session(jar).1 == 0,
-            hires: get_bool_cookie(jar, "hires"),
-            smallhead: get_bool_cookie(jar, "smallhead"),
+            hires: get_bool_cookie(jar, "hires", false),
+            smallhead: get_bool_cookie(jar, "smallhead", false),
             plain: *useplain.0,
-            nooverride: get_bool_cookie(jar, "nooverride"),
-            viewers: get_bool_cookie(jar, "viewers"),
-            filebrowser: get_bool_cookie(jar, "filebrowser"),
+            nooverride: get_bool_cookie(jar, "nooverride", false),
+            viewers: get_bool_cookie(jar, "viewers", true),
+            filebrowser: get_bool_cookie(jar, "filebrowser", false),
             language_names,
             show_cookie_notice,
         },
@@ -967,7 +967,7 @@ async fn iframe(
             path,
             dirs,
             theme: get_theme(jar),
-            hires: get_bool_cookie(jar, "hires"),
+            hires: get_bool_cookie(jar, "hires", false),
             notroot
         },
     ))
@@ -1019,8 +1019,8 @@ async fn default(status: Status, req: &Request<'_>) -> Template {
             theme: get_theme(jar),
             is_logged_in: is_logged_in(&jar),
             admin: get_session(&jar).1 == 0,
-            hires: get_bool_cookie(jar, "hires"),
-            smallhead: get_bool_cookie(jar, "smallhead"),
+            hires: get_bool_cookie(jar, "hires", false),
+            smallhead: get_bool_cookie(jar, "smallhead", false),
         },
     )
 }

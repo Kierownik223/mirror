@@ -55,8 +55,8 @@ fn login_page(
             is_logged_in: is_logged_in(&jar),
             username: "",
             admin: false,
-            hires: get_bool_cookie(jar, "hires"),
-            smallhead: get_bool_cookie(jar, "smallhead"),
+            hires: get_bool_cookie(jar, "hires", false),
+            smallhead: get_bool_cookie(jar, "smallhead", false),
             message: ""
         },
     ))
@@ -76,7 +76,7 @@ async fn login(
     useplain: UsePlain<'_>,
 ) -> Result<Redirect, Template> {
     if let Some(db_user) = login_user(db, &user.username, &user.password, &ip.0, true).await {
-        if !get_bool_cookie(&jar, "nooverride") {
+        if !get_bool_cookie(&jar, "nooverride", false) {
             if let Some(mirror_settings) = db_user.mirror_settings {
                 let decoded: HashMap<String, String> =
                     serde_json::from_str(&mirror_settings).unwrap_or_default();
@@ -138,8 +138,8 @@ async fn login(
                 theme: get_theme(jar),
                 is_logged_in: is_logged_in(&jar),
                 admin: get_session(&jar).1 == 0,
-                hires: get_bool_cookie(jar, "hires"),
-                smallhead: get_bool_cookie(jar, "smallhead"),
+                hires: get_bool_cookie(jar, "hires", false),
+                smallhead: get_bool_cookie(jar, "smallhead", false),
                 message: strings.get("invalid_info")
             },
         ));
@@ -186,7 +186,7 @@ async fn direct<'a>(
             serde_json::from_str(&json).map_err(|_| Status::BadRequest)?;
 
         if let Some(db_user) = login_user(db, &received_user.username, "", ip.0, false).await {
-            if !get_bool_cookie(&jar, "nooverride") {
+            if !get_bool_cookie(&jar, "nooverride", false) {
                 if let Some(mirror_settings) = db_user.mirror_settings {
                     let decoded: HashMap<String, String> =
                         serde_json::from_str(&mirror_settings).unwrap_or_default();
