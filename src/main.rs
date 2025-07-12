@@ -689,15 +689,14 @@ async fn index<'a>(
         }
         _ => {
             if path.exists() {
-                if !get_bool_cookie(jar, "viewers", true) {
-                    return if config.standalone {
-                        Ok(Err(Err(open_namedfile(path).await)))
-                    } else {
-                        Ok(Err(Ok(open_file(path, false))))
-                    };
-                }
-
                 if config.extensions.contains(&ext) {
+                    if !get_bool_cookie(jar, "viewers", true) {
+                        return if config.standalone {
+                            Ok(Err(Err(open_namedfile(path).await)))
+                        } else {
+                            Ok(Err(Ok(open_file(path, false))))
+                        };
+                    }
                     return Ok(Ok(Ok(Template::render(
                         if *useplain.0 {
                             "plain/details"
