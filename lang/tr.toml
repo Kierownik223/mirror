@@ -35,6 +35,7 @@ smallhead = "Küçük başlık logosu"
 dont_override_settings = "Ayarları geçersiz kılma"
 save_settings = "Ayarları Kaydet"
 reset_settings = "Ayarları sıfırla"
+viewers = "Dosya detay görüntüleyicileri"
 
 # Files
 

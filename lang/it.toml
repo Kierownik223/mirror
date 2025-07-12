@@ -35,6 +35,7 @@ smallhead = "Logo con intestazione piccola"
 dont_override_settings = "Non sovrascrivere impostazioni"
 save_settings = "Salva impostazioni"
 reset_settings = "Reimposta impostazioni"
+viewers = "Visualizzatori dei dettagli del file"
 
 # Files
 

@@ -35,6 +35,7 @@ smallhead = "小さなヘッダーロゴ"
 dont_override_settings = "設定を上書きしない"
 save_settings = "設定を保存"
 reset_settings = "設定をリセット"
+viewers = "ファイルの詳細ビューア"
 
 # Files
 

@@ -35,6 +35,7 @@ smallhead = "Malé logo hlavičky"
 dont_override_settings = "Neprepísať nastavenia"
 save_settings = "Uložiť nastavenia"
 reset_settings = "Obnoviť nastavenia"
+viewers = "Zobrazovače detailov súboru"
 
 # Files
 

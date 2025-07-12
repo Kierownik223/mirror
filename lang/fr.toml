@@ -35,6 +35,7 @@ smallhead = "Petit logo d'en-tête"
 dont_override_settings = "Ne pas écraser les paramètres"
 save_settings = "Enregistrer les paramètres"
 reset_settings = "Réinitialiser les paramètres"
+viewers = "Visionneurs de détails du fichier"
 
 # Files
 

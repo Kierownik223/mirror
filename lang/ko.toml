@@ -35,6 +35,7 @@ smallhead = "작은 헤더 로고"
 dont_override_settings = "설정 덮어쓰기 금지"
 save_settings = "설정 저장"
 reset_settings = "설정 재설정"
+viewers = "파일 세부정보 보기"
 
 # Files
 

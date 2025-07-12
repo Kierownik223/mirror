@@ -35,6 +35,7 @@ smallhead = "Kis fejléc logó"
 dont_override_settings = "Beállítások ne íródjanak felül"
 save_settings = "Beállítások mentése"
 reset_settings = "Beállítások visszaállítása"
+viewers = "Fájl részleteinek megtekintői"
 
 # Files
 

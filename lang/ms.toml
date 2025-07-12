@@ -35,6 +35,7 @@ smallhead = "Logo kepala kecil"
 dont_override_settings = "Jangan timpa tetapan"
 save_settings = "Simpan tetapan"
 reset_settings = "Tetapkan semula tetapan"
+viewers = "Pemapar butiran fail"
 
 # Files
 

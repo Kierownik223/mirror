@@ -35,6 +35,7 @@ smallhead = "Lite header-logo"
 dont_override_settings = "Ikke overstyr innstillinger"
 save_settings = "Lagre innstillinger"
 reset_settings = "Tilbakestill innstillinger"
+viewers = "Fil-detaljvisere"
 
 # Files
 

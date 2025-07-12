@@ -35,6 +35,7 @@ smallhead = "Mažas antraštės logotipas"
 dont_override_settings = "Nepiesti nustatymų"
 save_settings = "Išsaugoti nustatymus"
 reset_settings = "Atstatyti nustatymus"
+viewers = "Failo detalių peržiūrėtojai"
 
 # Files
 

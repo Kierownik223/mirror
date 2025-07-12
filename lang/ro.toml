@@ -35,6 +35,7 @@ smallhead = "Logo mic antet"
 dont_override_settings = "Nu suprascrie setările"
 save_settings = "Salvează setările"
 reset_settings = "Resetează setările"
+viewers = "Vizualizatori de detalii fișier"
 
 # Files
 

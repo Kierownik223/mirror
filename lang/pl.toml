@@ -35,6 +35,7 @@ smallhead = "Małe logo w nagłówku"
 dont_override_settings = "Nie nadpisuj ustawień"
 save_settings = "Zapisz ustawienia"
 reset_settings = "Resetuj ustawienia"
+viewers = "Przeglądarki szczegółów plików"
 
 # Files
 

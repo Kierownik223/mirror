@@ -35,6 +35,7 @@ smallhead = "Mali logo zaglavlja"
 dont_override_settings = "Ne prepiši postavke"
 save_settings = "Spremi postavke"
 reset_settings = "Resetiraj postavke"
+viewers = "Preglednici pojedinosti o datoteci"
 
 # Files
 

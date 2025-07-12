@@ -35,6 +35,7 @@ smallhead = "Малко лого в заглавката"
 dont_override_settings = "Не презаписвай настройките"
 save_settings = "Запази настройките"
 reset_settings = "Нулиране на настройките"
+viewers = "Преглеждащи детайли за файла"
 
 # Files
 

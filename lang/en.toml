@@ -35,6 +35,7 @@ smallhead = "Small header logo"
 dont_override_settings = "Don't override settings"
 save_settings = "Save settings"
 reset_settings = "Reset settings"
+viewers = "File detail viewers"
 
 # Files
 

@@ -35,6 +35,7 @@ smallhead = "Majhen logotip v glavi"
 dont_override_settings = "Ne prepiši nastavitev"
 save_settings = "Shrani nastavitve"
 reset_settings = "Ponastavi nastavitve"
+viewers = "Ogledovalci podrobnosti datoteke"
 
 # Files
 

@@ -35,6 +35,7 @@ smallhead = "Lille logo i header"
 dont_override_settings = "Overskriv ikke indstillinger"
 save_settings = "Gem indstillinger"
 reset_settings = "Nulstil indstillinger"
+viewers = "Filvisningsdetaljer"
 
 # Files
 

@@ -35,6 +35,7 @@ smallhead = "Logo header kecil"
 dont_override_settings = "Jangan timpa pengaturan"
 save_settings = "Simpan pengaturan"
 reset_settings = "Atur ulang pengaturan"
+viewers = "Penampil detail file"
 
 # Files
 

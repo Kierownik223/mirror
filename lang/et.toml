@@ -35,6 +35,7 @@ smallhead = "Väike päise logo"
 dont_override_settings = "Ära ülekirjuta seadeid"
 save_settings = "Salvesta seaded"
 reset_settings = "Lähtesta seaded"
+viewers = "Faili üksikasjade vaatajad"
 
 # Files
 

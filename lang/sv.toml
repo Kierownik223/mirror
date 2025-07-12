@@ -35,6 +35,7 @@ smallhead = "Liten header-logga"
 dont_override_settings = "Skriv inte över inställningar"
 save_settings = "Spara inställningar"
 reset_settings = "Återställ inställningar"
+viewers = "Filinformationsvisare"
 
 # Files
 
