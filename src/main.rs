@@ -231,7 +231,7 @@ type Translations = HashMap<String, HashMap<String, String>>;
 
 struct TranslationStore {
     translations: Translations,
-    language_names: Vec<(String, String)>
+    language_names: Vec<(String, String)>,
 }
 
 impl TranslationStore {
@@ -247,9 +247,16 @@ impl TranslationStore {
                     if let Ok(contents) = fs::read_to_string(entry.path()) {
                         if let Ok(parsed) = contents.parse::<Value>() {
                             if let Some(table) = parsed.as_table() {
-                                let lang_translations = table.iter().filter_map(|(key, val)| {val.as_str().map(|s| (key.clone(), s.to_string()))}).collect();
+                                let lang_translations = table
+                                    .iter()
+                                    .filter_map(|(key, val)| {
+                                        val.as_str().map(|s| (key.clone(), s.to_string()))
+                                    })
+                                    .collect();
 
-                                if let Some(lang_name) = table.get("language_name").and_then(|v| v.as_str()) {
+                                if let Some(lang_name) =
+                                    table.get("language_name").and_then(|v| v.as_str())
+                                {
                                     language_names.push((lang.to_string(), lang_name.to_string()));
                                 }
 
@@ -292,7 +299,11 @@ struct FileEntry {
 }
 
 #[get("/<file..>?download")]
-async fn download(file: PathBuf, jar: &CookieJar<'_>, config: &rocket::State<Config>,) -> Result<Result<Option<HeaderFile>, Option<NamedFile>>, Status> {
+async fn download(
+    file: PathBuf,
+    jar: &CookieJar<'_>,
+    config: &rocket::State<Config>,
+) -> Result<Result<Option<HeaderFile>, Option<NamedFile>>, Status> {
     let path = Path::new("files/").join(file);
 
     if is_restricted(path.clone(), &jar) {
@@ -303,7 +314,7 @@ async fn download(file: PathBuf, jar: &CookieJar<'_>, config: &rocket::State<Con
         Ok(Err(open_namedfile(path).await))
     } else {
         Ok(Ok(open_file(path)))
-    }
+    };
 }
 
 #[get("/<file..>")]
@@ -316,7 +327,8 @@ async fn index<'a>(
     host: Host<'_>,
     useplain: UsePlain<'_>,
     sizes: &State<FileSizes>,
-) -> Result<Result<Result<Template, Redirect>, Result<Option<HeaderFile>, Option<NamedFile>>>, Status> {
+) -> Result<Result<Result<Template, Redirect>, Result<Option<HeaderFile>, Option<NamedFile>>>, Status>
+{
     let path = Path::new("files/").join(file.clone());
     let strings = translations.get_translation(&lang.0);
 
@@ -380,7 +392,7 @@ async fn index<'a>(
                         Ok(Err(Err(open_namedfile(path).await)))
                     } else {
                         Ok(Err(Ok(open_file(path))))
-                    }
+                    };
                 }
 
                 let zip_file = fs::File::open(path.display().to_string()).unwrap();
@@ -418,7 +430,7 @@ async fn index<'a>(
                         Ok(Err(Err(open_namedfile(path).await)))
                     } else {
                         Ok(Err(Ok(open_file(path))))
-                    }
+                    };
                 }
             } else {
                 return Err(Status::NotFound);
@@ -431,7 +443,7 @@ async fn index<'a>(
                         Ok(Err(Err(open_namedfile(path).await)))
                     } else {
                         Ok(Err(Ok(open_file(path))))
-                    }
+                    };
                 }
 
                 let displaydetails = true;
@@ -499,13 +511,13 @@ async fn index<'a>(
                         Ok(Err(Err(open_namedfile(path).await)))
                     } else {
                         Ok(Err(Ok(open_file(path))))
-                    }
+                    };
                 }
 
                 let audiopath = Path::new("/").join(file.clone()).display().to_string();
                 let audiopath = audiopath.as_str();
 
-                if let Ok(tag) = Tag::new().read_from_path(&path){
+                if let Ok(tag) = Tag::new().read_from_path(&path) {
                     let audiotitle = tag
                         .title()
                         .unwrap_or(&path.file_name().unwrap().to_str().unwrap());
@@ -559,7 +571,7 @@ async fn index<'a>(
                         Ok(Err(Err(open_namedfile(path).await)))
                     } else {
                         Ok(Err(Ok(open_file(path))))
-                    }
+                    };
                 }
             } else {
                 return Err(Status::NotFound);
@@ -674,7 +686,7 @@ async fn index<'a>(
                         Ok(Err(Err(open_namedfile(path).await)))
                     } else {
                         Ok(Err(Ok(open_file(path))))
-                    }
+                    };
                 }
 
                 if config.extensions.contains(&ext) {
@@ -707,7 +719,7 @@ async fn index<'a>(
                         Ok(Err(Err(open_namedfile(path).await)))
                     } else {
                         Ok(Err(Ok(open_file(path))))
-                    }
+                    };
                 }
             } else {
                 return Err(Status::NotFound);
@@ -873,7 +885,14 @@ async fn sync_settings(
         let strings = translations.get_translation(&lang.0);
         let username = get_session(jar).0;
 
-        let keys = vec!["lang", "hires", "smallhead", "theme", "nooverride", "viewers"];
+        let keys = vec![
+            "lang",
+            "hires",
+            "smallhead",
+            "theme",
+            "nooverride",
+            "viewers",
+        ];
 
         let mut cookie_map: HashMap<String, Option<String>> = HashMap::new();
         for key in keys {
@@ -893,10 +912,16 @@ async fn sync_settings(
 }
 
 #[get("/settings/reset")]
-async fn reset_settings(
-    jar: &CookieJar<'_>,
-) -> Redirect {
-    let keys = vec!["lang", "hires", "smallhead", "theme", "nooverride", "plain", "viewers"];
+async fn reset_settings(jar: &CookieJar<'_>) -> Redirect {
+    let keys = vec![
+        "lang",
+        "hires",
+        "smallhead",
+        "theme",
+        "nooverride",
+        "plain",
+        "viewers",
+    ];
 
     for key in keys {
         jar.remove(key);
@@ -1065,7 +1090,10 @@ async fn rocket() -> _ {
         .manage(TranslationStore::new())
         .manage(size_state)
         .register("/", catchers![default, unprocessable_entry, forbidden])
-        .mount("/", routes![settings, reset_settings, download, index, iframe]);
+        .mount(
+            "/",
+            routes![settings, reset_settings, download, index, iframe],
+        );
 
     if config.enable_login {
         rocket = rocket

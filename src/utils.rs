@@ -7,7 +7,10 @@ use std::{
 };
 
 use humansize::{format_size, DECIMAL};
-use rocket::{fs::NamedFile, http::{Cookie, CookieJar}};
+use rocket::{
+    fs::NamedFile,
+    http::{Cookie, CookieJar},
+};
 use time::{Duration, OffsetDateTime};
 use tokio::sync::RwLock;
 
@@ -73,7 +76,7 @@ pub async fn read_dirs_async(
                 Ok(e) => e,
                 Err(_) => continue,
             };
-            
+
             for subdir_path in subdir_paths {
                 let subdir_path = subdir_path?;
                 if let Some(file_name) = subdir_path.file_name().to_str() {

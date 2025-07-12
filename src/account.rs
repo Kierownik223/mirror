@@ -6,7 +6,8 @@ use rocket::{
     fairing::AdHoc,
     form::Form,
     http::{Cookie, CookieJar, Status},
-    response::Redirect, State,
+    response::Redirect,
+    State,
 };
 use rocket_db_pools::Connection;
 use rocket_dyn_templates::{context, Template};
@@ -14,7 +15,9 @@ use serde_json::json;
 use time::{Duration, OffsetDateTime};
 
 use crate::{
-    db::{fetch_user, login_user, Db}, utils::{get_bool_cookie, get_session, get_theme, is_logged_in}, Config, Host, Language, MarmakUser, TranslationStore, UsePlain, UserToken, XForwardedFor
+    db::{fetch_user, login_user, Db},
+    utils::{get_bool_cookie, get_session, get_theme, is_logged_in},
+    Config, Host, Language, MarmakUser, TranslationStore, UsePlain, UserToken, XForwardedFor,
 };
 
 #[get("/login")]
@@ -24,7 +27,7 @@ fn login_page(
     lang: Language,
     host: Host<'_>,
     config: &State<Config>,
-    useplain: UsePlain<'_>
+    useplain: UsePlain<'_>,
 ) -> Result<Template, Redirect> {
     if is_logged_in(&jar) {
         let perms = get_session(jar).1;
@@ -70,7 +73,7 @@ async fn login(
     lang: Language,
     host: Host<'_>,
     config: &State<Config>,
-    useplain: UsePlain<'_>
+    useplain: UsePlain<'_>,
 ) -> Result<Redirect, Template> {
     if let Some(db_user) = login_user(db, &user.username, &user.password, &ip.0, true).await {
         if !get_bool_cookie(&jar, "nooverride") {
@@ -150,7 +153,7 @@ async fn direct<'a>(
     token: Option<String>,
     to: Option<String>,
     ip: XForwardedFor<'_>,
-    host: Host<'_>
+    host: Host<'_>,
 ) -> Result<Redirect, Status> {
     if let Some(token) = token {
         if is_logged_in(&jar) {
@@ -241,7 +244,7 @@ async fn direct<'a>(
                         "account" => format!("account.{}", root_domain),
                         "marmak" => root_domain.to_string(),
                         "karol" => format!("karol.{}", root_domain),
-                        _ => host.0.to_string()
+                        _ => host.0.to_string(),
                     },
                     encrypted_b64
                 );
@@ -269,8 +272,7 @@ pub fn build_account() -> AdHoc {
         let mut rocket = rocket.mount("/account", routes![login_page, login, logout]);
 
         if config.enable_direct {
-            rocket = rocket
-                .mount("/account", routes![direct]);
+            rocket = rocket.mount("/account", routes![direct]);
         }
 
         rocket

@@ -17,7 +17,8 @@ use rocket_multipart_form_data::{
 };
 
 use crate::{
-    utils::{get_bool_cookie, get_extension_from_filename, get_session, get_theme, is_logged_in}, Config, Disk, Host, Language, MirrorFile, TranslationStore, UsePlain
+    utils::{get_bool_cookie, get_extension_from_filename, get_session, get_theme, is_logged_in},
+    Config, Disk, Host, Language, MirrorFile, TranslationStore, UsePlain,
 };
 
 #[post("/upload", data = "<data>")]
@@ -29,7 +30,7 @@ async fn upload(
     lang: Language,
     host: Host<'_>,
     config: &State<Config>,
-    useplain: UsePlain<'_>
+    useplain: UsePlain<'_>,
 ) -> Result<Template, Status> {
     if !is_logged_in(&jar) {
         return Err(Status::Unauthorized);
@@ -71,7 +72,11 @@ async fn upload(
             for file_field in file_fields {
                 if let Some(file_name) = &file_field.file_name {
                     let normalized_path = file_name.replace('\\', "/");
-                    let file_name = &Path::new(&normalized_path) .file_name().and_then(|name| name.to_str()).unwrap().to_string();
+                    let file_name = &Path::new(&normalized_path)
+                        .file_name()
+                        .and_then(|name| name.to_str())
+                        .unwrap()
+                        .to_string();
 
                     let upload_path = format!("files/{}/{}", user_path, file_name);
 
@@ -121,7 +126,11 @@ async fn upload(
             let root_domain = host.0.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
 
             return Ok(Template::render(
-                if *useplain.0 { "plain/upload" } else { "upload" },
+                if *useplain.0 {
+                    "plain/upload"
+                } else {
+                    "upload"
+                },
                 context! {
                     title: strings.get("uploader").unwrap(),
                     lang,
@@ -152,7 +161,7 @@ fn sysinfo(
     lang: Language,
     host: Host<'_>,
     config: &State<Config>,
-    useplain: UsePlain<'_>
+    useplain: UsePlain<'_>,
 ) -> Result<Template, Status> {
     if !is_logged_in(&jar) {
         return Err(Status::Unauthorized);
@@ -194,7 +203,11 @@ fn sysinfo(
             .collect();
 
         return Ok(Template::render(
-            if *useplain.0 { "plain/sysinfo" } else { "sysinfo" },
+            if *useplain.0 {
+                "plain/sysinfo"
+            } else {
+                "sysinfo"
+            },
             context! {
                 title: strings.get("sysinfo").unwrap(),
                 lang,
@@ -228,7 +241,7 @@ fn uploader(
     lang: Language,
     host: Host<'_>,
     config: &State<Config>,
-    useplain: UsePlain<'_>
+    useplain: UsePlain<'_>,
 ) -> Result<Template, Status> {
     if !is_logged_in(&jar) {
         return Err(Status::Unauthorized);
@@ -244,7 +257,11 @@ fn uploader(
         let root_domain = host.0.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
 
         return Ok(Template::render(
-            if *useplain.0 { "plain/upload" } else { "upload" },
+            if *useplain.0 {
+                "plain/upload"
+            } else {
+                "upload"
+            },
             context! {
                 title: strings.get("uploader").unwrap(),
                 lang,
@@ -272,7 +289,7 @@ fn admin(
     lang: Language,
     host: Host<'_>,
     config: &State<Config>,
-    useplain: UsePlain<'_>
+    useplain: UsePlain<'_>,
 ) -> Result<Template, Status> {
     if !is_logged_in(&jar) {
         return Err(Status::Unauthorized);
