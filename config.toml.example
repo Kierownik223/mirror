@@ -16,3 +16,5 @@ instance_info = "My Mirror instance!"
 x_sendfile_header = "X-Send-File"
 # X-Send-File header path prefix (needed for Apache2 configuration)
 x_sendfile_prefix = "/opt/mirror/"
+# Standalone mode (for use without a reverse proxy)
+standalone = false

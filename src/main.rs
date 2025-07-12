@@ -3,6 +3,7 @@ use base64::engine::general_purpose;
 use base64::Engine;
 use db::{fetch_user, Db};
 use humansize::{format_size, DECIMAL};
+use rocket::fs::NamedFile;
 use rocket::http::{Cookie, CookieJar, Status};
 use rocket::request::{FromRequest, Outcome};
 use rocket::response::content::RawHtml;
@@ -29,7 +30,7 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::utils::{is_hidden, read_dirs_async};
+use crate::utils::{is_hidden, open_namedfile, read_dirs_async};
 
 mod account;
 mod admin;
@@ -48,6 +49,7 @@ struct Config {
     instance_info: String,
     x_sendfile_header: String,
     x_sendfile_prefix: String,
+    standalone: bool,
 }
 
 impl Config {
@@ -289,14 +291,18 @@ struct FileEntry {
 }
 
 #[get("/<file..>?download")]
-async fn download(file: PathBuf, jar: &CookieJar<'_>) -> Result<Option<HeaderFile>, Status> {
+async fn download(file: PathBuf, jar: &CookieJar<'_>, config: &rocket::State<Config>,) -> Result<Result<Option<HeaderFile>, Option<NamedFile>>, Status> {
     let path = Path::new("files/").join(file);
 
     if is_restricted(path.clone(), &jar) {
         return Err(Status::Unauthorized);
     }
 
-    Ok(open_file(path))
+    return if config.standalone {
+        Ok(Err(open_namedfile(path).await))
+    } else {
+        Ok(Ok(open_file(path)))
+    }
 }
 
 #[get("/<file..>")]
@@ -309,7 +315,7 @@ async fn index<'a>(
     host: Host<'_>,
     useplain: UsePlain<'_>,
     sizes: &State<FileSizes>,
-) -> Result<Result<Result<Template, Redirect>, Option<HeaderFile>>, Status> {
+) -> Result<Result<Result<Template, Redirect>, Result<Option<HeaderFile>, Option<NamedFile>>>, Status> {
     let path = Path::new("files/").join(file.clone());
     let strings = translations.get_translation(&lang.0);
 
@@ -518,7 +524,7 @@ async fn index<'a>(
                         },
                     ))))
                 } else {
-                    return Ok(Err(open_file(path)));
+                    return Ok(Err(Ok(open_file(path))));
                 }
             } else {
                 return Err(Status::NotFound);
@@ -657,7 +663,11 @@ async fn index<'a>(
                     return Err(Status::NotFound);
                 }
             } else {
-                return Ok(Err(open_file(path)));
+                return if config.standalone {
+                    Ok(Err(Err(open_namedfile(path).await)))
+                } else {
+                    Ok(Err(Ok(open_file(path))))
+                }
             }
         }
     }

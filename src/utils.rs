@@ -7,7 +7,7 @@ use std::{
 };
 
 use humansize::{format_size, DECIMAL};
-use rocket::http::{Cookie, CookieJar};
+use rocket::{fs::NamedFile, http::{Cookie, CookieJar}};
 use time::{Duration, OffsetDateTime};
 use tokio::sync::RwLock;
 
@@ -254,6 +254,14 @@ pub fn is_hidden(mut path: PathBuf, jar: &CookieJar<'_>) -> bool {
 pub fn open_file(path: PathBuf) -> Option<HeaderFile> {
     if path.exists() {
         return Some(HeaderFile(path.display().to_string()));
+    } else {
+        return None;
+    }
+}
+
+pub async fn open_namedfile(path: PathBuf) -> Option<NamedFile> {
+    if path.exists() {
+        return Some(NamedFile::open(path.display().to_string()).await.unwrap());
     } else {
         return None;
     }
