@@ -385,35 +385,41 @@ async fn index<'a>(
 
                 let zip_file = fs::File::open(path.display().to_string()).unwrap();
 
-                let archive = zip::ZipArchive::new(zip_file).unwrap();
+                if let Ok(archive) = zip::ZipArchive::new(zip_file) {
+                    let file_names: Vec<&str> = archive.file_names().collect();
 
-                let file_names: Vec<&str> = archive.file_names().collect();
+                    let files = list_to_files(file_names).unwrap_or_default();
 
-                let files = list_to_files(file_names).unwrap_or_default();
+                    if files.is_empty() {
+                        return Err(Status::NotFound);
+                    }
 
-                if files.is_empty() {
-                    return Err(Status::NotFound);
+                    Ok(Ok(Ok(Template::render(
+                        if *useplain.0 { "plain/zip" } else { "zip" },
+                        context! {
+                            title: format!("{} {}", strings.get("viewing_zip").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
+                            lang,
+                            strings,
+                            root_domain,
+                            host: host.0,
+                            config: config.inner(),
+                            path: Path::new("/").join(file.clone()).display().to_string(),
+                            files,
+                            theme,
+                            is_logged_in: is_logged_in(&jar),
+                            username,
+                            admin: perms == 0,
+                            hires,
+                            smallhead
+                        },
+                    ))))
+                } else {
+                    return if config.standalone {
+                        Ok(Err(Err(open_namedfile(path).await)))
+                    } else {
+                        Ok(Err(Ok(open_file(path))))
+                    }
                 }
-
-                Ok(Ok(Ok(Template::render(
-                    if *useplain.0 { "plain/zip" } else { "zip" },
-                    context! {
-                        title: format!("{} {}", strings.get("viewing_zip").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
-                        lang,
-                        strings,
-                        root_domain,
-                        host: host.0,
-                        config: config.inner(),
-                        path: Path::new("/").join(file.clone()).display().to_string(),
-                        files,
-                        theme,
-                        is_logged_in: is_logged_in(&jar),
-                        username,
-                        admin: perms == 0,
-                        hires,
-                        smallhead
-                    },
-                ))))
             } else {
                 return Err(Status::NotFound);
             }
