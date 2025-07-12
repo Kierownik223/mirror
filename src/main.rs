@@ -92,6 +92,7 @@ struct Settings<'r> {
     smallhead: Option<&'r str>,
     plain: Option<&'r str>,
     nooverride: Option<&'r str>,
+    viewers: Option<&'r str>,
     filebrowser: Option<&'r str>,
 }
 
@@ -374,6 +375,14 @@ async fn index<'a>(
         }
         "zip" => {
             if path.exists() {
+                if !get_bool_cookie(jar, "viewers") {
+                    return if config.standalone {
+                        Ok(Err(Err(open_namedfile(path).await)))
+                    } else {
+                        Ok(Err(Ok(open_file(path))))
+                    }
+                }
+
                 let zip_file = fs::File::open(path.display().to_string()).unwrap();
 
                 let archive = zip::ZipArchive::new(zip_file).unwrap();
@@ -411,6 +420,14 @@ async fn index<'a>(
         }
         "mp4" => {
             if path.exists() {
+                if !get_bool_cookie(jar, "viewers") {
+                    return if config.standalone {
+                        Ok(Err(Err(open_namedfile(path).await)))
+                    } else {
+                        Ok(Err(Ok(open_file(path))))
+                    }
+                }
+
                 let displaydetails = true;
 
                 let videopath = Path::new("/").join(file.clone()).display().to_string();
@@ -471,10 +488,18 @@ async fn index<'a>(
         }
         "mp3" | "m4a" | "m4b" | "flac" => {
             if path.exists() {
+                if !get_bool_cookie(jar, "viewers") {
+                    return if config.standalone {
+                        Ok(Err(Err(open_namedfile(path).await)))
+                    } else {
+                        Ok(Err(Ok(open_file(path))))
+                    }
+                }
+
                 let audiopath = Path::new("/").join(file.clone()).display().to_string();
                 let audiopath = audiopath.as_str();
 
-                if let Ok(tag) = Tag::new().read_from_path(&path) {
+                if let Ok(tag) = Tag::new().read_from_path(&path){
                     let audiotitle = tag
                         .title()
                         .unwrap_or(&path.file_name().unwrap().to_str().unwrap());
@@ -524,7 +549,11 @@ async fn index<'a>(
                         },
                     ))))
                 } else {
-                    return Ok(Err(Ok(open_file(path))));
+                    return if config.standalone {
+                        Ok(Err(Err(open_namedfile(path).await)))
+                    } else {
+                        Ok(Err(Ok(open_file(path))))
+                    }
                 }
             } else {
                 return Err(Status::NotFound);
@@ -633,8 +662,16 @@ async fn index<'a>(
             ))))
         }
         _ => {
-            if config.extensions.contains(&ext) {
-                if path.exists() {
+            if path.exists() {
+                if !get_bool_cookie(jar, "viewers") {
+                    return if config.standalone {
+                        Ok(Err(Err(open_namedfile(path).await)))
+                    } else {
+                        Ok(Err(Ok(open_file(path))))
+                    }
+                }
+
+                if config.extensions.contains(&ext) {
                     return Ok(Ok(Ok(Template::render(
                         if *useplain.0 {
                             "plain/details"
@@ -660,14 +697,14 @@ async fn index<'a>(
                         },
                     ))));
                 } else {
-                    return Err(Status::NotFound);
+                    return if config.standalone {
+                        Ok(Err(Err(open_namedfile(path).await)))
+                    } else {
+                        Ok(Err(Ok(open_file(path))))
+                    }
                 }
             } else {
-                return if config.standalone {
-                    Ok(Err(Err(open_namedfile(path).await)))
-                } else {
-                    Ok(Err(Ok(open_file(path))))
-                }
+                return Err(Status::NotFound);
             }
         }
     }
@@ -696,6 +733,7 @@ fn settings(
         ("smallhead", opt.smallhead),
         ("plain", opt.plain),
         ("nooverride", opt.nooverride),
+        ("viewers", opt.viewers),
         ("filebrowser", opt.filebrowser),
     ];
 
@@ -772,8 +810,9 @@ fn settings(
             admin: get_session(jar).1 == 0,
             hires: get_bool_cookie(jar, "hires"),
             smallhead: get_bool_cookie(jar, "smallhead"),
-            plain: get_bool_cookie(jar, "plain"),
+            plain: *useplain.0,
             nooverride: get_bool_cookie(jar, "nooverride"),
+            viewers: get_bool_cookie(jar, "viewers"),
             filebrowser: get_bool_cookie(jar, "filebrowser"),
             language_names,
             show_cookie_notice,
@@ -828,7 +867,7 @@ async fn sync_settings(
         let strings = translations.get_translation(&lang.0);
         let username = get_session(jar).0;
 
-        let keys = vec!["lang", "hires", "smallhead", "theme", "nooverride"];
+        let keys = vec!["lang", "hires", "smallhead", "theme", "nooverride", "viewers"];
 
         let mut cookie_map: HashMap<String, Option<String>> = HashMap::new();
         for key in keys {
@@ -851,7 +890,7 @@ async fn sync_settings(
 async fn reset_settings(
     jar: &CookieJar<'_>,
 ) -> Redirect {
-    let keys = vec!["lang", "hires", "smallhead", "theme", "nooverride", "plain"];
+    let keys = vec!["lang", "hires", "smallhead", "theme", "nooverride", "plain", "viewers"];
 
     for key in keys {
         jar.remove(key);

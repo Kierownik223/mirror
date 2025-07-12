@@ -53,6 +53,11 @@
     <br>
     <label><input type="radio" name="nooverride" value="true" {% if nooverride %}checked {% endif %}>{{ strings.enable }}</label>
     <label><input type="radio" name="nooverride" value="false" {% if not nooverride %}checked {% endif %}>{{ strings.disable }}</label>
+    <br>
+    <label for="viewers"><img src="/static/images/icons/{% if hires %}hires/{% endif %}exe.png" class="icon">{{ strings.viewers }}</label>
+    <br>
+    <label><input type="radio" name="viewers" value="true" {% if viewers %}checked {% endif %}>{{ strings.enable }}</label>
+    <label><input type="radio" name="viewers" value="false" {% if not viewers %}checked {% endif %}>{{ strings.disable }}</label>
     {% if is_logged_in and admin %}
     <br>
     <label for="nooverride"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">Disable file browser in uploader</label>
