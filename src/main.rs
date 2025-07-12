@@ -96,18 +96,26 @@ struct Settings<'r> {
     filebrowser: Option<&'r str>,
 }
 
-struct HeaderFile(String);
+struct HeaderFile(String, bool);
 
 impl<'r> Responder<'r, 'r> for HeaderFile {
-    fn respond_to(self, _: &Request) -> response::Result<'r> {
+    fn respond_to(self, _: &Request<'_>) -> response::Result<'r> {
         let config = Config::load();
 
-        Response::build()
-            .raw_header(
-                config.x_sendfile_header,
-                format!("{}{}", config.x_sendfile_prefix, self.0),
-            )
-            .ok()
+        let mut builder = Response::build();
+
+        builder.raw_header(
+            config.x_sendfile_header,
+            format!("{}{}", config.x_sendfile_prefix, self.0),
+        );
+
+        if self.1 {
+            builder.raw_header("Cache-Control", "public");
+        } else {
+            builder.raw_header("Cache-Control", "private");
+        }
+
+        builder.ok()
     }
 }
 
@@ -128,7 +136,7 @@ impl<'r> FromRequest<'r> for XForwardedFor<'r> {
 
                 Outcome::Success(XForwardedFor(ip))
             }
-            None => Outcome::Error((Status::BadRequest, ())),
+            None => Outcome::Success(XForwardedFor("(unknown)"))
         }
     }
 }
@@ -313,7 +321,7 @@ async fn download(
     return if config.standalone {
         Ok(Err(open_namedfile(path).await))
     } else {
-        Ok(Ok(open_file(path)))
+        Ok(Ok(open_file(path, true)))
     };
 }
 
@@ -391,7 +399,7 @@ async fn index<'a>(
                     return if config.standalone {
                         Ok(Err(Err(open_namedfile(path).await)))
                     } else {
-                        Ok(Err(Ok(open_file(path))))
+                        Ok(Err(Ok(open_file(path, true))))
                     };
                 }
 
@@ -429,7 +437,7 @@ async fn index<'a>(
                     return if config.standalone {
                         Ok(Err(Err(open_namedfile(path).await)))
                     } else {
-                        Ok(Err(Ok(open_file(path))))
+                        Ok(Err(Ok(open_file(path, false))))
                     };
                 }
             } else {
@@ -442,7 +450,7 @@ async fn index<'a>(
                     return if config.standalone {
                         Ok(Err(Err(open_namedfile(path).await)))
                     } else {
-                        Ok(Err(Ok(open_file(path))))
+                        Ok(Err(Ok(open_file(path, true))))
                     };
                 }
 
@@ -510,7 +518,7 @@ async fn index<'a>(
                     return if config.standalone {
                         Ok(Err(Err(open_namedfile(path).await)))
                     } else {
-                        Ok(Err(Ok(open_file(path))))
+                        Ok(Err(Ok(open_file(path, false))))
                     };
                 }
 
@@ -570,7 +578,7 @@ async fn index<'a>(
                     return if config.standalone {
                         Ok(Err(Err(open_namedfile(path).await)))
                     } else {
-                        Ok(Err(Ok(open_file(path))))
+                        Ok(Err(Ok(open_file(path, true))))
                     };
                 }
             } else {
@@ -685,7 +693,7 @@ async fn index<'a>(
                     return if config.standalone {
                         Ok(Err(Err(open_namedfile(path).await)))
                     } else {
-                        Ok(Err(Ok(open_file(path))))
+                        Ok(Err(Ok(open_file(path, false))))
                     };
                 }
 
@@ -718,7 +726,7 @@ async fn index<'a>(
                     return if config.standalone {
                         Ok(Err(Err(open_namedfile(path).await)))
                     } else {
-                        Ok(Err(Ok(open_file(path))))
+                        Ok(Err(Ok(open_file(path, true))))
                     };
                 }
             } else {

@@ -248,9 +248,9 @@ pub fn is_hidden(mut path: PathBuf, jar: &CookieJar<'_>) -> bool {
     false
 }
 
-pub fn open_file(path: PathBuf) -> Option<HeaderFile> {
+pub fn open_file(path: PathBuf, cache: bool) -> Option<HeaderFile> {
     if path.exists() {
-        return Some(HeaderFile(path.display().to_string()));
+        return Some(HeaderFile(path.display().to_string(), cache));
     } else {
         return None;
     }
