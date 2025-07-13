@@ -117,7 +117,7 @@
                         class="icon">{{ s.name }}/</a></td>
             <td>{{ s.size }}</td>
             <td>{{ strings.folder }}</td>
-            {% if admin %}<td><a style="cursor: pointer;" onclick="deleteFile(this, '{{ s.name }}')">{{ strings.delete }}</a></td>{% endif %}
+            {% if admin %}<td><a style="cursor: pointer;" href="javascript:;" onclick="deleteFile(this, '{{ s.name | safe | addslashes }}')">{{ strings.delete }}</a></td>{% endif %}
         </tr>
         {% endfor %}
         {% for s in files %}
@@ -126,7 +126,7 @@
                         class="icon">{{ s.name }}</a></td>
             <td>{{ s.size }}</td>
             <td>{{ strings.file }}</td>
-            {% if admin %}<td><a style="cursor: pointer;" onclick="deleteFile(this, '{{ s.name }}')">{{ strings.delete }}</a></td>{% endif %}
+            {% if admin %}<td><a style="cursor: pointer;" href="javascript:;" onclick="deleteFile(this, '{{ s.name | safe | addslashes }}')">{{ strings.delete }}</a></td>{% endif %}
         </tr>
         {% endfor %}
     </tbody>
