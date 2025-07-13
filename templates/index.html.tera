@@ -1,86 +1,6 @@
 {% extends "base" %}
 
 {% block content %}
-{% if admin %}
-<script src="/static/polyfills.js"></script>
-<script>
-    function deleteFile(element, filePath) {
-        var pathname = "/";
-        if (window.location && typeof window.location.pathname === "string") {
-            pathname = window.location.pathname;
-        }
-        var path = pathname + filePath;
-        var confirmMsg = "{{ strings.delete_confirmation }} " + decodeURIComponent(path) + "?";
-
-        if (!confirm(confirmMsg)) {
-            return;
-        }
-
-        var xhr;
-        if (window.XMLHttpRequest) {
-            xhr = new XMLHttpRequest();
-        } else {
-            try {
-                xhr = new ActiveXObject("Microsoft.XMLHTTP");
-            } catch (e) {
-                alert("{{ strings.error_deleting }}");
-                return;
-            }
-        }
-
-        try {
-            xhr.open("DELETE", "/api" + path, true);
-        } catch (e) {
-            alert("{{ strings.error_deleting }}");
-            return;
-        }
-
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4) {
-                if (xhr.status == 204) {
-                    try {
-                        var row = element;
-                        while (row && row.nodeType === 1) {
-                            if (String(row.tagName).toLowerCase() === 'tr') break;
-                            row = row.parentNode;
-                        }
-
-                        if (row && row.parentNode) {
-                            try {
-                                row.parentNode.removeChild(row);
-                            } catch (e) {
-                                row.outerHTML = "";
-                            }
-                        }
-
-                        alert(decodeURIComponent(path) + " {{ strings.delete_success }}");
-
-                    } catch (e) {
-                        alert("{{ strings.error_occured }} " + (e.message || ""));
-                    }
-                } else if (xhr.status == 409) {
-                    alert("{{ strings.directory_not_empty }}");
-                } else if (xhr.status == 404) {
-                    alert("{{ strings.not_found }}");
-                } else {
-                    try {
-                        var errorResponse = JSON.parse(xhr.responseText);
-                        alert("{{ strings.error_occured }} " + errorResponse.message);
-                    } catch (e) {
-                        alert("{{ strings.error_occured }}");
-                    }
-                }
-            }
-        };
-
-        try {
-            xhr.send();
-        } catch (e) {
-            alert("{{ strings.error_deleting }}");
-        }
-    }
-</script>
-{% endif %}
 <a href="/">MARMAK Mirror</a>/
 {% for s in path_seg %}
 {% if s != "" %}
@@ -136,3 +56,86 @@
 {{ markdown | safe}}
 {% endif %}
 {% endblock content %}
+
+{% block scripts %}
+{% if admin %}
+    <script src="/static/polyfills.js"></script>
+    <script>
+        function deleteFile(element, filePath) {
+            var pathname = "/";
+            if (window.location && typeof window.location.pathname === "string") {
+                pathname = window.location.pathname;
+            }
+            var path = pathname + filePath;
+            var confirmMsg = "{{ strings.delete_confirmation }} " + decodeURIComponent(path) + "?";
+
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+
+            var xhr;
+            if (window.XMLHttpRequest) {
+                xhr = new XMLHttpRequest();
+            } else {
+                try {
+                    xhr = new ActiveXObject("Microsoft.XMLHTTP");
+                } catch (e) {
+                    alert("{{ strings.error_deleting }}");
+                    return;
+                }
+            }
+
+            try {
+                xhr.open("DELETE", "/api" + path, true);
+            } catch (e) {
+                alert("{{ strings.error_deleting }}");
+                return;
+            }
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4) {
+                    if (xhr.status == 204) {
+                        try {
+                            var row = element;
+                            while (row && row.nodeType === 1) {
+                                if (String(row.tagName).toLowerCase() === 'tr') break;
+                                row = row.parentNode;
+                            }
+
+                            if (row && row.parentNode) {
+                                try {
+                                    row.parentNode.removeChild(row);
+                                } catch (e) {
+                                    row.outerHTML = "";
+                                }
+                            }
+
+                            alert(decodeURIComponent(path) + " {{ strings.delete_success }}");
+
+                        } catch (e) {
+                            alert("{{ strings.error_occured }} " + (e.message || ""));
+                        }
+                    } else if (xhr.status == 409) {
+                        alert("{{ strings.directory_not_empty }}");
+                    } else if (xhr.status == 404) {
+                        alert("{{ strings.not_found }}");
+                    } else {
+                        try {
+                            var errorResponse = JSON.parse(xhr.responseText);
+                            alert("{{ strings.error_occured }} " + errorResponse.message);
+                        } catch (e) {
+                            alert("{{ strings.error_occured }}");
+                        }
+                    }
+                }
+            };
+
+            try {
+                xhr.send();
+            } catch (e) {
+                alert("{{ strings.error_deleting }}");
+            }
+        }
+    </script>
+{% endif %}
+{% endblock scripts %}

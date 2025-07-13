@@ -14,8 +14,9 @@
 <div id="disks">
 Loading...
 </div>
+{% endblock content %}
 
+{% block scripts %}
 <script src="/static/polyfills.js"></script>
 <script src="/static/admin.js"></script>
-
-{% endblock content %}
+{% endblock scripts %}

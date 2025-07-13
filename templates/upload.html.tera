@@ -44,7 +44,9 @@
         <button type="button" onclick="uploadViaAPI()"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png" class="icon">{{ strings.upload }} (JavaScript)</span></button>
     </center>
 </form>
+{% endblock content %}
 
+{% block scripts %}
 <script>
 function uploadViaAPI() {
     var input = document.getElementById('file');
@@ -206,7 +208,6 @@ function deleteFile(element, filePath) {
 </script>
 
 {% if filebrowser %}
-
 <div id="browse_dialog" class="dialog">
     <div class="dialog-content">
         <img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">{{ strings.select_folder }}:
@@ -221,7 +222,6 @@ function deleteFile(element, filePath) {
 <script src="/static/browser.js"></script>
 
 <link rel="stylesheet" href="/static/browser.css">
-
 {% endif %}
 
-{% endblock content %}
+{% endblock scripts %}

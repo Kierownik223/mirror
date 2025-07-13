@@ -22,7 +22,9 @@
     {% endfor %}
 </div>
 
+{% endblock content %}
+
+{% block scripts %}
 <script src="/static/polyfills.js"></script>
 <script src="/static/sysinfo.js"></script>
-
-{% endblock content %}
+{% endblock scripts %}
