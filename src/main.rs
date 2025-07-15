@@ -136,7 +136,7 @@ impl<'r> FromRequest<'r> for XForwardedFor<'r> {
 
                 Outcome::Success(XForwardedFor(ip))
             }
-            None => Outcome::Success(XForwardedFor("(unknown)"))
+            None => Outcome::Success(XForwardedFor("(unknown)")),
         }
     }
 }

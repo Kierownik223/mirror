@@ -11,10 +11,9 @@ use rocket::{
 };
 use rocket_db_pools::Connection;
 use rocket_dyn_templates::{context, Template};
-use rsa::{RsaPrivateKey, RsaPublicKey};
-use rsa::pkcs1::DecodeRsaPrivateKey;
-use rsa::pkcs1::DecodeRsaPublicKey;
+use rsa::pkcs1::{DecodeRsaPrivateKey, DecodeRsaPublicKey};
 use rsa::pkcs1v15::Pkcs1v15Encrypt;
+use rsa::{RsaPrivateKey, RsaPublicKey};
 use serde_json::json;
 use time::{Duration, OffsetDateTime};
 
@@ -165,14 +164,18 @@ async fn direct<'a>(
             return Ok(Redirect::to(if perms == 0 { "/admin" } else { "/" }));
         }
 
-        let private_key_pem = fs::read_to_string("private.key").map_err(|_| Status::InternalServerError)?;
-        let private_key = RsaPrivateKey::from_pkcs1_pem(&private_key_pem).map_err(|_| Status::InternalServerError)?;
+        let private_key_pem =
+            fs::read_to_string("private.key").map_err(|_| Status::InternalServerError)?;
+        let private_key = RsaPrivateKey::from_pkcs1_pem(&private_key_pem)
+            .map_err(|_| Status::InternalServerError)?;
 
         let encrypted_data = base64::engine::general_purpose::URL_SAFE
             .decode(&token.replace(".", "="))
             .map_err(|_| Status::BadRequest)?;
 
-        let decrypted_data = private_key.decrypt(Pkcs1v15Encrypt, &encrypted_data).map_err(|_| Status::InternalServerError)?;
+        let decrypted_data = private_key
+            .decrypt(Pkcs1v15Encrypt, &encrypted_data)
+            .map_err(|_| Status::InternalServerError)?;
 
         let mut json_bytes = Vec::new();
         BASE64_STANDARD
@@ -222,11 +225,14 @@ async fn direct<'a>(
                     json!({"username": get_session(jar).0, "password_hash": db_user.password});
                 let b64token = BASE64_STANDARD.encode(user_data.to_string());
 
-                let public_key_pem = fs::read_to_string("public.key").map_err(|_| Status::InternalServerError)?;
-                let public_key = RsaPublicKey::from_pkcs1_pem(&public_key_pem).map_err(|_| Status::InternalServerError)?;
+                let public_key_pem =
+                    fs::read_to_string("public.key").map_err(|_| Status::InternalServerError)?;
+                let public_key = RsaPublicKey::from_pkcs1_pem(&public_key_pem)
+                    .map_err(|_| Status::InternalServerError)?;
 
                 let mut rng = thread_rng();
-                let encrypted_data = public_key.encrypt(&mut rng, Pkcs1v15Encrypt, b64token.as_bytes())
+                let encrypted_data = public_key
+                    .encrypt(&mut rng, Pkcs1v15Encrypt, b64token.as_bytes())
                     .map_err(|_| Status::InternalServerError)?;
 
                 let encrypted_b64 =
