@@ -2,5 +2,4 @@ target/
 private.key
 public.key
 config.toml
-Cargo.lock
 Rocket.toml
