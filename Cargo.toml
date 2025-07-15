@@ -7,7 +7,7 @@ publish = false
 [dependencies]
 audiotags = "0.5"
 base64 = "0.22"
-bcrypt = "0.16"
+bcrypt = "0.17"
 humansize = "2"
 markdown = "1"
 rand = "0.8"
@@ -16,20 +16,20 @@ rocket-multipart-form-data = "0.10"
 rsa = "0.9"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-sysinfo = "0.33"
+sysinfo = "0.36"
 tera = "1"
 time = "0.3"
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "time"] }
-toml = "0.8"
+toml = "0.9"
 walkdir = "2"
-zip = "2"
+zip = "4"
 
 [dependencies.rocket_dyn_templates]
 version = "0.2"
 features = ["tera"]
 
 [dependencies.sqlx]
-version = "0.7"
+version = "0.8"
 default-features = false
 features = ["macros", "migrate"]
 
