@@ -140,7 +140,6 @@ impl<'r> FromRequest<'r> for XForwardedFor<'r> {
         }
     }
 }
-
 struct UsePlain<'r>(&'r bool);
 
 #[rocket::async_trait]
@@ -161,6 +160,30 @@ impl<'r> FromRequest<'r> for UsePlain<'r> {
                 Outcome::Success(UsePlain(&false))
             }
             None => Outcome::Success(UsePlain(&true)),
+        }
+    }
+}
+
+struct UseViewers<'r>(&'r bool);
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for UseViewers<'r> {
+    type Error = ();
+
+    async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
+        match request.headers().get_one("User-Agent") {
+            Some(value) => {
+                if value.starts_with("Winamp") || value.starts_with("VLC") {
+                    return Outcome::Success(UseViewers(&false));
+                }
+
+                if get_bool_cookie(request.cookies(), "viewers", true) {
+                    return Outcome::Success(UseViewers(&true));
+                }
+
+                Outcome::Success(UseViewers(&false))
+            }
+            None => Outcome::Success(UseViewers(&true)),
         }
     }
 }
@@ -342,6 +365,7 @@ async fn index<'a>(
     lang: Language,
     host: Host<'_>,
     useplain: UsePlain<'_>,
+    viewers: UseViewers<'_>,
     sizes: &State<FileSizes>,
 ) -> Result<Result<Result<Template, Redirect>, Result<Option<HeaderFile>, Option<NamedFile>>>, Status>
 {
@@ -403,7 +427,7 @@ async fn index<'a>(
         }
         "zip" => {
             if path.exists() {
-                if !get_bool_cookie(jar, "viewers", true) {
+                if !*viewers.0 {
                     return if config.standalone {
                         Ok(Err(Err(open_namedfile(path).await)))
                     } else {
@@ -454,7 +478,7 @@ async fn index<'a>(
         }
         "mp4" => {
             if path.exists() {
-                if !get_bool_cookie(jar, "viewers", true) {
+                if !*viewers.0 {
                     return if config.standalone {
                         Ok(Err(Err(open_namedfile(path).await)))
                     } else {
@@ -522,7 +546,7 @@ async fn index<'a>(
         }
         "mp3" | "m4a" | "m4b" | "flac" => {
             if path.exists() {
-                if !get_bool_cookie(jar, "viewers", true) {
+                if !*viewers.0 {
                     return if config.standalone {
                         Ok(Err(Err(open_namedfile(path).await)))
                     } else {
@@ -698,7 +722,7 @@ async fn index<'a>(
         _ => {
             if path.exists() {
                 if config.extensions.contains(&ext) {
-                    if !get_bool_cookie(jar, "viewers", true) {
+                    if !*viewers.0 {
                         return if config.standalone {
                             Ok(Err(Err(open_namedfile(path).await)))
                         } else {
