@@ -1,20 +1,20 @@
 <div>
-    <a href="/">{% if not smallhead %}<h1>{% endif %}MARMAK Mirror{% if not smallhead %}</h1>{% endif %}</a>
-    {% if not smallhead %}<a href="/">{{ strings.home }} </a>{% endif %}
-    <a href="/settings">{{ strings.settings }} </a>
-    {% if config.enable_marmak_link %}<a href="http://{{ root_domain }}">MARMAK </a>{% endif %}
+    <a href="/">{% if not smallhead %}<h1>{% endif %}MARMAK Mirror{% if not smallhead %}</h1>{% endif %}</a>{% if smallhead %}&nbsp;{% endif %}
+    {% if not smallhead %}<a href="/">{{ strings.home }}</a>&nbsp;{% endif %}
+    <a href="/settings">{{ strings.settings }}</a>&nbsp;
+    {% if config.enable_marmak_link %}<a href="http://{{ root_domain }}">MARMAK</a>{% endif %}&nbsp;
     {% if config.enable_login %}
     {% if not is_logged_in %}
-    <a href="/account/login">{{ strings.log_in }} </a>
+    <a href="/account/login">{{ strings.log_in }}</a>&nbsp;
     {% else %}
     {% if admin %}
-    <a href="/admin/">{{ strings.admin }} </a>
+    <a href="/admin/">{{ strings.admin }}</a>&nbsp;
     {% else %}
     {% if config.enable_direct %}
-    <a href="/account/direct?to=account">{{ strings.manage_account }} </a>
+    <a href="/account/direct?to=account">{{ strings.manage_account }}</a>&nbsp;
     {% endif %}
     {% endif %}
-    <a href="/account/logout">{{ strings.log_out }} </a>
+    <a href="/account/logout">{{ strings.log_out }}</a>&nbsp;
     {% endif %}
     {% endif %}
 </div>
