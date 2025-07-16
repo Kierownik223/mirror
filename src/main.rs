@@ -625,7 +625,6 @@ async fn index<'a>(
             let mut markdown: String = "".to_string();
             let mut topmarkdown = false;
             let path = Path::new("/").join(file).display().to_string();
-            let path_seg: Vec<&str> = path.split("/").collect();
 
             if path == "/" {
                 notroot = false;
@@ -703,7 +702,7 @@ async fn index<'a>(
                     root_domain,
                     host: host.0,
                     config: config.inner(),
-                    path_seg,
+                    path,
                     dirs,
                     files,
                     theme,
