@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{% filter spaceless %}<!DOCTYPE html>
 <html lang="{{ lang }}">
 
 <head>
@@ -16,4 +16,4 @@
     <hr>
     {% include "plain/footer" %}
 </body>
-</html>
+</html>{% endfilter %}
