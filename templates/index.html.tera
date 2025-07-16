@@ -14,25 +14,11 @@
         {% endfor %}
     {% endif %}
 {% endfilter %}
-{% if markdown != "" and topmarkdown %}
 <table>
     <tbody>
+        {% if path != "/" %}
         <tr>
-            <td><a href="../"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png"
-                        class="icon">../</a></td>
-            <td></td>
-        </tr>
-    </tbody>
-</table>
-<p><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}md.png">{{ strings.readme }}</p>
-{{ markdown | safe}}
-{% endif %}
-<table>
-    <tbody>
-        {% if notroot and not topmarkdown %}
-        <tr>
-            <td><a href="../"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png"
-                        class="icon">../</a></td>
+            <td><a href="../"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">../</a></td>
             <td>---</td>
             <td>{{ strings.folder }}</td>
         </tr>
@@ -40,8 +26,7 @@
 
         {% for s in dirs %}
         <tr>
-            <td><a href="{{ s.name }}/"><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png"
-                        class="icon">{{ s.name }}/</a></td>
+            <td><a href="{{ s.name | urlencode }}/"><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}/</a></td>
             <td>{{ s.size }}</td>
             <td>{{ strings.folder }}</td>
             {% if admin %}<td><a style="cursor: pointer;" href="javascript:;" onclick="deleteFile(this, '{{ s.name | safe | addslashes }}')">{{ strings.delete }}</a></td>{% endif %}
@@ -49,8 +34,7 @@
         {% endfor %}
         {% for s in files %}
         <tr>
-            <td><a href="{{ s.name }}"><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png"
-                        class="icon">{{ s.name }}</a></td>
+            <td><a href="{{ s.name | urlencode }}"><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}</a></td>
             <td>{{ s.size }}</td>
             <td>{{ strings.file }}</td>
             {% if admin %}<td><a style="cursor: pointer;" href="javascript:;" onclick="deleteFile(this, '{{ s.name | safe | addslashes }}')">{{ strings.delete }}</a></td>{% endif %}
@@ -58,7 +42,7 @@
         {% endfor %}
     </tbody>
 </table>
-{% if markdown != "" and not topmarkdown %}
+{% if markdown != "" %}
 <p><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}md.png">README.md</p>
 {{ markdown | safe}}
 {% endif %}

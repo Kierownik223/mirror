@@ -1,36 +1,28 @@
 {% extends "plain/base" %}
 
 {% block content %}
-{% filter spaceless %}
-    <span><a href="/">MARMAK Mirror</a>/</span>
-    {% if path != "/" %}
-        {% set segments = path | split(pat="/") %}
-        {% for i in range(end=segments | length) %}
-            {% set subpath = segments | slice(start=0, end=i+1) %}
-            {% set url = subpath | join(sep="/") %}
-            {% if url != "" %}
-                <span><a href="{{ url | urlencode }}/">{{ segments[i] }}</a>/</span>
-            {% endif %}
-        {% endfor %}
-    {% endif %}
-{% endfilter %}
-{% if markdown != "" and topmarkdown %}
-<hr>
-<a href="../">../</a><br>
-<p>{{ strings.readme }}</p>
-{{ markdown | safe}}
+<span><a href="/">MARMAK Mirror</a>/</span>
+{% if path != "/" %}
+    {% set segments = path | split(pat="/") %}
+    {% for i in range(end=segments | length) %}
+        {% set subpath = segments | slice(start=0, end=i+1) %}
+        {% set url = subpath | join(sep="/") %}
+        {% if url != "" %}
+            <span><a href="{{ url | urlencode }}/">{{ segments[i] }}</a>/</span>
+        {% endif %}
+    {% endfor %}
 {% endif %}
 <hr>
-{% if notroot and not topmarkdown %}
+{% if path != "/" %}
 <a href="../">../</a><br>
 {% endif %}
 {% for s in dirs %}
-<a href="{{ s.name }}/">{{ s.name }}/</a><br>
+<a href="{{ s.name | urlencode }}/">{{ s.name }}/</a><br>
 {% endfor %}
 {% for s in files %}
-<a href="{{ s.name }}">{{ s.name }}</a><br>
+<a href="{{ s.name | urlencode }}">{{ s.name }}</a><br>
 {% endfor %}
-{% if markdown != "" and not topmarkdown %}
+{% if markdown != "" %}
 <hr>
 README.md<br>
 {{ markdown | safe}}
