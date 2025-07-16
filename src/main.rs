@@ -621,14 +621,9 @@ async fn index<'a>(
             if is_hidden(path.clone(), &jar) {
                 return Err(Status::NotFound);
             }
-            let mut notroot = true;
             let mut markdown: String = "".to_string();
             let mut topmarkdown = false;
             let path = Path::new("/").join(file).display().to_string();
-
-            if path == "/" {
-                notroot = false;
-            }
 
             let mut files = read_files(&path).unwrap_or_default();
             let mut dirs = read_dirs_async(&path, sizes).await.unwrap_or_default();
@@ -710,7 +705,6 @@ async fn index<'a>(
                     username,
                     admin: perms == 0,
                     hires,
-                    notroot,
                     smallhead,
                     markdown,
                     topmarkdown,
@@ -980,13 +974,7 @@ async fn iframe(
         return Err(Status::Unauthorized);
     }
 
-    let mut notroot = true;
-
     let path = Path::new("/").join(file).display().to_string();
-
-    if path == "/" {
-        notroot = false;
-    }
 
     let mut dirs = read_dirs(&path).unwrap_or_default();
     let file_list = read_files(&path).unwrap_or_default();
@@ -1005,8 +993,7 @@ async fn iframe(
             path,
             dirs,
             theme: get_theme(jar),
-            hires: get_bool_cookie(jar, "hires", false),
-            notroot
+            hires: get_bool_cookie(jar, "hires", false)
         },
     ))
 }
