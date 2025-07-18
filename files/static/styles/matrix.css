@@ -103,8 +103,7 @@ td:first-child {
     color: #32a852;
 }
 
-td:nth-child(3),
-td:last-child {
+tbody tr td:last-child {
     text-align: right;
 }
 
@@ -139,4 +138,8 @@ iframe {
 	border: none;
     box-sizing: border-box;
     width: 100%;
+}
+
+td input {
+    margin: auto;
 }

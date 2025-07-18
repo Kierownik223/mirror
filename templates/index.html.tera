@@ -15,9 +15,18 @@
     {% endif %}
 {% endfilter %}
 <table>
+    {% if admin %}
+    <thead>
+        <tr>
+            <td style="width: 2%; white-space: nowrap;"><input type="checkbox" id="selectAll" onclick="toggleAllCheckboxes(this)"></td>
+            <td><a style="cursor: pointer;" href="javascript:;" onclick="deleteSelected()">{{ strings.delete }}</a></td>
+        </tr>
+    </thead>
+    {% endif %}
     <tbody>
         {% if path != "/" %}
         <tr>
+            {% if admin %}<td></td>{% endif %}
             <td><a href="../"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">../</a></td>
             <td>---</td>
             <td>{{ strings.folder }}</td>
@@ -26,18 +35,28 @@
 
         {% for s in dirs %}
         <tr>
+            {% if admin %}
+            <td><input type="checkbox" class="delete-checkbox" value="{{ s.name | safe | addslashes }}"></td>
+            {% endif %}
             <td><a href="{{ s.name | urlencode }}/"><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}/</a></td>
             <td>{{ s.size }}</td>
             <td>{{ strings.folder }}</td>
-            {% if admin %}<td><a style="cursor: pointer;" href="javascript:;" onclick="deleteFile(this, '{{ s.name | safe | addslashes }}')">{{ strings.delete }}</a></td>{% endif %}
+            {% if admin %}
+            <td><a style="cursor: pointer;" href="javascript:;" onclick="deleteFile(this, '{{ s.name | safe | addslashes }}', true)">{{ strings.delete }}</a></td>
+            {% endif %}
         </tr>
         {% endfor %}
         {% for s in files %}
         <tr>
+            {% if admin %}
+            <td><input type="checkbox" class="delete-checkbox" value="{{ s.name | safe | addslashes }}"></td>
+            {% endif %}
             <td><a href="{{ s.name | urlencode }}"><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}</a></td>
             <td>{{ s.size }}</td>
             <td>{{ strings.file }}</td>
-            {% if admin %}<td><a style="cursor: pointer;" href="javascript:;" onclick="deleteFile(this, '{{ s.name | safe | addslashes }}')">{{ strings.delete }}</a></td>{% endif %}
+            {% if admin %}
+            <td><a style="cursor: pointer;" href="javascript:;" onclick="deleteFile(this, '{{ s.name | safe | addslashes }}', true)">{{ strings.delete }}</a></td>
+            {% endif %}
         </tr>
         {% endfor %}
     </tbody>
@@ -52,7 +71,69 @@
 {% if admin %}
     <script src="/static/polyfills.js"></script>
     <script>
-        function deleteFile(element, filePath) {
+        function toggleAllCheckboxes(master) {
+            var inputs = document.getElementsByTagName("input");
+            for (var i = 0; i < inputs.length; i++) {
+                if (inputs[i].type === "checkbox" && hasClass(inputs[i], "delete-checkbox")) {
+                    inputs[i].checked = master.checked;
+                }
+            }
+        }
+
+        function deleteSelected() {
+            var inputs = document.getElementsByTagName("input");
+            var filePathList = [];
+            var elementList = [];
+            var pathname = "/";
+            if (window.location && typeof window.location.pathname === "string") {
+                pathname = window.location.pathname;
+            }
+
+            for (var i = 0; i < inputs.length; i++) {
+                var input = inputs[i];
+                if (input.type === "checkbox" && hasClass(input, "delete-checkbox") && input.checked) {
+                    filePathList[filePathList.length] = input.value;
+
+                    var row = input;
+                    while (row && row.nodeType === 1 && String(row.tagName).toLowerCase() !== "tr") {
+                        row = row.parentNode;
+                    }
+
+                    elementList[elementList.length] = row;
+                }
+            }
+
+            if (filePathList.length === 0) {
+                return;
+            }
+
+            var i, confirmMsg = "{{ strings.delete_confirmation }}\n";
+            for (i = 0; i < filePathList.length; i++) {
+                confirmMsg += filePathList[i] + "\n";
+            }
+
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+
+            var currentIndex = 0;
+            function deleteNext() {
+                if (currentIndex >= filePathList.length) return;
+                var path = filePathList[currentIndex];
+                var rowElement = elementList[currentIndex];
+                currentIndex++;
+
+                deleteFile(rowElement, path, false, deleteNext);
+            }
+
+            deleteNext();
+        }
+
+        function hasClass(el, cls) {
+            return el.className && (" " + el.className + " ").indexOf(" " + cls + " ") > -1;
+        }
+
+        function deleteFile(element, filePath, message, onComplete) {
             var pathname = "/";
             if (window.location && typeof window.location.pathname === "string") {
                 pathname = window.location.pathname;
@@ -60,8 +141,10 @@
             var path = pathname + filePath;
             var confirmMsg = "{{ strings.delete_confirmation }} " + decodeURIComponent(path) + "?";
 
-            if (!confirm(confirmMsg)) {
-                return;
+            if (message) {
+                if (!confirm(confirmMsg)) {
+                    return;
+                }
             }
 
             var xhr;
@@ -101,8 +184,9 @@
                                 }
                             }
 
-                            alert(decodeURIComponent(path) + " {{ strings.delete_success }}");
-
+                            if (message) {
+                                alert(decodeURIComponent(path) + " {{ strings.delete_success }}");
+                            }
                         } catch (e) {
                             alert("{{ strings.error_occured }} " + (e.message || ""));
                         }
@@ -118,6 +202,7 @@
                             alert("{{ strings.error_occured }}");
                         }
                     }
+                    if (onComplete) onComplete();
                 }
             };
 
@@ -125,6 +210,7 @@
                 xhr.send();
             } catch (e) {
                 alert("{{ strings.error_deleting }}");
+                if (onComplete) onComplete();
             }
         }
     </script>
