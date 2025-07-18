@@ -50,6 +50,11 @@ a:hover {
     color: #2a7a38;
 }
 
+.header a span {
+    display: inline-flex;
+    white-space: pre;
+}
+
 input,
 select,
 button {
@@ -142,4 +147,16 @@ iframe {
 
 td input {
     margin: auto;
+    width: auto;
+}
+
+.seg {
+    opacity: 0;
+    font-size: 0.1px;
+}
+
+@media only screen and (max-width: 640px) {
+    .main > table td:nth-child(3) {
+        display: none;
+    }
 }

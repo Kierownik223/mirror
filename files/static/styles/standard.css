@@ -16,6 +16,11 @@ a:hover {
     color: red;
 }
 
+.header a span {
+    display: inline-flex;
+    white-space: pre;
+}
+
 .container {
     max-width: 820px;
     margin: 0 auto;
@@ -120,6 +125,11 @@ iframe {
     box-sizing: border-box;
     margin: 1px;
     width: 100%;
+}
+
+.seg {
+    opacity: 0;
+    font-size: 0px;
 }
 
 @media only screen and (max-width: 600px) {

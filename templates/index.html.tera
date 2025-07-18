@@ -1,24 +1,24 @@
 {% extends "base" %}
 
 {% block content %}
-{% filter spaceless %}
-    <span><a href="/">MARMAK Mirror</a>/</span>
+<div class="breadcrumb">
+    <span><a href="/">MARMAK Mirror</a>/</span><span class="seg"> </span>
     {% if path != "/" %}
         {% set segments = path | split(pat="/") %}
         {% for i in range(end=segments | length) %}
             {% set subpath = segments | slice(start=0, end=i+1) %}
             {% set url = subpath | join(sep="/") %}
             {% if url != "" %}
-                <span><a href="{{ url | urlencode }}/">{{ segments[i] }}</a>/</span>
+                <span><a href="{{ url | urlencode }}/">{{ segments[i] }}</a>/</span><span class="seg"> </span>
             {% endif %}
         {% endfor %}
     {% endif %}
-{% endfilter %}
+</div>
 <table>
     {% if admin %}
     <thead>
         <tr>
-            <td style="width: 2%; white-space: nowrap;"><input type="checkbox" id="selectAll" onclick="toggleAllCheckboxes(this)"></td>
+            <td style="width: 1em; white-space: nowrap;"><input type="checkbox" id="selectAll" onclick="toggleAllCheckboxes(this)"></td>
             <td><a style="cursor: pointer;" href="javascript:;" onclick="deleteSelected()">{{ strings.delete }}</a></td>
         </tr>
     </thead>
