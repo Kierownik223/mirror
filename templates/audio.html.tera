@@ -46,7 +46,7 @@
         <div style="float: right;"><span><a href="?download" download><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">{{ strings.download }}</span></a></div><br>
         <a href="./"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png">./</a>
     </div>
-    <audio src="?download" controls style="width: 100%;" poster="http://{{ host }}{{ path }}?poster">{{ strings.no_audio }}</audio>
+    <audio src="?download" controls style="width: 100%;" poster="/poster{{ path }}">{{ strings.no_audio }}</audio>
     {% if artist != "" %}{{ artist }} - {% endif %}<b style="font-size: 24px;">{% if track != 0 %}{{ track }}. {% endif %}{{ audiotitle }}</b>
     <div style="display: flex; align-items: center; justify-content: space-between;">
         <div style="flex: 1;">
@@ -55,7 +55,7 @@
             {% if genre != "" %}{{ strings.genre }}: <b>{{ genre }}</b><br>{% endif %}
         </div>
         {% if cover_data != "" %}
-        <img src="{{ cover_data }}" alt="{{ strings.album_cover }}" style="width: 30%; max-height: 100%;">
+        <img src="/poster{{ path }}" alt="{{ strings.album_cover }}" style="width: 30%; max-height: 100%;">
         {% endif %}
     </div>
 {% endblock content %}

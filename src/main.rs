@@ -1,6 +1,4 @@
 use audiotags::{MimeType, Tag};
-use base64::engine::general_purpose;
-use base64::Engine;
 use db::{fetch_user, Db};
 use humansize::{format_size, DECIMAL};
 use rocket::fs::NamedFile;
@@ -652,18 +650,10 @@ async fn index<'a>(
                     let genre = tag.genre().unwrap_or_default();
                     let track = tag.track_number().unwrap_or(0);
 
-                    let mut cover_data = String::new();
+                    let mut cover_data = "";
 
-                    if let Some(picture) = tag.album_cover() {
-                        let base64_string = general_purpose::STANDARD.encode(picture.data);
-                        let mime_type = match picture.mime_type {
-                            MimeType::Png => "image/png",
-                            MimeType::Bmp => "image/bmp",
-                            MimeType::Gif => "image/gif",
-                            MimeType::Jpeg => "image/jpeg",
-                            MimeType::Tiff => "image/tiff",
-                        };
-                        cover_data = format!("data:{};base64,{}", mime_type, base64_string);
+                    if let Some(_picture) = tag.album_cover() {
+                        cover_data = "a";
                     }
 
                     Ok(Ok(Ok(Template::render(
