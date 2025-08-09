@@ -4,16 +4,17 @@
 <a href="/">MARMAK Mirror</a>/<a href="/admin/">{{ strings.admin }}</a>/<a href="/admin/upload">{{ strings.uploader }}</a><br>
 {{ strings.welcome }}, {{ username }}!
 <br>
-<a href="/admin/"><img src="/static/images/icons/{% if hires %}hires/{% endif %}floppy.png" class="icon">{{ strings.admin }}</a>
-<a href="/uploads/"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">Uploads</a>
+<a href="/admin/"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}floppy.png" class="icon">{{ strings.admin }}</span></a>
+<a href="/uploads/"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">Uploads</span></a>
 <br>
-{% for s in uploadedfiles %}
-{% if s.name != "" %}
-<a href="{{ s.ext }}"><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}</a> {{ strings.upload_success }}<br>
-{% endif %}
-{% endfor %}
 
-<div id="uploadResults" style="margin-top: 10px; box-sizing: border-box;"></div>
+<div id="uploadResults" style="margin-top: 10px; box-sizing: border-box;">
+    {% for s in uploadedfiles %}
+    {% if s.name != "" %}
+    <a href="{{ s.ext }}"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}</span></a> {{ strings.upload_success }}<br>
+    {% endif %}
+    {% endfor %}
+</div>
 
 <form method="post" enctype="multipart/form-data" id="uploadForm">
     <label for="file">
@@ -135,7 +136,7 @@ function uploadViaAPI() {
                         a.href = result.url;
                         var filePath = a.pathname;
 
-                        label.innerHTML = '<a href="' + result.url + '"><img src="' + iconPath + '" class="icon">' + result.name + '</a> {{ strings.upload_success }} <a style="cursor: pointer;" onclick="deleteFile(this, \'' + filePath + '\')">{{ strings.delete }}</a><br>';
+                        label.innerHTML = '<a href="' + result.url + '"><span><img src="' + iconPath + '" class="icon">' + result.name + '</span></a> {{ strings.upload_success }} <a style="cursor: pointer;" onclick="deleteFile(this, \'' + filePath + '\')">{{ strings.delete }}</a><br>';
                     } catch (e) {
                         label.textContent = file.name + " {{ strings.upload_parse_error }}";
                     }

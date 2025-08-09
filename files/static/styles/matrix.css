@@ -50,7 +50,7 @@ a:hover {
     color: #2a7a38;
 }
 
-.header a span {
+a span {
     display: inline-flex;
     white-space: pre;
 }

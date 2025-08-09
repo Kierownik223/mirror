@@ -27,7 +27,7 @@
         {% if path != "/" %}
         <tr>
             {% if admin %}<td></td>{% endif %}
-            <td><a href="../"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">../</a></td>
+            <td><a href="../"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">../</span></a></td>
             <td>---</td>
             <td>{{ strings.folder }}</td>
         </tr>
@@ -38,7 +38,7 @@
             {% if admin %}
             <td><input type="checkbox" class="delete-checkbox" value="{{ s.name | safe | addslashes }}"></td>
             {% endif %}
-            <td><a href="{{ s.name | urlencode }}/"><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}/</a></td>
+            <td><a href="{{ s.name | urlencode }}/"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}/</span></a></td>
             <td>{{ s.size }}</td>
             <td>{{ strings.folder }}</td>
             {% if admin %}
@@ -51,7 +51,7 @@
             {% if admin %}
             <td><input type="checkbox" class="delete-checkbox" value="{{ s.name | safe | addslashes }}"></td>
             {% endif %}
-            <td><a href="{{ s.name | urlencode }}"><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}</a></td>
+            <td><a href="{{ s.name | urlencode }}"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}</span></a></td>
             <td>{{ s.size }}</td>
             <td>{{ strings.file }}</td>
             {% if admin %}
@@ -62,7 +62,7 @@
     </tbody>
 </table>
 {% if markdown != "" %}
-<p><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}md.png">README.md</p>
+<p><span><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}md.png">README.md</span></p>
 {{ markdown | safe}}
 {% endif %}
 {% endblock content %}

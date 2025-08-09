@@ -16,7 +16,7 @@ a:hover {
     color: red;
 }
 
-.header a span {
+a span {
     display: inline-flex;
     white-space: pre;
 }

@@ -24,7 +24,7 @@
             {% endfilter %}
         </span>
     </span>
-    <div style="float: right;"><a href="?download" download><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">{{ strings.download }}</a></div><br>
+    <div style="float: right;"><a href="?download" download><span><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">{{ strings.download }}</span></a></div><br>
 </div>
 <table>
     <tbody>

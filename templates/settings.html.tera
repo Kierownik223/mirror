@@ -5,8 +5,8 @@
 {% if config.enable_login and is_logged_in %}
 {{ strings.welcome }}, {{ username }}!
 <br>
-<a href="/settings/sync"><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.sync_settings }}</a>
-<a href="/settings/fetch"><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.fetch_settings }}</a>
+<a href="/settings/sync"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.sync_settings }}</span></a>
+<a href="/settings/fetch"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.fetch_settings }}</span></a>
 
 {% endif %}
 
@@ -69,6 +69,6 @@
     <center>
         <button type="submit" class="submit"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.save_settings }}</span></button>
     </center>
-    <a href="/settings/reset"><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.reset_settings }}</a>
+    <a href="/settings/reset"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.reset_settings }}</span></a>
 </form>
 {% endblock content %}
