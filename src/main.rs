@@ -650,10 +650,10 @@ async fn index<'a>(
                     let genre = tag.genre().unwrap_or_default();
                     let track = tag.track_number().unwrap_or(0);
 
-                    let mut cover_data = "";
+                    let mut cover = false;
 
                     if let Some(_picture) = tag.album_cover() {
-                        cover_data = "a";
+                        cover = true;
                     }
 
                     Ok(Ok(Ok(Template::render(
@@ -678,7 +678,7 @@ async fn index<'a>(
                             album,
                             genre,
                             track,
-                            cover_data
+                            cover
                         },
                     ))))
                 } else {
