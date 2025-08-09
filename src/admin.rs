@@ -17,7 +17,7 @@ use rocket_multipart_form_data::{
 };
 
 use crate::{
-    utils::{get_bool_cookie, get_extension_from_filename, get_session, get_theme, is_logged_in},
+    utils::{get_bool_cookie, get_extension_from_filename, get_root_domain, get_session, get_theme, is_logged_in},
     Config, Disk, Host, Language, MirrorFile, TranslationStore, UsePlain,
 };
 
@@ -123,8 +123,6 @@ async fn upload(
 
             let strings = translations.get_translation(&lang.0);
 
-            let root_domain = host.0.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
-
             return Ok(Template::render(
                 if *useplain.0 {
                     "plain/upload"
@@ -135,7 +133,7 @@ async fn upload(
                     title: strings.get("uploader").unwrap(),
                     lang,
                     strings,
-                    root_domain,
+                    root_domain: get_root_domain(host.0, &config.fallback_root_domain),
                     host: host.0,
                     config: config.inner(),
                     theme: get_theme(jar),
@@ -174,8 +172,6 @@ fn sysinfo(
 
         let strings = translations.get_translation(&lang.0);
 
-        let root_domain = host.0.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
-
         let mut sys = System::new_all();
 
         sys.refresh_all();
@@ -212,7 +208,7 @@ fn sysinfo(
                 title: strings.get("sysinfo").unwrap(),
                 lang,
                 strings,
-                root_domain,
+                root_domain: get_root_domain(host.0, &config.fallback_root_domain),
                 host: host.0,
                 config: config.inner(),
                 theme: get_theme(jar),
@@ -254,8 +250,6 @@ fn uploader(
 
         let strings = translations.get_translation(&lang.0);
 
-        let root_domain = host.0.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
-
         return Ok(Template::render(
             if *useplain.0 {
                 "plain/upload"
@@ -266,7 +260,7 @@ fn uploader(
                 title: strings.get("uploader").unwrap(),
                 lang,
                 strings,
-                root_domain,
+                root_domain: get_root_domain(host.0, &config.fallback_root_domain),
                 host: host.0,
                 config: config.inner(),
                 theme: get_theme(jar),
@@ -302,15 +296,13 @@ fn admin(
 
         let strings = translations.get_translation(&lang.0);
 
-        let root_domain = host.0.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
-
         return Ok(Template::render(
             if *useplain.0 { "plain/admin" } else { "admin" },
             context! {
                 title: strings.get("admin").unwrap(),
                 lang,
                 strings,
-                root_domain,
+                root_domain: get_root_domain(host.0, &config.fallback_root_domain),
                 host: host.0,
                 config: config.inner(),
                 theme: get_theme(jar),

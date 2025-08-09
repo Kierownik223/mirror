@@ -19,7 +19,7 @@ use time::{Duration, OffsetDateTime};
 
 use crate::{
     db::{fetch_user, login_user, Db},
-    utils::{get_bool_cookie, get_session, get_theme, is_logged_in},
+    utils::{get_bool_cookie, get_root_domain, get_session, get_theme, is_logged_in},
     Config, Host, Language, MarmakUser, TranslationStore, UsePlain, UserToken, XForwardedFor,
 };
 
@@ -43,15 +43,13 @@ fn login_page(
 
     let strings = translations.get_translation(&lang.0);
 
-    let root_domain = host.0.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
-
     Ok(Template::render(
         if *useplain.0 { "plain/login" } else { "login" },
         context! {
             title: "Login",
             lang,
             strings,
-            root_domain,
+            root_domain: get_root_domain(host.0, &config.fallback_root_domain),
             host: host.0,
             config: config.inner(),
             theme: get_theme(jar),
@@ -122,8 +120,6 @@ async fn login(
     } else {
         let strings = translations.get_translation(&lang.0);
 
-        let root_domain = host.0.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
-
         println!(
             "Failed login attempt to user {} with password {} from {}",
             &user.username, &user.password, &ip.0
@@ -135,7 +131,7 @@ async fn login(
                 title: "Login",
                 lang,
                 strings,
-                root_domain,
+                root_domain: get_root_domain(host.0, &config.fallback_root_domain),
                 host: host.0,
                 config: config.inner(),
                 theme: get_theme(jar),
@@ -157,6 +153,7 @@ async fn direct<'a>(
     to: Option<String>,
     ip: XForwardedFor<'_>,
     host: Host<'_>,
+    config: &rocket::State<Config>
 ) -> Result<Redirect, Status> {
     if let Some(token) = token {
         if is_logged_in(&jar) {
@@ -238,7 +235,7 @@ async fn direct<'a>(
                 let encrypted_b64 =
                     base64::engine::general_purpose::URL_SAFE.encode(encrypted_data);
 
-                let root_domain = host.0.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
+                let root_domain = get_root_domain(host.0, &config.fallback_root_domain);
 
                 let redirect_url = format!(
                     "http://{}/direct?token={}",

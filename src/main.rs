@@ -28,7 +28,7 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::utils::{is_hidden, open_namedfile, read_dirs_async};
+use crate::utils::{get_root_domain, is_hidden, open_namedfile, read_dirs_async};
 
 mod account;
 mod admin;
@@ -48,6 +48,7 @@ struct Config {
     x_sendfile_header: String,
     x_sendfile_prefix: String,
     standalone: bool,
+    fallback_root_domain: String,
 }
 
 impl Config {
@@ -455,7 +456,7 @@ async fn index<'a>(
     let path = Path::new("files/").join(file.clone());
     let strings = translations.get_translation(&lang.0);
 
-    let root_domain = host.0.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
+    let root_domain = get_root_domain(host.0, &config.fallback_root_domain);
 
     let (username, perms) = get_session(jar);
 
@@ -851,8 +852,6 @@ fn settings(
 
     let language_names = translations.available_languages();
 
-    let root_domain = host.0.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
-
     let settings_map = vec![
         ("hires", opt.hires),
         ("smallhead", opt.smallhead),
@@ -927,7 +926,7 @@ fn settings(
             theme,
             lang,
             strings,
-            root_domain,
+            root_domain: get_root_domain(host.0, &config.fallback_root_domain),
             host: host.0,
             config: config.inner(),
             is_logged_in: is_logged_in(&jar),
@@ -1099,8 +1098,6 @@ async fn default(status: Status, req: &Request<'_>) -> Template {
 
     let host = req.host().unwrap().to_string();
 
-    let root_domain = host.splitn(2, '.').nth(1).unwrap_or("marmak.net.pl");
-
     let config = Config::load();
 
     Template::render(
@@ -1113,7 +1110,7 @@ async fn default(status: Status, req: &Request<'_>) -> Template {
             title: format!("HTTP {}", status.code),
             lang,
             strings,
-            root_domain,
+            root_domain: get_root_domain(&host, &config.fallback_root_domain),
             host: host.clone(),
             config: config,
             theme: get_theme(jar),
