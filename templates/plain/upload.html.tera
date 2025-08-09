@@ -5,6 +5,7 @@
 {{ strings.welcome }}, {{ username }}!
 <br>
 <a href="/admin/">{{ strings.admin }}</a>
+&nbsp;
 <a href="/uploads/">Uploads</a>
 <br>
 {% for s in uploadedfiles %}

@@ -6,6 +6,7 @@
 {{ strings.welcome }}, {{ username }}!
 <br>
 <a href="/settings/sync">{{ strings.sync_settings }}</a>
+&nbsp;
 <a href="/settings/fetch">{{ strings.fetch_settings }}</a>
 {% endif %}
 
