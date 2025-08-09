@@ -4,7 +4,7 @@ use base64::Engine;
 use db::{fetch_user, Db};
 use humansize::{format_size, DECIMAL};
 use rocket::fs::NamedFile;
-use rocket::http::{Cookie, CookieJar, Status};
+use rocket::http::{ContentType, Cookie, CookieJar, Status};
 use rocket::request::{FromRequest, Outcome};
 use rocket::response::content::RawHtml;
 use rocket::response::{Redirect, Responder};
@@ -335,6 +335,91 @@ type FileSizes = Arc<RwLock<Vec<FileEntry>>>;
 struct FileEntry {
     size: u64,
     file: String,
+}
+
+pub struct Cached<R> {
+    response: R,
+}
+
+impl<'r, R: 'r + Responder<'r, 'static> + Send> Responder<'r, 'static> for Cached<R> {
+    fn respond_to(self, request: &'r Request<'_>) -> response::Result<'static> {
+        let mut res = self.response.respond_to(request)?;
+
+        res.set_raw_header("Cache-Control", "public");
+
+        Ok(res)
+    }
+}
+
+#[get("/poster/<file..>")]
+async fn poster(
+    file: PathBuf,
+    jar: &CookieJar<'_>,
+    config: &rocket::State<Config>,
+) -> Result<
+    Result<Cached<(ContentType, Vec<u8>)>, Result<Option<HeaderFile>, Option<NamedFile>>>,
+    Status,
+> {
+    let path = Path::new("files/").join(file);
+
+    if is_restricted(path.clone(), &jar) {
+        return Err(Status::Unauthorized);
+    }
+
+    if let Ok(tag) = Tag::new().read_from_path(&path) {
+        if let Some(picture) = tag.album_cover() {
+            let mime_type = match picture.mime_type {
+                MimeType::Png => ("image", "png"),
+                MimeType::Bmp => ("image", "bmp"),
+                MimeType::Gif => ("image", "gif"),
+                MimeType::Jpeg => ("image", "jpeg"),
+                MimeType::Tiff => ("image", "tiff"),
+            };
+            return Ok(Ok(Cached {
+                response: (
+                    ContentType::new(mime_type.0, mime_type.1),
+                    picture.data.to_vec(),
+                ),
+            }));
+        } else {
+            return if config.standalone {
+                Ok(Err(Err(open_namedfile(
+                    Path::new(&"files/static/images/icons/256x256/mp3.png").to_path_buf(),
+                )
+                .await)))
+            } else {
+                Ok(Err(Ok(open_file(
+                    Path::new(&"files/static/images/icons/256x256/mp3.png").to_path_buf(),
+                    true,
+                ))))
+            };
+        }
+    } else {
+        if !path.exists() {
+            return Err(Status::NotFound);
+        }
+
+        let ext = if path.is_file() {
+            path.extension().and_then(OsStr::to_str).unwrap_or("")
+        } else {
+            "folder"
+        }
+        .to_lowercase();
+
+        let mut icon = format!("files/static/images/icons/256x256/{}.png", ext);
+
+        if !Path::new(&(icon).to_string()).exists() {
+            icon = "files/static/images/icons/256x256/default.png".to_string();
+        }
+
+        return if config.standalone {
+            Ok(Err(Err(
+                open_namedfile(Path::new(&icon).to_path_buf()).await
+            )))
+        } else {
+            Ok(Err(Ok(open_file(Path::new(&icon).to_path_buf(), true))))
+        };
+    }
 }
 
 #[get("/<file..>?download")]
@@ -1117,7 +1202,7 @@ async fn rocket() -> _ {
         .register("/", catchers![default, unprocessable_entry, forbidden])
         .mount(
             "/",
-            routes![settings, reset_settings, download, index, iframe],
+            routes![settings, reset_settings, download, index, iframe, poster],
         );
 
     if config.enable_login {
