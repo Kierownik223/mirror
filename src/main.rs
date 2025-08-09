@@ -659,7 +659,7 @@ async fn index<'a>(
                     Ok(Ok(Ok(Template::render(
                         if *useplain.0 { "plain/audio" } else { "audio" },
                         context! {
-                            title: format!("{} {}", strings.get("watching").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
+                            title: format!("{} {}", strings.get("listening").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
                             lang,
                             strings,
                             root_domain,
