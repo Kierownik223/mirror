@@ -82,6 +82,7 @@ welcome = "こんにちは"
 tip = "ヒント"
 settings_tip1 = "現在の設定を維持したい場合は、"
 settings_tip2 = "にアクセスして「設定を上書きしない」を有効にしてください。"
+login_to_continue = "続行するにはログインしてください："
 
 # Admin
 

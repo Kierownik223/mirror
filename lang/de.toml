@@ -71,6 +71,7 @@ select_folder = "Ordner auswählen"
 browse = "Durchsuchen"
 select_files = "Dateien zum Hochladen auswählen."
 uploading = "Hochladen"
+login_to_continue = "Melden Sie sich an, um fortzufahren zu"
 
 # Account
 

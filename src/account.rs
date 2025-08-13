@@ -23,7 +23,7 @@ use crate::{
     Config, Host, Language, MarmakUser, TranslationStore, UsePlain, UserToken, XForwardedFor,
 };
 
-#[get("/login")]
+#[get("/login?<next>")]
 fn login_page(
     jar: &CookieJar<'_>,
     translations: &rocket::State<TranslationStore>,
@@ -31,6 +31,7 @@ fn login_page(
     host: Host<'_>,
     config: &State<Config>,
     useplain: UsePlain<'_>,
+    next: Option<&str>,
 ) -> Result<Template, Redirect> {
     if is_logged_in(&jar) {
         let perms = get_session(jar).1;
@@ -42,6 +43,8 @@ fn login_page(
     }
 
     let strings = translations.get_translation(&lang.0);
+
+    let next = next.unwrap_or("");
 
     Ok(Template::render(
         if *useplain.0 { "plain/login" } else { "login" },
@@ -58,7 +61,8 @@ fn login_page(
             admin: false,
             hires: get_bool_cookie(jar, "hires", false),
             smallhead: get_bool_cookie(jar, "smallhead", false),
-            message: ""
+            message: "",
+            next
         },
     ))
 }
@@ -107,10 +111,6 @@ async fn login(
         );
 
         let mut redirect_url = next.unwrap_or("/");
-
-        if redirect_url == "/admin" {
-            return Ok(Redirect::to("/"));
-        }
 
         if db_user.perms.unwrap_or(1) == 0 {
             redirect_url = next.unwrap_or("/admin");

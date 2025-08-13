@@ -82,6 +82,7 @@ welcome = "Hi"
 tip = "Tip"
 settings_tip1 = "If you want to keep your current settings, go to"
 settings_tip2 = "and enable \"Don't overwrite settings\"."
+login_to_continue = "Log in to continue to"
 
 # Admin
 
