@@ -139,7 +139,8 @@ async fn login(
                 admin: get_session(&jar).1 == 0,
                 hires: get_bool_cookie(jar, "hires", false),
                 smallhead: get_bool_cookie(jar, "smallhead", false),
-                message: strings.get("invalid_info")
+                message: strings.get("invalid_info"),
+                next: "",
             },
         ));
     }
