@@ -55,6 +55,8 @@ file_downloads = "Pobrania"
 print = "Drukuj"
 viewing_zip = "Przeglądarka pliku ZIP"
 watching = "Oglądanie pliku"
+download_zip = "Pobierz ZIP"
+preparing_zip = "Przygotowywanie ZIP..."
 
 # Uploader
 
@@ -69,7 +71,7 @@ target_placeholder = "Pozostaw pusty, aby użyć /uploads/"
 max_size = "Maksymalny rozmiar pliku wynosi 100MB."
 select_folder = "Wybierz katalog"
 browse = "Przeglądaj"
-select_files = "Wybierz pliki do wrzucenia"
+select_files = "Wybierz pliki"
 uploading = "Wrzucanie"
 
 # Account

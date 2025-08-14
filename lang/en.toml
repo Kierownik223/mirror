@@ -55,6 +55,8 @@ file_downloads = "Downloads"
 print = "Print"
 viewing_zip = "Viewing ZIP file"
 watching = "Watching file"
+download_zip = "Download ZIP"
+preparing_zip = "Preparing ZIP..."
 
 # Uploader
 
@@ -69,7 +71,7 @@ target_placeholder = "Leave empty for /uploads/"
 max_size = "Maximum file size allowed is 100MB."
 select_folder = "Select a folder"
 browse = "Browse"
-select_files = "Select files to upload."
+select_files = "Select files"
 uploading = "Uploading"
 
 # Account

@@ -1,7 +1,7 @@
 use std::{
     ffi::OsStr,
     fs,
-    io::Error,
+    io::{Cursor, Error},
     path::{Path, PathBuf},
     sync::Arc,
 };
@@ -13,6 +13,7 @@ use rocket::{
 };
 use time::{Duration, OffsetDateTime};
 use tokio::sync::RwLock;
+use zip::write::SimpleFileOptions;
 
 use crate::{FileEntry, HeaderFile, MirrorFile};
 
@@ -322,4 +323,27 @@ pub fn parse_language(header: &str) -> Option<String> {
 
 pub fn get_root_domain<'a>(host: &str, fallback: &str) -> String {
     return host.splitn(2, '.').nth(1).unwrap_or(fallback).to_string()
+}
+
+pub fn add_path_to_zip(
+    zip_writer: &mut zip::ZipWriter<&mut Cursor<Vec<u8>>>,
+    base_path: &Path,
+    path: &Path,
+    options: SimpleFileOptions,
+) -> std::io::Result<()> {
+    if path.is_file() {
+        let mut file = std::fs::File::open(path)?;
+        let relative_path = path.strip_prefix(base_path).unwrap_or(path);
+        zip_writer.start_file(relative_path.to_string_lossy(), options)?;
+        std::io::copy(&mut file, zip_writer)?;
+    } else if path.is_dir() {
+        let relative_path = path.strip_prefix(base_path).unwrap_or(path);
+        let folder_name = format!("{}/", relative_path.to_string_lossy());
+        zip_writer.add_directory(folder_name, options)?;
+        for entry in std::fs::read_dir(path)? {
+            let entry = entry?;
+            add_path_to_zip(zip_writer, base_path, &entry.path(), options)?;
+        }
+    }
+    Ok(())
 }

@@ -55,6 +55,8 @@ file_downloads = "Загрузки:"
 print = "Печать"
 viewing_zip = "Просмотр ZIP-файла"
 watching = "Просмотр файла"
+download_zip = "Скачать ZIP"
+preparing_zip = "Подготовка ZIP..."
 
 # Uploader
 
@@ -69,7 +71,7 @@ target_placeholder = "Оставьте пустым для /uploads/"
 max_size = "Максимальный размер файла — 100 МБ."
 select_folder = "Выбрать папку"
 browse = "Обзор"
-select_files = "Выберите файлы для загрузки."
+select_files = "Выберите файлы."
 uploading = "Загрузка"
 
 # Account

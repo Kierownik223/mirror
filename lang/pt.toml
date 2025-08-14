@@ -55,6 +55,8 @@ file_downloads = "Downloads"
 print = "Imprimir"
 viewing_zip = "Vendo arquivo ZIP"
 watching = "Assistindo arquivo"
+download_zip = "Baixar ZIP"
+preparing_zip = "Preparando ZIP..."
 
 # Uploader
 
@@ -69,7 +71,7 @@ target_placeholder = "Deixar /uploads/ vazio"
 max_size = "O tamanho máximo de arquivo permitido é 100MB."
 select_folder = "Selecionar pasta"
 browse = "Pesquisar"
-select_files = "Selecione arquivos para enviar."
+select_files = "Selecione arquivos."
 uploading = "Enviando"
 
 # Account

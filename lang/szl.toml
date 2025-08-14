@@ -55,6 +55,8 @@ file_downloads = "Pobiyrniōnć"
 print = "Drukuj"
 viewing_zip = "Przeglōndōm ZIP-plik"
 watching = "Ôbierōm plik"
+download_zip = "Pobierz ZIP"
+preparing_zip = "Przygotuwano ZIP..."
 
 # Uploader
 
@@ -69,7 +71,7 @@ target_placeholder = "Zostow puste dlo /uploads/"
 max_size = "Maksymalno wiylkōść pliku to 100MB."
 select_folder = "Ôbier folder"
 browse = "Szukej"
-select_files = "Ôbier pliki do wgraniŏ."
+select_files = "Ôbier pliki."
 uploading = "Wgrywanie"
 
 # Account

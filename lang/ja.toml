@@ -55,6 +55,8 @@ file_downloads = "ダウンロード数"
 print = "印刷"
 viewing_zip = "ZIPファイルを表示中"
 watching = "ファイルを表示中"
+download_zip = "ZIPをダウンロード"
+preparing_zip = "ZIPを準備中..."
 
 # Uploader
 

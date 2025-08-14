@@ -1,8 +1,5 @@
 use std::{
-    collections::HashMap,
-    fs::{remove_dir, remove_file},
-    io::{Read, Write},
-    path::{Path, PathBuf},
+    collections::HashMap, fs::{remove_dir, remove_file}, io::{Cursor, Read, Write}, ops::Deref, path::{Path, PathBuf}
 };
 
 use ::sysinfo::{Disks, RefreshKind, System};
@@ -17,11 +14,12 @@ use rocket::{
 use rocket_multipart_form_data::{
     MultipartFormData, MultipartFormDataField, MultipartFormDataOptions, Repetition,
 };
+use zip::write::SimpleFileOptions;
 
 use crate::{
     read_files,
     utils::{
-        get_extension_from_filename, get_session, is_logged_in, is_restricted, read_dirs_async,
+        add_path_to_zip, get_extension_from_filename, get_session, is_logged_in, is_restricted, read_dirs_async
     },
     Config, Disk, FileSizes, Host, MirrorFile, Sysinfo,
 };
@@ -51,6 +49,9 @@ pub struct UploadFile {
     error: Option<String>,
     icon: Option<String>,
 }
+
+#[derive(serde::Deserialize)]
+struct FileList(Vec<String>);
 
 #[get("/listing/<file..>")]
 async fn listing(
@@ -332,6 +333,43 @@ async fn upload(
     }
 }
 
+#[post("/zip", data = "<data>")]
+async fn download_zip(content_type: &ContentType, data: Data<'_>, jar: &CookieJar<'_>) -> Result<Option<(ContentType, Vec<u8>)>, Status> {
+    if !is_logged_in(&jar) {
+        return Err(Status::Unauthorized);
+    } else {
+        let mut options = MultipartFormDataOptions::new();
+        options.allowed_fields.push(MultipartFormDataField::raw("files"));
+
+        let multipart_form_data = MultipartFormData::parse(content_type, data, options).await.ok().unwrap();
+        let files_field = multipart_form_data.raw.get("files").unwrap();
+
+        let file_json = String::from_utf8(files_field[0].raw.clone()).ok().unwrap();
+        let file_list: FileList = serde_json::from_str(&file_json).ok().unwrap();
+
+        let mut zip_buf = Cursor::new(Vec::new());
+        let mut zip_writer = zip::ZipWriter::new(&mut zip_buf);
+        let zip_options = SimpleFileOptions::default().compression_method(zip::CompressionMethod::Deflated);
+
+        let root_base = PathBuf::from("files");
+        for path_encoded in file_list.0 {
+            let path_decoded = urlencoding::decode(&path_encoded).ok().unwrap();
+            let full_path = format!("files{}", path_decoded.deref());
+            let fs_path = PathBuf::from(&full_path);
+            if fs_path.exists() {
+                if let Err(e) = add_path_to_zip(&mut zip_writer, &root_base, &fs_path, zip_options) {
+                    eprintln!("Failed to add {:?} to zip: {}", fs_path, e);
+                }
+            }
+        }
+
+        zip_writer.finish().ok().unwrap();
+        let zip_bytes = zip_buf.into_inner();
+
+        Ok(Some((ContentType::new("application", "zip"), zip_bytes)))
+    }
+}
+
 #[get("/")]
 async fn index() -> Json<MirrorInfo> {
     Json(MirrorInfo {
@@ -351,7 +389,7 @@ pub fn build_api() -> AdHoc {
         rocket
             .mount(
                 "/api",
-                routes![index, listing, sysinfo, user, upload, delete],
+                routes![index, listing, sysinfo, user, upload, delete, download_zip],
             )
             .register("/api", catchers![default])
     })

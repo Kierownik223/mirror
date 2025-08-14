@@ -55,6 +55,8 @@ file_downloads = "Stažení"
 print = "Tisk"
 viewing_zip = "Zobrazení ZIP souboru"
 watching = "Zobrazení souboru"
+download_zip = "Stáhnout ZIP"
+preparing_zip = "Příprava ZIP..."
 
 # Uploader
 
@@ -69,7 +71,7 @@ target_placeholder = "Nechte prázdné pro /uploads/"
 max_size = "Maximální povolená velikost souboru je 100MB."
 select_folder = "Vyberte složku"
 browse = "Procházet"
-select_files = "Vyberte soubory k nahrání."
+select_files = "Vyberte soubory."
 uploading = "Nahrávání"
 
 # Account

@@ -55,6 +55,8 @@ file_downloads = "Downloads"
 print = "Drucken"
 viewing_zip = "ZIP-Datei anzeigen"
 watching = "Datei ansehen"
+download_zip = "ZIP herunterladen"
+preparing_zip = "ZIP wird vorbereitet..."
 
 # Uploader
 
@@ -69,7 +71,7 @@ target_placeholder = "Leer lassen für /uploads/"
 max_size = "Maximale Dateigröße beträgt 100 MB."
 select_folder = "Ordner auswählen"
 browse = "Durchsuchen"
-select_files = "Dateien zum Hochladen auswählen."
+select_files = "Dateien auswählen."
 uploading = "Hochladen"
 login_to_continue = "Melden Sie sich an, um fortzufahren zu"
 

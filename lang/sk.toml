@@ -55,6 +55,8 @@ file_downloads = "Stiahnutia"
 print = "Tlačiť"
 viewing_zip = "Zobrazenie ZIP súboru"
 watching = "Zobrazenie súboru"
+download_zip = "Stiahnuť ZIP"
+preparing_zip = "Príprava ZIP..."
 
 # Uploader
 
@@ -69,7 +71,7 @@ target_placeholder = "Nechajte prázdne pre /uploads/"
 max_size = "Maximálna povolená veľkosť súboru je 100MB."
 select_folder = "Vybrať priečinok"
 browse = "Prehliadať"
-select_files = "Vyberte súbory na nahratie."
+select_files = "Vyberte súbory."
 uploading = "Nahráva sa"
 
 # Account
