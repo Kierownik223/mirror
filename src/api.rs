@@ -349,7 +349,7 @@ async fn download_zip(content_type: &ContentType, data: Data<'_>, jar: &CookieJa
 
         let mut zip_buf = Cursor::new(Vec::new());
         let mut zip_writer = zip::ZipWriter::new(&mut zip_buf);
-        let zip_options = SimpleFileOptions::default().compression_method(zip::CompressionMethod::Deflated);
+        let zip_options = SimpleFileOptions::default().compression_method(zip::CompressionMethod::Stored);
 
         let root_base = PathBuf::from("files");
         for path_encoded in file_list.0 {
