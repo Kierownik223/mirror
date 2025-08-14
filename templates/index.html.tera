@@ -19,10 +19,11 @@
     <thead>
         <tr>
             <td style="width: 1em; white-space: nowrap;"><input type="checkbox" id="selectAll" onclick="toggleAllCheckboxes(this)"></td>
-            <td><a style="cursor: pointer;" href="javascript:;" onclick="downloadAsZip()" id="downloadZip">{{ strings.download_zip }} (BETA)</a></td>
+            <td><a style="cursor: pointer;" href="javascript:;" onclick="downloadAsZip()" id="downloadZip">{{ strings.download_zip }} (BETA)</a>
             {% if admin %}
-            <td><a style="cursor: pointer;" href="javascript:;" onclick="deleteSelected()">{{ strings.delete }}</a></td>
+            <a style="cursor: pointer;" href="javascript:;" onclick="deleteSelected()">{{ strings.delete }}</a>
             {% endif %}
+            </td>
         </tr>
     </thead>
     {% endif %}
