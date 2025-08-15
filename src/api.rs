@@ -1,5 +1,9 @@
 use std::{
-    collections::HashMap, fs::{remove_dir, remove_file}, io::{Cursor, Read, Write}, ops::Deref, path::{Path, PathBuf}
+    collections::HashMap,
+    fs::{remove_dir, remove_file},
+    io::{Cursor, Read, Write},
+    ops::Deref,
+    path::{Path, PathBuf},
 };
 
 use ::sysinfo::{Disks, RefreshKind, System};
@@ -19,7 +23,8 @@ use zip::write::SimpleFileOptions;
 use crate::{
     read_files,
     utils::{
-        add_path_to_zip, get_extension_from_filename, get_session, is_logged_in, is_restricted, read_dirs_async
+        add_path_to_zip, get_extension_from_filename, get_session, is_logged_in, is_restricted,
+        read_dirs_async,
     },
     Config, Disk, FileSizes, Host, MirrorFile, Sysinfo,
 };
@@ -334,14 +339,23 @@ async fn upload(
 }
 
 #[post("/zip", data = "<data>")]
-async fn download_zip(content_type: &ContentType, data: Data<'_>, jar: &CookieJar<'_>) -> Result<Option<(ContentType, Vec<u8>)>, Status> {
+async fn download_zip(
+    content_type: &ContentType,
+    data: Data<'_>,
+    jar: &CookieJar<'_>,
+) -> Result<Option<(ContentType, Vec<u8>)>, Status> {
     if !is_logged_in(&jar) {
         return Err(Status::Unauthorized);
     } else {
         let mut options = MultipartFormDataOptions::new();
-        options.allowed_fields.push(MultipartFormDataField::raw("files"));
+        options
+            .allowed_fields
+            .push(MultipartFormDataField::raw("files"));
 
-        let multipart_form_data = MultipartFormData::parse(content_type, data, options).await.ok().unwrap();
+        let multipart_form_data = MultipartFormData::parse(content_type, data, options)
+            .await
+            .ok()
+            .unwrap();
         let files_field = multipart_form_data.raw.get("files").unwrap();
 
         let file_json = String::from_utf8(files_field[0].raw.clone()).ok().unwrap();
@@ -349,7 +363,8 @@ async fn download_zip(content_type: &ContentType, data: Data<'_>, jar: &CookieJa
 
         let mut zip_buf = Cursor::new(Vec::new());
         let mut zip_writer = zip::ZipWriter::new(&mut zip_buf);
-        let zip_options = SimpleFileOptions::default().compression_method(zip::CompressionMethod::Stored);
+        let zip_options =
+            SimpleFileOptions::default().compression_method(zip::CompressionMethod::Stored);
 
         let root_base = PathBuf::from("files");
         for path_encoded in file_list.0 {
@@ -357,7 +372,8 @@ async fn download_zip(content_type: &ContentType, data: Data<'_>, jar: &CookieJa
             let full_path = format!("files{}", path_decoded.deref());
             let fs_path = PathBuf::from(&full_path);
             if fs_path.exists() {
-                if let Err(e) = add_path_to_zip(&mut zip_writer, &root_base, &fs_path, zip_options) {
+                if let Err(e) = add_path_to_zip(&mut zip_writer, &root_base, &fs_path, zip_options)
+                {
                     eprintln!("Failed to add {:?} to zip: {}", fs_path, e);
                 }
             }

@@ -154,7 +154,7 @@ async fn direct<'a>(
     to: Option<String>,
     ip: XForwardedFor<'_>,
     host: Host<'_>,
-    config: &rocket::State<Config>
+    config: &rocket::State<Config>,
 ) -> Result<Redirect, Status> {
     if let Some(token) = token {
         if is_logged_in(&jar) {

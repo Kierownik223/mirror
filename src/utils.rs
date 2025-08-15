@@ -322,7 +322,7 @@ pub fn parse_language(header: &str) -> Option<String> {
 }
 
 pub fn get_root_domain<'a>(host: &str, fallback: &str) -> String {
-    return host.splitn(2, '.').nth(1).unwrap_or(fallback).to_string()
+    return host.splitn(2, '.').nth(1).unwrap_or(fallback).to_string();
 }
 
 pub fn add_path_to_zip(
