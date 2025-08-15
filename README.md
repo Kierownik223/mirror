@@ -36,7 +36,8 @@ Once complete, the executable will be located at `./target/release/mirror` or `.
 
 ### Mirror
 
-The example config files show all available options. Before first startup, rename `config.toml.example` to `config.toml` and `Rocket.toml.example` to `Rocket.toml`. The files should be located in the working directory of the program
+The example config files show all available options.  
+Before first startup, copy `config.toml.example` to `config.toml` and `Rocket.toml.example` to `Rocket.toml`. The files should be located in the working directory of the program
 
 ### Webservers
 
@@ -57,7 +58,6 @@ http://dl.example.com, https://dl.example.com {
     handle /static/* {
         root * /path/to/mirror/files
         header /static* Cache-Control public
-        header * -Onion-Location
         file_server
     }
 
