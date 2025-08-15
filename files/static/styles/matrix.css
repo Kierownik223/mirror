@@ -108,6 +108,14 @@ td:first-child {
     color: #32a852;
 }
 
+tr a {
+    display: block;
+}
+
+tr:hover {
+    background-color: #21252a;
+}
+
 tbody tr td:last-child {
     text-align: right;
 }
@@ -158,5 +166,14 @@ td input {
 @media only screen and (max-width: 640px) {
     .main > table td:nth-child(3) {
         display: none;
+    }
+
+    a {
+        padding: 2px;
+    }
+
+    a:hover {
+        color: #32a852;
+        background-color: #21252a;
     }
 }
