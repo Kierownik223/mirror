@@ -167,13 +167,4 @@ td input {
     .main > table td:nth-child(3) {
         display: none;
     }
-
-    a {
-        padding: 2px;
-    }
-
-    a:hover {
-        color: #32a852;
-        background-color: #21252a;
-    }
 }
