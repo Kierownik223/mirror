@@ -379,7 +379,7 @@ async fn poster(
 ) -> Result<Result<Cached<(ContentType, Vec<u8>)>, Result<IndexResponse, Status>>, Status> {
     let path = Path::new("files/").join(file);
 
-    if is_restricted(path.clone(), &jar) {
+    if is_restricted(&path, jar) {
         return Err(Status::Unauthorized);
     }
 
@@ -431,7 +431,7 @@ async fn poster(
 async fn file(file: PathBuf, jar: &CookieJar<'_>) -> Result<Result<IndexResponse, Status>, Status> {
     let path = Path::new("files/").join(file);
 
-    if is_restricted(path.clone(), &jar) {
+    if is_restricted(&path, jar) {
         return Err(Status::Unauthorized);
     }
 
@@ -451,7 +451,7 @@ async fn download_with_counter(
         return Err(Status::NotFound);
     }
 
-    if is_restricted(path.clone(), &jar) {
+    if is_restricted(&path, jar) {
         return Err(Status::Unauthorized);
     }
 
@@ -469,7 +469,7 @@ async fn download(
 ) -> Result<Result<IndexResponse, Status>, Status> {
     let path = Path::new("files/").join(file);
 
-    if is_restricted(path.clone(), &jar) {
+    if is_restricted(&path, jar) {
         return Err(Status::Unauthorized);
     }
 
@@ -502,7 +502,7 @@ async fn index(
         theme = "standard".to_string();
     }
 
-    if is_restricted(path.clone(), jar) {
+    if is_restricted(&path, jar) {
         return Err(Status::Unauthorized);
     }
 
@@ -577,7 +577,7 @@ async fn index(
             }
         }
         "folder" => {
-            if is_hidden(path.clone(), jar) {
+            if is_hidden(&path, jar) {
                 return Err(Status::NotFound);
             }
 
@@ -629,13 +629,13 @@ async fn index(
             Ok(IndexResponse::Template(Template::render(
                 if *useplain.0 { "plain/index" } else { "index" },
                 context! {
-                    title: path_str.clone(),
+                    title: &path_str,
                     lang,
                     strings,
                     root_domain,
                     host: host.0,
                     config: config.inner(),
-                    path: path_str,
+                    path: &path_str,
                     dirs,
                     files,
                     theme,
@@ -889,9 +889,9 @@ async fn iframe(
     jar: &CookieJar<'_>,
     config: &rocket::State<Config>,
 ) -> Result<Template, Status> {
-    let path = Path::new("files/").join(file.clone());
+    let path = Path::new("files/").join(&file);
 
-    if is_restricted(path.clone(), &jar) {
+    if is_restricted(&path, jar) {
         return Err(Status::Unauthorized);
     }
 
@@ -958,7 +958,7 @@ async fn default(status: Status, req: &Request<'_>) -> Template {
             lang,
             strings,
             root_domain: get_root_domain(&host, &config.fallback_root_domain),
-            host: host.clone(),
+            host,
             config: config,
             theme: get_theme(jar),
             is_logged_in: is_logged_in(&jar),
@@ -988,7 +988,7 @@ async fn calculate_sizes(state: FileSizes) {
                 if metadata.is_file() {
                     file_sizes.push(FileEntry {
                         size,
-                        file: path_str.clone(),
+                        file: path_str,
                     });
 
                     let mut current = path.as_path();
@@ -1011,7 +1011,7 @@ async fn calculate_sizes(state: FileSizes) {
 
         {
             let mut state_lock = state.write().await;
-            *state_lock = all_entries.clone();
+            *state_lock = all_entries;
         }
 
         sleep(tokio::time::Duration::from_secs(60)).await;

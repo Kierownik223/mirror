@@ -67,7 +67,7 @@ async fn listing(
     config: &rocket::State<Config>,
     sizes: &State<FileSizes>,
 ) -> Result<Json<Vec<MirrorFile>>, Status> {
-    let path = Path::new("/").join(file.clone()).display().to_string();
+    let path = Path::new("/").join(&file).display().to_string();
 
     let mut file_list = read_files(&path).unwrap_or_default();
     let mut dir_list = read_dirs_async(&path, sizes).await.unwrap_or_default();
@@ -76,7 +76,7 @@ async fn listing(
         return Err(Status::NotFound);
     }
 
-    if is_restricted(Path::new("files/").join(file.clone()), &jar) {
+    if is_restricted(&Path::new("files/").join(&file), &jar) {
         return Err(Status::Forbidden);
     }
 
@@ -178,7 +178,7 @@ async fn delete<'a>(file: PathBuf, jar: &CookieJar<'_>) -> Result<Status, (Statu
         if perms != 0 {
             return Ok(Status::Forbidden);
         }
-        let path = Path::new("files/").join(file.clone());
+        let path = Path::new("files/").join(&file);
 
         if !path.exists() {
             return Ok(Status::NotFound);
