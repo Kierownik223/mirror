@@ -107,6 +107,7 @@ async fn upload(
                                     ext: format!("/{}/{}", user_path, file_name),
                                     size: String::new(),
                                     icon: icon,
+                                    downloads: None,
                                 });
                             } else {
                                 eprintln!("Failed to open temp file for: {}", file_name);
@@ -273,7 +274,7 @@ fn uploader(
                 username: username,
                 admin: perms == 0,
                 filebrowser: !get_bool_cookie(jar, "filebrowser", false),
-                uploadedfiles: vec![MirrorFile { name: "".to_string(), ext: "".to_string(), icon: "default".to_string(), size: String::new()}]
+                uploadedfiles: vec![MirrorFile { name: "".to_string(), ext: "".to_string(), icon: "default".to_string(), size: String::new(), downloads: None }]
             },
         ));
     }

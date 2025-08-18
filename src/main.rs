@@ -68,6 +68,7 @@ pub struct MirrorFile {
     ext: String,
     icon: String,
     size: String,
+    downloads: Option<i32>
 }
 
 impl Eq for MirrorFile {}
@@ -466,7 +467,7 @@ async fn download(
     return Ok(Redirect::found(url));
 }
 
-#[get("/<file..>")]
+#[get("/<file..>", rank = 10)]
 async fn index<'a>(
     file: PathBuf,
     jar: &CookieJar<'_>,
@@ -739,6 +740,7 @@ async fn index<'a>(
                 ext: String::new(),
                 icon: "default".to_string(),
                 size: String::new(),
+                downloads: None,
             }) {
                 topmarkdown = true;
             }
@@ -748,6 +750,7 @@ async fn index<'a>(
                 ext: String::new(),
                 icon: "default".to_string(),
                 size: String::new(),
+                downloads: None,
             }) {
                 for dir in dirs.iter_mut() {
                     dir.icon = "lockedfolder".to_string();
@@ -765,6 +768,7 @@ async fn index<'a>(
                 ext: "md".to_string(),
                 icon: "default".to_string(),
                 size: String::new(),
+                downloads: None,
             }) {
                 let markdown_text = fs::read_to_string(
                     Path::new(&("files".to_string() + &path))
@@ -779,6 +783,7 @@ async fn index<'a>(
                 ext: "md".to_string(),
                 icon: "default".to_string(),
                 size: String::new(),
+                downloads: None,
             }) {
                 let markdown_text = fs::read_to_string(
                     Path::new(&("files".to_string() + &path))

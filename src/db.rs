@@ -124,3 +124,23 @@ pub async fn add_download(mut db: Connection<FileDb>, path: &str) -> () {
     .execute(&mut **db)
     .await;
 }
+
+pub async fn get_downloads(mut db: Connection<FileDb>, path: &str) -> Option<i32> {
+    let query_result =
+        sqlx::query("SELECT downloads FROM files WHERE path = ? OR id = ?")
+            .bind(path)
+            .bind(path)
+            .fetch_one(&mut **db)
+            .await;
+
+    match query_result {
+        Ok(row) => {
+            if let Some(downloads) = row.try_get::<i32, _>("downloads").ok() {
+                Some(downloads)
+            } else {
+                None
+            }
+        },
+        Err(_) => None,
+    }
+}

@@ -42,6 +42,7 @@ pub fn read_dirs(path: &str) -> Result<Vec<MirrorFile>, Error> {
                     ext: "folder".to_string(),
                     icon: "folder".to_string(),
                     size: "---".to_string(),
+                    downloads: None,
                 };
 
                 dir_list.push(file);
@@ -105,6 +106,7 @@ pub async fn read_dirs_async(
                     ext: "folder".to_string(),
                     icon: "folder".to_string(),
                     size: format_size(folder_size, DECIMAL),
+                    downloads: None,
                 });
             }
         }
@@ -146,6 +148,7 @@ pub fn read_files(path: &str) -> Result<Vec<MirrorFile>, Error> {
                         .to_lowercase(),
                     icon: icon,
                     size: format_size(md.len(), DECIMAL),
+                    downloads: None,
                 };
 
                 dir_list.push(file);
@@ -291,6 +294,7 @@ pub fn list_to_files(files: Vec<&str>) -> Result<Vec<MirrorFile>, Error> {
             ext: ext.to_string(),
             icon: icon.to_lowercase(),
             size: "---".to_string(),
+            downloads: None,
         };
 
         file_list.push(file);

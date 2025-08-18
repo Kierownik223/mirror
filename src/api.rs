@@ -1,11 +1,12 @@
 use std::{
     collections::HashMap,
-    fs::{remove_dir, remove_file},
+    fs::{self, remove_dir, remove_file},
     io::{Cursor, Read, Write},
     ops::Deref,
     path::{Path, PathBuf},
 };
 
+use rocket_db_pools::Connection;
 use ::sysinfo::{Disks, RefreshKind, System};
 use humansize::{format_size, DECIMAL};
 use rocket::{
@@ -21,12 +22,10 @@ use rocket_multipart_form_data::{
 use zip::write::SimpleFileOptions;
 
 use crate::{
-    read_files,
-    utils::{
+    db::{get_downloads, FileDb}, read_files, utils::{
         add_path_to_zip, get_extension_from_filename, get_session, is_logged_in, is_restricted,
         read_dirs_async,
-    },
-    Config, Disk, FileSizes, Host, MirrorFile, Sysinfo,
+    }, Config, Disk, FileSizes, Host, MirrorFile, Sysinfo
 };
 
 #[derive(serde::Serialize)]
@@ -87,6 +86,32 @@ async fn listing(
     dir_list.append(&mut file_list);
 
     Ok(Json(dir_list))
+}
+
+#[get("/<file..>", rank = 1)]
+async fn file(
+    db: Connection<FileDb>,
+    file: PathBuf,
+) -> Result<Json<MirrorFile>, Status> {
+    let path = Path::new("files/").join(&file);
+    let file = file.display().to_string();
+    
+    if !&path.exists() {
+        return Err(Status::NotFound);
+    }
+
+    let md = fs::metadata(&path).map_err(|_| {Status::InternalServerError})?;
+
+    let name = path.file_name().unwrap().to_str().unwrap_or_default().to_string();
+    let downloads = get_downloads(db, &file).await.unwrap_or(0);
+    let mut icon = path.extension().unwrap().to_str().unwrap_or("default");
+
+    if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists()
+    {
+        icon = "default";
+    }
+
+    Ok(Json(MirrorFile { name, ext: path.extension().unwrap().to_str().unwrap_or_default().to_string(), icon: icon.to_string(), size: format_size(md.len(), DECIMAL), downloads: Some(downloads) }))
 }
 
 #[delete("/<file..>")]
@@ -401,12 +426,19 @@ fn default(status: Status, _req: &Request) -> Json<Error> {
 }
 
 pub fn build_api() -> AdHoc {
-    AdHoc::on_ignite("API", |rocket| async {
-        rocket
+    AdHoc::on_ignite("API", |mut rocket| async {
+        let config = Config::load();
+        rocket = rocket
             .mount(
                 "/api",
                 routes![index, listing, sysinfo, user, upload, delete, download_zip],
             )
-            .register("/api", catchers![default])
+            .register("/api", catchers![default]);
+
+        if config.enable_login {
+            rocket = rocket.mount("/api", routes![file])
+        }
+
+        rocket
     })
 }
