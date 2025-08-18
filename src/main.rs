@@ -353,6 +353,25 @@ impl<'r, R: 'r + Responder<'r, 'static> + Send> Responder<'r, 'static> for Cache
     }
 }
 
+enum IndexResponse {
+    Template(Template),
+    HeaderFile(HeaderFile),
+    NamedFile(NamedFile),
+}
+
+type IndexResult = Result<IndexResponse, Status>;
+
+#[rocket::async_trait]
+impl<'r> Responder<'r, 'r> for IndexResponse {
+    fn respond_to(self, req: &'r rocket::Request<'_>) -> rocket::response::Result<'r> {
+        match self {
+            IndexResponse::Template(t) => t.respond_to(req),
+            IndexResponse::HeaderFile(h) => h.respond_to(req),
+            IndexResponse::NamedFile(f) => f.respond_to(req),
+        }
+    }
+}
+
 #[get("/poster/<file..>")]
 async fn poster(
     file: PathBuf,
@@ -497,7 +516,7 @@ async fn index<'a>(
     useplain: UsePlain<'_>,
     viewers: UseViewers<'_>,
     sizes: &State<FileSizes>,
-) -> Result<Result<Result<Template, Redirect>, Result<Option<HeaderFile>, Option<NamedFile>>>, Status>
+) -> IndexResult
 {
     let path = Path::new("files/").join(file.clone());
     let strings = translations.get_translation(&lang.0);
@@ -533,7 +552,7 @@ async fn index<'a>(
                 let markdown_text = fs::read_to_string(path.display().to_string())
                     .unwrap_or_else(|err| err.to_string());
                 let markdown = markdown::to_html(&markdown_text);
-                return Ok(Ok(Ok(Template::render(
+                Ok(IndexResponse::Template(Template::render(
                     if *useplain.0 { "plain/md" } else { "md" },
                     context! {
                         title: format!("{} {}", strings.get("reading_markdown").unwrap(), Path::new("/").join(file.clone()).display()),
@@ -550,18 +569,18 @@ async fn index<'a>(
                         smallhead,
                         markdown
                     },
-                ))));
+                )))
             } else {
-                return Err(Status::NotFound);
+                Err(Status::NotFound)
             }
         }
         "zip" => {
             if path.exists() {
                 if !*viewers.0 {
                     return if config.standalone {
-                        Ok(Err(Err(open_namedfile(path).await)))
+                        Ok(IndexResponse::NamedFile(open_namedfile(path).await.unwrap()))
                     } else {
-                        Ok(Err(Ok(open_file(path, true))))
+                        Ok(IndexResponse::HeaderFile(open_file(path, true).unwrap()))
                     };
                 }
 
@@ -576,7 +595,7 @@ async fn index<'a>(
                         return Err(Status::NotFound);
                     }
 
-                    Ok(Ok(Ok(Template::render(
+                    Ok(IndexResponse::Template(Template::render(
                         if *useplain.0 { "plain/zip" } else { "zip" },
                         context! {
                             title: format!("{} {}", strings.get("viewing_zip").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
@@ -594,149 +613,16 @@ async fn index<'a>(
                             hires,
                             smallhead
                         },
-                    ))))
+                    )))
                 } else {
                     return if config.standalone {
-                        Ok(Err(Err(open_namedfile(path).await)))
+                        Ok(IndexResponse::NamedFile(open_namedfile(path).await.unwrap()))
                     } else {
-                        Ok(Err(Ok(open_file(path, false))))
+                        Ok(IndexResponse::HeaderFile(open_file(path, false).unwrap()))
                     };
                 }
             } else {
-                return Err(Status::NotFound);
-            }
-        }
-        "mp4" => {
-            if path.exists() {
-                if !*viewers.0 {
-                    return if config.standalone {
-                        Ok(Err(Err(open_namedfile(path).await)))
-                    } else {
-                        Ok(Err(Ok(open_file(path, true))))
-                    };
-                }
-
-                let displaydetails = true;
-
-                let videopath = Path::new("/").join(file.clone()).display().to_string();
-                let videopath = videopath.as_str();
-
-                let mdpath = format!("files/video/metadata{}.md", videopath.replace("video/", ""));
-                let mdpath = Path::new(mdpath.as_str());
-
-                let vidtitle = path.file_name();
-                let vidtitle = vidtitle.unwrap().to_str();
-                let mut vidtitle = vidtitle.unwrap().to_string();
-
-                let details: String;
-
-                if mdpath.exists() {
-                    let markdown_text = fs::read_to_string(mdpath.display().to_string())
-                        .unwrap_or_else(|err| err.to_string());
-                    let mut lines = markdown_text.lines();
-
-                    vidtitle = lines
-                        .next()
-                        .unwrap_or("")
-                        .trim_start_matches('#')
-                        .trim()
-                        .to_string();
-                    let markdown = lines.collect::<Vec<&str>>().join("\n");
-
-                    details = markdown::to_html(&markdown);
-                } else {
-                    details = strings.get("no_details").unwrap().to_string();
-                }
-
-                Ok(Ok(Ok(Template::render(
-                    if *useplain.0 { "plain/video" } else { "video" },
-                    context! {
-                        title: format!("{} {}", strings.get("watching").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
-                        lang,
-                        strings,
-                        root_domain,
-                        host: host.0,
-                        config: config.inner(),
-                        path: videopath,
-                        poster: format!("/images/videoposters{}.jpg", videopath.replace("video/", "")),
-                        vidtitle,
-                        theme,
-                        is_logged_in: is_logged_in(&jar),
-                        username,
-                        admin: perms == 0,
-                        hires,
-                        smallhead,
-                        displaydetails,
-                        details
-                    },
-                ))))
-            } else {
-                return Err(Status::NotFound);
-            }
-        }
-        "mp3" | "m4a" | "m4b" | "flac" => {
-            if path.exists() {
-                if !*viewers.0 {
-                    return if config.standalone {
-                        Ok(Err(Err(open_namedfile(path).await)))
-                    } else {
-                        Ok(Err(Ok(open_file(path, false))))
-                    };
-                }
-
-                let audiopath = Path::new("/").join(file.clone()).display().to_string();
-                let audiopath = audiopath.as_str();
-
-                if let Ok(tag) = Tag::new().read_from_path(&path) {
-                    let audiotitle = tag
-                        .title()
-                        .unwrap_or(&path.file_name().unwrap().to_str().unwrap());
-                    let artist = tag.artist().unwrap_or_default();
-                    let year = tag.year().unwrap_or(0);
-                    let album = tag.album_title().unwrap_or_default();
-                    let genre = tag.genre().unwrap_or_default();
-                    let track = tag.track_number().unwrap_or(0);
-
-                    let mut cover = false;
-
-                    if let Some(_picture) = tag.album_cover() {
-                        cover = true;
-                    }
-
-                    Ok(Ok(Ok(Template::render(
-                        if *useplain.0 { "plain/audio" } else { "audio" },
-                        context! {
-                            title: format!("{} {}", strings.get("listening").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
-                            lang,
-                            strings,
-                            root_domain,
-                            host: host.0,
-                            config: config.inner(),
-                            path: audiopath,
-                            audiotitle,
-                            theme,
-                            is_logged_in: is_logged_in(&jar),
-                            username,
-                            admin: perms == 0,
-                            hires,
-                            smallhead,
-                            artist,
-                            year,
-                            album,
-                            genre,
-                            track,
-                            cover
-                        },
-                    ))))
-                } else {
-                    return if config.standalone {
-                        Ok(Err(Err(open_namedfile(path).await)))
-                    } else {
-                        Ok(Err(Ok(open_file(path, true))))
-                    };
-                }
-            } else {
-                return Err(Status::NotFound);
+                Err(Status::NotFound)
             }
         }
         "folder" => {
@@ -814,7 +700,7 @@ async fn index<'a>(
                 markdown = markdown::to_html(&markdown_text);
             }
 
-            Ok(Ok(Ok(Template::render(
+            Ok(IndexResponse::Template(Template::render(
                 if *useplain.0 { "plain/index" } else { "index" },
                 context! {
                     title: path.to_string(),
@@ -836,19 +722,19 @@ async fn index<'a>(
                     topmarkdown,
                     filebrowser: !get_bool_cookie(jar, "filebrowser", false),
                 },
-            ))))
+            )))
         }
         _ => {
             if path.exists() {
                 if config.extensions.contains(&ext) {
                     if !*viewers.0 {
                         return if config.standalone {
-                            Ok(Err(Err(open_namedfile(path).await)))
+                            Ok(IndexResponse::NamedFile(open_namedfile(path).await.unwrap()))
                         } else {
-                            Ok(Err(Ok(open_file(path, false))))
+                            Ok(IndexResponse::HeaderFile(open_file(path, false).unwrap()))
                         };
                     }
-                    return Ok(Ok(Ok(Template::render(
+                    Ok(IndexResponse::Template(Template::render(
                         if *useplain.0 {
                             "plain/details"
                         } else {
@@ -871,12 +757,12 @@ async fn index<'a>(
                             filename: path.file_name().unwrap().to_str(),
                             filesize: format_size(fs::metadata(path.clone()).unwrap().len(), DECIMAL)
                         },
-                    ))));
+                    )))
                 } else {
                     return if config.standalone {
-                        Ok(Err(Err(open_namedfile(path).await)))
+                        Ok(IndexResponse::NamedFile(open_namedfile(path).await.unwrap()))
                     } else {
-                        Ok(Err(Ok(open_file(path, true))))
+                        Ok(IndexResponse::HeaderFile(open_file(path, false).unwrap()))
                     };
                 }
             } else {
