@@ -28,6 +28,7 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
+use crate::db::{add_download, FileDb};
 use crate::utils::{get_root_domain, is_hidden, open_namedfile, read_dirs_async};
 
 mod account;
@@ -421,8 +422,8 @@ async fn poster(
     }
 }
 
-#[get("/<file..>?download")]
-async fn download(
+#[get("/file/<file..>")]
+async fn file(
     file: PathBuf,
     jar: &CookieJar<'_>,
     config: &rocket::State<Config>,
@@ -438,6 +439,31 @@ async fn download(
     } else {
         Ok(Ok(open_file(path, true)))
     };
+}
+
+#[get("/<file..>?download")]
+async fn download(
+    db: Connection<FileDb>,
+    file: PathBuf,
+    jar: &CookieJar<'_>,
+
+) -> Result<Redirect, Status> {
+    let path = Path::new("files/").join(&file);
+    let file = file.display().to_string();
+
+    if !path.exists() {
+        return Err(Status::NotFound);
+    }
+
+    if is_restricted(path.clone(), &jar) {
+        return Err(Status::Unauthorized);
+    }
+
+    add_download(db, &file).await;
+
+    let url = format!("/file/{}", file).replace(" ", "%20");
+
+    return Ok(Redirect::found(url));
 }
 
 #[get("/<file..>")]
@@ -1189,7 +1215,7 @@ async fn rocket() -> _ {
         .register("/", catchers![default, unprocessable_entry, forbidden])
         .mount(
             "/",
-            routes![settings, reset_settings, download, index, iframe, poster],
+            routes![settings, reset_settings, download, index, iframe, poster, file],
         );
 
     if config.enable_login {
@@ -1197,6 +1223,7 @@ async fn rocket() -> _ {
             .attach(account::build_account())
             .attach(admin::build())
             .attach(Db::init())
+            .attach(FileDb::init())
             .mount("/", routes![fetch_settings, sync_settings,]);
     }
 

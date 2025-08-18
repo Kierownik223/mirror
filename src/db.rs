@@ -2,12 +2,17 @@ use rocket_db_pools::{sqlx, Connection, Database};
 use sqlx::Row;
 
 use bcrypt::verify;
+use uuid::Uuid;
 
 use crate::MarmakUser;
 
 #[derive(Database)]
 #[database("marmak")]
 pub struct Db(sqlx::MySqlPool);
+
+#[derive(Database)]
+#[database("mirror")]
+pub struct FileDb(sqlx::MySqlPool);
 
 pub async fn login_user(
     mut db: Connection<Db>,
@@ -107,5 +112,15 @@ pub async fn add_login(mut db: Connection<Db>, username: &str, ip: &str) -> () {
     .bind(username)
     .bind(ip)
     .fetch_one(&mut **db)
+    .await;
+}
+
+pub async fn add_download(mut db: Connection<FileDb>, path: &str) -> () {
+    let id = Uuid::new_v4().to_string();
+
+    let _ = sqlx::query("INSERT INTO files (id, path, downloads) VALUES (?, ?, 1) ON DUPLICATE KEY UPDATE downloads = downloads + 1")
+    .bind(id)
+    .bind(path)
+    .execute(&mut **db)
     .await;
 }
