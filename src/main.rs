@@ -376,7 +376,6 @@ impl<'r> Responder<'r, 'r> for IndexResponse {
 async fn poster(
     file: PathBuf,
     jar: &CookieJar<'_>,
-    config: &rocket::State<Config>,
 ) -> Result<Result<Cached<(ContentType, Vec<u8>)>, Result<IndexResponse, Status>>, Status> {
     let path = Path::new("files/").join(file);
 
@@ -403,7 +402,8 @@ async fn poster(
             return Ok(Err(open_file(
                 Path::new(&"files/static/images/icons/256x256/mp3.png").to_path_buf(),
                 true,
-            ).await))
+            )
+            .await));
         }
     } else {
         if !path.exists() {
@@ -428,10 +428,7 @@ async fn poster(
 }
 
 #[get("/file/<file..>")]
-async fn file(
-    file: PathBuf,
-    jar: &CookieJar<'_>,
-) -> Result<Result<IndexResponse, Status>, Status> {
+async fn file(file: PathBuf, jar: &CookieJar<'_>) -> Result<Result<IndexResponse, Status>, Status> {
     let path = Path::new("files/").join(file);
 
     if is_restricted(path.clone(), &jar) {
@@ -513,7 +510,8 @@ async fn index(
         path.extension().and_then(OsStr::to_str).unwrap_or("")
     } else {
         "folder"
-    }.to_lowercase();
+    }
+    .to_lowercase();
 
     if !path.exists() {
         return Err(Status::NotFound);
@@ -610,14 +608,21 @@ async fn index(
             dirs.sort();
             files.sort();
 
-            if files.iter().any(|f| f.name == format!("README.{}.md", lang.0)) {
-                let md = fs::read_to_string(Path::new(&("files".to_string() + &path_str))
-                    .join(format!("README.{}.md", lang.0)))
-                    .unwrap_or_default();
+            if files
+                .iter()
+                .any(|f| f.name == format!("README.{}.md", lang.0))
+            {
+                let md = fs::read_to_string(
+                    Path::new(&("files".to_string() + &path_str))
+                        .join(format!("README.{}.md", lang.0)),
+                )
+                .unwrap_or_default();
                 markdown = markdown::to_html(&md);
             } else if files.iter().any(|f| f.name == "README.md") {
-                let md = fs::read_to_string(Path::new(&("files".to_string() + &path_str)).join("README.md"))
-                    .unwrap_or_default();
+                let md = fs::read_to_string(
+                    Path::new(&("files".to_string() + &path_str)).join("README.md"),
+                )
+                .unwrap_or_default();
                 markdown = markdown::to_html(&md);
             }
 
@@ -648,7 +653,11 @@ async fn index(
         _ => {
             if config.extensions.contains(&ext) {
                 Ok(IndexResponse::Template(Template::render(
-                    if *useplain.0 { "plain/details" } else { "details" },
+                    if *useplain.0 {
+                        "plain/details"
+                    } else {
+                        "details"
+                    },
                     context! {
                         title: format!("{} {}", strings.get("file_details").unwrap(), Path::new("/").join(&file).display()),
                         lang,

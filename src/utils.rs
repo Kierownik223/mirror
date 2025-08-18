@@ -264,7 +264,10 @@ pub async fn open_file(path: PathBuf, cache: bool) -> Result<IndexResponse, Stat
             Err(_) => Err(Status::InternalServerError),
         }
     } else {
-        Ok(IndexResponse::HeaderFile(HeaderFile(path.display().to_string(), cache)))
+        Ok(IndexResponse::HeaderFile(HeaderFile(
+            path.display().to_string(),
+            cache,
+        )))
     }
 }
 
