@@ -29,7 +29,7 @@ use walkdir::WalkDir;
 use rocket_dyn_templates::{context, Template};
 
 use crate::db::{add_download, FileDb};
-use crate::utils::{get_root_domain, is_hidden, open_namedfile, read_dirs_async};
+use crate::utils::{get_root_domain, is_hidden, read_dirs_async};
 
 mod account;
 mod admin;
@@ -377,10 +377,7 @@ async fn poster(
     file: PathBuf,
     jar: &CookieJar<'_>,
     config: &rocket::State<Config>,
-) -> Result<
-    Result<Cached<(ContentType, Vec<u8>)>, Result<Option<HeaderFile>, Option<NamedFile>>>,
-    Status,
-> {
+) -> Result<Result<Cached<(ContentType, Vec<u8>)>, Result<IndexResponse, Status>>, Status> {
     let path = Path::new("files/").join(file);
 
     if is_restricted(path.clone(), &jar) {
@@ -403,17 +400,10 @@ async fn poster(
                 ),
             }));
         } else {
-            return if config.standalone {
-                Ok(Err(Err(open_namedfile(
-                    Path::new(&"files/static/images/icons/256x256/mp3.png").to_path_buf(),
-                )
-                .await)))
-            } else {
-                Ok(Err(Ok(open_file(
-                    Path::new(&"files/static/images/icons/256x256/mp3.png").to_path_buf(),
-                    true,
-                ))))
-            };
+            return Ok(Err(open_file(
+                Path::new(&"files/static/images/icons/256x256/mp3.png").to_path_buf(),
+                true,
+            ).await))
         }
     } else {
         if !path.exists() {
@@ -433,13 +423,7 @@ async fn poster(
             icon = "files/static/images/icons/256x256/default.png".to_string();
         }
 
-        return if config.standalone {
-            Ok(Err(Err(
-                open_namedfile(Path::new(&icon).to_path_buf()).await
-            )))
-        } else {
-            Ok(Err(Ok(open_file(Path::new(&icon).to_path_buf(), true))))
-        };
+        Ok(Err(open_file(Path::new(&icon).to_path_buf(), true).await))
     }
 }
 
@@ -447,19 +431,14 @@ async fn poster(
 async fn file(
     file: PathBuf,
     jar: &CookieJar<'_>,
-    config: &rocket::State<Config>,
-) -> Result<Result<Option<HeaderFile>, Option<NamedFile>>, Status> {
+) -> Result<Result<IndexResponse, Status>, Status> {
     let path = Path::new("files/").join(file);
 
     if is_restricted(path.clone(), &jar) {
         return Err(Status::Unauthorized);
     }
 
-    return if config.standalone {
-        Ok(Err(open_namedfile(path).await))
-    } else {
-        Ok(Ok(open_file(path, true)))
-    };
+    Ok(open_file(path, true).await)
 }
 
 #[get("/<file..>?download")]
@@ -490,19 +469,14 @@ async fn download_with_counter(
 async fn download(
     file: PathBuf,
     jar: &CookieJar<'_>,
-    config: &rocket::State<Config>,
-) -> Result<Result<Option<HeaderFile>, Option<NamedFile>>, Status> {
+) -> Result<Result<IndexResponse, Status>, Status> {
     let path = Path::new("files/").join(file);
 
     if is_restricted(path.clone(), &jar) {
         return Err(Status::Unauthorized);
     }
 
-    return if config.standalone {
-        Ok(Err(open_namedfile(path).await))
-    } else {
-        Ok(Ok(open_file(path, true)))
-    };
+    Ok(open_file(path, true).await)
 }
 
 #[get("/<file..>", rank = 10)]
@@ -570,11 +544,7 @@ async fn index(
         }
         "zip" => {
             if !*viewers.0 {
-                return if config.standalone {
-                    Ok(IndexResponse::NamedFile(open_namedfile(path).await.unwrap()))
-                } else {
-                    Ok(IndexResponse::HeaderFile(open_file(path, true).unwrap()))
-                };
+                return open_file(path, true).await;
             }
 
             let zip_file = fs::File::open(&path).unwrap();
@@ -605,11 +575,7 @@ async fn index(
                     },
                 )))
             } else {
-                if config.standalone {
-                    Ok(IndexResponse::NamedFile(open_namedfile(path).await.unwrap()))
-                } else {
-                    Ok(IndexResponse::HeaderFile(open_file(path, false).unwrap()))
-                }
+                open_file(path, false).await
             }
         }
         "folder" => {
@@ -701,10 +667,8 @@ async fn index(
                         filesize: format_size(fs::metadata(&path).unwrap().len(), DECIMAL)
                     },
                 )))
-            } else if config.standalone {
-                Ok(IndexResponse::NamedFile(open_namedfile(path).await.unwrap()))
             } else {
-                Ok(IndexResponse::HeaderFile(open_file(path, true).unwrap()))
+                open_file(path, true).await
             }
         }
     }

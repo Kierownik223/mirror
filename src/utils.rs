@@ -9,13 +9,13 @@ use std::{
 use humansize::{format_size, DECIMAL};
 use rocket::{
     fs::NamedFile,
-    http::{Cookie, CookieJar},
+    http::{Cookie, CookieJar, Status},
 };
 use time::{Duration, OffsetDateTime};
 use tokio::sync::RwLock;
 use zip::write::SimpleFileOptions;
 
-use crate::{FileEntry, HeaderFile, MirrorFile};
+use crate::{Config, FileEntry, HeaderFile, IndexResponse, MirrorFile};
 
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
 struct FolderSize {
@@ -252,19 +252,19 @@ pub fn is_hidden(mut path: PathBuf, jar: &CookieJar<'_>) -> bool {
     false
 }
 
-pub fn open_file(path: PathBuf, cache: bool) -> Option<HeaderFile> {
-    if path.exists() {
-        return Some(HeaderFile(path.display().to_string(), cache));
-    } else {
-        return None;
+pub async fn open_file(path: PathBuf, cache: bool) -> Result<IndexResponse, Status> {
+    let config = Config::load();
+    if !path.exists() {
+        return Err(Status::NotFound);
     }
-}
 
-pub async fn open_namedfile(path: PathBuf) -> Option<NamedFile> {
-    if path.exists() {
-        return Some(NamedFile::open(path.display().to_string()).await.unwrap());
+    if config.standalone {
+        match NamedFile::open(&path).await {
+            Ok(f) => Ok(IndexResponse::NamedFile(f)),
+            Err(_) => Err(Status::InternalServerError),
+        }
     } else {
-        return None;
+        Ok(IndexResponse::HeaderFile(HeaderFile(path.display().to_string(), cache)))
     }
 }
 
