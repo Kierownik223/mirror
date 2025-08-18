@@ -12,9 +12,15 @@ secret_key = "your-secret-key"
 # prod database
 
 [release.databases.marmak]
-url = "mysql://marmak:12345678@localhost:3306/marmak"
+url = "mysql://mirror:12345678@localhost:3306/marmak"
+
+[release.databases.mirror]
+url = "mysql://mirror:12345678@localhost:3306/mirror"
 
 # dev database
 
 [debug.databases.marmak]
-url = "mysql://marmak:12345678@localhost:3306/marmak"
+url = "mysql://mirror:12345678@localhost:3306/marmak"
+
+[debug.databases.mirror]
+url = "mysql://mirror:12345678@localhost:3306/mirror"
