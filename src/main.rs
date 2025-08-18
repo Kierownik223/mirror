@@ -545,7 +545,7 @@ async fn index(
                 return open_file(path, true).await;
             }
 
-            let zip_file = fs::File::open(&path).unwrap();
+            let zip_file = fs::File::open(&path).map_err(|_| {Status::BadRequest})?;
             if let Ok(archive) = zip::ZipArchive::new(zip_file) {
                 let file_names: Vec<&str> = archive.file_names().collect();
                 let files = list_to_files(file_names).unwrap_or_default();
