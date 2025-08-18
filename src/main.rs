@@ -472,7 +472,7 @@ async fn index(
         }
         "zip" => {
             if !*viewers.0 {
-                return open_file(path, true).await;
+                return open_file(path, false).await;
             }
 
             let zip_file = fs::File::open(&path).map_err(|_| {Status::BadRequest})?;
