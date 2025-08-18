@@ -506,6 +506,119 @@ async fn index(
                 open_file(path, false).await
             }
         }
+        "mp4" => {
+            if !*viewers.0 {
+                return open_file(path, false).await;
+            }
+
+            let displaydetails = true;
+
+            let videopath = Path::new("/").join(file.clone()).display().to_string();
+            let videopath = videopath.as_str();
+
+            let mdpath = format!("files/video/metadata{}.md", videopath.replace("video/", ""));
+            let mdpath = Path::new(mdpath.as_str());
+
+            let vidtitle = path.file_name();
+            let vidtitle = vidtitle.unwrap().to_str();
+            let mut vidtitle = vidtitle.unwrap().to_string();
+
+            let details: String;
+
+            if mdpath.exists() {
+                let markdown_text = fs::read_to_string(mdpath.display().to_string())
+                    .unwrap_or_else(|err| err.to_string());
+                let mut lines = markdown_text.lines();
+
+                vidtitle = lines
+                    .next()
+                    .unwrap_or("")
+                    .trim_start_matches('#')
+                    .trim()
+                    .to_string();
+                let markdown = lines.collect::<Vec<&str>>().join("\n");
+
+                details = markdown::to_html(&markdown);
+            } else {
+                details = strings.get("no_details").unwrap().to_string();
+            }
+
+            Ok(IndexResponse::Template(Template::render(
+                if *useplain.0 { "plain/video" } else { "video" },
+                context! {
+                    title: format!("{} {}", strings.get("watching").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
+                    lang,
+                    strings,
+                    root_domain,
+                    host: host.0,
+                    config: config.inner(),
+                    path: videopath,
+                    poster: format!("/images/videoposters{}.jpg", videopath.replace("video/", "")),
+                    vidtitle,
+                    theme,
+                    is_logged_in: is_logged_in(&jar),
+                    username,
+                    admin: perms == 0,
+                    hires,
+                    smallhead,
+                    displaydetails,
+                    details
+                },
+            )))
+        }
+        "mp3" | "m4a" | "m4b" | "flac" => {
+            if !*viewers.0 {
+                return open_file(path, false).await;
+            }
+
+            let audiopath = Path::new("/").join(file.clone()).display().to_string();
+            let audiopath = audiopath.as_str();
+
+            if let Ok(tag) = Tag::new().read_from_path(&path) {
+                let audiotitle = tag
+                    .title()
+                    .unwrap_or(&path.file_name().unwrap().to_str().unwrap());
+                let artist = tag.artist().unwrap_or_default();
+                let year = tag.year().unwrap_or(0);
+                let album = tag.album_title().unwrap_or_default();
+                let genre = tag.genre().unwrap_or_default();
+                let track = tag.track_number().unwrap_or(0);
+
+                let mut cover = false;
+
+                if let Some(_picture) = tag.album_cover() {
+                    cover = true;
+                }
+
+                Ok(IndexResponse::Template(Template::render(
+                    if *useplain.0 { "plain/audio" } else { "audio" },
+                    context! {
+                        title: format!("{} {}", strings.get("listening").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
+                        lang,
+                        strings,
+                        root_domain,
+                        host: host.0,
+                        config: config.inner(),
+                        path: audiopath,
+                        audiotitle,
+                        theme,
+                        is_logged_in: is_logged_in(&jar),
+                        username,
+                        admin: perms == 0,
+                        hires,
+                        smallhead,
+                        artist,
+                        year,
+                        album,
+                        genre,
+                        track,
+                        cover
+                    },
+                )))
+            } else {
+                open_file(path, true).await
+            }
+        }
         "folder" => {
             if is_hidden(&path, jar) {
                 return Err(Status::NotFound);
