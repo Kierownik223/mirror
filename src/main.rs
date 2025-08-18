@@ -50,6 +50,7 @@ struct Config {
     x_sendfile_prefix: String,
     standalone: bool,
     fallback_root_domain: String,
+    enable_file_db: bool,
 }
 
 impl Config {
@@ -443,7 +444,7 @@ async fn file(
 }
 
 #[get("/<file..>?download")]
-async fn download(
+async fn download_with_counter(
     db: Connection<FileDb>,
     file: PathBuf,
     jar: &CookieJar<'_>,
@@ -465,6 +466,25 @@ async fn download(
     let url = format!("/file/{}", file).replace(" ", "%20");
 
     return Ok(Redirect::found(url));
+}
+
+#[get("/<file..>?download")]
+async fn download(
+    file: PathBuf,
+    jar: &CookieJar<'_>,
+    config: &rocket::State<Config>,
+) -> Result<Result<Option<HeaderFile>, Option<NamedFile>>, Status> {
+    let path = Path::new("files/").join(file);
+
+    if is_restricted(path.clone(), &jar) {
+        return Err(Status::Unauthorized);
+    }
+
+    return if config.standalone {
+        Ok(Err(open_namedfile(path).await))
+    } else {
+        Ok(Ok(open_file(path, true)))
+    };
 }
 
 #[get("/<file..>", rank = 10)]
@@ -1220,7 +1240,7 @@ async fn rocket() -> _ {
         .register("/", catchers![default, unprocessable_entry, forbidden])
         .mount(
             "/",
-            routes![settings, reset_settings, download, index, iframe, poster, file],
+            routes![settings, reset_settings, index, iframe, poster, file],
         );
 
     if config.enable_login {
@@ -1228,8 +1248,16 @@ async fn rocket() -> _ {
             .attach(account::build_account())
             .attach(admin::build())
             .attach(Db::init())
-            .attach(FileDb::init())
             .mount("/", routes![fetch_settings, sync_settings,]);
+    }
+
+    if config.enable_file_db {
+        rocket = rocket
+            .attach(FileDb::init())
+            .mount("/", routes![download_with_counter])
+    } else {
+        rocket = rocket
+            .mount("/", routes![download])
     }
 
     if config.enable_api {

@@ -20,3 +20,5 @@ x_sendfile_prefix = "/opt/mirror/"
 standalone = false
 # Fallback root domain (when using custom DNS or hosting on a root domain)
 fallback_root_domain = "marmak.net.pl"
+# Enable file database (download files by ID, download counting)
+enable_file_db = true

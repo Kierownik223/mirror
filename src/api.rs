@@ -89,7 +89,7 @@ async fn listing(
 }
 
 #[get("/<file..>", rank = 1)]
-async fn file(
+async fn file_with_downloads(
     db: Connection<FileDb>,
     file: PathBuf,
 ) -> Result<Json<MirrorFile>, Status> {
@@ -112,6 +112,29 @@ async fn file(
     }
 
     Ok(Json(MirrorFile { name, ext: path.extension().unwrap().to_str().unwrap_or_default().to_string(), icon: icon.to_string(), size: format_size(md.len(), DECIMAL), downloads: Some(downloads) }))
+}
+
+#[get("/<file..>", rank = 1)]
+async fn file(
+    file: PathBuf,
+) -> Result<Json<MirrorFile>, Status> {
+    let path = Path::new("files/").join(&file);
+    
+    if !&path.exists() {
+        return Err(Status::NotFound);
+    }
+
+    let md = fs::metadata(&path).map_err(|_| {Status::InternalServerError})?;
+
+    let name = path.file_name().unwrap().to_str().unwrap_or_default().to_string();
+    let mut icon = path.extension().unwrap().to_str().unwrap_or("default");
+
+    if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists()
+    {
+        icon = "default";
+    }
+
+    Ok(Json(MirrorFile { name, ext: path.extension().unwrap().to_str().unwrap_or_default().to_string(), icon: icon.to_string(), size: format_size(md.len(), DECIMAL), downloads: None }))
 }
 
 #[delete("/<file..>")]
@@ -435,7 +458,9 @@ pub fn build_api() -> AdHoc {
             )
             .register("/api", catchers![default]);
 
-        if config.enable_login {
+        if config.enable_file_db {
+            rocket = rocket.mount("/api", routes![file_with_downloads])
+        } else {
             rocket = rocket.mount("/api", routes![file])
         }
 
