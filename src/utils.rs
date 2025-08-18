@@ -209,46 +209,34 @@ pub fn is_logged_in<'r>(jar: &CookieJar<'_>) -> bool {
     jar.get_private("session").map(k(true)).unwrap_or(false)
 }
 
-pub fn is_restricted(mut path: PathBuf, jar: &CookieJar<'_>) -> bool {
-    while let Some(parent) = path.parent() {
-        if parent.join("RESTRICTED").exists() {
-            if !is_logged_in(&jar) {
-                return true;
-            } else {
-                return false;
-            }
+pub fn is_restricted(path: &Path, jar: &CookieJar<'_>) -> bool {
+    let mut current = Some(path);
+
+    while let Some(p) = current {
+        if p.join("RESTRICTED").exists() {
+            return !is_logged_in(jar);
         }
-        path = parent.to_path_buf();
+        current = p.parent();
     }
+
     false
 }
 
-pub fn is_hidden(mut path: PathBuf, jar: &CookieJar<'_>) -> bool {
-    if path.join("HIDDEN").exists() {
-        if is_logged_in(&jar) {
-            if get_session(&jar).1 == 0 {
-                return false;
-            } else {
-                return true;
-            }
-        } else {
-            return true;
-        }
-    }
-    while let Some(parent) = path.parent() {
-        if parent.join("HIDDEN").exists() {
-            if is_logged_in(&jar) {
-                if get_session(&jar).1 == 0 {
-                    return false;
-                } else {
-                    return true;
-                }
+pub fn is_hidden(path: &Path, jar: &CookieJar<'_>) -> bool {
+    let mut current = Some(path);
+
+    while let Some(p) = current {
+        if p.join("HIDDEN").exists() {
+            if is_logged_in(jar) {
+                let (_, perms) = get_session(jar);
+                return perms != 0;
             } else {
                 return true;
             }
         }
-        path = parent.to_path_buf();
+        current = p.parent();
     }
+
     false
 }
 
