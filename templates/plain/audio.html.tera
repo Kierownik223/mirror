@@ -24,10 +24,10 @@
     </span>
 </span>
 &nbsp;
-<a href="?download" download>{{ strings.download }}</a><br>
+<a href="/file{{ path }}" download>{{ strings.download }}</a><br>
 <hr>
 <a href="./">./</a>
-<audio src="?download" controls style="width: 100%;" poster="http://{{ host }}{{ path }}?poster">{{ strings.no_audio }}</audio>
+<audio src="/file{{ path }}" controls style="width: 100%;" poster="/poster{{ path }}">{{ strings.no_audio }}</audio>
 {% if artist != "" %}{{ artist }} - {% endif %}<b style="font-size: 24px;">{% if track != 0 %}{{ track }}. {% endif %}{{ audiotitle }}</b><br>
 {% if album != "" %}{{ strings.album }}: <b>{{ album }}</b><br>{% endif %}
 {% if year != 0 %}{{ strings.year }}: <b>{{ year }}</b><br>{% endif %}
