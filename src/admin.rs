@@ -35,7 +35,7 @@ async fn upload(
     config: &State<Config>,
     useplain: UsePlain<'_>,
 ) -> Result<Template, Status> {
-    if !is_logged_in(&jar) {
+    if !is_logged_in(jar) {
         return Err(Status::Unauthorized);
     } else {
         let (username, perms) = get_session(jar);
@@ -141,7 +141,7 @@ async fn upload(
                     host: host.0,
                     config: config.inner(),
                     theme: get_theme(jar),
-                    is_logged_in: is_logged_in(&jar),
+                    is_logged_in: is_logged_in(jar),
                     hires: get_bool_cookie(jar, "hires", false),
                     smallhead: get_bool_cookie(jar, "smallhead", false),
                     username: username,
@@ -165,7 +165,7 @@ fn sysinfo(
     config: &State<Config>,
     useplain: UsePlain<'_>,
 ) -> Result<Template, Status> {
-    if !is_logged_in(&jar) {
+    if !is_logged_in(jar) {
         return Err(Status::Unauthorized);
     } else {
         let (username, perms) = get_session(jar);
@@ -216,9 +216,9 @@ fn sysinfo(
                 host: host.0,
                 config: config.inner(),
                 theme: get_theme(jar),
-                is_logged_in: is_logged_in(&jar),
+                is_logged_in: is_logged_in(jar),
                 hires: get_bool_cookie(jar, "hires", false),
-                admin: get_session(&jar).1 == 0,
+                admin: get_session(jar).1 == 0,
                 smallhead: get_bool_cookie(jar, "smallhead", false),
                 username: username,
                 total_mem: total_mem,
@@ -243,7 +243,7 @@ fn uploader(
     config: &State<Config>,
     useplain: UsePlain<'_>,
 ) -> Result<Template, Status> {
-    if !is_logged_in(&jar) {
+    if !is_logged_in(jar) {
         return Err(Status::Unauthorized);
     } else {
         let (username, perms) = get_session(jar);
@@ -268,7 +268,7 @@ fn uploader(
                 host: host.0,
                 config: config.inner(),
                 theme: get_theme(jar),
-                is_logged_in: is_logged_in(&jar),
+                is_logged_in: is_logged_in(jar),
                 hires: get_bool_cookie(jar, "hires", false),
                 smallhead: get_bool_cookie(jar, "smallhead", false),
                 username: username,
@@ -289,7 +289,7 @@ fn admin(
     config: &State<Config>,
     useplain: UsePlain<'_>,
 ) -> Result<Template, Status> {
-    if !is_logged_in(&jar) {
+    if !is_logged_in(jar) {
         return Err(Status::Unauthorized);
     } else {
         let (username, perms) = get_session(jar);
@@ -310,7 +310,7 @@ fn admin(
                 host: host.0,
                 config: config.inner(),
                 theme: get_theme(jar),
-                is_logged_in: is_logged_in(&jar),
+                is_logged_in: is_logged_in(jar),
                 hires: get_bool_cookie(jar, "hires", false),
                 smallhead: get_bool_cookie(jar, "smallhead", false),
                 username: username,

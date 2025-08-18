@@ -756,7 +756,7 @@ fn settings(
 
     let show_cookie_notice = jar.iter().next().is_none();
 
-    let username = if is_logged_in(&jar) {
+    let username = if is_logged_in(jar) {
         get_session(jar).0
     } else {
         String::new()
@@ -776,7 +776,7 @@ fn settings(
             root_domain: get_root_domain(host.0, &config.fallback_root_domain),
             host: host.0,
             config: config.inner(),
-            is_logged_in: is_logged_in(&jar),
+            is_logged_in: is_logged_in(jar),
             username,
             admin: get_session(jar).1 == 0,
             hires: get_bool_cookie(jar, "hires", false),
@@ -798,7 +798,7 @@ async fn fetch_settings(
     lang: Language,
     translations: &State<TranslationStore>,
 ) -> Result<RawHtml<String>, Status> {
-    if !is_logged_in(&jar) {
+    if !is_logged_in(jar) {
         return Err(Status::Unauthorized);
     } else {
         let strings = translations.get_translation(&lang.0);
@@ -832,7 +832,7 @@ async fn sync_settings(
     lang: Language,
     translations: &State<TranslationStore>,
 ) -> Result<RawHtml<String>, Status> {
-    if !is_logged_in(&jar) {
+    if !is_logged_in(jar) {
         return Err(Status::Unauthorized);
     } else {
         let strings = translations.get_translation(&lang.0);
@@ -961,8 +961,8 @@ async fn default(status: Status, req: &Request<'_>) -> Template {
             host,
             config: config,
             theme: get_theme(jar),
-            is_logged_in: is_logged_in(&jar),
-            admin: get_session(&jar).1 == 0,
+            is_logged_in: is_logged_in(jar),
+            admin: get_session(jar).1 == 0,
             hires: get_bool_cookie(jar, "hires", false),
             smallhead: get_bool_cookie(jar, "smallhead", false),
         },

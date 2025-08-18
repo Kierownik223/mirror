@@ -33,7 +33,7 @@ fn login_page(
     useplain: UsePlain<'_>,
     next: Option<&str>,
 ) -> Result<Template, Redirect> {
-    if is_logged_in(&jar) {
+    if is_logged_in(jar) {
         let perms = get_session(jar).1;
         if perms == 0 {
             return Err(Redirect::to("/admin/"));
@@ -56,7 +56,7 @@ fn login_page(
             host: host.0,
             config: config.inner(),
             theme: get_theme(jar),
-            is_logged_in: is_logged_in(&jar),
+            is_logged_in: is_logged_in(jar),
             username: "",
             admin: false,
             hires: get_bool_cookie(jar, "hires", false),
@@ -81,7 +81,7 @@ async fn login(
     useplain: UsePlain<'_>,
 ) -> Result<Redirect, Template> {
     if let Some(db_user) = login_user(db, &user.username, &user.password, &ip.0, true).await {
-        if !get_bool_cookie(&jar, "nooverride", false) {
+        if !get_bool_cookie(jar, "nooverride", false) {
             if let Some(mirror_settings) = db_user.mirror_settings {
                 let decoded: HashMap<String, String> =
                     serde_json::from_str(&mirror_settings).unwrap_or_default();
@@ -135,8 +135,8 @@ async fn login(
                 host: host.0,
                 config: config.inner(),
                 theme: get_theme(jar),
-                is_logged_in: is_logged_in(&jar),
-                admin: get_session(&jar).1 == 0,
+                is_logged_in: is_logged_in(jar),
+                admin: get_session(jar).1 == 0,
                 hires: get_bool_cookie(jar, "hires", false),
                 smallhead: get_bool_cookie(jar, "smallhead", false),
                 message: strings.get("invalid_info"),
@@ -157,7 +157,7 @@ async fn direct<'a>(
     config: &rocket::State<Config>,
 ) -> Result<Redirect, Status> {
     if let Some(token) = token {
-        if is_logged_in(&jar) {
+        if is_logged_in(jar) {
             let perms = get_session(jar).1;
             return Ok(Redirect::to(if perms == 0 { "/admin" } else { "/" }));
         }
@@ -185,7 +185,7 @@ async fn direct<'a>(
             serde_json::from_str(&json).map_err(|_| Status::BadRequest)?;
 
         if let Some(db_user) = login_user(db, &received_user.username, "", ip.0, false).await {
-            if !get_bool_cookie(&jar, "nooverride", false) {
+            if !get_bool_cookie(jar, "nooverride", false) {
                 if let Some(mirror_settings) = db_user.mirror_settings {
                     let decoded: HashMap<String, String> =
                         serde_json::from_str(&mirror_settings).unwrap_or_default();
@@ -215,7 +215,7 @@ async fn direct<'a>(
     }
 
     if let Some(to) = to {
-        if !is_logged_in(&jar) {
+        if !is_logged_in(jar) {
             return Err(Status::Unauthorized);
         } else {
             if let Some(db_user) = fetch_user(db, get_session(jar).0.as_str()).await {

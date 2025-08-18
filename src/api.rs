@@ -76,7 +76,7 @@ async fn listing(
         return Err(Status::NotFound);
     }
 
-    if is_restricted(&Path::new("files/").join(&file), &jar) {
+    if is_restricted(&Path::new("files/").join(&file), jar) {
         return Err(Status::Forbidden);
     }
 
@@ -170,7 +170,7 @@ async fn file(file: PathBuf) -> Result<Json<MirrorFile>, Status> {
 
 #[delete("/<file..>")]
 async fn delete<'a>(file: PathBuf, jar: &CookieJar<'_>) -> Result<Status, (Status, Json<Error>)> {
-    if !is_logged_in(&jar) {
+    if !is_logged_in(jar) {
         return Ok(Status::Unauthorized);
     } else {
         let perms = get_session(jar).1;
@@ -223,7 +223,7 @@ async fn delete<'a>(file: PathBuf, jar: &CookieJar<'_>) -> Result<Status, (Statu
 
 #[get("/sysinfo")]
 fn sysinfo(jar: &CookieJar<'_>) -> Result<Json<Sysinfo>, Status> {
-    if !is_logged_in(&jar) {
+    if !is_logged_in(jar) {
         return Err(Status::Unauthorized);
     } else {
         let mut sys = System::new_all();
@@ -264,7 +264,7 @@ fn sysinfo(jar: &CookieJar<'_>) -> Result<Json<Sysinfo>, Status> {
 
 #[get("/user")]
 fn user(jar: &CookieJar<'_>) -> Result<Json<User>, Status> {
-    if !is_logged_in(&jar) {
+    if !is_logged_in(jar) {
         return Err(Status::Unauthorized);
     } else {
         let (username, perms) = get_session(jar);
@@ -305,7 +305,7 @@ async fn upload(
     host: Host<'_>,
     path: Option<String>,
 ) -> Result<Json<Vec<UploadFile>>, Status> {
-    if !is_logged_in(&jar) {
+    if !is_logged_in(jar) {
         return Err(Status::Unauthorized);
     } else {
         let perms = get_session(jar).1;
@@ -423,7 +423,7 @@ async fn download_zip(
     data: Data<'_>,
     jar: &CookieJar<'_>,
 ) -> Result<Option<(ContentType, Vec<u8>)>, Status> {
-    if !is_logged_in(&jar) {
+    if !is_logged_in(jar) {
         return Err(Status::Unauthorized);
     } else {
         let mut options = MultipartFormDataOptions::new();
