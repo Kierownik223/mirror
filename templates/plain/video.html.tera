@@ -25,11 +25,11 @@
         </span>
     </span>
     &nbsp;
-    <a href="?download" download>{{ strings.download }}</a><br>
+    <a href="/file{{ path }}" download>{{ strings.download }}</a><br>
 </div>
 <hr>
 <a href="./">./</a>
-<video src="?download" controls style="height: 60vh; width: 100%;" poster="{{ poster }}">{{ strings.no_video }}</video>
+<video src="/file{{ path }}" controls style="height: 60vh; width: 100%;" poster="{{ poster }}">{{ strings.no_video }}</video>
 {% if displaydetails %}
 <b style="font-size: 24px;">{{ vidtitle }}</b>
 {{ details | safe }}
