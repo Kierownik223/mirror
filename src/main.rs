@@ -387,7 +387,7 @@ async fn download_with_counter(
 
     add_download(db, &file).await;
 
-    let url = format!("/file/{}", file).replace(" ", "%20");
+    let url = format!("/file/{}", urlencoding::encode(&file)).replace("%2F", "/");
 
     return Ok(Redirect::found(url));
 }
