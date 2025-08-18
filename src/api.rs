@@ -6,7 +6,6 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use rocket_db_pools::Connection;
 use ::sysinfo::{Disks, RefreshKind, System};
 use humansize::{format_size, DECIMAL};
 use rocket::{
@@ -16,16 +15,20 @@ use rocket::{
     serde::json::Json,
     Data, Request, State,
 };
+use rocket_db_pools::Connection;
 use rocket_multipart_form_data::{
     MultipartFormData, MultipartFormDataField, MultipartFormDataOptions, Repetition,
 };
 use zip::write::SimpleFileOptions;
 
 use crate::{
-    db::{get_downloads, FileDb}, read_files, utils::{
+    db::{get_downloads, FileDb},
+    read_files,
+    utils::{
         add_path_to_zip, get_extension_from_filename, get_session, is_logged_in, is_restricted,
         read_dirs_async,
-    }, Config, Disk, FileSizes, Host, MirrorFile, Sysinfo
+    },
+    Config, Disk, FileSizes, Host, MirrorFile, Sysinfo,
 };
 
 #[derive(serde::Serialize)]
@@ -95,46 +98,74 @@ async fn file_with_downloads(
 ) -> Result<Json<MirrorFile>, Status> {
     let path = Path::new("files/").join(&file);
     let file = file.display().to_string();
-    
+
     if !&path.exists() {
         return Err(Status::NotFound);
     }
 
-    let md = fs::metadata(&path).map_err(|_| {Status::InternalServerError})?;
+    let md = fs::metadata(&path).map_err(|_| Status::InternalServerError)?;
 
-    let name = path.file_name().unwrap().to_str().unwrap_or_default().to_string();
+    let name = path
+        .file_name()
+        .unwrap()
+        .to_str()
+        .unwrap_or_default()
+        .to_string();
     let downloads = get_downloads(db, &file).await.unwrap_or(0);
     let mut icon = path.extension().unwrap().to_str().unwrap_or("default");
 
-    if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists()
-    {
+    if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
         icon = "default";
     }
 
-    Ok(Json(MirrorFile { name, ext: path.extension().unwrap().to_str().unwrap_or_default().to_string(), icon: icon.to_string(), size: format_size(md.len(), DECIMAL), downloads: Some(downloads) }))
+    Ok(Json(MirrorFile {
+        name,
+        ext: path
+            .extension()
+            .unwrap()
+            .to_str()
+            .unwrap_or_default()
+            .to_string(),
+        icon: icon.to_string(),
+        size: format_size(md.len(), DECIMAL),
+        downloads: Some(downloads),
+    }))
 }
 
 #[get("/<file..>", rank = 1)]
-async fn file(
-    file: PathBuf,
-) -> Result<Json<MirrorFile>, Status> {
+async fn file(file: PathBuf) -> Result<Json<MirrorFile>, Status> {
     let path = Path::new("files/").join(&file);
-    
+
     if !&path.exists() {
         return Err(Status::NotFound);
     }
 
-    let md = fs::metadata(&path).map_err(|_| {Status::InternalServerError})?;
+    let md = fs::metadata(&path).map_err(|_| Status::InternalServerError)?;
 
-    let name = path.file_name().unwrap().to_str().unwrap_or_default().to_string();
+    let name = path
+        .file_name()
+        .unwrap()
+        .to_str()
+        .unwrap_or_default()
+        .to_string();
     let mut icon = path.extension().unwrap().to_str().unwrap_or("default");
 
-    if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists()
-    {
+    if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
         icon = "default";
     }
 
-    Ok(Json(MirrorFile { name, ext: path.extension().unwrap().to_str().unwrap_or_default().to_string(), icon: icon.to_string(), size: format_size(md.len(), DECIMAL), downloads: None }))
+    Ok(Json(MirrorFile {
+        name,
+        ext: path
+            .extension()
+            .unwrap()
+            .to_str()
+            .unwrap_or_default()
+            .to_string(),
+        icon: icon.to_string(),
+        size: format_size(md.len(), DECIMAL),
+        downloads: None,
+    }))
 }
 
 #[delete("/<file..>")]

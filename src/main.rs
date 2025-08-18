@@ -69,7 +69,7 @@ pub struct MirrorFile {
     ext: String,
     icon: String,
     size: String,
-    downloads: Option<i32>
+    downloads: Option<i32>,
 }
 
 impl Eq for MirrorFile {}
@@ -448,7 +448,6 @@ async fn download_with_counter(
     db: Connection<FileDb>,
     file: PathBuf,
     jar: &CookieJar<'_>,
-
 ) -> Result<Redirect, Status> {
     let path = Path::new("files/").join(&file);
     let file = file.display().to_string();
@@ -1256,8 +1255,7 @@ async fn rocket() -> _ {
             .attach(FileDb::init())
             .mount("/", routes![download_with_counter])
     } else {
-        rocket = rocket
-            .mount("/", routes![download])
+        rocket = rocket.mount("/", routes![download])
     }
 
     if config.enable_api {
