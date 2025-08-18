@@ -506,7 +506,7 @@ async fn download(
 }
 
 #[get("/<file..>", rank = 10)]
-async fn index<'a>(
+async fn index(
     file: PathBuf,
     jar: &CookieJar<'_>,
     config: &rocket::State<Config>,
@@ -516,147 +516,123 @@ async fn index<'a>(
     useplain: UsePlain<'_>,
     viewers: UseViewers<'_>,
     sizes: &State<FileSizes>,
-) -> IndexResult
-{
-    let path = Path::new("files/").join(file.clone());
+) -> IndexResult {
+    let path = Path::new("files/").join(&file);
     let strings = translations.get_translation(&lang.0);
 
     let root_domain = get_root_domain(host.0, &config.fallback_root_domain);
-
     let (username, perms) = get_session(jar);
-
     let mut theme = get_theme(jar);
 
     let hires = get_bool_cookie(jar, "hires", false);
     let smallhead = get_bool_cookie(jar, "smallhead", false);
 
-    if !Path::new(&("files/static/styles/".to_owned() + &theme + ".css").to_string()).exists() {
+    if !Path::new(&format!("files/static/styles/{}.css", theme)).exists() {
         theme = "standard".to_string();
     }
 
-    if is_restricted(path.clone(), &jar) {
+    if is_restricted(path.clone(), jar) {
         return Err(Status::Unauthorized);
     }
 
-    let ext_upper = if path.is_file() {
+    let ext = if path.is_file() {
         path.extension().and_then(OsStr::to_str).unwrap_or("")
     } else {
         "folder"
-    };
+    }.to_lowercase();
 
-    let ext = ext_upper.to_lowercase();
+    if !path.exists() {
+        return Err(Status::NotFound);
+    }
 
     match ext.as_str() {
         "md" => {
-            if path.exists() {
-                let markdown_text = fs::read_to_string(path.display().to_string())
-                    .unwrap_or_else(|err| err.to_string());
-                let markdown = markdown::to_html(&markdown_text);
+            let markdown_text = fs::read_to_string(&path).unwrap_or_default();
+            let markdown = markdown::to_html(&markdown_text);
+            Ok(IndexResponse::Template(Template::render(
+                if *useplain.0 { "plain/md" } else { "md" },
+                context! {
+                    title: format!("{} {}", strings.get("reading_markdown").unwrap(), Path::new("/").join(&file).display()),
+                    lang,
+                    strings,
+                    root_domain,
+                    host: host.0,
+                    config: config.inner(),
+                    path: Path::new("/").join(&file).display().to_string(),
+                    theme,
+                    is_logged_in: is_logged_in(jar),
+                    hires,
+                    admin: perms == 0,
+                    smallhead,
+                    markdown
+                },
+            )))
+        }
+        "zip" => {
+            if !*viewers.0 {
+                return if config.standalone {
+                    Ok(IndexResponse::NamedFile(open_namedfile(path).await.unwrap()))
+                } else {
+                    Ok(IndexResponse::HeaderFile(open_file(path, true).unwrap()))
+                };
+            }
+
+            let zip_file = fs::File::open(&path).unwrap();
+            if let Ok(archive) = zip::ZipArchive::new(zip_file) {
+                let file_names: Vec<&str> = archive.file_names().collect();
+                let files = list_to_files(file_names).unwrap_or_default();
+                if files.is_empty() {
+                    return Err(Status::NotFound);
+                }
+
                 Ok(IndexResponse::Template(Template::render(
-                    if *useplain.0 { "plain/md" } else { "md" },
+                    if *useplain.0 { "plain/zip" } else { "zip" },
                     context! {
-                        title: format!("{} {}", strings.get("reading_markdown").unwrap(), Path::new("/").join(file.clone()).display()),
+                        title: format!("{} {}", strings.get("viewing_zip").unwrap(), Path::new("/").join(&file).display()),
                         lang,
                         strings,
                         root_domain,
                         host: host.0,
                         config: config.inner(),
-                        path: Path::new("/").join(file.clone()).display().to_string(),
+                        path: Path::new("/").join(&file).display().to_string(),
+                        files,
                         theme,
-                        is_logged_in: is_logged_in(&jar),
-                        hires,
+                        is_logged_in: is_logged_in(jar),
+                        username,
                         admin: perms == 0,
-                        smallhead,
-                        markdown
+                        hires,
+                        smallhead
                     },
                 )))
             } else {
-                Err(Status::NotFound)
-            }
-        }
-        "zip" => {
-            if path.exists() {
-                if !*viewers.0 {
-                    return if config.standalone {
-                        Ok(IndexResponse::NamedFile(open_namedfile(path).await.unwrap()))
-                    } else {
-                        Ok(IndexResponse::HeaderFile(open_file(path, true).unwrap()))
-                    };
-                }
-
-                let zip_file = fs::File::open(path.display().to_string()).unwrap();
-
-                if let Ok(archive) = zip::ZipArchive::new(zip_file) {
-                    let file_names: Vec<&str> = archive.file_names().collect();
-
-                    let files = list_to_files(file_names).unwrap_or_default();
-
-                    if files.is_empty() {
-                        return Err(Status::NotFound);
-                    }
-
-                    Ok(IndexResponse::Template(Template::render(
-                        if *useplain.0 { "plain/zip" } else { "zip" },
-                        context! {
-                            title: format!("{} {}", strings.get("viewing_zip").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
-                            lang,
-                            strings,
-                            root_domain,
-                            host: host.0,
-                            config: config.inner(),
-                            path: Path::new("/").join(file.clone()).display().to_string(),
-                            files,
-                            theme,
-                            is_logged_in: is_logged_in(&jar),
-                            username,
-                            admin: perms == 0,
-                            hires,
-                            smallhead
-                        },
-                    )))
+                if config.standalone {
+                    Ok(IndexResponse::NamedFile(open_namedfile(path).await.unwrap()))
                 } else {
-                    return if config.standalone {
-                        Ok(IndexResponse::NamedFile(open_namedfile(path).await.unwrap()))
-                    } else {
-                        Ok(IndexResponse::HeaderFile(open_file(path, false).unwrap()))
-                    };
+                    Ok(IndexResponse::HeaderFile(open_file(path, false).unwrap()))
                 }
-            } else {
-                Err(Status::NotFound)
             }
         }
         "folder" => {
-            if is_hidden(path.clone(), &jar) {
+            if is_hidden(path.clone(), jar) {
                 return Err(Status::NotFound);
             }
-            let mut markdown: String = "".to_string();
-            let mut topmarkdown = false;
-            let path = Path::new("/").join(file).display().to_string();
 
-            let mut files = read_files(&path).unwrap_or_default();
-            let mut dirs = read_dirs_async(&path, sizes).await.unwrap_or_default();
+            let mut markdown = String::new();
+            let mut topmarkdown = false;
+            let path_str = Path::new("/").join(&file).display().to_string();
+
+            let mut files = read_files(&path_str).unwrap_or_default();
+            let mut dirs = read_dirs_async(&path_str, sizes).await.unwrap_or_default();
 
             if dirs.is_empty() && files.is_empty() {
                 return Err(Status::NotFound);
             }
 
-            if files.contains(&MirrorFile {
-                name: "top".to_owned(),
-                ext: String::new(),
-                icon: "default".to_string(),
-                size: String::new(),
-                downloads: None,
-            }) {
+            if files.iter().any(|f| f.name == "top") {
                 topmarkdown = true;
             }
 
-            if files.contains(&MirrorFile {
-                name: "RESTRICTED".to_owned(),
-                ext: String::new(),
-                icon: "default".to_string(),
-                size: String::new(),
-                downloads: None,
-            }) {
+            if files.iter().any(|f| f.name == "RESTRICTED") {
                 for dir in dirs.iter_mut() {
                     dir.icon = "lockedfolder".to_string();
                 }
@@ -668,52 +644,31 @@ async fn index<'a>(
             dirs.sort();
             files.sort();
 
-            if files.contains(&MirrorFile {
-                name: format!("README.{}.md", lang.0),
-                ext: "md".to_string(),
-                icon: "default".to_string(),
-                size: String::new(),
-                downloads: None,
-            }) {
-                let markdown_text = fs::read_to_string(
-                    Path::new(&("files".to_string() + &path))
-                        .join(format!("README.{}.md", lang.0))
-                        .display()
-                        .to_string(),
-                )
-                .unwrap_or_else(|err| err.to_string());
-                markdown = markdown::to_html(&markdown_text);
-            } else if files.contains(&MirrorFile {
-                name: "README.md".to_owned(),
-                ext: "md".to_string(),
-                icon: "default".to_string(),
-                size: String::new(),
-                downloads: None,
-            }) {
-                let markdown_text = fs::read_to_string(
-                    Path::new(&("files".to_string() + &path))
-                        .join("README.md")
-                        .display()
-                        .to_string(),
-                )
-                .unwrap_or_else(|err| err.to_string());
-                markdown = markdown::to_html(&markdown_text);
+            if files.iter().any(|f| f.name == format!("README.{}.md", lang.0)) {
+                let md = fs::read_to_string(Path::new(&("files".to_string() + &path_str))
+                    .join(format!("README.{}.md", lang.0)))
+                    .unwrap_or_default();
+                markdown = markdown::to_html(&md);
+            } else if files.iter().any(|f| f.name == "README.md") {
+                let md = fs::read_to_string(Path::new(&("files".to_string() + &path_str)).join("README.md"))
+                    .unwrap_or_default();
+                markdown = markdown::to_html(&md);
             }
 
             Ok(IndexResponse::Template(Template::render(
                 if *useplain.0 { "plain/index" } else { "index" },
                 context! {
-                    title: path.to_string(),
+                    title: path_str.clone(),
                     lang,
                     strings,
                     root_domain,
                     host: host.0,
                     config: config.inner(),
-                    path,
+                    path: path_str,
                     dirs,
                     files,
                     theme,
-                    is_logged_in: is_logged_in(&jar),
+                    is_logged_in: is_logged_in(jar),
                     username,
                     admin: perms == 0,
                     hires,
@@ -725,48 +680,31 @@ async fn index<'a>(
             )))
         }
         _ => {
-            if path.exists() {
-                if config.extensions.contains(&ext) {
-                    if !*viewers.0 {
-                        return if config.standalone {
-                            Ok(IndexResponse::NamedFile(open_namedfile(path).await.unwrap()))
-                        } else {
-                            Ok(IndexResponse::HeaderFile(open_file(path, false).unwrap()))
-                        };
-                    }
-                    Ok(IndexResponse::Template(Template::render(
-                        if *useplain.0 {
-                            "plain/details"
-                        } else {
-                            "details"
-                        },
-                        context! {
-                            title: format!("{} {}", strings.get("file_details").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
-                            lang,
-                            strings,
-                            root_domain,
-                            host: host.0,
-                            config: config.inner(),
-                            path: Path::new("/").join(file.clone()).display().to_string(),
-                            theme,
-                            is_logged_in: is_logged_in(&jar),
-                            username,
-                            admin: perms == 0,
-                            hires,
-                            smallhead,
-                            filename: path.file_name().unwrap().to_str(),
-                            filesize: format_size(fs::metadata(path.clone()).unwrap().len(), DECIMAL)
-                        },
-                    )))
-                } else {
-                    return if config.standalone {
-                        Ok(IndexResponse::NamedFile(open_namedfile(path).await.unwrap()))
-                    } else {
-                        Ok(IndexResponse::HeaderFile(open_file(path, false).unwrap()))
-                    };
-                }
+            if config.extensions.contains(&ext) {
+                Ok(IndexResponse::Template(Template::render(
+                    if *useplain.0 { "plain/details" } else { "details" },
+                    context! {
+                        title: format!("{} {}", strings.get("file_details").unwrap(), Path::new("/").join(&file).display()),
+                        lang,
+                        strings,
+                        root_domain,
+                        host: host.0,
+                        config: config.inner(),
+                        path: Path::new("/").join(&file).display().to_string(),
+                        theme,
+                        is_logged_in: is_logged_in(jar),
+                        username,
+                        admin: perms == 0,
+                        hires,
+                        smallhead,
+                        filename: path.file_name().unwrap().to_str(),
+                        filesize: format_size(fs::metadata(&path).unwrap().len(), DECIMAL)
+                    },
+                )))
+            } else if config.standalone {
+                Ok(IndexResponse::NamedFile(open_namedfile(path).await.unwrap()))
             } else {
-                return Err(Status::NotFound);
+                Ok(IndexResponse::HeaderFile(open_file(path, true).unwrap()))
             }
         }
     }
