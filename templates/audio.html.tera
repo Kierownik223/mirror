@@ -43,10 +43,10 @@
                 {% endfilter %}
             </span>
         </span>
-        <div style="float: right;"><span><a href="?download" download><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">{{ strings.download }}</span></a></div><br>
+        <div style="float: right;"><span><a href="/file{{ path }}" download><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">{{ strings.download }}</span></a></div><br>
         <a href="./"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png">./</a>
     </div>
-    <audio src="?download" controls style="width: 100%;" poster="/poster{{ path }}">{{ strings.no_audio }}</audio>
+    <audio src="/file{{ path }}" controls style="width: 100%;" poster="/poster{{ path }}">{{ strings.no_audio }}</audio>
     {% if artist != "" %}{{ artist }} - {% endif %}<b style="font-size: 24px;">{% if track != 0 %}{{ track }}. {% endif %}{{ audiotitle }}</b>
     <div style="display: flex; align-items: center; justify-content: space-between;">
         <div style="flex: 1;">
