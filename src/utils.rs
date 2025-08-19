@@ -169,20 +169,20 @@ pub fn get_bool_cookie(jar: &CookieJar<'_>, name: &str, default: bool) -> bool {
         .unwrap_or(default)
 }
 
-pub fn get_session<'a>(jar: &CookieJar<'_>) -> (String, i32) {
-    if is_logged_in(jar) {
-        let session = jar
-            .get_private("session")
-            .map(|cookie| cookie.value().to_string())
-            .unwrap_or_else(|| "defaultuser.1".to_string());
+pub fn get_session(jar: &CookieJar<'_>) -> (String, i32) {
+    if let Some(cookie) = jar.get_private("session") {
+        let session = cookie.value();
 
-        let user_name: Vec<&str> = session.split(".").collect();
-        let username = user_name[0].to_string();
-        let perms = str::parse::<i32>(user_name[1]).unwrap();
+        let mut parts = session.splitn(2, '.');
+        let username = parts.next().unwrap_or("defaultuser").to_owned();
+        let perms = parts
+            .next()
+            .and_then(|p| p.parse::<i32>().ok())
+            .unwrap_or(1);
 
         (username, perms)
     } else {
-        ("Nobody".to_string(), 1)
+        ("Nobody".into(), 1)
     }
 }
 
