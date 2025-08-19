@@ -35,8 +35,8 @@ mod account;
 mod admin;
 mod api;
 mod db;
-mod utils;
 mod i18n;
+mod utils;
 
 #[derive(Debug, Deserialize, Clone, Serialize)]
 struct Config {
@@ -491,7 +491,7 @@ async fn index(
                 return open_file(path, false).await;
             }
 
-            let zip_file = fs::File::open(&path).map_err(|_| {Status::BadRequest})?;
+            let zip_file = fs::File::open(&path).map_err(|_| Status::BadRequest)?;
             if let Ok(archive) = zip::ZipArchive::new(zip_file) {
                 let file_names: Vec<&str> = archive.file_names().collect();
                 let files = list_to_files(file_names).unwrap_or_default();
@@ -645,7 +645,9 @@ async fn index(
             let path_str = Path::new("/").join(&file).display().to_string();
 
             let mut files = read_files(&path_str).map_err(map_io_error_to_status)?;
-            let mut dirs = read_dirs_async(&path_str, sizes).await.map_err(map_io_error_to_status)?;
+            let mut dirs = read_dirs_async(&path_str, sizes)
+                .await
+                .map_err(map_io_error_to_status)?;
 
             if files.iter().any(|f| f.name == "top") {
                 topmarkdown = true;

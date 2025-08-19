@@ -135,11 +135,7 @@ pub fn read_files(path: &str) -> Result<Vec<MirrorFile>, Error> {
 
                 let mut icon = ext.as_str();
 
-                if !Path::new(
-                    &format!("files/static/images/icons/{}.png", &icon),
-                )
-                .exists()
-                {
+                if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
                     icon = "default";
                 }
                 let file: MirrorFile = MirrorFile {
@@ -265,11 +261,7 @@ pub fn list_to_files(files: Vec<&str>) -> Result<Vec<MirrorFile>, Error> {
         }
 
         let mut icon = ext.as_str();
-        if !Path::new(
-            &format!("files/static/images/icons/{}.png", &icon),
-        )
-        .exists()
-        {
+        if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
             icon = "default";
         }
 

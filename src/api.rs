@@ -25,7 +25,8 @@ use crate::{
     db::{get_downloads, FileDb},
     read_files,
     utils::{
-        add_path_to_zip, get_extension_from_filename, get_session, is_logged_in, is_restricted, map_io_error_to_status, read_dirs_async
+        add_path_to_zip, get_extension_from_filename, get_session, is_logged_in, is_restricted,
+        map_io_error_to_status, read_dirs_async,
     },
     Config, Disk, FileSizes, Host, MirrorFile, Sysinfo,
 };
@@ -356,8 +357,10 @@ async fn upload(
 
                     let upload_path = format!("files/{}/{}", user_path, file_name);
 
-                    let mut file = std::fs::File::create(&upload_path).map_err(map_io_error_to_status)?;
-                    let mut temp_file = std::fs::File::open(&file_field.path).map_err(map_io_error_to_status)?;
+                    let mut file =
+                        std::fs::File::create(&upload_path).map_err(map_io_error_to_status)?;
+                    let mut temp_file =
+                        std::fs::File::open(&file_field.path).map_err(map_io_error_to_status)?;
 
                     let mut buffer = Vec::new();
                     let _ = temp_file.read_to_end(&mut buffer);
@@ -368,20 +371,13 @@ async fn upload(
                         .unwrap_or_else(|| "")
                         .to_lowercase();
                     let mut icon = ext.as_str();
-                    if !Path::new(
-                        &format!("files/static/images/icons/{}.png", &icon),
-                    )
-                    .exists()
-                    {
+                    if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
                         icon = "default";
                     }
 
                     uploaded_files.push(UploadFile {
                         name: file_name.to_string(),
-                        url: Some(format!(
-                            "http://{}/{}/{}",
-                            host.0, user_path, file_name
-                        )),
+                        url: Some(format!("http://{}/{}/{}", host.0, user_path, file_name)),
                         icon: Some(icon.to_string()),
                         error: None,
                     });
