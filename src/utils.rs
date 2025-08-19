@@ -189,14 +189,14 @@ pub fn get_session<'a>(jar: &CookieJar<'_>) -> (String, i32) {
 pub fn get_theme<'a>(jar: &CookieJar<'_>) -> String {
     let mut theme = jar
         .get("theme")
-        .map(|cookie| cookie.value().to_string())
-        .unwrap_or("standard".to_string());
+        .map(|cookie| cookie.value())
+        .unwrap_or("standard");
 
-    if !Path::new(&("files/static/styles/".to_owned() + &theme + ".css").to_string()).exists() {
-        theme = "standard".to_string();
+    if !Path::new(&format!("files/static/styles/{}.css", &theme)).exists() {
+        theme = "standard";
     }
 
-    theme
+    theme.to_string()
 }
 
 pub fn is_logged_in(jar: &CookieJar<'_>) -> bool {
