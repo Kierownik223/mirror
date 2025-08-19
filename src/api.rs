@@ -358,30 +358,31 @@ async fn upload(
 
                     let mut file = std::fs::File::create(&upload_path).map_err(map_io_error_to_status)?;
                     let mut temp_file = std::fs::File::open(&file_field.path).map_err(map_io_error_to_status)?;
-                    
+
                     let mut buffer = Vec::new();
                     let _ = temp_file.read_to_end(&mut buffer);
 
                     let _ = file.write_all(&buffer);
-                    let mut icon = get_extension_from_filename(file_name)
-                        .unwrap_or("")
-                        .to_string()
+
+                    let ext = get_extension_from_filename(file_name)
+                        .unwrap_or_else(|| "")
                         .to_lowercase();
+                    let mut icon = ext.as_str();
                     if !Path::new(
-                        &("files/static/images/icons/".to_owned() + &icon + ".png")
-                            .to_string(),
+                        &format!("files/static/images/icons/{}.png", &icon),
                     )
                     .exists()
                     {
-                        icon = "default".to_string();
+                        icon = "default";
                     }
+
                     uploaded_files.push(UploadFile {
                         name: file_name.to_string(),
                         url: Some(format!(
                             "http://{}/{}/{}",
                             host.0, user_path, file_name
                         )),
-                        icon: Some(icon),
+                        icon: Some(icon.to_string()),
                         error: None,
                     });
                 } else {
