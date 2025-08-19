@@ -1,7 +1,7 @@
 use std::{
     ffi::OsStr,
     fs,
-    io::{Cursor, Error},
+    io::{Cursor, Error, ErrorKind},
     path::{Path, PathBuf},
     sync::Arc,
 };
@@ -334,4 +334,13 @@ pub fn add_path_to_zip(
         }
     }
     Ok(())
+}
+
+pub fn map_io_error_to_status(e: Error) -> Status {
+    match e.kind() {
+        ErrorKind::NotFound => Status::NotFound,
+        ErrorKind::PermissionDenied => Status::Forbidden,
+        ErrorKind::StorageFull => Status::InsufficientStorage,
+        _ => Status::InternalServerError,
+    }
 }

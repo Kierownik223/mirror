@@ -29,7 +29,7 @@ use rocket_dyn_templates::{context, Template};
 
 use crate::db::{add_download, FileDb};
 use crate::i18n::TranslationStore;
-use crate::utils::{get_root_domain, is_hidden, read_dirs_async};
+use crate::utils::{get_root_domain, is_hidden, map_io_error_to_status, read_dirs_async};
 
 mod account;
 mod admin;
@@ -644,12 +644,8 @@ async fn index(
             let mut topmarkdown = false;
             let path_str = Path::new("/").join(&file).display().to_string();
 
-            let mut files = read_files(&path_str).unwrap_or_default();
-            let mut dirs = read_dirs_async(&path_str, sizes).await.unwrap_or_default();
-
-            if dirs.is_empty() && files.is_empty() {
-                return Err(Status::NotFound);
-            }
+            let mut files = read_files(&path_str).map_err(map_io_error_to_status)?;
+            let mut dirs = read_dirs_async(&path_str, sizes).await.map_err(map_io_error_to_status)?;
 
             if files.iter().any(|f| f.name == "top") {
                 topmarkdown = true;
@@ -956,12 +952,7 @@ async fn iframe(
 
     let path = Path::new("/").join(file).display().to_string();
 
-    let mut dirs = read_dirs(&path).unwrap_or_default();
-    let file_list = read_files(&path).unwrap_or_default();
-
-    if dirs.is_empty() && file_list.is_empty() {
-        return Err(Status::NotFound);
-    }
+    let mut dirs = read_dirs(&path).map_err(map_io_error_to_status)?;
 
     dirs.retain(|x| !config.hidden_files.contains(&x.name));
 
