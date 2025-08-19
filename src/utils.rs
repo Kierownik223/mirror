@@ -26,7 +26,7 @@ struct FolderSize {
 pub fn read_dirs(path: &str) -> Result<Vec<MirrorFile>, Error> {
     let mut dir_list = Vec::new();
 
-    let paths = match fs::read_dir("files".to_owned() + &path) {
+    let paths = match fs::read_dir(format!("files{}", &path)) {
         Ok(paths) => paths,
         Err(e) => return Err(e),
     };
@@ -116,9 +116,9 @@ pub async fn read_dirs_async(
 }
 
 pub fn read_files(path: &str) -> Result<Vec<MirrorFile>, Error> {
-    let mut dir_list = Vec::new();
+    let mut file_list = Vec::new();
 
-    let paths = match fs::read_dir("files".to_owned() + &path) {
+    let paths = match fs::read_dir(format!("files{}", &path)) {
         Ok(paths) => paths,
         Err(e) => return Err(e),
     };
@@ -151,12 +151,12 @@ pub fn read_files(path: &str) -> Result<Vec<MirrorFile>, Error> {
                     downloads: None,
                 };
 
-                dir_list.push(file);
+                file_list.push(file);
             }
         }
     }
 
-    Ok(dir_list)
+    Ok(file_list)
 }
 
 pub fn get_extension_from_filename(filename: &str) -> Option<&str> {
@@ -177,9 +177,7 @@ pub fn get_session<'a>(jar: &CookieJar<'_>) -> (String, i32) {
             .unwrap_or_else(|| "defaultuser.1".to_string());
 
         let user_name: Vec<&str> = session.split(".").collect();
-
         let username = user_name[0].to_string();
-
         let perms = str::parse::<i32>(user_name[1]).unwrap();
 
         (username, perms)
@@ -201,12 +199,8 @@ pub fn get_theme<'a>(jar: &CookieJar<'_>) -> String {
     theme
 }
 
-pub fn k<T: 'static + Copy, U>(val: T) -> Box<dyn Fn(U) -> T> {
-    Box::new(move |_| val)
-}
-
-pub fn is_logged_in<'r>(jar: &CookieJar<'_>) -> bool {
-    jar.get_private("session").map(k(true)).unwrap_or(false)
+pub fn is_logged_in(jar: &CookieJar<'_>) -> bool {
+    jar.get_private("session").is_some()
 }
 
 pub fn is_restricted(path: &Path, jar: &CookieJar<'_>) -> bool {
@@ -271,19 +265,19 @@ pub fn list_to_files(files: Vec<&str>) -> Result<Vec<MirrorFile>, Error> {
             ext = "Folder".to_string();
         }
 
-        let mut icon = &ext.as_str();
+        let mut icon = ext.as_str();
         if !Path::new(
-            &("files/static/images/icons/".to_owned() + &icon.to_lowercase() + ".png").to_string(),
+            &format!("files/static/images/icons/{}.png", &icon),
         )
         .exists()
         {
-            icon = &"default";
+            icon = "default";
         }
 
         let file: MirrorFile = MirrorFile {
             name: file.to_string(),
             ext: ext.to_string(),
-            icon: icon.to_lowercase(),
+            icon: icon.to_string(),
             size: "---".to_string(),
             downloads: None,
         };
