@@ -129,24 +129,23 @@ pub fn read_files(path: &str) -> Result<Vec<MirrorFile>, Error> {
 
         if md.is_file() {
             if let Some(file_name) = file_path.file_name().to_str() {
-                let mut icon = get_extension_from_filename(file_name)
+                let ext = get_extension_from_filename(file_name)
                     .unwrap_or_else(|| "")
-                    .to_string()
                     .to_lowercase();
+
+                let mut icon = ext.as_str();
+
                 if !Path::new(
-                    &("files/static/images/icons/".to_owned() + &icon + ".png").to_string(),
+                    &format!("files/static/images/icons/{}.png", &icon),
                 )
                 .exists()
                 {
-                    icon = "default".to_string();
+                    icon = "default";
                 }
                 let file: MirrorFile = MirrorFile {
                     name: file_name.to_owned(),
-                    ext: get_extension_from_filename(file_name)
-                        .unwrap_or_else(|| "")
-                        .to_string()
-                        .to_lowercase(),
-                    icon: icon,
+                    ext: ext.to_string(),
+                    icon: icon.to_string(),
                     size: format_size(md.len(), DECIMAL),
                     downloads: None,
                 };
