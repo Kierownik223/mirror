@@ -287,6 +287,7 @@ enum IndexResponse {
     Template(Template),
     HeaderFile(HeaderFile),
     NamedFile(NamedFile),
+    Redirect(Redirect),
 }
 
 type IndexResult = Result<IndexResponse, Status>;
@@ -298,6 +299,7 @@ impl<'r> Responder<'r, 'r> for IndexResponse {
             IndexResponse::Template(t) => t.respond_to(req),
             IndexResponse::HeaderFile(h) => h.respond_to(req),
             IndexResponse::NamedFile(f) => f.respond_to(req),
+            IndexResponse::Redirect(r) => r.respond_to(req),
         }
     }
 }
@@ -373,7 +375,8 @@ async fn download_with_counter(
     db: Connection<FileDb>,
     file: PathBuf,
     jar: &CookieJar<'_>,
-) -> Result<Redirect, Status> {
+    config: &rocket::State<Config>,
+) -> Result<IndexResponse, Status> {
     let path = Path::new("files/").join(&file);
     let file = file.display().to_string();
 
@@ -385,11 +388,24 @@ async fn download_with_counter(
         return Err(Status::Unauthorized);
     }
 
+    let ext = if path.is_file() {
+        path.extension().and_then(OsStr::to_str).unwrap_or("")
+    } else {
+        "folder"
+    }
+    .to_lowercase();
+
+    if config.extensions.contains(&ext) {
+        return open_file(path, true).await;
+    } else if &ext == "folder" {
+        return Err(Status::Forbidden);
+    }
+
     add_download(db, &file).await;
 
     let url = format!("/file/{}", urlencoding::encode(&file)).replace("%2F", "/");
 
-    return Ok(Redirect::found(url));
+    return Ok(IndexResponse::Redirect(Redirect::found(url)));
 }
 
 #[get("/<file..>?download")]
