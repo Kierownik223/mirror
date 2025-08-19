@@ -25,8 +25,7 @@ use crate::{
     db::{get_downloads, FileDb},
     read_files,
     utils::{
-        add_path_to_zip, get_extension_from_filename, get_session, is_logged_in, is_restricted,
-        read_dirs_async,
+        add_path_to_zip, get_extension_from_filename, get_session, is_logged_in, is_restricted, map_io_error_to_status, read_dirs_async
     },
     Config, Disk, FileSizes, Host, MirrorFile, Sysinfo,
 };
@@ -357,53 +356,34 @@ async fn upload(
 
                     let upload_path = format!("files/{}/{}", user_path, file_name);
 
-                    match std::fs::File::create(&upload_path) {
-                        Ok(mut file) => {
-                            if let Ok(mut temp_file) = std::fs::File::open(&file_field.path) {
-                                let mut buffer = Vec::new();
-                                let _ = temp_file.read_to_end(&mut buffer);
+                    let mut file = std::fs::File::create(&upload_path).map_err(map_io_error_to_status)?;
+                    let mut temp_file = std::fs::File::open(&file_field.path).map_err(map_io_error_to_status)?;
+                    
+                    let mut buffer = Vec::new();
+                    let _ = temp_file.read_to_end(&mut buffer);
 
-                                let _ = file.write_all(&buffer);
-                                let mut icon = get_extension_from_filename(file_name)
-                                    .unwrap_or("")
-                                    .to_string()
-                                    .to_lowercase();
-                                if !Path::new(
-                                    &("files/static/images/icons/".to_owned() + &icon + ".png")
-                                        .to_string(),
-                                )
-                                .exists()
-                                {
-                                    icon = "default".to_string();
-                                }
-                                uploaded_files.push(UploadFile {
-                                    name: file_name.to_string(),
-                                    url: Some(format!(
-                                        "http://{}/{}/{}",
-                                        host.0, user_path, file_name
-                                    )),
-                                    icon: Some(icon),
-                                    error: None,
-                                });
-                            } else {
-                                eprintln!("Failed to open temp file for: {}", file_name);
-                                return Err(Status::InternalServerError);
-                            }
-                        }
-                        Err(err) => {
-                            uploaded_files.push(UploadFile {
-                                name: file_name.to_string(),
-                                url: None,
-                                icon: None,
-                                error: Some(format!(
-                                    "Failed to create target file {}: {:?}",
-                                    upload_path, err
-                                )),
-                            });
-                            eprintln!("Failed to create target file {}: {:?}", upload_path, err);
-                            continue;
-                        }
+                    let _ = file.write_all(&buffer);
+                    let mut icon = get_extension_from_filename(file_name)
+                        .unwrap_or("")
+                        .to_string()
+                        .to_lowercase();
+                    if !Path::new(
+                        &("files/static/images/icons/".to_owned() + &icon + ".png")
+                            .to_string(),
+                    )
+                    .exists()
+                    {
+                        icon = "default".to_string();
                     }
+                    uploaded_files.push(UploadFile {
+                        name: file_name.to_string(),
+                        url: Some(format!(
+                            "http://{}/{}/{}",
+                            host.0, user_path, file_name
+                        )),
+                        icon: Some(icon),
+                        error: None,
+                    });
                 } else {
                     eprintln!("A file was uploaded without a name, skipping.");
                     continue;
