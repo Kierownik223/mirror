@@ -395,7 +395,7 @@ async fn download_with_counter(
     }
     .to_lowercase();
 
-    if config.extensions.contains(&ext) {
+    if !config.extensions.contains(&ext) {
         return open_file(path, true).await;
     } else if &ext == "folder" {
         return Err(Status::Forbidden);
