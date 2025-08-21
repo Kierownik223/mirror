@@ -116,7 +116,7 @@ async fn login(
             redirect_url = next.unwrap_or("/admin");
         }
 
-        return Ok(Redirect::to(redirect_url.replace(" ", "%20")));
+        return Ok(Redirect::to(urlencoding::encode(redirect_url).replace("%2F", "/")));
     } else {
         let strings = translations.get_translation(&lang.0);
 
