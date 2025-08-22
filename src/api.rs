@@ -60,6 +60,11 @@ pub struct UploadFile {
 #[derive(serde::Deserialize)]
 struct FileList(Vec<String>);
 
+#[derive(serde::Deserialize)]
+struct RenameRequest {
+    name: String,
+}
+
 #[get("/listing/<file..>")]
 async fn listing(
     file: PathBuf,
@@ -166,6 +171,60 @@ async fn file(file: PathBuf) -> Result<Json<MirrorFile>, Status> {
         size: format_size(md.len(), DECIMAL),
         downloads: None,
     }))
+}
+
+#[patch("/<file..>", data = "<rename_req>")]
+async fn rename(file: PathBuf, jar: &CookieJar<'_>, rename_req: Json<RenameRequest>) -> Result<Json<MirrorFile>, Status> {
+    if !is_logged_in(jar) {
+        return Err(Status::Unauthorized);
+    } else {
+        let perms = get_session(jar).1;
+
+        if perms != 0 {
+            return Err(Status::Forbidden);
+        }
+        let path = Path::new("files/").join(&file);
+
+        if !path.exists() {
+            return Err(Status::NotFound);
+        }
+
+        let parent = path.parent().ok_or(Status::InternalServerError)?;
+        let new_path = parent.join(&rename_req.name);
+
+        fs::rename(&path, &new_path).map_err(map_io_error_to_status)?;
+
+        let md = fs::metadata(&new_path).map_err(map_io_error_to_status)?;
+        let name = new_path
+            .file_name()
+            .unwrap()
+            .to_str()
+            .unwrap_or_default()
+            .to_string();
+
+        let mut icon = new_path
+            .extension()
+            .unwrap_or_default()
+            .to_str()
+            .unwrap_or("default");
+
+        if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
+            icon = "default";
+        }
+
+        Ok(Json(MirrorFile {
+            name,
+            ext: new_path
+                .extension()
+                .unwrap_or_default()
+                .to_str()
+                .unwrap_or_default()
+                .to_string(),
+            icon: icon.to_string(),
+            size: format_size(md.len(), DECIMAL),
+            downloads: None,
+        }))
+    }
 }
 
 #[delete("/<file..>")]
@@ -462,7 +521,7 @@ pub fn build_api() -> AdHoc {
         rocket = rocket
             .mount(
                 "/api",
-                routes![index, listing, sysinfo, user, upload, delete, download_zip],
+                routes![index, listing, sysinfo, user, upload, delete, download_zip, rename],
             )
             .register("/api", catchers![default]);
 
