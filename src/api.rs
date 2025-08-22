@@ -74,12 +74,8 @@ async fn listing(
 ) -> Result<Json<Vec<MirrorFile>>, Status> {
     let path = Path::new("/").join(&file).display().to_string();
 
-    let mut file_list = read_files(&path).unwrap_or_default();
-    let mut dir_list = read_dirs_async(&path, sizes).await.unwrap_or_default();
-
-    if dir_list.is_empty() && file_list.is_empty() {
-        return Err(Status::NotFound);
-    }
+    let mut file_list = read_files(&path).map_err(map_io_error_to_status)?;
+    let mut dir_list = read_dirs_async(&path, sizes).await.map_err(map_io_error_to_status)?;
 
     if is_restricted(&Path::new("files/").join(&file), jar) {
         return Err(Status::Forbidden);
