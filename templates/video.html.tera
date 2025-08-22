@@ -8,7 +8,7 @@
     <link rel="icon" href="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">
     <meta property="og:title" content="{{ vidtitle }}">
     <meta property="og:url" content="{{ host }}/">
-    <meta property="og:description" content="{{ details }}">
+    <meta property="og:description" content="{{ details | striptags }}">
     <meta property="og:type" content=website>
     <meta property="og:image" content="{{ poster }}">
     <meta property="og:locale" content="{{ lang }}">

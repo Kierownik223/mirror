@@ -10,7 +10,7 @@
     <meta property="og:url" content="{{ host }}/">
     <meta property="og:description" content="{{ title }}">
     <meta property="og:type" content=website>
-    <meta property="og:image" content="http://{{ host }}{{ path }}?poster">
+    <meta property="og:image" content="http://{{ host }}/poster{{ path }}">
     <meta property="og:locale" content="{{ lang }}">
     <meta property="og:site_name" content="MARMAK Mirror">
     <meta property="og:audio" content="http://{{ host }}{{ path }}?download"/>
