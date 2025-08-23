@@ -435,10 +435,13 @@ async fn index(
     sizes: &State<FileSizes>,
 ) -> IndexResult {
     let (username, perms) = get_session(jar);
+    let mut is_private = false;
     let path = if let Ok(rest) = file.strip_prefix("private") {
         if username == "Nobody" {
             return Err(Status::Forbidden);
         }
+
+        is_private = true;
 
         Path::new("files/").join("private").join(&username).join(rest)
     } else {
@@ -819,7 +822,7 @@ async fn index(
                     },
                 )))
             } else {
-                open_file(path, true).await
+                open_file(path, !is_private).await
             }
         }
     }
