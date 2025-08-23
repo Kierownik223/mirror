@@ -361,13 +361,28 @@ async fn poster(
 
 #[get("/file/<file..>")]
 async fn file(file: PathBuf, jar: &CookieJar<'_>) -> Result<Result<IndexResponse, Status>, Status> {
-    let path = Path::new("files/").join(file);
+    let username = get_session(jar).0;
+    let mut is_private = false;
+    let path = if let Ok(rest) = file.strip_prefix("private") {
+        if username == "Nobody" {
+            return Err(Status::Forbidden);
+        }
+
+        is_private = true;
+
+        Path::new("files/")
+            .join("private")
+            .join(&username)
+            .join(rest)
+    } else {
+        Path::new("files/").join(&file)
+    };
 
     if is_restricted(&path, jar) {
         return Err(Status::Unauthorized);
     }
 
-    Ok(open_file(path, true).await)
+    Ok(open_file(path, !is_private).await)
 }
 
 #[get("/<file..>?download")]
