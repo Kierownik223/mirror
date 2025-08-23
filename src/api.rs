@@ -375,11 +375,7 @@ async fn upload(
     if !is_logged_in(jar) {
         return Err(Status::Unauthorized);
     } else {
-        let perms = get_session(jar).1;
-
-        if perms != 0 {
-            return Err(Status::Forbidden);
-        }
+        let (username, perms) = get_session(jar);
 
         let options = MultipartFormDataOptions::with_multipart_form_data_fields(vec![
             MultipartFormDataField::file("files")
@@ -410,6 +406,21 @@ async fn upload(
             user_path = query_path.trim_matches('/').to_string();
         }
 
+        let is_private = user_path.starts_with("private");
+        if !is_private && perms != 0 {
+            return Err(Status::Forbidden);
+        }
+
+        print!("is_private: {}", is_private);
+
+        let base_path = if is_private {
+            format!("files/private/{}/{}", username, user_path.trim_start_matches("private"))
+        } else {
+            format!("files/{}", user_path)
+        };
+
+        print!("base_path: {}", base_path);
+
         let mut uploaded_files: Vec<UploadFile> = Vec::new();
 
         if let Some(file_fields) = form_data.files.get("files") {
@@ -422,7 +433,7 @@ async fn upload(
                         .unwrap()
                         .to_string();
 
-                    let upload_path = format!("files/{}/{}", user_path, file_name);
+                    let upload_path = format!("{}/{}", base_path, file_name);
 
                     let mut file =
                         std::fs::File::create(&upload_path).map_err(map_io_error_to_status)?;
