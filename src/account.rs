@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs};
+use std::{collections::HashMap, fs, path::Path};
 
 use base64::{prelude::BASE64_STANDARD, Engine};
 use rand::thread_rng;
@@ -109,6 +109,10 @@ async fn login(
             "Login for user {} from {} succeeded",
             &db_user.username, &ip.0
         );
+
+        if !Path::new(&format!("files/private/{}", &db_user.username)).exists() {
+            let _ = fs::create_dir(format!("files/private/{}", &db_user.username));
+        }
 
         let mut redirect_url = next.unwrap_or("/");
 
