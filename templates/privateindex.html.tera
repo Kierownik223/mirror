@@ -1,6 +1,7 @@
 {% extends "base" %}
 
 {% block content %}
+<div id="uploadResults"></div>
 <div class="breadcrumb">
     <span><a href="/">MARMAK Mirror</a>/</span><span class="seg"> </span>
     {% if path != "/" %}
@@ -268,6 +269,189 @@
                 if (onComplete) onComplete();
             }
         }
+
+        function uploadViaAPI(files, path) {
+            if (!files || !files.length) {
+                alert("{{ strings.select_files }}");
+                return;
+            }
+
+            var resultsDiv = document.getElementById('uploadResults');
+
+            for (var i = 0; i < files.length; i++) {
+                (function(file) {
+                    var container = document.createElement("div");
+
+                    var label = document.createElement("div");
+                    label.textContent = "{{ strings.uploading }} " + file.name;
+                    container.appendChild(label);
+
+                    var progressBar = document.createElement("progress");
+                    progressBar.max = 100;
+                    progressBar.value = 0;
+                    progressBar.style.width = "100%";
+                    container.appendChild(progressBar);
+
+                    var info = document.createElement("div");
+                    info.style.fontSize = "small";
+                    info.textContent = "0% - 0 B / " + formatBytes(file.size) + " @ 0 KB/s";
+                    container.appendChild(info);
+
+                    resultsDiv.appendChild(container);
+
+                    var formData = new FormData();
+                    formData.append("files", file);
+                    formData.append("path", path || "/private/");
+
+                    var xhr = new XMLHttpRequest();
+                    xhr.open("POST", "/api/upload", true);
+
+                    var startTime = new Date().getTime();
+
+                    xhr.upload.onprogress = function(e) {
+                        if (e.lengthComputable) {
+                            var percent = (e.loaded / e.total) * 100;
+                            var elapsed = (new Date().getTime() - startTime) / 1000;
+                            var speed = e.loaded / elapsed;
+
+                            progressBar.value = percent;
+
+                            info.textContent =
+                                percent.toFixed(1) + "% - " + formatBytes(e.loaded) + " / " + formatBytes(e.total) +
+                                " @ " + formatBytes(speed) + "/s";
+                        }
+                    };
+
+                    xhr.onload = function() {
+                        progressBar.style.display = "none";
+                        container.style.display = "none";
+
+                        if (xhr.status === 200) {
+                            try {
+                                var response = JSON.parse(xhr.responseText);
+                                var result = response[0];
+
+                                if (!result || result.url == null) {
+                                    alert("{{ strings.upload_error }} " + (result && result.error ? result.error : ""));
+                                    return;
+                                }
+
+                                info.remove();
+
+                                var tableBody = document.querySelector("table tbody");
+                                if (tableBody) {
+                                    var row = document.createElement("tr");
+
+                                    var tdCheck = document.createElement("td");
+                                    var cb = document.createElement("input");
+                                    cb.type = "checkbox";
+                                    cb.className = "delete-checkbox";
+                                    cb.value = result.name;
+                                    tdCheck.appendChild(cb);
+                                    row.appendChild(tdCheck);
+
+                                    var tdName = document.createElement("td");
+                                    var a = document.createElement("a");
+                                    a.href = result.url;
+                                    a.innerHTML = '<img src="/static/images/icons/{% if hires %}hires/{% endif %}' + result.icon + '.png" class="icon">' + result.name;
+                                    tdName.appendChild(a);
+                                    row.appendChild(tdName);
+
+                                    var tdSize = document.createElement("td");
+                                    tdSize.textContent = result.size || "—";
+                                    row.appendChild(tdSize);
+
+                                    var tdType = document.createElement("td");
+                                    tdType.textContent = "{{ strings.file }}";
+                                    row.appendChild(tdType);
+
+                                    var tdDelete = document.createElement("td");
+                                    var delLink = document.createElement("a");
+                                    delLink.style.cursor = "pointer";
+                                    delLink.textContent = "{{ strings.delete }}";
+                                    delLink.onclick = function() {
+                                        deleteFile(this, result.name, true);
+                                    };
+                                    tdDelete.appendChild(delLink);
+                                    row.appendChild(tdDelete);
+
+                                    tableBody.appendChild(row);
+                                }
+                            } catch (e) {
+                                alert(file.name + " {{ strings.upload_parse_error }}");
+                            }
+                        } else {
+                            alert(file.name + " {{ strings.upload_failed_status }} " + xhr.status);
+                        }
+                    };
+
+                    xhr.onerror = function() {
+                        progressBar.style.display = "none";
+                        info.style.display = "none";
+                        alert(file.name + " {{ strings.upload_failed_network }}");
+                    };
+
+                    try {
+                        xhr.send(formData);
+                    } catch (e) {
+                        label.textContent = file.name + " {{ strings.upload_error }}";
+                    }
+                })(files[i]);
+            }
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return "0 B";
+            var k = 1024;
+            var sizes = ["B", "KB", "MB", "GB", "TB"];
+            var i = Math.floor(Math.log(bytes) / Math.log(k));
+            return (bytes / Math.pow(k, i)).toFixed(1) + " " + sizes[i];
+        }
+
+        (function() {
+            var dropTarget = document.body;
+
+            function preventDefaults(e) {
+                if (e.preventDefault) e.preventDefault();
+                if (e.stopPropagation) e.stopPropagation();
+                return false;
+            }
+
+            function highlight() {
+                dropTarget.style.backgroundColor = "#000";
+                dropTarget.style.border = "5px dashed #202020";
+            }
+
+            function unhighlight() {
+                dropTarget.style.backgroundColor = "";
+                dropTarget.style.border = "";
+            }
+
+            dropTarget.addEventListener('dragenter', function(e) {
+                preventDefaults(e);
+                highlight();
+            }, false);
+
+            dropTarget.addEventListener('dragover', function(e) {
+                preventDefaults(e);
+                highlight();
+            }, false);
+
+            dropTarget.addEventListener('dragleave', function(e) {
+                preventDefaults(e);
+                unhighlight();
+            }, false);
+
+            dropTarget.addEventListener('drop', function(e) {
+                preventDefaults(e);
+                unhighlight();
+
+                var dt = e.dataTransfer;
+                if (dt && dt.files && dt.files.length) {
+                    uploadViaAPI(dt.files);
+                }
+            }, false);
+        })();
     </script>
 {% endif %}
 {% endblock scripts %}
