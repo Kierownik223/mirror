@@ -75,7 +75,9 @@ async fn listing(
     let path = Path::new("/").join(&file).display().to_string();
 
     let mut file_list = read_files(&path).map_err(map_io_error_to_status)?;
-    let mut dir_list = read_dirs_async(&path, sizes).await.map_err(map_io_error_to_status)?;
+    let mut dir_list = read_dirs_async(&path, sizes)
+        .await
+        .map_err(map_io_error_to_status)?;
 
     if is_restricted(&Path::new("files/").join(&file), jar) {
         return Err(Status::Forbidden);
@@ -170,7 +172,11 @@ async fn file(file: PathBuf) -> Result<Json<MirrorFile>, Status> {
 }
 
 #[patch("/<file..>", data = "<rename_req>")]
-async fn rename(file: PathBuf, jar: &CookieJar<'_>, rename_req: Json<RenameRequest>) -> Result<Json<MirrorFile>, Status> {
+async fn rename(
+    file: PathBuf,
+    jar: &CookieJar<'_>,
+    rename_req: Json<RenameRequest>,
+) -> Result<Json<MirrorFile>, Status> {
     if !is_logged_in(jar) {
         return Err(Status::Unauthorized);
     } else {
@@ -235,7 +241,10 @@ async fn delete<'a>(file: PathBuf, jar: &CookieJar<'_>) -> Result<Status, (Statu
                 return Ok(Status::Unauthorized);
             }
 
-            Path::new("files/").join("private").join(&username).join(rest)
+            Path::new("files/")
+                .join("private")
+                .join(&username)
+                .join(rest)
         } else {
             if perms != 0 {
                 return Ok(Status::Forbidden);
@@ -411,7 +420,11 @@ async fn upload(
         print!("is_private: {}", is_private);
 
         let base_path = if is_private {
-            format!("files/private/{}/{}", username, user_path.trim_start_matches("private"))
+            format!(
+                "files/private/{}/{}",
+                username,
+                user_path.trim_start_matches("private")
+            )
         } else {
             format!("files/{}", user_path)
         };
@@ -537,7 +550,16 @@ pub fn build_api() -> AdHoc {
         rocket = rocket
             .mount(
                 "/api",
-                routes![index, listing, sysinfo, user, upload, delete, download_zip, rename],
+                routes![
+                    index,
+                    listing,
+                    sysinfo,
+                    user,
+                    upload,
+                    delete,
+                    download_zip,
+                    rename
+                ],
             )
             .register("/api", catchers![default]);
 

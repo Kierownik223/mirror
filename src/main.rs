@@ -443,7 +443,10 @@ async fn index(
 
         is_private = true;
 
-        Path::new("files/").join("private").join(&username).join(rest)
+        Path::new("files/")
+            .join("private")
+            .join(&username)
+            .join(rest)
     } else {
         Path::new("files/").join(&file)
     };
@@ -725,7 +728,7 @@ async fn index(
         }
         "privatefolder" => {
             let mut markdown = String::new();
-            
+
             let mut path_str = if let Ok(rest) = file.strip_prefix("private") {
                 if username.is_empty() {
                     return Err(Status::Forbidden);
@@ -734,7 +737,9 @@ async fn index(
                 Path::new("/").join("private").join(&username).join(rest)
             } else {
                 Path::new("/").join(&file)
-            }.display().to_string();
+            }
+            .display()
+            .to_string();
 
             let mut files = read_files(&path_str).map_err(map_io_error_to_status)?;
             let mut dirs = read_dirs_async(&path_str, sizes)
@@ -763,17 +768,30 @@ async fn index(
             }
 
             path_str = if let Ok(rest) = file.strip_prefix("private") {
-                    if username.is_empty() {
-                        return Err(Status::Forbidden);
-                    }
+                if username.is_empty() {
+                    return Err(Status::Forbidden);
+                }
 
-                    Path::new("/").join(format!("private{}", if rest.display().to_string() != String::new() { format!("/{}", rest.display().to_string()) } else { String::new() }))
-                } else {
-                    Path::new("/").join(&file)
-                }.display().to_string();
+                Path::new("/").join(format!(
+                    "private{}",
+                    if rest.display().to_string() != String::new() {
+                        format!("/{}", rest.display().to_string())
+                    } else {
+                        String::new()
+                    }
+                ))
+            } else {
+                Path::new("/").join(&file)
+            }
+            .display()
+            .to_string();
 
             Ok(IndexResponse::Template(Template::render(
-                if *useplain.0 { "plain/privateindex" } else { "privateindex" },
+                if *useplain.0 {
+                    "plain/privateindex"
+                } else {
+                    "privateindex"
+                },
                 context! {
                     title: &path_str,
                     lang,
