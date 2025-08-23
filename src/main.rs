@@ -434,11 +434,20 @@ async fn index(
     viewers: UseViewers<'_>,
     sizes: &State<FileSizes>,
 ) -> IndexResult {
-    let path = Path::new("files/").join(&file);
+    let (username, perms) = get_session(jar);
+    let path = if let Ok(rest) = file.strip_prefix("private") {
+        if username == "Nobody" {
+            return Err(Status::Forbidden);
+        }
+
+        Path::new("files/").join("private").join(&username).join(rest)
+    } else {
+        Path::new("files/").join(&file)
+    };
+
     let strings = translations.get_translation(&lang.0);
 
     let root_domain = get_root_domain(host.0, &config.fallback_root_domain);
-    let (username, perms) = get_session(jar);
     let theme = get_theme(jar);
 
     let hires = get_bool_cookie(jar, "hires", false);
@@ -451,7 +460,15 @@ async fn index(
     let ext = if path.is_file() {
         path.extension().and_then(OsStr::to_str).unwrap_or("")
     } else {
-        "folder"
+        if let Ok(_rest) = file.strip_prefix("private") {
+            if username.is_empty() {
+                return Err(Status::Forbidden);
+            }
+
+            "privatefolder"
+        } else {
+            "folder"
+        }
     }
     .to_lowercase();
 
@@ -699,6 +716,78 @@ async fn index(
                     smallhead,
                     markdown,
                     topmarkdown,
+                    filebrowser: !get_bool_cookie(jar, "filebrowser", false),
+                },
+            )))
+        }
+        "privatefolder" => {
+            let mut markdown = String::new();
+            
+            let mut path_str = if let Ok(rest) = file.strip_prefix("private") {
+                if username.is_empty() {
+                    return Err(Status::Forbidden);
+                }
+
+                Path::new("/").join("private").join(&username).join(rest)
+            } else {
+                Path::new("/").join(&file)
+            }.display().to_string();
+
+            let mut files = read_files(&path_str).map_err(map_io_error_to_status)?;
+            let mut dirs = read_dirs_async(&path_str, sizes)
+                .await
+                .map_err(map_io_error_to_status)?;
+
+            dirs.sort();
+            files.sort();
+
+            if files
+                .iter()
+                .any(|f| f.name == format!("README.{}.md", lang.0))
+            {
+                let md = fs::read_to_string(
+                    Path::new(&("files".to_string() + &path_str))
+                        .join(format!("README.{}.md", lang.0)),
+                )
+                .unwrap_or_default();
+                markdown = markdown::to_html(&md);
+            } else if files.iter().any(|f| f.name == "README.md") {
+                let md = fs::read_to_string(
+                    Path::new(&("files".to_string() + &path_str)).join("README.md"),
+                )
+                .unwrap_or_default();
+                markdown = markdown::to_html(&md);
+            }
+
+            path_str = if let Ok(rest) = file.strip_prefix("private") {
+                    if username.is_empty() {
+                        return Err(Status::Forbidden);
+                    }
+
+                    Path::new("/").join(format!("private{}", if rest.display().to_string() != String::new() { format!("/{}", rest.display().to_string()) } else { String::new() }))
+                } else {
+                    Path::new("/").join(&file)
+                }.display().to_string();
+
+            Ok(IndexResponse::Template(Template::render(
+                if *useplain.0 { "plain/privateindex" } else { "privateindex" },
+                context! {
+                    title: &path_str,
+                    lang,
+                    strings,
+                    root_domain,
+                    host: host.0,
+                    config: config.inner(),
+                    path: &path_str,
+                    dirs,
+                    files,
+                    theme,
+                    is_logged_in: is_logged_in(jar),
+                    username,
+                    admin: perms == 0,
+                    hires,
+                    smallhead,
+                    markdown,
                     filebrowser: !get_bool_cookie(jar, "filebrowser", false),
                 },
             )))

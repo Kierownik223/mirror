@@ -228,12 +228,24 @@ async fn delete<'a>(file: PathBuf, jar: &CookieJar<'_>) -> Result<Status, (Statu
     if !is_logged_in(jar) {
         return Ok(Status::Unauthorized);
     } else {
-        let perms = get_session(jar).1;
+        let (username, perms) = get_session(jar);
 
         if perms != 0 {
             return Ok(Status::Forbidden);
         }
-        let path = Path::new("files/").join(&file);
+        let path = if let Ok(rest) = file.strip_prefix("private") {
+            if username == "Nobody" {
+                return Ok(Status::Unauthorized);
+            }
+
+            Path::new("files/").join("private").join(&username).join(rest)
+        } else {
+            if perms != 0 {
+                return Ok(Status::Forbidden);
+            } else {
+                Path::new("files/").join(&file)
+            }
+        };
 
         if !path.exists() {
             return Ok(Status::NotFound);
