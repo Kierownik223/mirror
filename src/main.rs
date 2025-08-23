@@ -377,7 +377,24 @@ async fn download_with_counter(
     jar: &CookieJar<'_>,
     config: &rocket::State<Config>,
 ) -> Result<IndexResponse, Status> {
-    let path = Path::new("files/").join(&file);
+    let username = get_session(jar).0;
+    let path = if let Ok(rest) = file.strip_prefix("private") {
+        if username == "Nobody" {
+            return Err(Status::Forbidden);
+        }
+
+        println!("username : {}", username);
+
+        let file_path = Path::new("files/")
+            .join("private")
+            .join(&username)
+            .join(rest);
+
+        return open_file(file_path, false).await;
+    } else {
+        Path::new("files/").join(&file)
+    };
+    
     let file = file.display().to_string();
 
     if !path.exists() {
@@ -413,7 +430,21 @@ async fn download(
     file: PathBuf,
     jar: &CookieJar<'_>,
 ) -> Result<Result<IndexResponse, Status>, Status> {
-    let path = Path::new("files/").join(file);
+    let username = get_session(jar).0;
+    let path = if let Ok(rest) = file.strip_prefix("private") {
+        if username == "Nobody" {
+            return Err(Status::Forbidden);
+        }
+
+        let file_path = Path::new("files/")
+            .join("private")
+            .join(&username)
+            .join(rest);
+
+        return Ok(open_file(file_path, false).await);
+    } else {
+        Path::new("files/").join(&file)
+    };
 
     if is_restricted(&path, jar) {
         return Err(Status::Unauthorized);
