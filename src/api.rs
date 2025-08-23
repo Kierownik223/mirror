@@ -230,9 +230,6 @@ async fn delete<'a>(file: PathBuf, jar: &CookieJar<'_>) -> Result<Status, (Statu
     } else {
         let (username, perms) = get_session(jar);
 
-        if perms != 0 {
-            return Ok(Status::Forbidden);
-        }
         let path = if let Ok(rest) = file.strip_prefix("private") {
             if username == "Nobody" {
                 return Ok(Status::Unauthorized);
