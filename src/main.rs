@@ -439,14 +439,10 @@ async fn index(
 
     let root_domain = get_root_domain(host.0, &config.fallback_root_domain);
     let (username, perms) = get_session(jar);
-    let mut theme = get_theme(jar);
+    let theme = get_theme(jar);
 
     let hires = get_bool_cookie(jar, "hires", false);
     let smallhead = get_bool_cookie(jar, "smallhead", false);
-
-    if !Path::new(&format!("files/static/styles/{}.css", theme)).exists() {
-        theme = "standard".to_string();
-    }
 
     if is_restricted(&path, jar) {
         return Err(Status::Unauthorized);
@@ -751,7 +747,7 @@ fn settings(
     useplain: UsePlain<'_>,
 ) -> Result<Template, Redirect> {
     let mut lang = lang.0;
-    let mut theme = get_theme(jar);
+    let theme = get_theme(jar);
     let strings = translations.get_translation(&lang);
 
     let language_names = translations.available_languages();
@@ -766,10 +762,6 @@ fn settings(
     ];
 
     let mut redir = false;
-
-    if !Path::new(&format!("files/static/styles/{}.css", theme)).exists() {
-        theme = "standard".to_string();
-    }
 
     if let Some(theme_opt) = opt.theme {
         if Path::new(&format!("files/static/styles/{}.css", theme_opt)).exists() {
