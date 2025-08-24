@@ -1040,13 +1040,24 @@ async fn iframe(
     jar: &CookieJar<'_>,
     config: &rocket::State<Config>,
 ) -> Result<Template, Status> {
-    let path = Path::new("files/").join(&file);
+    let username= get_session(jar).0;
+    let path = get_real_path(&file, username.clone())?.0;
 
     if is_restricted(&path, jar) {
         return Err(Status::Unauthorized);
     }
 
-    let path = Path::new("/").join(file).display().to_string();
+    let path = if let Ok(rest) = file.strip_prefix("private") {
+            if username.is_empty() {
+                return Err(Status::Forbidden);
+            }
+
+            Path::new("/").join("private").join(&username).join(rest)
+        } else {
+            Path::new("/").join(&file)
+        }
+        .display()
+        .to_string();
 
     let mut dirs = read_dirs(&path).map_err(map_io_error_to_status)?;
 
