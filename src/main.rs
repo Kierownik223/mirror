@@ -360,7 +360,7 @@ async fn poster(
 }
 
 #[get("/file/<file..>")]
-async fn file(file: PathBuf, jar: &CookieJar<'_>) -> Result<Result<IndexResponse, Status>, Status> {
+async fn file(file: PathBuf, jar: &CookieJar<'_>) -> Result<IndexResponse, Status> {
     let username = get_session(jar).0;
     let mut is_private = false;
     let path = if let Ok(rest) = file.strip_prefix("private") {
@@ -382,7 +382,7 @@ async fn file(file: PathBuf, jar: &CookieJar<'_>) -> Result<Result<IndexResponse
         return Err(Status::Unauthorized);
     }
 
-    Ok(open_file(path, !is_private).await)
+    open_file(path, !is_private).await
 }
 
 #[get("/<file..>?download")]
@@ -444,7 +444,7 @@ async fn download_with_counter(
 async fn download(
     file: PathBuf,
     jar: &CookieJar<'_>,
-) -> Result<Result<IndexResponse, Status>, Status> {
+) -> Result<IndexResponse, Status>{
     let username = get_session(jar).0;
     let path = if let Ok(rest) = file.strip_prefix("private") {
         if username == "Nobody" {
@@ -456,7 +456,7 @@ async fn download(
             .join(&username)
             .join(rest);
 
-        return Ok(open_file(file_path, false).await);
+        return open_file(file_path, false).await;
     } else {
         Path::new("files/").join(&file)
     };
@@ -465,7 +465,7 @@ async fn download(
         return Err(Status::Unauthorized);
     }
 
-    Ok(open_file(path, true).await)
+    open_file(path, true).await
 }
 
 #[get("/<file..>", rank = 10)]
