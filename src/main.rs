@@ -29,7 +29,9 @@ use rocket_dyn_templates::{context, Template};
 
 use crate::db::{add_download, FileDb};
 use crate::i18n::TranslationStore;
-use crate::utils::{get_real_path, get_root_domain, is_hidden, map_io_error_to_status, read_dirs_async};
+use crate::utils::{
+    get_real_path, get_root_domain, is_hidden, map_io_error_to_status, read_dirs_async,
+};
 
 mod account;
 mod admin;
@@ -384,7 +386,7 @@ async fn download_with_counter(
     if is_private {
         return open_file(path, !is_private).await;
     }
-    
+
     let file = file.display().to_string();
 
     if !path.exists() {
@@ -416,10 +418,7 @@ async fn download_with_counter(
 }
 
 #[get("/<file..>?download")]
-async fn download(
-    file: PathBuf,
-    jar: &CookieJar<'_>,
-) -> Result<IndexResponse, Status>{
+async fn download(file: PathBuf, jar: &CookieJar<'_>) -> Result<IndexResponse, Status> {
     let username = get_session(jar).0;
     let (path, is_private) = get_real_path(&file, username)?;
 
@@ -778,11 +777,7 @@ async fn index(
             .to_string();
 
             Ok(IndexResponse::Template(Template::render(
-                if *useplain.0 {
-                    "plain/index"
-                } else {
-                    "index"
-                },
+                if *useplain.0 { "plain/index" } else { "index" },
                 context! {
                     title: &path_str,
                     lang,
@@ -1040,7 +1035,7 @@ async fn iframe(
     jar: &CookieJar<'_>,
     config: &rocket::State<Config>,
 ) -> Result<Template, Status> {
-    let username= get_session(jar).0;
+    let username = get_session(jar).0;
     let path = get_real_path(&file, username.clone())?.0;
 
     if is_restricted(&path, jar) {
@@ -1048,16 +1043,16 @@ async fn iframe(
     }
 
     let path = if let Ok(rest) = file.strip_prefix("private") {
-            if username.is_empty() {
-                return Err(Status::Forbidden);
-            }
-
-            Path::new("/").join("private").join(&username).join(rest)
-        } else {
-            Path::new("/").join(&file)
+        if username.is_empty() {
+            return Err(Status::Forbidden);
         }
-        .display()
-        .to_string();
+
+        Path::new("/").join("private").join(&username).join(rest)
+    } else {
+        Path::new("/").join(&file)
+    }
+    .display()
+    .to_string();
 
     let mut dirs = read_dirs(&path).map_err(map_io_error_to_status)?;
 

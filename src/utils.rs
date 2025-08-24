@@ -343,25 +343,35 @@ pub fn get_real_path(file: &PathBuf, username: String) -> Result<(PathBuf, bool)
             return Err(Status::Forbidden);
         }
 
-        Ok((Path::new("files/")
-            .join("private")
-            .join(&username)
-            .join(rest), true))
+        Ok((
+            Path::new("files/")
+                .join("private")
+                .join(&username)
+                .join(rest),
+            true,
+        ))
     } else {
         Ok((Path::new("files/").join(&file), false))
     }
 }
 
-pub fn get_real_path_with_perms(file: &PathBuf, username: String, perms: i32) -> Result<(PathBuf, bool), Status> {
+pub fn get_real_path_with_perms(
+    file: &PathBuf,
+    username: String,
+    perms: i32,
+) -> Result<(PathBuf, bool), Status> {
     if let Ok(rest) = file.strip_prefix("private") {
         if username == "Nobody" {
             return Err(Status::Forbidden);
         }
 
-        Ok((Path::new("files/")
-            .join("private")
-            .join(&username)
-            .join(rest), true))
+        Ok((
+            Path::new("files/")
+                .join("private")
+                .join(&username)
+                .join(rest),
+            true,
+        ))
     } else {
         if perms != 0 {
             Err(Status::Forbidden)

@@ -25,7 +25,8 @@ use crate::{
     db::{get_downloads, FileDb},
     read_files,
     utils::{
-        add_path_to_zip, get_extension_from_filename, get_real_path_with_perms, get_session, is_logged_in, is_restricted, map_io_error_to_status, read_dirs_async
+        add_path_to_zip, get_extension_from_filename, get_real_path_with_perms, get_session,
+        is_logged_in, is_restricted, map_io_error_to_status, read_dirs_async,
     },
     Config, Disk, FileSizes, Host, MirrorFile, Sysinfo,
 };
@@ -71,19 +72,19 @@ async fn listing(
     config: &rocket::State<Config>,
     sizes: &State<FileSizes>,
 ) -> Result<Json<Vec<MirrorFile>>, Status> {
-    let username= get_session(jar).0;
+    let username = get_session(jar).0;
 
     let path = if let Ok(rest) = file.strip_prefix("private") {
-            if username.is_empty() {
-                return Err(Status::Forbidden);
-            }
-
-            Path::new("/").join("private").join(&username).join(rest)
-        } else {
-            Path::new("/").join(&file)
+        if username.is_empty() {
+            return Err(Status::Forbidden);
         }
-        .display()
-        .to_string();
+
+        Path::new("/").join("private").join(&username).join(rest)
+    } else {
+        Path::new("/").join(&file)
+    }
+    .display()
+    .to_string();
 
     let mut file_list = read_files(&path).map_err(map_io_error_to_status)?;
     let mut dir_list = read_dirs_async(&path, sizes)
@@ -244,7 +245,16 @@ async fn delete<'a>(file: PathBuf, jar: &CookieJar<'_>) -> Result<Status, (Statu
     } else {
         let (username, perms) = get_session(jar);
 
-        let path = get_real_path_with_perms(&file, username, perms).map_err(|e| { (e, Json(Error {message: format!("{} {}", e.code, e.reason_lossy() ),}))})?.0;
+        let path = get_real_path_with_perms(&file, username, perms)
+            .map_err(|e| {
+                (
+                    e,
+                    Json(Error {
+                        message: format!("{} {}", e.code, e.reason_lossy()),
+                    }),
+                )
+            })?
+            .0;
 
         if !path.exists() {
             return Ok(Status::NotFound);
