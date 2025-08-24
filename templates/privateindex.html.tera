@@ -272,12 +272,10 @@
                             }
                         }
 
-                        alert("Renamed to " + response.name + " successfully!");
+                        alert("{{ strings.rename_success }}");
                     } catch (e) {
                         alert("{{ strings.error_occured }} " + (e.message || ""));
                     }
-                } else if (xhr.status === 409) {
-                    alert("{{ strings.directory_not_empty }}");
                 } else if (xhr.status === 404) {
                     alert("{{ strings.not_found }}");
                 } else {
