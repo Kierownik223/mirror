@@ -25,8 +25,7 @@ use crate::{
     db::{get_downloads, FileDb},
     read_files,
     utils::{
-        add_path_to_zip, get_extension_from_filename, get_session, is_logged_in, is_restricted,
-        map_io_error_to_status, read_dirs_async,
+        add_path_to_zip, get_extension_from_filename, get_real_path_with_perms, get_session, is_logged_in, is_restricted, map_io_error_to_status, read_dirs_async
     },
     Config, Disk, FileSizes, Host, MirrorFile, Sysinfo,
 };
@@ -180,12 +179,9 @@ async fn rename(
     if !is_logged_in(jar) {
         return Err(Status::Unauthorized);
     } else {
-        let perms = get_session(jar).1;
+        let (username, perms) = get_session(jar);
 
-        if perms != 0 {
-            return Err(Status::Forbidden);
-        }
-        let path = Path::new("files/").join(&file);
+        let path = get_real_path_with_perms(&file, username, perms)?.0;
 
         if !path.exists() {
             return Err(Status::NotFound);
@@ -236,22 +232,7 @@ async fn delete<'a>(file: PathBuf, jar: &CookieJar<'_>) -> Result<Status, (Statu
     } else {
         let (username, perms) = get_session(jar);
 
-        let path = if let Ok(rest) = file.strip_prefix("private") {
-            if username == "Nobody" {
-                return Ok(Status::Unauthorized);
-            }
-
-            Path::new("files/")
-                .join("private")
-                .join(&username)
-                .join(rest)
-        } else {
-            if perms != 0 {
-                return Ok(Status::Forbidden);
-            } else {
-                Path::new("files/").join(&file)
-            }
-        };
+        let path = get_real_path_with_perms(&file, username, perms).map_err(|e| { (e, Json(Error {message: format!("{} {}", e.code, e.reason_lossy() ),}))})?.0;
 
         if !path.exists() {
             return Ok(Status::NotFound);

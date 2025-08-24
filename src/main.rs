@@ -29,7 +29,7 @@ use rocket_dyn_templates::{context, Template};
 
 use crate::db::{add_download, FileDb};
 use crate::i18n::TranslationStore;
-use crate::utils::{get_root_domain, is_hidden, map_io_error_to_status, read_dirs_async};
+use crate::utils::{get_real_path, get_root_domain, is_hidden, map_io_error_to_status, read_dirs_async};
 
 mod account;
 mod admin;
@@ -362,21 +362,7 @@ async fn poster(
 #[get("/file/<file..>")]
 async fn file(file: PathBuf, jar: &CookieJar<'_>) -> Result<IndexResponse, Status> {
     let username = get_session(jar).0;
-    let mut is_private = false;
-    let path = if let Ok(rest) = file.strip_prefix("private") {
-        if username == "Nobody" {
-            return Err(Status::Forbidden);
-        }
-
-        is_private = true;
-
-        Path::new("files/")
-            .join("private")
-            .join(&username)
-            .join(rest)
-    } else {
-        Path::new("files/").join(&file)
-    };
+    let (path, is_private) = get_real_path(&file, username)?;
 
     if is_restricted(&path, jar) {
         return Err(Status::Unauthorized);
@@ -393,22 +379,11 @@ async fn download_with_counter(
     config: &rocket::State<Config>,
 ) -> Result<IndexResponse, Status> {
     let username = get_session(jar).0;
-    let path = if let Ok(rest) = file.strip_prefix("private") {
-        if username == "Nobody" {
-            return Err(Status::Forbidden);
-        }
+    let (path, is_private) = get_real_path(&file, username)?;
 
-        println!("username : {}", username);
-
-        let file_path = Path::new("files/")
-            .join("private")
-            .join(&username)
-            .join(rest);
-
-        return open_file(file_path, false).await;
-    } else {
-        Path::new("files/").join(&file)
-    };
+    if is_private {
+        return open_file(path, !is_private).await;
+    }
     
     let file = file.display().to_string();
 
@@ -446,26 +421,13 @@ async fn download(
     jar: &CookieJar<'_>,
 ) -> Result<IndexResponse, Status>{
     let username = get_session(jar).0;
-    let path = if let Ok(rest) = file.strip_prefix("private") {
-        if username == "Nobody" {
-            return Err(Status::Forbidden);
-        }
-
-        let file_path = Path::new("files/")
-            .join("private")
-            .join(&username)
-            .join(rest);
-
-        return open_file(file_path, false).await;
-    } else {
-        Path::new("files/").join(&file)
-    };
+    let (path, is_private) = get_real_path(&file, username)?;
 
     if is_restricted(&path, jar) {
         return Err(Status::Unauthorized);
     }
 
-    open_file(path, true).await
+    open_file(path, !is_private).await
 }
 
 #[get("/<file..>", rank = 10)]
@@ -481,21 +443,7 @@ async fn index(
     sizes: &State<FileSizes>,
 ) -> IndexResult {
     let (username, perms) = get_session(jar);
-    let mut is_private = false;
-    let path = if let Ok(rest) = file.strip_prefix("private") {
-        if username == "Nobody" {
-            return Err(Status::Forbidden);
-        }
-
-        is_private = true;
-
-        Path::new("files/")
-            .join("private")
-            .join(&username)
-            .join(rest)
-    } else {
-        Path::new("files/").join(&file)
-    };
+    let (path, is_private) = get_real_path(&file, username.clone())?;
 
     let strings = translations.get_translation(&lang.0);
 
@@ -512,11 +460,7 @@ async fn index(
     let ext = if path.is_file() {
         path.extension().and_then(OsStr::to_str).unwrap_or("")
     } else {
-        if let Ok(_rest) = file.strip_prefix("private") {
-            if username.is_empty() {
-                return Err(Status::Forbidden);
-            }
-
+        if is_private {
             "privatefolder"
         } else {
             "folder"
