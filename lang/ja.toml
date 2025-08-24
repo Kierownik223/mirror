@@ -57,6 +57,10 @@ viewing_zip = "ZIPファイルを表示中"
 watching = "ファイルを表示中"
 download_zip = "ZIPをダウンロード"
 preparing_zip = "ZIPを準備中..."
+rename = "名前を変更"
+rename_success = "正常に名前が変更されました！"
+new_name = "新しい名前"
+error_renaming = "名前の変更中にエラーが発生しました"
 
 # Uploader
 

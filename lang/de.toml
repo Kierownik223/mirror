@@ -57,6 +57,10 @@ viewing_zip = "ZIP-Datei anzeigen"
 watching = "Datei ansehen"
 download_zip = "ZIP herunterladen"
 preparing_zip = "ZIP wird vorbereitet..."
+rename = "Umbenennen"
+rename_success = "Erfolgreich umbenannt!"
+new_name = "Neuer Name"
+error_renaming = "Beim Umbenennen ist ein Fehler aufgetreten"
 
 # Uploader
 

@@ -57,6 +57,10 @@ viewing_zip = "Przeglōndōm ZIP-plik"
 watching = "Ôbierōm plik"
 download_zip = "Pobierz ZIP"
 preparing_zip = "Przygotuwano ZIP..."
+rename = "Przemiynić"
+rename_success = "Przemiyniynte z powodzeniem!"
+new_name = "Nowy mjano"
+error_renaming = "Pojawiou sie feler przi przemiynianiu"
 
 # Uploader
 

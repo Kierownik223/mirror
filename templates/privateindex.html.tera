@@ -216,7 +216,7 @@
         var path = pathname + filePath;
         var confirmMsg = "{{ strings.delete_confirmation }} " + decodeURIComponent(path) + "?";
 
-        var newName = prompt("New name:", filePath);
+        var newName = prompt("{{ strings.new_name }}:", filePath);
 
         var xhr;
         if (window.XMLHttpRequest) {
@@ -233,7 +233,7 @@
         try {
             xhr.open("PATCH", "/api" + path, true);
         } catch (e) {
-            alert("{{ strings.error_deleting }}");
+            alert("{{ strings.error_renaming }}");
             return;
         }
 

@@ -57,6 +57,10 @@ viewing_zip = "Vendo arquivo ZIP"
 watching = "Assistindo arquivo"
 download_zip = "Baixar ZIP"
 preparing_zip = "Preparando ZIP..."
+rename = "Renomear"
+rename_success = "Renomeado com sucesso!"
+new_name = "Novo nome"
+error_renaming = "Ocorreu um erro ao renomear"
 
 # Uploader
 
