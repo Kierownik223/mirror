@@ -298,7 +298,7 @@
             if (window.location && typeof window.location.pathname === "string") {
                 pathname = window.location.pathname;
             }
-            var path = pathname + filePath;
+            var path = pathname + encodeURIComponent(filePath);
             var confirmMsg = "{{ strings.delete_confirmation }} " + decodeURIComponent(path) + "?";
 
             if (message) {
