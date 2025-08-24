@@ -120,6 +120,10 @@ tbody tr td:last-child {
     text-align: right;
 }
 
+tbody tr td:last-child a {
+    display: inline;
+}
+
 .footer {
     width: 90vw;
     max-width: 800px;
