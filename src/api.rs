@@ -71,7 +71,19 @@ async fn listing(
     config: &rocket::State<Config>,
     sizes: &State<FileSizes>,
 ) -> Result<Json<Vec<MirrorFile>>, Status> {
-    let path = Path::new("/").join(&file).display().to_string();
+    let username= get_session(jar).0;
+
+    let path = if let Ok(rest) = file.strip_prefix("private") {
+            if username.is_empty() {
+                return Err(Status::Forbidden);
+            }
+
+            Path::new("/").join("private").join(&username).join(rest)
+        } else {
+            Path::new("/").join(&file)
+        }
+        .display()
+        .to_string();
 
     let mut file_list = read_files(&path).map_err(map_io_error_to_status)?;
     let mut dir_list = read_dirs_async(&path, sizes)
