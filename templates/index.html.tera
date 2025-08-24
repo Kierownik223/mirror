@@ -1,6 +1,7 @@
 {% extends "base" %}
 
 {% block content %}
+<div id="uploadResults"></div>
 <div class="breadcrumb">
     <span><a href="/">MARMAK Mirror</a>/</span><span class="seg"> </span>
     {% if path != "/" %}
@@ -20,7 +21,7 @@
         <tr>
             <td style="width: 1em; white-space: nowrap;"><input type="checkbox" id="selectAll" onclick="toggleAllCheckboxes(this)"></td>
             <td><a style="cursor: pointer;" href="javascript:;" onclick="downloadAsZip()" id="downloadZip">{{ strings.download_zip }} (BETA)</a>
-            {% if admin %}
+            {% if admin or private %}
             <a style="cursor: pointer;" href="javascript:;" onclick="deleteSelected()">{{ strings.delete }}</a>
             {% endif %}
             </td>
@@ -34,6 +35,7 @@
             <td><a href="../"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">../</a></td>
             <td>---</td>
             <td>{{ strings.folder }}</td>
+            {% if admin or private %}<td></td>{% endif %}
         </tr>
         {% endif %}
 
@@ -45,7 +47,7 @@
             <td><a href="{{ s.name | urlencode }}/"><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}/</a></td>
             <td>{{ s.size }}</td>
             <td>{{ strings.folder }}</td>
-            {% if admin %}
+            {% if admin or private %}
             <td><a style="cursor: pointer;" href="javascript:;" onclick="deleteFile(this, '{{ s.name | safe | addslashes }}', true)">{{ strings.delete }}</a></td>
             {% endif %}
         </tr>
@@ -58,8 +60,8 @@
             <td><a href="{{ s.name | urlencode }}"><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}</a></td>
             <td>{{ s.size }}</td>
             <td>{{ strings.file }}</td>
-            {% if admin %}
-            <td><a style="cursor: pointer;" href="javascript:;" onclick="deleteFile(this, '{{ s.name | safe | addslashes }}', true)">{{ strings.delete }}</a></td>
+            {% if admin or private %}
+            <td><a style="cursor: pointer;" href="javascript:;" onclick="renameFile(this, '{{ s.name | safe | addslashes }}', true)">{{ strings.rename }}</a> <a style="cursor: pointer;" href="javascript:;" onclick="deleteFile(this, '{{ s.name | safe | addslashes }}', true)">{{ strings.delete }}</a></td>
             {% endif %}
         </tr>
         {% endfor %}
@@ -148,10 +150,7 @@
         function hasClass(el, cls) {
             return el.className && (" " + el.className + " ").indexOf(" " + cls + " ") > -1;
         }
-    </script>
-{% endif %}
-{% if admin %}
-    <script>
+
         function deleteSelected() {
             var inputs = document.getElementsByTagName("input");
             var filePathList = [];
@@ -199,6 +198,99 @@
             }
 
             deleteNext();
+        }
+
+        function renameFile(element, filePath) {
+            var pathname = "/";
+            if (window.location && typeof window.location.pathname === "string") {
+                pathname = window.location.pathname;
+            }
+            var path = pathname + filePath;
+            var confirmMsg = "{{ strings.delete_confirmation }} " + decodeURIComponent(path) + "?";
+
+            var newName = prompt("{{ strings.new_name }}:", filePath);
+
+            if (newName == null) {
+                return;
+            }
+
+            var xhr;
+            if (window.XMLHttpRequest) {
+                xhr = new XMLHttpRequest();
+            } else {
+                try {
+                    xhr = new ActiveXObject("Microsoft.XMLHTTP");
+                } catch (e) {
+                    alert("{{ strings.error_deleting }}");
+                    return;
+                }
+            }
+
+            try {
+                xhr.open("PATCH", "/api" + path, true);
+            } catch (e) {
+                alert("{{ strings.error_renaming }}");
+                return;
+            }
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        try {
+                            var response = JSON.parse(xhr.responseText);
+
+                            element.onclick = function () { renameFile(element, response.name) };
+
+                            var row = element;
+                            while (row && row.nodeType === 1) {
+                                if (String(row.tagName).toLowerCase() === 'tr') break;
+                                row = row.parentNode;
+                            }
+
+                            if (row) {
+                                var cells = row.getElementsByTagName("td");
+                                if (cells.length > 0) {
+                                    var td = cells[1];
+                                    var link = td.querySelector("a");
+
+                                    if (link) {
+                                        link.setAttribute("href", "../" + response.name);
+
+                                        link.innerHTML = "";
+
+                                        var img = document.createElement("img");
+                                        img.src = "/static/images/icons/{% if hires %}hires/{% endif %}" + response.icon + ".png";
+                                        img.className = "icon";
+
+                                        link.appendChild(img);
+                                        link.appendChild(document.createTextNode(response.name));
+                                    }
+                                }
+                            }
+
+                            alert("{{ strings.rename_success }}");
+                        } catch (e) {
+                            alert("{{ strings.error_occured }} " + (e.message || ""));
+                        }
+                    } else if (xhr.status === 404) {
+                        alert("{{ strings.not_found }}");
+                    } else {
+                        try {
+                            var errorResponse = JSON.parse(xhr.responseText);
+                            alert("{{ strings.error_occured }} " + errorResponse.message);
+                        } catch (e) {
+                            alert("{{ strings.error_occured }}");
+                        }
+                    }
+                }
+            };
+
+            try {
+                xhr.send("{\"name\":\"" + newName + "\"}");
+            } catch (e) {
+                alert("{{ strings.error_deleting }}");
+                if (onComplete) onComplete();
+            }
         }
 
         function deleteFile(element, filePath, message, onComplete) {
@@ -281,6 +373,193 @@
                 if (onComplete) onComplete();
             }
         }
+
+        function uploadViaAPI(files, path) {
+            if (!files || !files.length) {
+                alert("{{ strings.select_files }}");
+                return;
+            }
+
+            var resultsDiv = document.getElementById('uploadResults');
+
+            for (var i = 0; i < files.length; i++) {
+                (function (file) {
+                    var container = document.createElement("div");
+
+                    var label = document.createElement("div");
+                    label.textContent = "{{ strings.uploading }} " + file.name;
+                    container.appendChild(label);
+
+                    var progressBar = document.createElement("progress");
+                    progressBar.max = 100;
+                    progressBar.value = 0;
+                    progressBar.style.width = "100%";
+                    container.appendChild(progressBar);
+
+                    var info = document.createElement("div");
+                    info.style.fontSize = "small";
+                    info.textContent = "0% - 0 B / " + formatBytes(file.size) + " @ 0 KB/s";
+                    container.appendChild(info);
+
+                    resultsDiv.appendChild(container);
+
+                    var formData = new FormData();
+                    formData.append("files", file);
+                    formData.append("path", path || "/private/");
+
+                    var xhr = new XMLHttpRequest();
+                    xhr.open("POST", "/api/upload", true);
+
+                    var startTime = new Date().getTime();
+
+                    xhr.upload.onprogress = function (e) {
+                        if (e.lengthComputable) {
+                            var percent = (e.loaded / e.total) * 100;
+                            var elapsed = (new Date().getTime() - startTime) / 1000;
+                            var speed = e.loaded / elapsed;
+
+                            progressBar.value = percent;
+
+                            info.textContent =
+                                percent.toFixed(1) + "% - " + formatBytes(e.loaded) + " / " + formatBytes(e.total) +
+                                " @ " + formatBytes(speed) + "/s";
+                        }
+                    };
+
+                    xhr.onload = function () {
+                        progressBar.style.display = "none";
+                        container.style.display = "none";
+
+                        if (xhr.status === 200) {
+                            try {
+                                var response = JSON.parse(xhr.responseText);
+                                var result = response[0];
+
+                                if (!result || result.url == null) {
+                                    alert("{{ strings.upload_error }} " + (result && result.error ? result.error : ""));
+                                    return;
+                                }
+
+                                info.remove();
+
+                                var tableBody = document.querySelector("table tbody");
+                                if (tableBody) {
+                                    var row = document.createElement("tr");
+
+                                    var tdCheck = document.createElement("td");
+                                    var cb = document.createElement("input");
+                                    cb.type = "checkbox";
+                                    cb.className = "delete-checkbox";
+                                    cb.value = result.name;
+                                    tdCheck.appendChild(cb);
+                                    row.appendChild(tdCheck);
+
+                                    var tdName = document.createElement("td");
+                                    var a = document.createElement("a");
+                                    a.href = result.url;
+                                    a.innerHTML = '<img src="/static/images/icons/{% if hires %}hires/{% endif %}' + result.icon + '.png" class="icon">' + result.name;
+                                    tdName.appendChild(a);
+                                    row.appendChild(tdName);
+
+                                    var tdSize = document.createElement("td");
+                                    tdSize.textContent = result.size || "—";
+                                    row.appendChild(tdSize);
+
+                                    var tdType = document.createElement("td");
+                                    tdType.textContent = "{{ strings.file }}";
+                                    row.appendChild(tdType);
+
+                                    var tdDelete = document.createElement("td");
+                                    var delLink = document.createElement("a");
+                                    delLink.style.cursor = "pointer";
+                                    delLink.textContent = "{{ strings.delete }}";
+                                    delLink.onclick = function () {
+                                        deleteFile(this, result.name, true);
+                                    };
+                                    tdDelete.appendChild(delLink);
+                                    row.appendChild(tdDelete);
+
+                                    tableBody.appendChild(row);
+                                }
+                            } catch (e) {
+                                alert(file.name + " {{ strings.upload_parse_error }}");
+                            }
+                        } else {
+                            alert(file.name + " {{ strings.upload_failed_status }} " + xhr.status);
+                        }
+                    };
+
+                    xhr.onerror = function () {
+                        progressBar.style.display = "none";
+                        info.style.display = "none";
+                        alert(file.name + " {{ strings.upload_failed_network }}");
+                    };
+
+                    try {
+                        xhr.send(formData);
+                    } catch (e) {
+                        label.textContent = file.name + " {{ strings.upload_error }}";
+                    }
+                })(files[i]);
+            }
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return "0 B";
+            var k = 1024;
+            var sizes = ["B", "KB", "MB", "GB", "TB"];
+            var i = Math.floor(Math.log(bytes) / Math.log(k));
+            return (bytes / Math.pow(k, i)).toFixed(1) + " " + sizes[i];
+        }
+
+        (function () {
+            var dropTarget = document.body;
+
+            function preventDefaults(e) {
+                if (e.preventDefault) e.preventDefault();
+                if (e.stopPropagation) e.stopPropagation();
+                return false;
+            }
+
+            function highlight() {
+                dropTarget.style.backgroundColor = "#000";
+                dropTarget.style.border = "5px dashed #202020";
+            }
+
+            function unhighlight() {
+                dropTarget.style.backgroundColor = "";
+                dropTarget.style.border = "";
+            }
+
+            dropTarget.addEventListener('dragenter', function (e) {
+                preventDefaults(e);
+                highlight();
+            }, false);
+
+            dropTarget.addEventListener('dragover', function (e) {
+                preventDefaults(e);
+                highlight();
+            }, false);
+
+            dropTarget.addEventListener('dragleave', function (e) {
+                preventDefaults(e);
+                unhighlight();
+            }, false);
+
+            dropTarget.addEventListener('drop', function (e) {
+                preventDefaults(e);
+                unhighlight();
+
+                var dt = e.dataTransfer;
+                if (dt && dt.files && dt.files.length) {
+                    var pathname = "/";
+                    if (window.location && typeof window.location.pathname === "string") {
+                        pathname = window.location.pathname;
+                    }
+                    uploadViaAPI(dt.files, pathname);
+                }
+            }, false);
+        })();
     </script>
 {% endif %}
 {% endblock scripts %}

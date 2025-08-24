@@ -713,6 +713,7 @@ async fn index(
                     markdown,
                     topmarkdown,
                     filebrowser: !get_bool_cookie(jar, "filebrowser", false),
+                    private: is_private,
                 },
             )))
         }
@@ -778,9 +779,9 @@ async fn index(
 
             Ok(IndexResponse::Template(Template::render(
                 if *useplain.0 {
-                    "plain/privateindex"
+                    "plain/index"
                 } else {
-                    "privateindex"
+                    "index"
                 },
                 context! {
                     title: &path_str,
@@ -800,6 +801,7 @@ async fn index(
                     smallhead,
                     markdown,
                     filebrowser: !get_bool_cookie(jar, "filebrowser", false),
+                    private: is_private,
                 },
             )))
         }
