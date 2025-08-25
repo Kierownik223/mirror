@@ -43,7 +43,7 @@
             {% if s.ext == "Folder" %}
             <td>{{ strings.folder }}</td>
             {% else %}
-            <td>{{ s.ext }} {{ strings.file }}</td>
+            <td>{{ strings.file }}</td>
             {% endif %}
         </tr>
         {% endfor %}
