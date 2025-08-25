@@ -531,7 +531,7 @@ async fn index(
                 open_file(path, false).await
             }
         }
-        "7z" => {
+        "7z" | "rar" => {
             if !*viewers.0 {
                 return open_file(path, false).await;
             }
