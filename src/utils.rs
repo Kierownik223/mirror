@@ -384,28 +384,30 @@ pub fn get_real_path_with_perms(
 pub fn parse_7z_output(output: &str) -> Vec<MirrorFile> {
     let mut files = Vec::new();
 
-    let mut i = 0;
-
     for line in output.lines() {
-        if let Some(_idx) = line.find("....A") {
-            i += 1;
-            println!("{}", line);
+        if let Some(_idx) = line.find("..") {
             let parts: Vec<&str> = line.split_whitespace().collect();
 
             if parts.len() < 5 {
                 continue;
             }
 
-            let size_bytes: u64 = parts[3].parse().unwrap_or(0);
-            let size = format_size(size_bytes, DECIMAL);
-            let filename = if i == 1 {
+            let filename = if let Ok(_) = parts[4].parse::<u64>() {
                 parts[5..].join(" ")
             } else {
                 parts[4..].join(" ")
             };
+
+            let size_bytes: u64 = parts[3].parse().unwrap_or(0);
+            let size = format_size(size_bytes, DECIMAL);
+
+            if size_bytes == 0 {
+                continue;
+            }
+
             let name = filename.to_string();
 
-            let ext = get_extension_from_filename(&filename).unwrap().to_string();
+            let ext = get_extension_from_filename(&filename).unwrap_or_default().to_string();
 
             let mut icon = &ext.as_str();
 
