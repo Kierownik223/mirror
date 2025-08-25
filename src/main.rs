@@ -313,7 +313,8 @@ async fn poster(
     file: PathBuf,
     jar: &CookieJar<'_>,
 ) -> Result<Result<Cached<(ContentType, Vec<u8>)>, Result<IndexResponse, Status>>, Status> {
-    let path = Path::new("files/").join(file);
+    let username = get_session(jar).0;
+    let (path, is_private) = get_real_path(&file, username)?;
 
     if is_restricted(&path, jar) {
         return Err(Status::Unauthorized);
@@ -337,7 +338,7 @@ async fn poster(
         } else {
             return Ok(Err(open_file(
                 Path::new(&"files/static/images/icons/256x256/mp3.png").to_path_buf(),
-                true,
+                !is_private,
             )
             .await));
         }
@@ -359,7 +360,7 @@ async fn poster(
             icon = "files/static/images/icons/256x256/default.png".to_string();
         }
 
-        Ok(Err(open_file(Path::new(&icon).to_path_buf(), true).await))
+        Ok(Err(open_file(Path::new(&icon).to_path_buf(), !is_private).await))
     }
 }
 
