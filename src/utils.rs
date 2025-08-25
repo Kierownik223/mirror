@@ -248,37 +248,6 @@ pub async fn open_file(path: PathBuf, cache: bool) -> Result<IndexResponse, Stat
     }
 }
 
-pub fn list_to_files(files: Vec<&str>) -> Result<Vec<MirrorFile>, Error> {
-    let mut file_list = Vec::new();
-
-    for file in files {
-        let mut ext = get_extension_from_filename(file)
-            .unwrap_or_else(|| "")
-            .to_lowercase();
-
-        if file.ends_with("/") {
-            ext = "Folder".to_string();
-        }
-
-        let mut icon = ext.as_str();
-        if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
-            icon = "default";
-        }
-
-        let file: MirrorFile = MirrorFile {
-            name: file.to_string(),
-            ext: ext.to_string(),
-            icon: icon.to_string(),
-            size: "---".to_string(),
-            downloads: None,
-        };
-
-        file_list.push(file);
-    }
-
-    Ok(file_list)
-}
-
 pub fn create_cookie<'a>(name: &'a str, value: &str) -> Cookie<'a> {
     let now = OffsetDateTime::now_utc() + Duration::days(365);
     let mut cookie = Cookie::new(name, value.to_string());
@@ -379,4 +348,53 @@ pub fn get_real_path_with_perms(
             Ok((Path::new("files/").join(&file), false))
         }
     }
+}
+
+pub fn parse_7z_output(output: &str) -> Vec<MirrorFile> {
+    let mut files = Vec::new();
+
+    for line in output.lines() {
+        if let Some(_idx) = line.find("..") {
+            let parts: Vec<&str> = line.split_whitespace().collect();
+
+            if parts.len() < 5 {
+                continue;
+            }
+
+            let filename = if let Ok(_) = parts[4].parse::<u64>() {
+                parts[5..].join(" ")
+            } else {
+                parts[4..].join(" ")
+            };
+
+            let size_bytes: u64 = parts[3].parse().unwrap_or(0);
+            let size = format_size(size_bytes, DECIMAL);
+
+            if size_bytes == 0 {
+                continue;
+            }
+
+            let name = filename.to_string();
+
+            let ext = get_extension_from_filename(&filename)
+                .unwrap_or_default()
+                .to_string();
+
+            let mut icon = ext.to_lowercase();
+
+            if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
+                icon = "default".to_string();
+            }
+
+            files.push(MirrorFile {
+                name,
+                ext: ext.to_string(),
+                icon: icon.to_string(),
+                size,
+                downloads: None,
+            });
+        }
+    }
+
+    files
 }
