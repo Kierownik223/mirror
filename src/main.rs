@@ -22,7 +22,7 @@ use tokio::sync::RwLock;
 use tokio::time::sleep;
 use utils::{
     create_cookie, get_bool_cookie, get_session, get_theme, is_logged_in, is_restricted,
-    list_to_files, open_file, parse_language, read_dirs, read_files,
+    open_file, parse_language, read_dirs, read_files,
 };
 use walkdir::WalkDir;
 
@@ -495,43 +495,7 @@ async fn index(
                 },
             )))
         }
-        "zip" => {
-            if !*viewers.0 {
-                return open_file(path, false).await;
-            }
-
-            let zip_file = fs::File::open(&path).map_err(|_| Status::BadRequest)?;
-            if let Ok(archive) = zip::ZipArchive::new(zip_file) {
-                let file_names: Vec<&str> = archive.file_names().collect();
-                let files = list_to_files(file_names).unwrap_or_default();
-                if files.is_empty() {
-                    return Err(Status::NotFound);
-                }
-
-                Ok(IndexResponse::Template(Template::render(
-                    if *useplain.0 { "plain/zip" } else { "zip" },
-                    context! {
-                        title: format!("{} {}", strings.get("viewing_zip").unwrap(), Path::new("/").join(&file).display()),
-                        lang,
-                        strings,
-                        root_domain,
-                        host: host.0,
-                        config: config.inner(),
-                        path: Path::new("/").join(&file).display().to_string(),
-                        files,
-                        theme,
-                        is_logged_in: is_logged_in(jar),
-                        username,
-                        admin: perms == 0,
-                        hires,
-                        smallhead
-                    },
-                )))
-            } else {
-                open_file(path, false).await
-            }
-        }
-        "7z" | "rar" => {
+        "7z" | "rar" | "zip" => {
             if !*viewers.0 {
                 return open_file(path, false).await;
             }
