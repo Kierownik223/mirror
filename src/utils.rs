@@ -26,7 +26,7 @@ struct FolderSize {
 pub fn read_dirs(path: &str) -> Result<Vec<MirrorFile>, Error> {
     let mut dir_list = Vec::new();
 
-    let paths = match fs::read_dir(format!("files{}", &path)) {
+    let paths = match fs::read_dir(path) {
         Ok(paths) => paths,
         Err(e) => return Err(e),
     };
@@ -61,8 +61,7 @@ pub async fn read_dirs_async(
 
     let size_list = sizes_state.read().await;
 
-    let base_path = format!("files{}", path);
-    let paths = match fs::read_dir(&base_path) {
+    let paths = match fs::read_dir(&path) {
         Ok(paths) => paths,
         Err(e) => return Err(e),
     };
@@ -118,7 +117,7 @@ pub async fn read_dirs_async(
 pub fn read_files(path: &str) -> Result<Vec<MirrorFile>, Error> {
     let mut file_list = Vec::new();
 
-    let paths = match fs::read_dir(format!("files{}", &path)) {
+    let paths = match fs::read_dir(&path) {
         Ok(paths) => paths,
         Err(e) => return Err(e),
     };
