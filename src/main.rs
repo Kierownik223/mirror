@@ -15,6 +15,7 @@ use std::collections::HashMap;
 use std::ffi::OsStr;
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::process::Command;
 use std::sync::Arc;
 use time::{Duration, OffsetDateTime};
 use tokio::sync::RwLock;
@@ -30,7 +31,7 @@ use rocket_dyn_templates::{context, Template};
 use crate::db::{add_download, FileDb};
 use crate::i18n::TranslationStore;
 use crate::utils::{
-    get_real_path, get_root_domain, is_hidden, map_io_error_to_status, read_dirs_async,
+    get_real_path, get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output, read_dirs_async
 };
 
 mod account;
@@ -529,6 +530,38 @@ async fn index(
             } else {
                 open_file(path, false).await
             }
+        }
+        "7z" => {
+            if !*viewers.0 {
+                return open_file(path, false).await;
+            }
+
+            let output = Command::new("7z")
+                .args(["l", &path.display().to_string()])
+                .output()
+                .map_err(map_io_error_to_status)?;
+
+            let files = parse_7z_output(&String::from_utf8(output.stdout).unwrap_or_default());
+
+            Ok(IndexResponse::Template(Template::render(
+                if *useplain.0 { "plain/zip" } else { "zip" },
+                context! {
+                    title: format!("{} {}", strings.get("viewing_zip").unwrap(), Path::new("/").join(&file).display()),
+                    lang,
+                    strings,
+                    root_domain,
+                    host: host.0,
+                    config: config.inner(),
+                    path: Path::new("/").join(&file).display().to_string(),
+                    files,
+                    theme,
+                    is_logged_in: is_logged_in(jar),
+                    username,
+                    admin: perms == 0,
+                    hires,
+                    smallhead
+                },
+            )))
         }
         "mp4" => {
             if !*viewers.0 {
