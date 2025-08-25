@@ -10,7 +10,7 @@
 <b>{{ strings.system }}</b>: <span id="sys_name">{{ sys_name }}</span> <br>
 <b>{{ strings.kernel_version }}</b>: <span id="sys_ver">{{ sys_ver }}</span> <br>
 <b>{{ strings.hostname }}</b>: <span id="hostname">{{ hostname }}</span> <br>
-<b>{{ strings.disk_usage }}</b>:<br>
+<b><img src="/static/images/icons/ui/{% if hires %}hires/{% endif %}drive.png" class="icon">{{ strings.disk_usage }}</b>:<br>
 <div id="disks">
     {% for s in disks %}
     <div>

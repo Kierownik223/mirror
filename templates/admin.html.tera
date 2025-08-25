@@ -10,7 +10,7 @@
 <a href="/account/direct?to=account"><span><img src="/static/images/icons/ui/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.manage_account }}</span></a>
 {% endif %}
 <br>
-<b>{{ strings.disk_usage }}:</b><br>
+<b><img src="/static/images/icons/ui/{% if hires %}hires/{% endif %}drive.png" class="icon">{{ strings.disk_usage }}:</b><br>
 <div id="disks">
 Loading...
 </div>
