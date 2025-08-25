@@ -21,8 +21,8 @@ use time::{Duration, OffsetDateTime};
 use tokio::sync::RwLock;
 use tokio::time::sleep;
 use utils::{
-    create_cookie, get_bool_cookie, get_session, get_theme, is_logged_in, is_restricted,
-    open_file, parse_language, read_dirs, read_files,
+    create_cookie, get_bool_cookie, get_session, get_theme, is_logged_in, is_restricted, open_file,
+    parse_language, read_dirs, read_files,
 };
 use walkdir::WalkDir;
 
@@ -31,7 +31,8 @@ use rocket_dyn_templates::{context, Template};
 use crate::db::{add_download, FileDb};
 use crate::i18n::TranslationStore;
 use crate::utils::{
-    get_real_path, get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output, read_dirs_async
+    get_real_path, get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output,
+    read_dirs_async,
 };
 
 mod account;

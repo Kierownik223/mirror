@@ -376,7 +376,9 @@ pub fn parse_7z_output(output: &str) -> Vec<MirrorFile> {
 
             let name = filename.to_string();
 
-            let ext = get_extension_from_filename(&filename).unwrap_or_default().to_string();
+            let ext = get_extension_from_filename(&filename)
+                .unwrap_or_default()
+                .to_string();
 
             let mut icon = ext.to_lowercase();
 
