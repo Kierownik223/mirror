@@ -409,10 +409,10 @@ pub fn parse_7z_output(output: &str) -> Vec<MirrorFile> {
 
             let ext = get_extension_from_filename(&filename).unwrap_or_default().to_string();
 
-            let mut icon = &ext.as_str();
+            let mut icon = ext.to_lowercase();
 
             if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
-                icon = &"default";
+                icon = "default".to_string();
             }
 
             files.push(MirrorFile {
