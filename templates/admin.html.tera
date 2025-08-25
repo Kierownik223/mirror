@@ -7,7 +7,7 @@
 <a href="/admin/upload"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">{{ strings.uploader }}</span></a>
 <a href="/admin/sysinfo"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}config.png" class="icon">{{ strings.sysinfo }}</span></a>
 {% if config.enable_direct %}
-<a href="/account/direct?to=account"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.manage_account }}</span></a>
+<a href="/account/direct?to=account"><span><img src="/static/images/icons/ui/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.manage_account }}</span></a>
 {% endif %}
 <br>
 <b>{{ strings.disk_usage }}:</b><br>

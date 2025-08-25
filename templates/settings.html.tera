@@ -5,8 +5,8 @@
 {% if config.enable_login and is_logged_in %}
 {{ strings.welcome }}, {{ username }}!
 <br>
-<a href="/settings/sync"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.sync_settings }}</span></a>
-<a href="/settings/fetch"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.fetch_settings }}</span></a>
+<a href="/settings/sync"><span><img src="/static/images/icons/ui/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.sync_settings }}</span></a>
+<a href="/settings/fetch"><span><img src="/static/images/icons/ui/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.fetch_settings }}</span></a>
 
 {% endif %}
 
@@ -15,14 +15,14 @@
 {% endif %}
 
 <form method="get">
-    <img src="/static/images/icons/{% if hires %}hires/{% endif %}lang.png" class="icon">{{ strings.change_lang }}<br>
+    <img src="/static/images/icons/ui/{% if hires %}hires/{% endif %}lang.png" class="icon">{{ strings.change_lang }}<br>
     <select name="lang">
         {% for s in language_names %}
         <option value="{{ s.0 }}" {% if lang==s.0 %}selected{% endif %}>{{ s.1 }} ({{ s.0 }})</option>
         {% endfor %}
     </select>
     <br>
-    <img src="/static/images/icons/{% if hires %}hires/{% endif %}theme.png" class="icon">{{ strings.change_theme }}<br>
+    <img src="/static/images/icons/ui/{% if hires %}hires/{% endif %}theme.png" class="icon">{{ strings.change_theme }}<br>
     <select name="theme">
         <option value="standard" {% if theme=="standard" %}selected{% endif %}>{{ strings.theme_default }}</option>
         <option value="darkblu" {% if theme=="darkblu" %}selected{% endif %}>{{ strings.theme_darkblu }}</option>
@@ -34,7 +34,7 @@
         {% if theme == "venti" %}<option value="venti" selected>Venti by Olek47</option>{% endif %}
     </select>
     <br>
-    <label for="hires"><img src="/static/images/icons/{% if hires %}hires/{% endif %}floppy.png" class="icon">{{ strings.hires }}</label>
+    <label for="hires"><img src="/static/images/icons/ui/{% if hires %}hires/{% endif %}floppy.png" class="icon">{{ strings.hires }}</label>
     <br>
     <label><input type="radio" name="hires" value="true" {% if hires %}checked {% endif %}>{{ strings.enable }}</label>
     <label><input type="radio" name="hires" value="false" {% if not hires %}checked {% endif %}>{{ strings.disable }}</label>
@@ -49,7 +49,7 @@
     <label><input type="radio" name="plain" value="true" {% if plain %}checked {% endif %}>{{ strings.enable }}</label>
     <label><input type="radio" name="plain" value="false" {% if not plain %}checked {% endif %}>{{ strings.disable }}</label>
     <br>
-    <label for="nooverride"><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.dont_override_settings }}</label>
+    <label for="nooverride"><img src="/static/images/icons/ui/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.dont_override_settings }}</label>
     <br>
     <label><input type="radio" name="nooverride" value="true" {% if nooverride %}checked {% endif %}>{{ strings.enable }}</label>
     <label><input type="radio" name="nooverride" value="false" {% if not nooverride %}checked {% endif %}>{{ strings.disable }}</label>
@@ -67,8 +67,8 @@
     {% endif %}
     <br>
     <center>
-        <button type="submit" class="submit"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.save_settings }}</span></button>
+        <button type="submit" class="submit"><span><img src="/static/images/icons/ui/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.save_settings }}</span></button>
     </center>
-    <a href="/settings/reset"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.reset_settings }}</span></a>
+    <a href="/settings/reset"><span><img src="/static/images/icons/ui/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.reset_settings }}</span></a>
 </form>
 {% endblock content %}

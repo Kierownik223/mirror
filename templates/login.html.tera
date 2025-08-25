@@ -7,17 +7,17 @@
     {% if message != "" %}
     <p class="message">{{ message }}</p>
     {% endif %}
-    <label for="username"><span><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}login.png">{{ strings.username }}:</span></label><br>
+    <label for="username"><span><img class="icon" src="/static/images/icons/ui/{% if hires %}hires/{% endif %}user.png">{{ strings.username }}:</span></label><br>
     <center><input type="text" name="username" id="username" class="text" required></center><br>
-    <label for="password"><span><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}key.png">{{ strings.password }}:</span></label><br>
+    <label for="password"><span><img class="icon" src="/static/images/icons/ui/{% if hires %}hires/{% endif %}keys.png">{{ strings.password }}:</span></label><br>
     <center><input type="password" name="password" id="password" class="text" required></center><br>
     <center>
-        <button type="submit"><span><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}login.png">{{ strings.log_in }}</span></button>
+        <button type="submit"><span><img class="icon" src="/static/images/icons/ui/{% if hires %}hires/{% endif %}login.png">{{ strings.log_in }}</span></button>
     </center>
     {% if next != "" %}
     {{ strings.login_to_continue }} {{ next }}
     {% endif %}
     <p><span><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}md.png">{{ strings.tip }}</span></p>
-    {{ strings.settings_tip1 }} <a href="/settings"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}settings.png">{{ strings.settings }}</a> {{ strings.settings_tip2 }}
+    {{ strings.settings_tip1 }} <a href="/settings"><img class="icon" src="/static/images/icons/ui/{% if hires %}hires/{% endif %}settings.png">{{ strings.settings }}</a> {{ strings.settings_tip2 }}
 </form>
 {% endblock content %}

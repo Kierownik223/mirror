@@ -4,7 +4,7 @@
 <a href="/">MARMAK Mirror</a>/<a href="/admin/">{{ strings.admin }}</a>/<a href="/admin/upload">{{ strings.uploader }}</a><br>
 {{ strings.welcome }}, {{ username }}!
 <br>
-<a href="/admin/"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}floppy.png" class="icon">{{ strings.admin }}</span></a>
+<a href="/admin/"><span><img src="/static/images/icons/ui/{% if hires %}hires/{% endif %}admin.png" class="icon">{{ strings.admin }}</span></a>
 <a href="/uploads/"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">Uploads</span></a>
 <br>
 
