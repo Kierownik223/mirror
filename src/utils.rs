@@ -248,37 +248,6 @@ pub async fn open_file(path: PathBuf, cache: bool) -> Result<IndexResponse, Stat
     }
 }
 
-pub fn list_to_files(files: Vec<&str>) -> Result<Vec<MirrorFile>, Error> {
-    let mut file_list = Vec::new();
-
-    for file in files {
-        let mut ext = get_extension_from_filename(file)
-            .unwrap_or_else(|| "")
-            .to_lowercase();
-
-        if file.ends_with("/") {
-            ext = "Folder".to_string();
-        }
-
-        let mut icon = ext.as_str();
-        if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
-            icon = "default";
-        }
-
-        let file: MirrorFile = MirrorFile {
-            name: file.to_string(),
-            ext: ext.to_string(),
-            icon: icon.to_string(),
-            size: "---".to_string(),
-            downloads: None,
-        };
-
-        file_list.push(file);
-    }
-
-    Ok(file_list)
-}
-
 pub fn create_cookie<'a>(name: &'a str, value: &str) -> Cookie<'a> {
     let now = OffsetDateTime::now_utc() + Duration::days(365);
     let mut cookie = Cookie::new(name, value.to_string());
