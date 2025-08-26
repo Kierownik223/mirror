@@ -4,7 +4,6 @@ use std::{
 };
 
 use ::sysinfo::{Disks, System};
-use humansize::{format_size, DECIMAL};
 use rocket::{
     data::ToByteUnit,
     fairing::AdHoc,
@@ -18,8 +17,7 @@ use rocket_multipart_form_data::{
 
 use crate::{
     utils::{
-        get_bool_cookie, get_extension_from_filename, get_root_domain, get_session, get_theme,
-        is_logged_in,
+        format_size, get_bool_cookie, get_extension_from_filename, get_root_domain, get_session, get_theme, is_logged_in
     },
     Config, Disk, Host, Language, MirrorFile, TranslationStore, UsePlain,
 };
@@ -196,8 +194,8 @@ fn sysinfo(
                     fs: x.file_system().to_str().unwrap().to_string(),
                     used_space,
                     total_space: x.total_space(),
-                    used_space_readable: format_size(used_space, DECIMAL),
-                    total_space_readable: format_size(x.total_space(), DECIMAL),
+                    used_space_readable: format_size(used_space),
+                    total_space_readable: format_size(x.total_space()),
                 }
             })
             .collect();
@@ -222,9 +220,9 @@ fn sysinfo(
                 smallhead: get_bool_cookie(jar, "smallhead", false),
                 username: username,
                 total_mem: total_mem,
-                total_mem_readable: format_size(total_mem, DECIMAL),
+                total_mem_readable: format_size(total_mem),
                 used_mem: used_mem,
-                used_mem_readable: format_size(used_mem, DECIMAL),
+                used_mem_readable: format_size(used_mem),
                 sys_name: sys_name,
                 sys_ver: sys_ver,
                 hostname: hostname,

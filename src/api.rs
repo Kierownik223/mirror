@@ -7,7 +7,6 @@ use std::{
 };
 
 use ::sysinfo::{Disks, RefreshKind, System};
-use humansize::{format_size, DECIMAL};
 use rocket::{
     data::ToByteUnit,
     fairing::AdHoc,
@@ -25,7 +24,7 @@ use crate::{
     db::{get_downloads, FileDb},
     read_files,
     utils::{
-        add_path_to_zip, get_extension_from_filename, get_real_path, get_real_path_with_perms, get_session, is_logged_in, is_restricted, map_io_error_to_status, read_dirs_async
+        add_path_to_zip, format_size, get_extension_from_filename, get_real_path, get_real_path_with_perms, get_session, is_logged_in, is_restricted, map_io_error_to_status, read_dirs_async
     },
     Config, Disk, FileSizes, Host, MirrorFile, Sysinfo,
 };
@@ -311,19 +310,18 @@ fn sysinfo(jar: &CookieJar<'_>) -> Result<Json<Sysinfo>, Status> {
                     used_space: disk.total_space() - disk.available_space(),
                     total_space: disk.total_space(),
                     used_space_readable: format_size(
-                        disk.total_space() - disk.available_space(),
-                        DECIMAL,
+                        disk.total_space() - disk.available_space()
                     ),
-                    total_space_readable: format_size(disk.total_space(), DECIMAL),
+                    total_space_readable: format_size(disk.total_space()),
                 });
             }
         }
 
         return Ok(Json(Sysinfo {
             total_mem: total_mem,
-            total_mem_readable: format_size(total_mem, DECIMAL),
+            total_mem_readable: format_size(total_mem),
             used_mem: used_mem,
-            used_mem_readable: format_size(used_mem, DECIMAL),
+            used_mem_readable: format_size(used_mem),
             disks: disks,
         }));
     }
