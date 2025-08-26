@@ -1624,7 +1624,6 @@ dependencies = [
  "audiotags",
  "base64 0.22.1",
  "bcrypt",
- "humansize",
  "markdown",
  "rand",
  "rocket",
