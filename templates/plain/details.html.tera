@@ -30,6 +30,6 @@
 <hr>
 <a href="./">./</a>
 <p><strong>{{ strings.file_name }}:</strong> {{ filename }}</p>
-<p><strong>{{ strings.file_size }}:</strong> {{ filesize }}</p>
+<p><strong>{{ strings.file_size }}:</strong> {{ filesize | filesizeformat }}</p>
 <a href="?download">{{ strings.download }}</a>
 {% endblock content %}

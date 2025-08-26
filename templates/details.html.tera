@@ -27,5 +27,5 @@
     <a href="./"><span><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png">./</span></a><div style="float: right;"><a href="?download"><span><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">{{ strings.download }}</span></a></div><br>
 </div>
 <p><strong>{{ strings.file_name }}:</strong> {{ filename }}</p>
-<p><strong>{{ strings.file_size }}:</strong> {{ filesize }}</p>
+<p><strong>{{ strings.file_size }}:</strong> {{ filesize | filesizeformat }}</p>
 {% endblock content %}

@@ -1,6 +1,5 @@
 use audiotags::{MimeType, Tag};
 use db::{fetch_user, Db};
-use humansize::{format_size, DECIMAL};
 use rocket::fs::NamedFile;
 use rocket::http::{ContentType, Cookie, CookieJar, Status};
 use rocket::request::{FromRequest, Outcome};
@@ -811,7 +810,7 @@ async fn index(
                         hires,
                         smallhead,
                         filename: path.file_name().unwrap().to_str(),
-                        filesize: format_size(fs::metadata(&path).unwrap().len(), DECIMAL)
+                        filesize: fs::metadata(&path).unwrap().len(),
                     },
                 )))
             } else {
