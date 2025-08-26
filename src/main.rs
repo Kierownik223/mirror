@@ -301,13 +301,13 @@ impl<'r> Responder<'r, 'r> for IndexResponse {
                 let mut res = t.respond_to(req)?;
                 res.set_raw_header("Cache-Control", "private");
                 Ok(res)
-            },
+            }
             IndexResponse::HeaderFile(h) => h.respond_to(req),
             IndexResponse::NamedFile(f) => {
                 let mut res = f.respond_to(req)?;
                 res.set_raw_header("Cache-Control", "public");
                 Ok(res)
-            },
+            }
             IndexResponse::Redirect(r) => r.respond_to(req),
         }
     }
@@ -339,20 +339,12 @@ async fn poster(
                     ContentType::new(mime_type.0, mime_type.1),
                     picture.data.to_vec(),
                 ),
-                header: if is_private {
-                    "private"
-                } else {
-                    "public"
-                }
+                header: if is_private { "private" } else { "public" },
             }));
         } else {
             return Ok(Err(open_file(
                 Path::new(&"files/static/images/icons/256x256/mp3.png").to_path_buf(),
-                if is_private {
-                    "private"
-                } else {
-                    "public"
-                },
+                if is_private { "private" } else { "public" },
             )
             .await));
         }
@@ -374,13 +366,11 @@ async fn poster(
             icon = "files/static/images/icons/256x256/default.png".to_string();
         }
 
-        Ok(Err(
-            open_file(Path::new(&icon).to_path_buf(), if is_private {
-                    "private"
-                } else {
-                    "public"
-                }).await
-        ))
+        Ok(Err(open_file(
+            Path::new(&icon).to_path_buf(),
+            if is_private { "private" } else { "public" },
+        )
+        .await))
     }
 }
 

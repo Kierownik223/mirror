@@ -227,7 +227,10 @@ pub fn is_hidden(path: &Path, jar: &CookieJar<'_>) -> bool {
     false
 }
 
-pub async fn open_file(path: PathBuf, cache_control: &'static str) -> Result<IndexResponse, Status> {
+pub async fn open_file(
+    path: PathBuf,
+    cache_control: &'static str,
+) -> Result<IndexResponse, Status> {
     let config = Config::load();
     if !path.exists() {
         return Err(Status::NotFound);

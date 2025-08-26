@@ -18,7 +18,10 @@ use serde_json::json;
 use time::{Duration, OffsetDateTime};
 
 use crate::{
-    db::{fetch_user, login_user, Db}, utils::{get_bool_cookie, get_root_domain, get_session, get_theme, is_logged_in}, Config, Host, IndexResponse, Language, MarmakUser, TranslationStore, UsePlain, UserToken, XForwardedFor
+    db::{fetch_user, login_user, Db},
+    utils::{get_bool_cookie, get_root_domain, get_session, get_theme, is_logged_in},
+    Config, Host, IndexResponse, Language, MarmakUser, TranslationStore, UsePlain, UserToken,
+    XForwardedFor,
 };
 
 #[get("/login?<next>")]

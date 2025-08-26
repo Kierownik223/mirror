@@ -19,7 +19,8 @@ use crate::{
     utils::{
         format_size, get_bool_cookie, get_extension_from_filename, get_root_domain, get_session,
         get_theme, is_logged_in,
-    }, Config, Disk, Host, IndexResponse, Language, MirrorFile, TranslationStore, UsePlain
+    },
+    Config, Disk, Host, IndexResponse, Language, MirrorFile, TranslationStore, UsePlain,
 };
 
 #[post("/upload", data = "<data>")]

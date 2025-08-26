@@ -21,11 +21,14 @@ use rocket_multipart_form_data::{
 use zip::write::SimpleFileOptions;
 
 use crate::{
-    db::{get_downloads, FileDb}, read_files, utils::{
+    db::{get_downloads, FileDb},
+    read_files,
+    utils::{
         add_path_to_zip, format_size, get_extension_from_filename, get_real_path,
         get_real_path_with_perms, get_session, is_logged_in, is_restricted, map_io_error_to_status,
         read_dirs_async,
-    }, Cached, Config, Disk, FileSizes, Host, MirrorFile, Sysinfo
+    },
+    Cached, Config, Disk, FileSizes, Host, MirrorFile, Sysinfo,
 };
 
 #[derive(serde::Serialize)]
@@ -90,7 +93,10 @@ async fn listing(
 
     dir_list.append(&mut file_list);
 
-    Ok(Cached { response: Json(dir_list), header: "no-cache" })
+    Ok(Cached {
+        response: Json(dir_list),
+        header: "no-cache",
+    })
 }
 
 #[get("/<file..>", rank = 1)]
@@ -120,18 +126,21 @@ async fn file_with_downloads(
         icon = "default";
     }
 
-    Ok(Cached { response: Json(MirrorFile {
-        name,
-        ext: path
-            .extension()
-            .unwrap()
-            .to_str()
-            .unwrap_or_default()
-            .to_string(),
-        icon: icon.to_string(),
-        size: md.len(),
-        downloads: Some(downloads),
-    }), header: "no-cache" })
+    Ok(Cached {
+        response: Json(MirrorFile {
+            name,
+            ext: path
+                .extension()
+                .unwrap()
+                .to_str()
+                .unwrap_or_default()
+                .to_string(),
+            icon: icon.to_string(),
+            size: md.len(),
+            downloads: Some(downloads),
+        }),
+        header: "no-cache",
+    })
 }
 
 #[get("/<file..>", rank = 1)]
@@ -160,18 +169,21 @@ async fn file(file: PathBuf) -> Result<Cached<Json<MirrorFile>>, Status> {
         icon = "default";
     }
 
-    Ok(Cached { response: Json(MirrorFile {
-        name,
-        ext: path
-            .extension()
-            .unwrap_or_default()
-            .to_str()
-            .unwrap_or_default()
-            .to_string(),
-        icon: icon.to_string(),
-        size: md.len(),
-        downloads: None,
-    }), header: "no-cache"})
+    Ok(Cached {
+        response: Json(MirrorFile {
+            name,
+            ext: path
+                .extension()
+                .unwrap_or_default()
+                .to_str()
+                .unwrap_or_default()
+                .to_string(),
+            icon: icon.to_string(),
+            size: md.len(),
+            downloads: None,
+        }),
+        header: "no-cache",
+    })
 }
 
 #[patch("/<file..>", data = "<rename_req>")]
@@ -316,13 +328,16 @@ fn sysinfo(jar: &CookieJar<'_>) -> Result<Cached<Json<Sysinfo>>, Status> {
             }
         }
 
-        Ok(Cached { response: Json(Sysinfo {
-            total_mem: total_mem,
-            total_mem_readable: format_size(total_mem),
-            used_mem: used_mem,
-            used_mem_readable: format_size(used_mem),
-            disks: disks,
-        }), header: "no-cache"})
+        Ok(Cached {
+            response: Json(Sysinfo {
+                total_mem: total_mem,
+                total_mem_readable: format_size(total_mem),
+                used_mem: used_mem,
+                used_mem_readable: format_size(used_mem),
+                disks: disks,
+            }),
+            header: "no-cache",
+        })
     }
 }
 
@@ -349,15 +364,18 @@ fn user(jar: &CookieJar<'_>) -> Result<Cached<Json<User>>, Status> {
             settings.insert(key.to_string(), value.unwrap_or_default());
         }
 
-        Ok(Cached { response: Json(User {
-            username,
-            scope: match perms {
-                0 => "admin".to_string(),
-                _ => "user".to_string(),
-            },
-            perms,
-            settings,
-        }), header: "no-cache"})
+        Ok(Cached {
+            response: Json(User {
+                username,
+                scope: match perms {
+                    0 => "admin".to_string(),
+                    _ => "user".to_string(),
+                },
+                perms,
+                settings,
+            }),
+            header: "no-cache",
+        })
     }
 }
 
