@@ -18,9 +18,7 @@ use serde_json::json;
 use time::{Duration, OffsetDateTime};
 
 use crate::{
-    db::{fetch_user, login_user, Db},
-    utils::{get_bool_cookie, get_root_domain, get_session, get_theme, is_logged_in},
-    Config, Host, Language, MarmakUser, TranslationStore, UsePlain, UserToken, XForwardedFor,
+    db::{fetch_user, login_user, Db}, utils::{get_bool_cookie, get_root_domain, get_session, get_theme, is_logged_in}, Config, Host, IndexResponse, Language, MarmakUser, TranslationStore, UsePlain, UserToken, XForwardedFor
 };
 
 #[get("/login?<next>")]
@@ -32,13 +30,13 @@ fn login_page(
     config: &State<Config>,
     useplain: UsePlain<'_>,
     next: Option<&str>,
-) -> Result<Template, Redirect> {
+) -> IndexResponse {
     if is_logged_in(jar) {
         let perms = get_session(jar).1;
         if perms == 0 {
-            return Err(Redirect::to("/admin/"));
+            return IndexResponse::Redirect(Redirect::to("/admin/"));
         } else {
-            return Err(Redirect::to("/"));
+            return IndexResponse::Redirect(Redirect::to("/"));
         }
     }
 
@@ -46,7 +44,7 @@ fn login_page(
 
     let next = next.unwrap_or("");
 
-    Ok(Template::render(
+    IndexResponse::Template(Template::render(
         if *useplain.0 { "plain/login" } else { "login" },
         context! {
             title: "Login",
@@ -79,7 +77,7 @@ async fn login(
     host: Host<'_>,
     config: &State<Config>,
     useplain: UsePlain<'_>,
-) -> Result<Redirect, Template> {
+) -> IndexResponse {
     if let Some(db_user) = login_user(db, &user.username, &user.password, &ip.0, true).await {
         if !get_bool_cookie(jar, "nooverride", false) {
             if let Some(mirror_settings) = db_user.mirror_settings {
@@ -120,9 +118,9 @@ async fn login(
             redirect_url = next.unwrap_or("/admin");
         }
 
-        return Ok(Redirect::to(
+        IndexResponse::Redirect(Redirect::to(
             urlencoding::encode(redirect_url).replace("%2F", "/"),
-        ));
+        ))
     } else {
         let strings = translations.get_translation(&lang.0);
 
@@ -131,7 +129,7 @@ async fn login(
             &user.username, &user.password, &ip.0
         );
 
-        return Err(Template::render(
+        IndexResponse::Template(Template::render(
             if *useplain.0 { "plain/login" } else { "login" },
             context! {
                 title: "Login",
@@ -148,7 +146,7 @@ async fn login(
                 message: strings.get("invalid_info"),
                 next: "",
             },
-        ));
+        ))
     }
 }
 

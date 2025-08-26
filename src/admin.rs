@@ -19,8 +19,7 @@ use crate::{
     utils::{
         format_size, get_bool_cookie, get_extension_from_filename, get_root_domain, get_session,
         get_theme, is_logged_in,
-    },
-    Config, Disk, Host, Language, MirrorFile, TranslationStore, UsePlain,
+    }, Config, Disk, Host, IndexResponse, Language, MirrorFile, TranslationStore, UsePlain
 };
 
 #[post("/upload", data = "<data>")]
@@ -33,7 +32,7 @@ async fn upload(
     host: Host<'_>,
     config: &State<Config>,
     useplain: UsePlain<'_>,
-) -> Result<Template, Status> {
+) -> Result<IndexResponse, Status> {
     if !is_logged_in(jar) {
         return Err(Status::Unauthorized);
     } else {
@@ -126,7 +125,7 @@ async fn upload(
 
             let strings = translations.get_translation(&lang.0);
 
-            return Ok(Template::render(
+            return Ok(IndexResponse::Template(Template::render(
                 if *useplain.0 {
                     "plain/upload"
                 } else {
@@ -148,7 +147,7 @@ async fn upload(
                     filebrowser: !get_bool_cookie(jar, "filebrowser", false),
                     uploadedfiles: uploaded_files
                 },
-            ));
+            )));
         } else {
             return Err(Status::BadRequest);
         }
@@ -163,7 +162,7 @@ fn sysinfo(
     host: Host<'_>,
     config: &State<Config>,
     useplain: UsePlain<'_>,
-) -> Result<Template, Status> {
+) -> Result<IndexResponse, Status> {
     if !is_logged_in(jar) {
         return Err(Status::Unauthorized);
     } else {
@@ -201,7 +200,7 @@ fn sysinfo(
             })
             .collect();
 
-        return Ok(Template::render(
+        return Ok(IndexResponse::Template(Template::render(
             if *useplain.0 {
                 "plain/sysinfo"
             } else {
@@ -229,7 +228,7 @@ fn sysinfo(
                 hostname: hostname,
                 disks: disks
             },
-        ));
+        )));
     }
 }
 
@@ -241,7 +240,7 @@ fn uploader(
     host: Host<'_>,
     config: &State<Config>,
     useplain: UsePlain<'_>,
-) -> Result<Template, Status> {
+) -> Result<IndexResponse, Status> {
     if !is_logged_in(jar) {
         return Err(Status::Unauthorized);
     } else {
@@ -253,7 +252,7 @@ fn uploader(
 
         let strings = translations.get_translation(&lang.0);
 
-        return Ok(Template::render(
+        return Ok(IndexResponse::Template(Template::render(
             if *useplain.0 {
                 "plain/upload"
             } else {
@@ -275,7 +274,7 @@ fn uploader(
                 filebrowser: !get_bool_cookie(jar, "filebrowser", false),
                 uploadedfiles: vec![MirrorFile { name: "".to_string(), ext: "".to_string(), icon: "default".to_string(), size: 0, downloads: None }]
             },
-        ));
+        )));
     }
 }
 
@@ -287,7 +286,7 @@ fn admin(
     host: Host<'_>,
     config: &State<Config>,
     useplain: UsePlain<'_>,
-) -> Result<Template, Status> {
+) -> Result<IndexResponse, Status> {
     if !is_logged_in(jar) {
         return Err(Status::Unauthorized);
     } else {
@@ -299,7 +298,7 @@ fn admin(
 
         let strings = translations.get_translation(&lang.0);
 
-        return Ok(Template::render(
+        return Ok(IndexResponse::Template(Template::render(
             if *useplain.0 { "plain/admin" } else { "admin" },
             context! {
                 title: strings.get("admin").unwrap(),
@@ -315,7 +314,7 @@ fn admin(
                 username: username,
                 admin: perms == 0,
             },
-        ));
+        )));
     }
 }
 pub fn build() -> AdHoc {
