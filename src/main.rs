@@ -103,7 +103,7 @@ struct Settings<'r> {
     filebrowser: Option<&'r str>,
 }
 
-struct HeaderFile(String, bool);
+struct HeaderFile(String, &'static str);
 
 impl<'r> Responder<'r, 'r> for HeaderFile {
     fn respond_to(self, _: &Request<'_>) -> response::Result<'r> {
@@ -116,11 +116,7 @@ impl<'r> Responder<'r, 'r> for HeaderFile {
             format!("{}{}", config.x_sendfile_prefix, self.0),
         );
 
-        if self.1 {
-            builder.raw_header("Cache-Control", "public");
-        } else {
-            builder.raw_header("Cache-Control", "private");
-        }
+        builder.raw_header("Cache-Control", self.1);
 
         builder.ok()
     }
@@ -275,13 +271,14 @@ struct FileEntry {
 
 pub struct Cached<R> {
     response: R,
+    header: &'static str,
 }
 
 impl<'r, R: 'r + Responder<'r, 'static> + Send> Responder<'r, 'static> for Cached<R> {
     fn respond_to(self, request: &'r Request<'_>) -> response::Result<'static> {
         let mut res = self.response.respond_to(request)?;
 
-        res.set_raw_header("Cache-Control", "public");
+        res.set_raw_header("Cache-Control", self.header);
 
         Ok(res)
     }
@@ -300,9 +297,17 @@ type IndexResult = Result<IndexResponse, Status>;
 impl<'r> Responder<'r, 'r> for IndexResponse {
     fn respond_to(self, req: &'r rocket::Request<'_>) -> rocket::response::Result<'r> {
         match self {
-            IndexResponse::Template(t) => t.respond_to(req),
+            IndexResponse::Template(t) => {
+                let mut res = t.respond_to(req)?;
+                res.set_raw_header("Cache-Control", "private");
+                Ok(res)
+            },
             IndexResponse::HeaderFile(h) => h.respond_to(req),
-            IndexResponse::NamedFile(f) => f.respond_to(req),
+            IndexResponse::NamedFile(f) => {
+                let mut res = f.respond_to(req)?;
+                res.set_raw_header("Cache-Control", "public");
+                Ok(res)
+            },
             IndexResponse::Redirect(r) => r.respond_to(req),
         }
     }
@@ -334,11 +339,20 @@ async fn poster(
                     ContentType::new(mime_type.0, mime_type.1),
                     picture.data.to_vec(),
                 ),
+                header: if is_private {
+                    "private"
+                } else {
+                    "public"
+                }
             }));
         } else {
             return Ok(Err(open_file(
                 Path::new(&"files/static/images/icons/256x256/mp3.png").to_path_buf(),
-                !is_private,
+                if is_private {
+                    "private"
+                } else {
+                    "public"
+                },
             )
             .await));
         }
@@ -361,7 +375,11 @@ async fn poster(
         }
 
         Ok(Err(
-            open_file(Path::new(&icon).to_path_buf(), !is_private).await
+            open_file(Path::new(&icon).to_path_buf(), if is_private {
+                    "private"
+                } else {
+                    "public"
+                }).await
         ))
     }
 }
@@ -375,7 +393,7 @@ async fn file(file: PathBuf, jar: &CookieJar<'_>) -> Result<IndexResponse, Statu
         return Err(Status::Unauthorized);
     }
 
-    open_file(path, !is_private).await
+    open_file(path, if is_private { "private" } else { "public" }).await
 }
 
 #[get("/<file..>?download")]
@@ -389,7 +407,7 @@ async fn download_with_counter(
     let (path, is_private) = get_real_path(&file, username)?;
 
     if is_private {
-        return open_file(path, !is_private).await;
+        return open_file(path, if is_private { "private" } else { "public" }).await;
     }
 
     let file = file.display().to_string();
@@ -410,7 +428,7 @@ async fn download_with_counter(
     .to_lowercase();
 
     if !config.extensions.contains(&ext) {
-        return open_file(path, true).await;
+        return open_file(path, "public").await;
     } else if &ext == "folder" {
         return Err(Status::Forbidden);
     }
@@ -431,7 +449,7 @@ async fn download(file: PathBuf, jar: &CookieJar<'_>) -> Result<IndexResponse, S
         return Err(Status::Unauthorized);
     }
 
-    open_file(path, !is_private).await
+    open_file(path, if is_private { "private" } else { "public" }).await
 }
 
 #[get("/<file..>", rank = 10)]
@@ -501,7 +519,7 @@ async fn index(
         }
         "7z" | "rar" | "zip" => {
             if !*viewers.0 {
-                return open_file(path, false).await;
+                return open_file(path, "private").await;
             }
 
             let output = Command::new("7z")
@@ -533,7 +551,7 @@ async fn index(
         }
         "mp4" => {
             if !*viewers.0 {
-                return open_file(path, false).await;
+                return open_file(path, "private").await;
             }
 
             let displaydetails = true;
@@ -593,7 +611,7 @@ async fn index(
         }
         "mp3" | "m4a" | "m4b" | "flac" => {
             if !*viewers.0 {
-                return open_file(path, false).await;
+                return open_file(path, "private").await;
             }
 
             let audiopath = Path::new("/").join(file.clone()).display().to_string();
@@ -641,7 +659,7 @@ async fn index(
                     },
                 )))
             } else {
-                open_file(path, true).await
+                open_file(path, if is_private { "private" } else { "public" }).await
             }
         }
         "folder" => {
@@ -816,7 +834,7 @@ async fn index(
                     },
                 )))
             } else {
-                open_file(path, !is_private).await
+                open_file(path, if is_private { "private" } else { "public" }).await
             }
         }
     }
@@ -831,7 +849,7 @@ fn settings(
     host: Host<'_>,
     config: &State<Config>,
     useplain: UsePlain<'_>,
-) -> Result<Template, Redirect> {
+) -> Result<Cached<Template>, Redirect> {
     let mut lang = lang.0;
     let theme = get_theme(jar);
     let strings = translations.get_translation(&lang);
@@ -897,7 +915,7 @@ fn settings(
         String::new()
     };
 
-    return Ok(Template::render(
+    return Ok(Cached { response: Template::render(
         if *useplain.0 {
             "plain/settings"
         } else {
@@ -923,7 +941,7 @@ fn settings(
             language_names,
             show_cookie_notice,
         },
-    ));
+    ), header: "private"} );
 }
 
 #[get("/settings/fetch")]

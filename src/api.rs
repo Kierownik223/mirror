@@ -21,14 +21,11 @@ use rocket_multipart_form_data::{
 use zip::write::SimpleFileOptions;
 
 use crate::{
-    db::{get_downloads, FileDb},
-    read_files,
-    utils::{
+    db::{get_downloads, FileDb}, read_files, utils::{
         add_path_to_zip, format_size, get_extension_from_filename, get_real_path,
         get_real_path_with_perms, get_session, is_logged_in, is_restricted, map_io_error_to_status,
         read_dirs_async,
-    },
-    Config, Disk, FileSizes, Host, MirrorFile, Sysinfo,
+    }, Cached, Config, Disk, FileSizes, Host, MirrorFile, Sysinfo
 };
 
 #[derive(serde::Serialize)]
@@ -71,7 +68,7 @@ async fn listing(
     jar: &CookieJar<'_>,
     config: &rocket::State<Config>,
     sizes: &State<FileSizes>,
-) -> Result<Json<Vec<MirrorFile>>, Status> {
+) -> Result<Cached<Json<Vec<MirrorFile>>>, Status> {
     let username = get_session(jar).0;
 
     let path = get_real_path(&file, username)?.0.display().to_string();
@@ -93,14 +90,14 @@ async fn listing(
 
     dir_list.append(&mut file_list);
 
-    Ok(Json(dir_list))
+    Ok(Cached { response: Json(dir_list), header: "no-cache" })
 }
 
 #[get("/<file..>", rank = 1)]
 async fn file_with_downloads(
     db: Connection<FileDb>,
     file: PathBuf,
-) -> Result<Json<MirrorFile>, Status> {
+) -> Result<Cached<Json<MirrorFile>>, Status> {
     let path = Path::new("files/").join(&file);
     let file = file.display().to_string();
 
@@ -123,7 +120,7 @@ async fn file_with_downloads(
         icon = "default";
     }
 
-    Ok(Json(MirrorFile {
+    Ok(Cached { response: Json(MirrorFile {
         name,
         ext: path
             .extension()
@@ -134,11 +131,11 @@ async fn file_with_downloads(
         icon: icon.to_string(),
         size: md.len(),
         downloads: Some(downloads),
-    }))
+    }), header: "no-cache" })
 }
 
 #[get("/<file..>", rank = 1)]
-async fn file(file: PathBuf) -> Result<Json<MirrorFile>, Status> {
+async fn file(file: PathBuf) -> Result<Cached<Json<MirrorFile>>, Status> {
     let path = Path::new("files/").join(&file);
 
     if !&path.exists() {
@@ -163,7 +160,7 @@ async fn file(file: PathBuf) -> Result<Json<MirrorFile>, Status> {
         icon = "default";
     }
 
-    Ok(Json(MirrorFile {
+    Ok(Cached { response: Json(MirrorFile {
         name,
         ext: path
             .extension()
@@ -174,7 +171,7 @@ async fn file(file: PathBuf) -> Result<Json<MirrorFile>, Status> {
         icon: icon.to_string(),
         size: md.len(),
         downloads: None,
-    }))
+    }), header: "no-cache"})
 }
 
 #[patch("/<file..>", data = "<rename_req>")]
@@ -292,7 +289,7 @@ async fn delete<'a>(file: PathBuf, jar: &CookieJar<'_>) -> Result<Status, (Statu
 }
 
 #[get("/sysinfo")]
-fn sysinfo(jar: &CookieJar<'_>) -> Result<Json<Sysinfo>, Status> {
+fn sysinfo(jar: &CookieJar<'_>) -> Result<Cached<Json<Sysinfo>>, Status> {
     if !is_logged_in(jar) {
         return Err(Status::Unauthorized);
     } else {
@@ -319,18 +316,18 @@ fn sysinfo(jar: &CookieJar<'_>) -> Result<Json<Sysinfo>, Status> {
             }
         }
 
-        return Ok(Json(Sysinfo {
+        Ok(Cached { response: Json(Sysinfo {
             total_mem: total_mem,
             total_mem_readable: format_size(total_mem),
             used_mem: used_mem,
             used_mem_readable: format_size(used_mem),
             disks: disks,
-        }));
+        }), header: "no-cache"})
     }
 }
 
 #[get("/user")]
-fn user(jar: &CookieJar<'_>) -> Result<Json<User>, Status> {
+fn user(jar: &CookieJar<'_>) -> Result<Cached<Json<User>>, Status> {
     if !is_logged_in(jar) {
         return Err(Status::Unauthorized);
     } else {
@@ -352,7 +349,7 @@ fn user(jar: &CookieJar<'_>) -> Result<Json<User>, Status> {
             settings.insert(key.to_string(), value.unwrap_or_default());
         }
 
-        Ok(Json(User {
+        Ok(Cached { response: Json(User {
             username,
             scope: match perms {
                 0 => "admin".to_string(),
@@ -360,7 +357,7 @@ fn user(jar: &CookieJar<'_>) -> Result<Json<User>, Status> {
             },
             perms,
             settings,
-        }))
+        }), header: "no-cache"})
     }
 }
 
