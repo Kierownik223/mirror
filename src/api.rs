@@ -154,7 +154,7 @@ async fn file(file: PathBuf) -> Result<Json<MirrorFile>, Status> {
         .to_str()
         .unwrap_or_default()
         .to_string();
-    let mut icon = path.extension().unwrap().to_str().unwrap_or("default");
+    let mut icon = path.extension().unwrap_or_default().to_str().unwrap_or("default");
 
     if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
         icon = "default";
@@ -164,7 +164,7 @@ async fn file(file: PathBuf) -> Result<Json<MirrorFile>, Status> {
         name,
         ext: path
             .extension()
-            .unwrap()
+            .unwrap_or_default()
             .to_str()
             .unwrap_or_default()
             .to_string(),
