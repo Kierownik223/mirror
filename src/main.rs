@@ -849,7 +849,7 @@ fn settings(
     host: Host<'_>,
     config: &State<Config>,
     useplain: UsePlain<'_>,
-) -> Result<Cached<Template>, Redirect> {
+) -> IndexResponse {
     let mut lang = lang.0;
     let theme = get_theme(jar);
     let strings = translations.get_translation(&lang);
@@ -904,7 +904,7 @@ fn settings(
     }
 
     if redir {
-        return Err(Redirect::to(uri!("/")));
+        return IndexResponse::Redirect(Redirect::to(uri!("/")));
     }
 
     let show_cookie_notice = jar.iter().next().is_none();
@@ -915,7 +915,7 @@ fn settings(
         String::new()
     };
 
-    return Ok(Cached { response: Template::render(
+    return IndexResponse::Template(Template::render(
         if *useplain.0 {
             "plain/settings"
         } else {
@@ -941,7 +941,7 @@ fn settings(
             language_names,
             show_cookie_notice,
         },
-    ), header: "private"} );
+    ));
 }
 
 #[get("/settings/fetch")]
