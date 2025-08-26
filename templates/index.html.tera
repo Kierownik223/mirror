@@ -57,7 +57,7 @@
         {% endfor %}
         {% for s in files %}
         <tr>
-            {% if is_logged_in %}
+            {% if is_logged_in and config.enable_zip_downloads or admin or private %}
             <td><input type="checkbox" class="delete-checkbox" value="{{ s.name | safe | addslashes }}"></td>
             {% endif %}
             <td><a href="{{ s.name | urlencode }}"><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}</a></td>
