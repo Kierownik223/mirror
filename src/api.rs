@@ -551,8 +551,7 @@ pub fn build_api() -> AdHoc {
                     user,
                     upload,
                     delete,
-                    download_zip,
-                    rename
+                    rename,
                 ],
             )
             .register("/api", catchers![default]);
@@ -561,6 +560,10 @@ pub fn build_api() -> AdHoc {
             rocket = rocket.mount("/api", routes![file_with_downloads])
         } else {
             rocket = rocket.mount("/api", routes![file])
+        }
+
+        if config.enable_zip_downloads {
+            rocket = rocket.mount("/api", routes![download_zip])
         }
 
         rocket

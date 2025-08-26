@@ -22,3 +22,5 @@ standalone = false
 fallback_root_domain = "marmak.net.pl"
 # Enable file database (download files by ID, download counting)
 enable_file_db = true
+# Enable ZIP downloads for all folders
+enable_zip_downloads = false

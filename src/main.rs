@@ -56,6 +56,7 @@ struct Config {
     standalone: bool,
     fallback_root_domain: String,
     enable_file_db: bool,
+    enable_zip_downloads: bool,
 }
 
 impl Config {
