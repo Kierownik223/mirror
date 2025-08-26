@@ -1041,7 +1041,7 @@ async fn iframe(
     file: PathBuf,
     jar: &CookieJar<'_>,
     config: &rocket::State<Config>,
-) -> Result<Template, Status> {
+) -> Result<IndexResponse, Status> {
     let username = get_session(jar).0;
     let path = get_real_path(&file, username.clone())?.0;
 
@@ -1057,7 +1057,7 @@ async fn iframe(
 
     dirs.sort();
 
-    Ok(Template::render(
+    Ok(IndexResponse::Template(Template::render(
         "iframe",
         context! {
             path,
@@ -1065,7 +1065,7 @@ async fn iframe(
             theme: get_theme(jar),
             hires: get_bool_cookie(jar, "hires", false)
         },
-    ))
+    )))
 }
 
 #[catch(422)]
