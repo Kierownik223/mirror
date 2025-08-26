@@ -17,7 +17,8 @@ use rocket_multipart_form_data::{
 
 use crate::{
     utils::{
-        format_size, get_bool_cookie, get_extension_from_filename, get_root_domain, get_session, get_theme, is_logged_in
+        format_size, get_bool_cookie, get_extension_from_filename, get_root_domain, get_session,
+        get_theme, is_logged_in,
     },
     Config, Disk, Host, Language, MirrorFile, TranslationStore, UsePlain,
 };

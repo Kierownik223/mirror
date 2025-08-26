@@ -360,7 +360,9 @@ async fn poster(
             icon = "files/static/images/icons/256x256/default.png".to_string();
         }
 
-        Ok(Err(open_file(Path::new(&icon).to_path_buf(), !is_private).await))
+        Ok(Err(
+            open_file(Path::new(&icon).to_path_buf(), !is_private).await
+        ))
     }
 }
 
@@ -651,7 +653,8 @@ async fn index(
             let mut topmarkdown = false;
             let path_str = Path::new("/").join(&file).display().to_string();
 
-            let mut files = read_files(&path.display().to_string()).map_err(map_io_error_to_status)?;
+            let mut files =
+                read_files(&path.display().to_string()).map_err(map_io_error_to_status)?;
             let mut dirs = read_dirs_async(&path.display().to_string(), sizes)
                 .await
                 .map_err(map_io_error_to_status)?;
@@ -718,7 +721,8 @@ async fn index(
         "privatefolder" => {
             let mut markdown = String::new();
 
-            let mut files = read_files(&path.display().to_string()).map_err(map_io_error_to_status)?;
+            let mut files =
+                read_files(&path.display().to_string()).map_err(map_io_error_to_status)?;
             let mut dirs = read_dirs_async(&path.display().to_string(), sizes)
                 .await
                 .map_err(map_io_error_to_status)?;
@@ -731,16 +735,14 @@ async fn index(
                 .any(|f| f.name == format!("README.{}.md", lang.0))
             {
                 let md = fs::read_to_string(
-                    Path::new(&path.display().to_string())
-                        .join(format!("README.{}.md", lang.0)),
+                    Path::new(&path.display().to_string()).join(format!("README.{}.md", lang.0)),
                 )
                 .unwrap_or_default();
                 markdown = markdown::to_html(&md);
             } else if files.iter().any(|f| f.name == "README.md") {
-                let md = fs::read_to_string(
-                    Path::new(&path.display().to_string()).join("README.md"),
-                )
-                .unwrap_or_default();
+                let md =
+                    fs::read_to_string(Path::new(&path.display().to_string()).join("README.md"))
+                        .unwrap_or_default();
                 markdown = markdown::to_html(&md);
             }
 
@@ -1029,9 +1031,7 @@ async fn iframe(
         return Err(Status::Unauthorized);
     }
 
-    let path = get_real_path(&file, username)?.0
-        .display()
-        .to_string();
+    let path = get_real_path(&file, username)?.0.display().to_string();
 
     let mut dirs = read_dirs(&path).map_err(map_io_error_to_status)?;
 

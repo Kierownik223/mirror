@@ -24,7 +24,9 @@ use crate::{
     db::{get_downloads, FileDb},
     read_files,
     utils::{
-        add_path_to_zip, format_size, get_extension_from_filename, get_real_path, get_real_path_with_perms, get_session, is_logged_in, is_restricted, map_io_error_to_status, read_dirs_async
+        add_path_to_zip, format_size, get_extension_from_filename, get_real_path,
+        get_real_path_with_perms, get_session, is_logged_in, is_restricted, map_io_error_to_status,
+        read_dirs_async,
     },
     Config, Disk, FileSizes, Host, MirrorFile, Sysinfo,
 };
@@ -72,9 +74,7 @@ async fn listing(
 ) -> Result<Json<Vec<MirrorFile>>, Status> {
     let username = get_session(jar).0;
 
-    let path = get_real_path(&file, username)?.0
-        .display()
-        .to_string();
+    let path = get_real_path(&file, username)?.0.display().to_string();
 
     let mut file_list = read_files(&path).map_err(map_io_error_to_status)?;
     let mut dir_list = read_dirs_async(&path, sizes)
@@ -153,7 +153,11 @@ async fn file(file: PathBuf) -> Result<Json<MirrorFile>, Status> {
         .to_str()
         .unwrap_or_default()
         .to_string();
-    let mut icon = path.extension().unwrap_or_default().to_str().unwrap_or("default");
+    let mut icon = path
+        .extension()
+        .unwrap_or_default()
+        .to_str()
+        .unwrap_or("default");
 
     if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
         icon = "default";
@@ -309,9 +313,7 @@ fn sysinfo(jar: &CookieJar<'_>) -> Result<Json<Sysinfo>, Status> {
                     fs: disk.file_system().to_str().unwrap().to_string(),
                     used_space: disk.total_space() - disk.available_space(),
                     total_space: disk.total_space(),
-                    used_space_readable: format_size(
-                        disk.total_space() - disk.available_space()
-                    ),
+                    used_space_readable: format_size(disk.total_space() - disk.available_space()),
                     total_space_readable: format_size(disk.total_space()),
                 });
             }
@@ -542,15 +544,7 @@ pub fn build_api() -> AdHoc {
         rocket = rocket
             .mount(
                 "/api",
-                routes![
-                    index,
-                    listing,
-                    sysinfo,
-                    user,
-                    upload,
-                    delete,
-                    rename,
-                ],
+                routes![index, listing, sysinfo, user, upload, delete, rename,],
             )
             .register("/api", catchers![default]);
 
