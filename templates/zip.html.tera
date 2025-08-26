@@ -39,7 +39,7 @@
         <tr>
             <td><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name
                 }}</td>
-            <td>{{ s.size }}</td>
+            <td>{{ s.size | filesizeformat }}</td>
             {% if s.ext == "Folder" %}
             <td>{{ strings.folder }}</td>
             {% else %}

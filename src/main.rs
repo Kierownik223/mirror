@@ -74,7 +74,7 @@ pub struct MirrorFile {
     name: String,
     ext: String,
     icon: String,
-    size: String,
+    size: u64,
     downloads: Option<i32>,
 }
 

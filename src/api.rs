@@ -133,7 +133,7 @@ async fn file_with_downloads(
             .unwrap_or_default()
             .to_string(),
         icon: icon.to_string(),
-        size: format_size(md.len(), DECIMAL),
+        size: md.len(),
         downloads: Some(downloads),
     }))
 }
@@ -169,7 +169,7 @@ async fn file(file: PathBuf) -> Result<Json<MirrorFile>, Status> {
             .unwrap_or_default()
             .to_string(),
         icon: icon.to_string(),
-        size: format_size(md.len(), DECIMAL),
+        size: md.len(),
         downloads: None,
     }))
 }
@@ -223,7 +223,7 @@ async fn rename(
                 .unwrap_or_default()
                 .to_string(),
             icon: icon.to_string(),
-            size: format_size(md.len(), DECIMAL),
+            size: md.len(),
             downloads: None,
         }))
     }

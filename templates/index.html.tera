@@ -48,7 +48,7 @@
             <td><input type="checkbox" class="delete-checkbox" value="{{ s.name | safe | addslashes }}"></td>
             {% endif %}
             <td><a href="{{ s.name | urlencode }}/"><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}/</a></td>
-            <td>{{ s.size }}</td>
+            <td>{{ s.size | filesizeformat }}</td>
             <td>{{ strings.folder }}</td>
             {% if admin or private %}
             <td><a style="cursor: pointer;" href="javascript:;" onclick="deleteFile(this, '{{ s.name | safe | addslashes }}', true)">{{ strings.delete }}</a></td>
@@ -61,7 +61,7 @@
             <td><input type="checkbox" class="delete-checkbox" value="{{ s.name | safe | addslashes }}"></td>
             {% endif %}
             <td><a href="{{ s.name | urlencode }}"><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}</a></td>
-            <td>{{ s.size }}</td>
+            <td>{{ s.size | filesizeformat }}</td>
             <td>{{ strings.file }}</td>
             {% if admin or private %}
             <td><a style="cursor: pointer;" href="javascript:;" onclick="renameFile(this, '{{ s.name | safe | addslashes }}', true)">{{ strings.rename }}</a> <a style="cursor: pointer;" href="javascript:;" onclick="deleteFile(this, '{{ s.name | safe | addslashes }}', true)">{{ strings.delete }}</a></td>

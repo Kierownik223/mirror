@@ -6,7 +6,6 @@ use std::{
     sync::Arc,
 };
 
-use humansize::{format_size, DECIMAL};
 use rocket::{
     fs::NamedFile,
     http::{Cookie, CookieJar, Status},
@@ -41,7 +40,7 @@ pub fn read_dirs(path: &str) -> Result<Vec<MirrorFile>, Error> {
                     name: file_name.to_owned(),
                     ext: "folder".to_string(),
                     icon: "folder".to_string(),
-                    size: "---".to_string(),
+                    size: 0,
                     downloads: None,
                 };
 
@@ -104,7 +103,7 @@ pub async fn read_dirs_async(
                     name: file_name.to_string(),
                     ext: "folder".to_string(),
                     icon: "folder".to_string(),
-                    size: format_size(folder_size, DECIMAL),
+                    size: folder_size,
                     downloads: None,
                 });
             }
@@ -141,7 +140,7 @@ pub fn read_files(path: &str) -> Result<Vec<MirrorFile>, Error> {
                     name: file_name.to_owned(),
                     ext: ext.to_string(),
                     icon: icon.to_string(),
-                    size: format_size(md.len(), DECIMAL),
+                    size: md.len(),
                     downloads: None,
                 };
 
@@ -366,10 +365,9 @@ pub fn parse_7z_output(output: &str) -> Vec<MirrorFile> {
                 parts[4..].join(" ")
             };
 
-            let size_bytes: u64 = parts[3].parse().unwrap_or(0);
-            let size = format_size(size_bytes, DECIMAL);
+            let size: u64 = parts[3].parse().unwrap_or(0);
 
-            if size_bytes == 0 {
+            if size == 0 {
                 continue;
             }
 

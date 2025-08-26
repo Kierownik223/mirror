@@ -105,7 +105,7 @@ async fn upload(
                                 uploaded_files.push(MirrorFile {
                                     name: file_name.to_string(),
                                     ext: format!("/{}/{}", user_path, file_name),
-                                    size: String::new(),
+                                    size: 0,
                                     icon: icon,
                                     downloads: None,
                                 });
@@ -274,7 +274,7 @@ fn uploader(
                 username: username,
                 admin: perms == 0,
                 filebrowser: !get_bool_cookie(jar, "filebrowser", false),
-                uploadedfiles: vec![MirrorFile { name: "".to_string(), ext: "".to_string(), icon: "default".to_string(), size: String::new(), downloads: None }]
+                uploadedfiles: vec![MirrorFile { name: "".to_string(), ext: "".to_string(), icon: "default".to_string(), size: 0, downloads: None }]
             },
         ));
     }
