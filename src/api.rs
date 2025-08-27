@@ -6,6 +6,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use audiotags::Tag;
 use ::sysinfo::{Disks, RefreshKind, System};
 use rocket::{
     data::ToByteUnit,
@@ -57,6 +58,17 @@ pub struct UploadFile {
     icon: Option<String>,
 }
 
+#[derive(serde::Serialize)]
+pub struct MusicFile {
+    title: String,
+    album: Option<String>,
+    artist: Option<String>,
+    year: Option<i32>,
+    genre: Option<String>,
+    track: Option<u16>,
+    cover: bool,
+}
+
 #[derive(serde::Deserialize)]
 struct FileList(Vec<String>);
 
@@ -103,7 +115,7 @@ async fn listing(
 async fn file_with_downloads(
     db: Connection<FileDb>,
     file: PathBuf,
-) -> Result<Cached<Json<MirrorFile>>, Status> {
+) -> Result<Result<Cached<Json<MirrorFile>>, Cached<Json<MusicFile>>>, Status> {
     let path = Path::new("files/").join(&file);
     let file = file.display().to_string();
 
@@ -120,31 +132,63 @@ async fn file_with_downloads(
         .unwrap_or_default()
         .to_string();
     let downloads = get_downloads(db, &file).await.unwrap_or(0);
-    let mut icon = path.extension().unwrap().to_str().unwrap_or("default");
+    let ext = path.extension().unwrap().to_str().unwrap_or_default();
+    let mut icon = ext;
+
+    if ext == "mp3" || ext == "m4a" || ext == "m4b" || ext == "flac" {
+        if let Ok(tag) = Tag::new().read_from_path(&path) {
+            let title = tag
+                .title()
+                .map(|s| s.to_string())
+                .unwrap_or_else(|| {
+                    path.file_name()
+                        .unwrap()
+                        .to_str()
+                        .unwrap()
+                        .to_string()
+                });
+
+            let artist = tag.artist().map(|s| s.to_string());
+            let album = tag.album_title().map(|s| s.to_string());
+            let genre = tag.genre().map(|s| s.to_string());
+            let year = tag.year();
+            let track = tag.track_number();
+
+            let cover = tag.album_cover().is_some();
+
+            return Ok(Err(Cached {
+                response: Json(MusicFile {
+                    title,
+                    album,
+                    artist,
+                    year,
+                    genre,
+                    track,
+                    cover,
+                }),
+                header: "private",
+            }));
+        }
+    }
 
     if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
         icon = "default";
     }
 
-    Ok(Cached {
+    Ok(Ok(Cached {
         response: Json(MirrorFile {
             name,
-            ext: path
-                .extension()
-                .unwrap()
-                .to_str()
-                .unwrap_or_default()
-                .to_string(),
+            ext: ext.to_string(),
             icon: icon.to_string(),
             size: md.len(),
             downloads: Some(downloads),
         }),
         header: "no-cache",
-    })
+    }))
 }
 
 #[get("/<file..>", rank = 1)]
-async fn file(file: PathBuf) -> Result<Cached<Json<MirrorFile>>, Status> {
+async fn file(file: PathBuf) -> Result<Result<Cached<Json<MirrorFile>>, Cached<Json<MusicFile>>>, Status> {
     let path = Path::new("files/").join(&file);
 
     if !&path.exists() {
@@ -159,17 +203,51 @@ async fn file(file: PathBuf) -> Result<Cached<Json<MirrorFile>>, Status> {
         .to_str()
         .unwrap_or_default()
         .to_string();
-    let mut icon = path
-        .extension()
-        .unwrap_or_default()
-        .to_str()
-        .unwrap_or("default");
+
+    let ext = path.extension().unwrap().to_str().unwrap_or_default();
+    let mut icon = ext;
+
+    if ext == "mp3" || ext == "m4a" || ext == "m4b" || ext == "flac" {
+        if let Ok(tag) = Tag::new().read_from_path(&path) {
+            let title = tag
+                .title()
+                .map(|s| s.to_string())
+                .unwrap_or_else(|| {
+                    path.file_name()
+                        .unwrap()
+                        .to_str()
+                        .unwrap()
+                        .to_string()
+                });
+
+            let artist = tag.artist().map(|s| s.to_string());
+            let album = tag.album_title().map(|s| s.to_string());
+            let genre = tag.genre().map(|s| s.to_string());
+            let year = tag.year();
+            let track = tag.track_number();
+
+            let cover = tag.album_cover().is_some();
+
+            return Ok(Err(Cached {
+                response: Json(MusicFile {
+                    title,
+                    album,
+                    artist,
+                    year,
+                    genre,
+                    track,
+                    cover,
+                }),
+                header: "private",
+            }));
+        }
+    }
 
     if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
         icon = "default";
     }
 
-    Ok(Cached {
+    Ok(Ok(Cached {
         response: Json(MirrorFile {
             name,
             ext: path
@@ -183,7 +261,7 @@ async fn file(file: PathBuf) -> Result<Cached<Json<MirrorFile>>, Status> {
             downloads: None,
         }),
         header: "no-cache",
-    })
+    }))
 }
 
 #[patch("/<file..>", data = "<rename_req>")]
