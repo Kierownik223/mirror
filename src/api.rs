@@ -115,8 +115,10 @@ async fn listing(
 async fn file_with_downloads(
     db: Connection<FileDb>,
     file: PathBuf,
+    jar: &CookieJar<'_>,
 ) -> Result<Result<Cached<Json<MirrorFile>>, Cached<Json<MusicFile>>>, Status> {
-    let path = Path::new("files/").join(&file);
+    let username = get_session(jar).0;
+    let path = get_real_path(&file, username.clone())?.0;
     let file = file.display().to_string();
 
     if !&path.exists() {
@@ -188,8 +190,9 @@ async fn file_with_downloads(
 }
 
 #[get("/<file..>", rank = 1)]
-async fn file(file: PathBuf) -> Result<Result<Cached<Json<MirrorFile>>, Cached<Json<MusicFile>>>, Status> {
-    let path = Path::new("files/").join(&file);
+async fn file(file: PathBuf, jar: &CookieJar<'_>) -> Result<Result<Cached<Json<MirrorFile>>, Cached<Json<MusicFile>>>, Status> {
+    let username = get_session(jar).0;
+    let path = get_real_path(&file, username.clone())?.0;
 
     if !&path.exists() {
         return Err(Status::NotFound);
