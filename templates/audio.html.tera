@@ -163,7 +163,10 @@
         }
 
         for (var i = 0; i < files.length; i++) {
-            fileNames.push(files[i].name);
+            var name = files[i].name.toLowerCase();
+            if (name.match(/\.(mp3|m4a|m4b|flac)$/)) {
+                fileNames.push(files[i].name);
+            }
         }
 
         currentIndex = fileNames.indexOf(currentFile);
