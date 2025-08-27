@@ -46,23 +46,35 @@
         <div style="float: right;"><span><a href="/file{{ path | urlencode }}" download><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">{{ strings.download }}</span></a></div><br>
         <a href="./"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png">./</a>
     </div>
-    <audio src="/file{{ path | urlencode }}" controls style="width: 100%;" poster="/poster{{ path }}">{{ strings.no_audio }}</audio>
-    {% if artist != "" %}{{ artist }} - {% endif %}<b style="font-size: 24px;">{% if track != 0 %}{{ track }}. {% endif %}{{ audiotitle }}</b>
+    <audio id="audio" src="/file{{ path | urlencode }}" controls style="width: 100%;" poster="/poster{{ path }}">{{ strings.no_audio }}</audio>
+    <a href="#" id="prev">Prev</a> <a href="#" id="next">Next</a> <br>
+    {% if artist != "" %}<span id="artist">{{ artist }}</span> - {% endif %}<b style="font-size: 24px;">{% if track != 0 %}<span id="track">{{ track }}</span>. {% endif %}<span id="title">{{ audiotitle }}</span></b>
     <div style="display: flex; align-items: center; justify-content: space-between;">
         <div style="flex: 1;">
-            {% if album != "" %}{{ strings.album }}: <b>{{ album }}</b><br>{% endif %}
-            {% if year != 0 %}{{ strings.year }}: <b>{{ year }}</b><br>{% endif %}
-            {% if genre != "" %}{{ strings.genre }}: <b>{{ genre }}</b><br>{% endif %}
+            {% if album != "" %}{{ strings.album }}: <b id="album">{{ album }}</b><br>{% endif %}
+            {% if year != 0 %}{{ strings.year }}: <b id="year">{{ year }}</b><br>{% endif %}
+            {% if genre != "" %}{{ strings.genre }}: <b id="genre">{{ genre }}</b><br>{% endif %}
         </div>
         {% if cover %}
-        <img src="/poster{{ path }}" alt="{{ strings.album_cover }}" style="width: 30%; max-height: 100%;">
+        <img id="cover" src="/poster{{ path }}" alt="{{ strings.album_cover }}" style="width: 30%; max-height: 100%;">
         {% endif %}
     </div>
 {% endblock content %}
 
 {% block scripts %}
 <script>
-    if ("mediaSession" in navigator) {
+    var audio = document.getElementById('audio');
+    var titleEl = document.getElementById('title');
+    var artistEl = document.getElementById('artist');
+    var albumEl = document.getElementById('album');
+    var yearEl = document.getElementById('year');
+    var genreEl = document.getElementById('genre');
+    var coverEl = document.getElementById('cover');
+    var trackEl = document.getElementById('track');
+    var prev = document.getElementById('prev');
+    var next = document.getElementById('next');
+
+    if (window.navigator && navigator.mediaSession) {
         navigator.mediaSession.metadata = new MediaMetadata({
             title: '{{ audiotitle }}',
             artist: '{{ artist }}',
@@ -70,5 +82,142 @@
             artwork: [{src: '/poster{{ path | safe }}'}],
         });
     }
+
+    function fetchJSON(url, callback) {
+        var xhr;
+        if (window.XMLHttpRequest) {
+            xhr = new XMLHttpRequest();
+        } else {
+            try {
+                xhr = new ActiveXObject("Microsoft.XMLHTTP");
+            } catch (e) {
+                alert("Failed to load resource: " + url);
+                return;
+            }
+        }
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    try {
+                        var data = JSON.parse(xhr.responseText);
+                        callback(null, data);
+                    } catch (e) {
+                        callback(e, null);
+                    }
+                } else {
+                    callback(new Error("Request failed: " + xhr.status), null);
+                }
+            }
+        };
+        xhr.open("GET", url, true);
+        xhr.send();
+    }
+
+    function updatePageMetadata(meta, newPath) {
+        if (artistEl) artistEl.textContent = meta.artist || '';
+        if (titleEl) titleEl.textContent = meta.title || '';
+        if (albumEl) albumEl.textContent = meta.album || '';
+        if (yearEl) yearEl.textContent = meta.year || '';
+        if (genreEl) genreEl.textContent = meta.genre || '';
+        if (trackEl && meta.track) trackEl.textContent = meta.track;
+
+        if (coverEl && meta.cover) {
+            coverEl.src = '/poster' + newPath;
+            coverEl.alt = meta.album || '';
+            coverEl.style.display = '';
+        } else if (coverEl) {
+            coverEl.style.display = 'none';
+        }
+
+        document.title = meta.title + ' - MARMAK Mirror';
+
+        if (window.navigator && navigator.mediaSession) {
+            try {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: meta.title,
+                    artist: meta.artist,
+                    album: meta.album,
+                    artwork: [{ src: '/poster' + newPath }]
+                });
+            } catch (e) {
+                alert(e);
+            }
+        }
+
+        if (window.history && history.pushState) {
+            history.pushState(null, '', newPath);
+        }
+    }
+
+    var pathname = window.location.pathname.split("/");
+    var currentFile = decodeURIComponent(pathname.pop());
+    var folderPath = decodeURIComponent(pathname.join("/"));
+    var fileNames = [];
+    var currentIndex = 0;
+
+    fetchJSON('/api/listing' + folderPath, function (err, files) {
+        if (err) {
+            console.error("Failed to fetch file list", err);
+            return;
+        }
+
+        for (var i = 0; i < files.length; i++) {
+            fileNames.push(files[i].name);
+        }
+
+        currentIndex = fileNames.indexOf(currentFile);
+        if (currentIndex === -1) currentIndex = 0;
+
+        function loadTrack(index) {
+            if (index < 0 || index >= fileNames.length) return;
+
+            var targetFile = fileNames[index];
+            var newPath = folderPath + '/' + encodeURIComponent(targetFile);
+
+            audio.src = '/file' + newPath;
+            audio.play();
+
+            fetchJSON('/api' + newPath, function (err, meta) {
+                if (!err && meta) {
+                    updatePageMetadata(meta, newPath);
+                }
+            });
+        }
+
+        prev.onclick = function () {
+            if (currentIndex > 0) {
+                currentIndex--;
+                loadTrack(currentIndex);
+            }
+        };
+
+        next.onclick = function () {
+            if (currentIndex < fileNames.length - 1) {
+                currentIndex++;
+                loadTrack(currentIndex);
+            }
+        };
+
+        if (navigator.mediaSession) {
+            try {
+                navigator.mediaSession.setActionHandler('previoustrack', function () {
+                    if (currentIndex > 0) {
+                        currentIndex--;
+                        loadTrack(currentIndex);
+                    }
+                });
+
+                navigator.mediaSession.setActionHandler('nexttrack', function () {
+                    if (currentIndex < fileNames.length - 1) {
+                        currentIndex++;
+                        loadTrack(currentIndex);
+                    }
+                });
+            } catch (e) {
+                alert(e);
+            }
+        }
+    });
 </script>
 {% endblock scripts %}
