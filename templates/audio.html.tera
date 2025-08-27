@@ -59,3 +59,16 @@
         {% endif %}
     </div>
 {% endblock content %}
+
+{% block scripts %}
+<script>
+    if ("mediaSession" in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: '{{ audiotitle }}',
+            artist: '{{ artist }}',
+            album: '{{ album }}',
+            artwork: [{src: '/poster{{ path | safe }}'}],
+        });
+    }
+</script>
+{% endblock scripts %}

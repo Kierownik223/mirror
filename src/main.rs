@@ -320,7 +320,24 @@ async fn poster(
     jar: &CookieJar<'_>,
 ) -> Result<Result<Cached<(ContentType, Vec<u8>)>, Result<IndexResponse, Status>>, Status> {
     let username = get_session(jar).0;
-    let (path, is_private) = get_real_path(&file, username)?;
+    let (path, is_private) = if let Ok(rest) = file.strip_prefix("private") {
+        if username == "Nobody" {
+            if rest.extension().unwrap_or_default().to_str().unwrap_or_default() == "mp3" {
+                return Ok(Err(open_file(Path::new(&"files/static/images/icons/256x256/mp3.png").to_path_buf(), "private").await));
+            }
+            return Err(Status::Forbidden);
+        }
+
+        (
+            Path::new("files/")
+                .join("private")
+                .join(&username)
+                .join(rest),
+            true,
+        )
+    } else {
+        (Path::new("files/").join(&file), false)
+    };
 
     if is_restricted(&path, jar) {
         return Err(Status::Unauthorized);
