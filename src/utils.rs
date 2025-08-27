@@ -229,7 +229,7 @@ pub fn is_hidden(path: &Path, jar: &CookieJar<'_>) -> bool {
 
 pub async fn open_file(
     path: PathBuf,
-    cache_control: &'static str,
+    cache_control: &str,
 ) -> Result<IndexResponse, Status> {
     let config = Config::load();
     if !path.exists() {
@@ -238,13 +238,13 @@ pub async fn open_file(
 
     if config.standalone {
         match NamedFile::open(&path).await {
-            Ok(f) => Ok(IndexResponse::NamedFile(f)),
+            Ok(f) => Ok(IndexResponse::NamedFile(f, cache_control.to_string())),
             Err(_) => Err(Status::InternalServerError),
         }
     } else {
         Ok(IndexResponse::HeaderFile(HeaderFile(
             path.display().to_string(),
-            cache_control,
+            cache_control.to_string(),
         )))
     }
 }

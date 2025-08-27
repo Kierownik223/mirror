@@ -24,3 +24,5 @@ fallback_root_domain = "marmak.net.pl"
 enable_file_db = true
 # Enable ZIP downloads for all folders
 enable_zip_downloads = false
+# Max-Age for Cache-Control header
+max_age = 86400
