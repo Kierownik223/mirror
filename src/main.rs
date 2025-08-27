@@ -376,7 +376,11 @@ async fn poster(
 }
 
 #[get("/file/<file..>")]
-async fn file(file: PathBuf, jar: &CookieJar<'_>, config: &rocket::State<Config>) -> Result<IndexResponse, Status> {
+async fn file(
+    file: PathBuf,
+    jar: &CookieJar<'_>,
+    config: &rocket::State<Config>,
+) -> Result<IndexResponse, Status> {
     let username = get_session(jar).0;
     let (path, is_private) = get_real_path(&file, username)?;
 
@@ -430,7 +434,18 @@ async fn download_with_counter(
 
     if !config.extensions.contains(&ext) {
         let cache_control_string;
-        return open_file(path, if is_private { "private" } else if config.max_age == 0 { "public" } else { cache_control_string = format!("public, max-age={}", config.max_age); &cache_control_string }).await;
+        return open_file(
+            path,
+            if is_private {
+                "private"
+            } else if config.max_age == 0 {
+                "public"
+            } else {
+                cache_control_string = format!("public, max-age={}", config.max_age);
+                &cache_control_string
+            },
+        )
+        .await;
     } else if &ext == "folder" {
         return Err(Status::Forbidden);
     }
@@ -443,7 +458,11 @@ async fn download_with_counter(
 }
 
 #[get("/<file..>?download")]
-async fn download(file: PathBuf, jar: &CookieJar<'_>, config: &rocket::State<Config>) -> Result<IndexResponse, Status> {
+async fn download(
+    file: PathBuf,
+    jar: &CookieJar<'_>,
+    config: &rocket::State<Config>,
+) -> Result<IndexResponse, Status> {
     let username = get_session(jar).0;
     let (path, is_private) = get_real_path(&file, username)?;
 
@@ -452,7 +471,18 @@ async fn download(file: PathBuf, jar: &CookieJar<'_>, config: &rocket::State<Con
     }
 
     let cache_control_string;
-    open_file(path, if is_private { "private" } else if config.max_age == 0 { "public" } else { cache_control_string = format!("public, max-age={}", config.max_age); &cache_control_string }).await
+    open_file(
+        path,
+        if is_private {
+            "private"
+        } else if config.max_age == 0 {
+            "public"
+        } else {
+            cache_control_string = format!("public, max-age={}", config.max_age);
+            &cache_control_string
+        },
+    )
+    .await
 }
 
 #[get("/<file..>", rank = 10)]
