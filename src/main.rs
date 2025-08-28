@@ -339,10 +339,6 @@ async fn poster(
         (Path::new("files/").join(&file), false)
     };
 
-    if is_restricted(&path, jar) {
-        return Err(Status::Unauthorized);
-    }
-
     if let Ok(tag) = Tag::new().read_from_path(&path) {
         if let Some(picture) = tag.album_cover() {
             let mime_type = match picture.mime_type {
