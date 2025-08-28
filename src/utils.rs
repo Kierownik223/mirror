@@ -94,7 +94,7 @@ pub async fn read_dirs_async(
 
             let folder_size = size_list
                 .iter()
-                .find(|entry| entry.file == rel_path)
+                .find(|entry| entry.file.strip_suffix("/").unwrap_or_default().to_string() == rel_path)
                 .map(|entry| entry.size)
                 .unwrap_or(0);
 

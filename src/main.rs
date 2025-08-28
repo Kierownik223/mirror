@@ -1128,6 +1128,33 @@ async fn iframe(
     )))
 }
 
+#[get("/sitemap.xml")]
+async fn sitemap(
+    config: &rocket::State<Config>,
+    sizes: &State<FileSizes>,
+    host: Host<'_>,
+) -> Result<Cached<Template>, Status> {
+    let files = sizes.read().await;
+    let mut files = files.clone();
+
+    files.retain(|file| {
+        !config.hidden_files.iter().any(|hidden| file.file.contains(hidden) || file.file.contains("private"))
+    });
+
+    for file in files.iter_mut() {
+        file.file = file.file.strip_prefix("files").unwrap_or("").to_string();
+    }
+
+    files.retain(|file| !file.file.is_empty());
+
+    let context = context! {
+        files: files,
+        host: host.0,
+    };
+
+    Ok(Cached{ response: Template::render("sitemap", context), header: "public" })
+}
+
 #[catch(422)]
 fn unprocessable_entry() -> Status {
     Status::BadRequest
@@ -1215,7 +1242,7 @@ async fn calculate_sizes(state: FileSizes) {
         all_entries.extend(
             dir_sizes
                 .into_iter()
-                .map(|(dir, size)| FileEntry { size, file: dir }),
+                .map(|(dir, size)| FileEntry { size, file: format!("{}/", dir) }),
         );
 
         {
@@ -1245,7 +1272,7 @@ async fn rocket() -> _ {
         .register("/", catchers![default, unprocessable_entry, forbidden])
         .mount(
             "/",
-            routes![settings, reset_settings, index, iframe, poster, file],
+            routes![settings, reset_settings, index, iframe, poster, file, sitemap],
         );
 
     if config.enable_login {
