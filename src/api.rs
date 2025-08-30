@@ -25,9 +25,7 @@ use crate::{
     db::{get_downloads, FileDb},
     read_files,
     utils::{
-        add_path_to_zip, format_size, get_extension_from_filename, get_real_path,
-        get_real_path_with_perms, get_session, is_logged_in, is_restricted, map_io_error_to_status,
-        read_dirs_async,
+        add_path_to_zip, format_size, get_extension_from_filename, get_genre, get_real_path, get_real_path_with_perms, get_session, is_logged_in, is_restricted, map_io_error_to_status, read_dirs_async
     },
     Cached, Config, Disk, FileSizes, Host, MirrorFile, Sysinfo,
 };
@@ -152,7 +150,7 @@ async fn file_with_downloads(
 
             let artist = tag.artist().map(|s| s.to_string());
             let album = tag.album_title().map(|s| s.to_string());
-            let genre = tag.genre().map(|s| s.to_string());
+            let genre = tag.genre().map(|s| get_genre(s).unwrap_or(s.to_string()));
             let year = tag.year();
             let track = tag.track_number();
 
@@ -225,7 +223,7 @@ async fn file(file: PathBuf, jar: &CookieJar<'_>) -> Result<Result<Cached<Json<M
 
             let artist = tag.artist().map(|s| s.to_string());
             let album = tag.album_title().map(|s| s.to_string());
-            let genre = tag.genre().map(|s| s.to_string());
+            let genre = tag.genre().map(|s| get_genre(s).unwrap_or(s.to_string()));
             let year = tag.year();
             let track = tag.track_number();
 

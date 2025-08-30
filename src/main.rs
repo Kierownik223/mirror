@@ -30,8 +30,7 @@ use rocket_dyn_templates::{context, Template};
 use crate::db::{add_download, FileDb};
 use crate::i18n::TranslationStore;
 use crate::utils::{
-    get_real_path, get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output,
-    read_dirs_async,
+    get_genre, get_real_path, get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output, read_dirs_async
 };
 
 mod account;
@@ -680,7 +679,7 @@ async fn index(
                 let artist = tag.artist().unwrap_or_default();
                 let year = tag.year().unwrap_or(0);
                 let album = tag.album_title().unwrap_or_default();
-                let genre = tag.genre().unwrap_or_default();
+                let genre = get_genre(tag.genre().unwrap_or_default())?;
                 let track = tag.track_number().unwrap_or(0);
 
                 let mut cover = false;

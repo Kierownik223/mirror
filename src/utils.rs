@@ -1,9 +1,5 @@
 use std::{
-    ffi::OsStr,
-    fs,
-    io::{Cursor, Error, ErrorKind},
-    path::{Path, PathBuf},
-    sync::Arc,
+    collections::HashMap, ffi::OsStr, fs, io::{Cursor, Error, ErrorKind}, path::{Path, PathBuf}, sync::Arc
 };
 
 use rocket::{
@@ -408,4 +404,22 @@ pub fn format_size(bytes: u64) -> String {
     let value = bytes_f64 / k.powi(i as i32);
 
     format!("{:.1} {}", value, sizes[i])
+}
+
+pub fn get_genre(genre: &str) -> Result<String, Status>{
+    let toml_str = fs::read_to_string("genres.toml").map_err(map_io_error_to_status)?;
+    let parsed: toml::Value = toml::from_str(&toml_str).map_err(|_| {Status::InternalServerError})?;
+    let genres: HashMap<String, String> = parsed
+        .get("genres")
+        .unwrap()
+        .as_table()
+        .unwrap()
+        .iter()
+        .map(|(k, v)| (k.clone(), v.as_str().unwrap().to_string()))
+        .collect();
+
+    match genres.get(genre) {
+        Some(genre) => Ok(genre.to_string()),
+        None => Ok(genre.to_string())
+    }
 }
