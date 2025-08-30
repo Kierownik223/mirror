@@ -6,8 +6,8 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use audiotags::Tag;
 use ::sysinfo::{Disks, RefreshKind, System};
+use audiotags::Tag;
 use rocket::{
     data::ToByteUnit,
     fairing::AdHoc,
@@ -25,7 +25,9 @@ use crate::{
     db::{get_downloads, FileDb},
     read_files,
     utils::{
-        add_path_to_zip, format_size, get_extension_from_filename, get_genre, get_real_path, get_real_path_with_perms, get_session, is_logged_in, is_restricted, map_io_error_to_status, read_dirs_async
+        add_path_to_zip, format_size, get_extension_from_filename, get_genre, get_real_path,
+        get_real_path_with_perms, get_session, is_logged_in, is_restricted, map_io_error_to_status,
+        read_dirs_async,
     },
     Cached, Config, Disk, FileSizes, Host, MirrorFile, Sysinfo,
 };
@@ -140,13 +142,7 @@ async fn file_with_downloads(
             let title = tag
                 .title()
                 .map(|s| s.to_string())
-                .unwrap_or_else(|| {
-                    path.file_name()
-                        .unwrap()
-                        .to_str()
-                        .unwrap()
-                        .to_string()
-                });
+                .unwrap_or_else(|| path.file_name().unwrap().to_str().unwrap().to_string());
 
             let artist = tag.artist().map(|s| s.to_string());
             let album = tag.album_title().map(|s| s.to_string());
@@ -188,7 +184,10 @@ async fn file_with_downloads(
 }
 
 #[get("/<file..>", rank = 1)]
-async fn file(file: PathBuf, jar: &CookieJar<'_>) -> Result<Result<Cached<Json<MirrorFile>>, Cached<Json<MusicFile>>>, Status> {
+async fn file(
+    file: PathBuf,
+    jar: &CookieJar<'_>,
+) -> Result<Result<Cached<Json<MirrorFile>>, Cached<Json<MusicFile>>>, Status> {
     let username = get_session(jar).0;
     let path = get_real_path(&file, username.clone())?.0;
 
@@ -213,13 +212,7 @@ async fn file(file: PathBuf, jar: &CookieJar<'_>) -> Result<Result<Cached<Json<M
             let title = tag
                 .title()
                 .map(|s| s.to_string())
-                .unwrap_or_else(|| {
-                    path.file_name()
-                        .unwrap()
-                        .to_str()
-                        .unwrap()
-                        .to_string()
-                });
+                .unwrap_or_else(|| path.file_name().unwrap().to_str().unwrap().to_string());
 
             let artist = tag.artist().map(|s| s.to_string());
             let album = tag.album_title().map(|s| s.to_string());

@@ -1,5 +1,10 @@
 use std::{
-    collections::HashMap, ffi::OsStr, fs, io::{Cursor, Error, ErrorKind}, path::{Path, PathBuf}, sync::Arc
+    collections::HashMap,
+    ffi::OsStr,
+    fs,
+    io::{Cursor, Error, ErrorKind},
+    path::{Path, PathBuf},
+    sync::Arc,
 };
 
 use rocket::{
@@ -94,7 +99,9 @@ pub async fn read_dirs_async(
 
             let folder_size = size_list
                 .iter()
-                .find(|entry| entry.file.strip_suffix("/").unwrap_or_default().to_string() == rel_path)
+                .find(|entry| {
+                    entry.file.strip_suffix("/").unwrap_or_default().to_string() == rel_path
+                })
                 .map(|entry| entry.size)
                 .unwrap_or(0);
 
@@ -410,9 +417,9 @@ pub fn format_size(bytes: u64) -> String {
     format!("{:.1} {}", value, sizes[i])
 }
 
-pub fn get_genre(genre: &str) -> Result<String, Status>{
+pub fn get_genre(genre: &str) -> Result<String, Status> {
     let toml_str = fs::read_to_string("genres.toml").map_err(map_io_error_to_status)?;
-    let parsed: toml::Value = toml::from_str(&toml_str).map_err(|_| {Status::InternalServerError})?;
+    let parsed: toml::Value = toml::from_str(&toml_str).map_err(|_| Status::InternalServerError)?;
     let genres: HashMap<String, String> = parsed
         .get("genres")
         .unwrap()
@@ -424,6 +431,6 @@ pub fn get_genre(genre: &str) -> Result<String, Status>{
 
     match genres.get(genre) {
         Some(genre) => Ok(genre.to_string()),
-        None => Ok(genre.to_string())
+        None => Ok(genre.to_string()),
     }
 }

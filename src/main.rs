@@ -30,7 +30,8 @@ use rocket_dyn_templates::{context, Template};
 use crate::db::{add_download, FileDb};
 use crate::i18n::TranslationStore;
 use crate::utils::{
-    get_genre, get_real_path, get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output, read_dirs_async
+    get_genre, get_real_path, get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output,
+    read_dirs_async,
 };
 
 mod account;
@@ -321,8 +322,18 @@ async fn poster(
     let username = get_session(jar).0;
     let (path, is_private) = if let Ok(rest) = file.strip_prefix("private") {
         if username == "Nobody" {
-            if rest.extension().unwrap_or_default().to_str().unwrap_or_default() == "mp3" {
-                return Ok(Err(open_file(Path::new(&"files/static/images/icons/256x256/mp3.png").to_path_buf(), "private").await));
+            if rest
+                .extension()
+                .unwrap_or_default()
+                .to_str()
+                .unwrap_or_default()
+                == "mp3"
+            {
+                return Ok(Err(open_file(
+                    Path::new(&"files/static/images/icons/256x256/mp3.png").to_path_buf(),
+                    "private",
+                )
+                .await));
             }
             return Err(Status::Forbidden);
         }
@@ -512,12 +523,12 @@ async fn index(
     let (username, perms) = get_session(jar);
     let path: PathBuf;
     let is_private: bool;
-    
+
     let strings = translations.get_translation(&lang.0);
-    
+
     let root_domain = get_root_domain(host.0, &config.fallback_root_domain);
     let theme = get_theme(jar);
-    
+
     let hires = get_bool_cookie(jar, "hires", false);
     let smallhead = get_bool_cookie(jar, "smallhead", false);
 
@@ -1166,7 +1177,10 @@ async fn sitemap(
     let mut files = files.clone();
 
     files.retain(|file| {
-        !config.hidden_files.iter().any(|hidden| file.file.contains(hidden) || file.file.contains("private"))
+        !config
+            .hidden_files
+            .iter()
+            .any(|hidden| file.file.contains(hidden) || file.file.contains("private"))
     });
 
     for file in files.iter_mut() {
@@ -1180,7 +1194,10 @@ async fn sitemap(
         host: host.0,
     };
 
-    Ok(Cached{ response: Template::render("sitemap", context), header: "public" })
+    Ok(Cached {
+        response: Template::render("sitemap", context),
+        header: "public",
+    })
 }
 
 #[catch(422)]
@@ -1267,11 +1284,10 @@ async fn calculate_sizes(state: FileSizes) {
 
         let mut all_entries = file_sizes;
 
-        all_entries.extend(
-            dir_sizes
-                .into_iter()
-                .map(|(dir, size)| FileEntry { size, file: format!("{}/", dir) }),
-        );
+        all_entries.extend(dir_sizes.into_iter().map(|(dir, size)| FileEntry {
+            size,
+            file: format!("{}/", dir),
+        }));
 
         {
             let mut state_lock = state.write().await;
@@ -1300,7 +1316,15 @@ async fn rocket() -> _ {
         .register("/", catchers![default, unprocessable_entry, forbidden])
         .mount(
             "/",
-            routes![settings, reset_settings, index, iframe, poster, file, sitemap],
+            routes![
+                settings,
+                reset_settings,
+                index,
+                iframe,
+                poster,
+                file,
+                sitemap
+            ],
         );
 
     if config.enable_login {
