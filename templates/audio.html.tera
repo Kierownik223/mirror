@@ -48,16 +48,14 @@
     </div>
     <audio id="audio" src="/file{{ path | urlencode }}" controls style="width: 100%;" poster="/poster{{ path }}">{{ strings.no_audio }}</audio>
     <a href="#" id="prev">Prev</a> <a href="#" id="next">Next</a> <br>
-    {% if artist != "" %}<span id="artist">{{ artist }}</span> - {% endif %}<b style="font-size: 24px;">{% if track != 0 %}<span id="track">{{ track }}</span>. {% endif %}<span id="title">{{ audiotitle }}</span></b>
+    <span id="artist">{% if artist != "" %}{{ artist }}{% else %}N/A{% endif %}</span> - <b style="font-size: 24px;"><span id="track">{% if track != 0 %}{{ track }}.{% endif %}</span> <span id="title">{{ audiotitle }}</span></b>
     <div style="display: flex; align-items: center; justify-content: space-between;">
         <div style="flex: 1;">
-            {% if album != "" %}{{ strings.album }}: <b id="album">{{ album }}</b><br>{% endif %}
-            {% if year != 0 %}{{ strings.year }}: <b id="year">{{ year }}</b><br>{% endif %}
-            {% if genre != "" %}{{ strings.genre }}: <b id="genre">{{ genre }}</b><br>{% endif %}
+            {{ strings.album }}: <b id="album">{% if album != "" %}{{ album }}{% else %}N/A{% endif %}</b><br>
+            {{ strings.year }}: <b id="year">{% if year != 0 %}{{ year }}{% else %}N/A{% endif %}</b><br>
+            {{ strings.genre }}: <b id="genre">{% if genre != "" %}{{ genre }}{% else %}N/A{% endif %}</b><br>
         </div>
-        {% if cover %}
         <img id="cover" src="/poster{{ path }}" alt="{{ strings.album_cover }}" style="width: 30%; max-height: 100%;">
-        {% endif %}
     </div>
 {% endblock content %}
 
@@ -115,22 +113,23 @@
     }
 
     function updatePageMetadata(meta, newPath) {
-        if (artistEl) artistEl.textContent = meta.artist || '';
-        if (titleEl) titleEl.textContent = meta.title || '';
-        if (albumEl) albumEl.textContent = meta.album || '';
-        if (yearEl) yearEl.textContent = meta.year || '';
-        if (genreEl) genreEl.textContent = meta.genre || '';
-        if (trackEl && meta.track) trackEl.textContent = meta.track;
+        if (meta.track) {
+            meta.track += '.';
+        }
+        if (artistEl) artistEl.textContent = meta.artist || 'N/A';
+        if (titleEl) titleEl.textContent = meta.title || decodeURIComponent(newPath.split('/').pop());
+        if (albumEl) albumEl.textContent = meta.album || 'N/A';
+        if (yearEl) yearEl.textContent = meta.year || 'N/A';
+        if (genreEl) genreEl.textContent = meta.genre || 'N/A';
+        if (trackEl) trackEl.textContent = meta.track || '';
 
-        if (coverEl && meta.cover) {
+        if (coverEl) {
             coverEl.src = '/poster' + newPath;
-            coverEl.alt = meta.album || '';
+            coverEl.alt = meta.album || 'N/A';
             coverEl.style.display = '';
-        } else if (coverEl) {
-            coverEl.style.display = 'none';
         }
 
-        document.title = meta.title + ' - MARMAK Mirror';
+        document.title = meta.title || decodeURIComponent(newPath.split('/').pop()) + ' - MARMAK Mirror';
 
         if (window.navigator && navigator.mediaSession) {
             try {
