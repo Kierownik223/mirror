@@ -73,11 +73,15 @@ pub async fn read_dirs_async(
                 Err(_) => continue,
             };
 
+            let mut icon = "folder";
+
             for subdir_path in subdir_paths {
                 let subdir_path = subdir_path?;
                 if let Some(file_name) = subdir_path.file_name().to_str() {
                     if file_name == "HIDDEN" {
                         continue 'main;
+                    } else if file_name == "RESTRICTED" {
+                        icon = "lockedfolder";
                     }
                 }
             }
@@ -98,7 +102,7 @@ pub async fn read_dirs_async(
                 dir_list.push(MirrorFile {
                     name: file_name.to_string(),
                     ext: "folder".to_string(),
-                    icon: "folder".to_string(),
+                    icon: icon.to_string(),
                     size: folder_size,
                     downloads: None,
                 });
