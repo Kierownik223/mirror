@@ -510,15 +510,48 @@ async fn index(
     sizes: &State<FileSizes>,
 ) -> IndexResult {
     let (username, perms) = get_session(jar);
-    let (path, is_private) = get_real_path(&file, username.clone())?;
-
+    let path: PathBuf;
+    let is_private: bool;
+    
     let strings = translations.get_translation(&lang.0);
-
+    
     let root_domain = get_root_domain(host.0, &config.fallback_root_domain);
     let theme = get_theme(jar);
-
+    
     let hires = get_bool_cookie(jar, "hires", false);
     let smallhead = get_bool_cookie(jar, "smallhead", false);
+
+    if let Ok((p, i)) = get_real_path(&file, username.clone()) {
+        path = p;
+        is_private = i;
+    } else if let Err(e) = get_real_path(&file, username.clone()) {
+        if e == Status::Forbidden {
+            return Ok(IndexResponse::Template(Template::render(
+                if *useplain.0 {
+                    "plain/error/private"
+                } else {
+                    "error/private"
+                },
+                context! {
+                    title: "/private",
+                    lang,
+                    strings,
+                    root_domain,
+                    host: host.0,
+                    config: config.inner(),
+                    theme,
+                    is_logged_in: is_logged_in(jar),
+                    admin: perms == 0,
+                    hires,
+                    smallhead,
+                },
+            )));
+        } else {
+            return Err(e);
+        }
+    } else {
+        return Err(Status::UnprocessableEntity);
+    }
 
     if is_restricted(&path, jar) {
         return Err(Status::Unauthorized);

@@ -1,0 +1,6 @@
+{% extends "plain/base" %}
+
+{% block content %}
+<a href="/">MARMAK Mirror</a>/<a href="/private/">private</a>/<br>
+{{ strings.private_folder }}
+{% endblock content %}
