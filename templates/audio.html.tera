@@ -116,9 +116,6 @@
         if (meta.track) {
             meta.track += '.';
         }
-        if (meta.title) {
-            meta.title += ' - MARMAK Mirror';
-        }
         if (artistEl) artistEl.textContent = meta.artist || 'N/A';
         if (titleEl) titleEl.textContent = meta.title || decodeURIComponent(newPath.split('/').pop());
         if (albumEl) albumEl.textContent = meta.album || 'N/A';
@@ -130,6 +127,10 @@
             coverEl.src = '/poster' + newPath;
             coverEl.alt = meta.album || 'N/A';
             coverEl.style.display = '';
+        }
+        
+        if (meta.title) {
+            meta.title += ' - MARMAK Mirror';
         }
 
         document.title = meta.title || decodeURIComponent(newPath.split('/').pop()) + ' - MARMAK Mirror';
