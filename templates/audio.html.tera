@@ -169,6 +169,13 @@
             }
         }
 
+        audio.addEventListener('ended', function () {
+            if (currentIndex < fileNames.length - 1) {
+                currentIndex++;
+                loadTrack(currentIndex);
+            }
+        });
+
         currentIndex = fileNames.indexOf(currentFile);
         if (currentIndex === -1) currentIndex = 0;
 
