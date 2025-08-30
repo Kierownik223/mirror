@@ -116,6 +116,9 @@
         if (meta.track) {
             meta.track += '.';
         }
+        if (meta.title) {
+            meta.title += ' - MARMAK Mirror';
+        }
         if (artistEl) artistEl.textContent = meta.artist || 'N/A';
         if (titleEl) titleEl.textContent = meta.title || decodeURIComponent(newPath.split('/').pop());
         if (albumEl) albumEl.textContent = meta.album || 'N/A';
