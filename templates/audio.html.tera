@@ -128,12 +128,6 @@
             coverEl.alt = meta.album || 'N/A';
             coverEl.style.display = '';
         }
-        
-        if (meta.title) {
-            meta.title += ' - MARMAK Mirror';
-        }
-
-        document.title = meta.title || decodeURIComponent(newPath.split('/').pop()) + ' - MARMAK Mirror';
 
         if (window.navigator && navigator.mediaSession) {
             try {
@@ -147,6 +141,12 @@
                 alert(e);
             }
         }
+        
+        if (meta.title) {
+            meta.title += ' - MARMAK Mirror';
+        }
+
+        document.title = meta.title || decodeURIComponent(newPath.split('/').pop()) + ' - MARMAK Mirror';
 
         if (window.history && history.pushState) {
             history.pushState(null, '', newPath);
