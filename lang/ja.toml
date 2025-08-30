@@ -132,6 +132,7 @@ error_occured = "エラーが発生しました："
 error_deleting = "ファイルの削除中にエラーが発生しました。"
 directory_not_empty = "このディレクトリは空ではありません！"
 upload_not_supported = "このブラウザではJavaScriptアップローダーがサポートされていません。"
+private_folder = "プライベートフォルダにアクセスするにはログインしてください！"
 
 # Generic UI strings
 

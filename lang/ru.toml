@@ -132,6 +132,7 @@ error_occured = "Произошла ошибка:"
 error_deleting = "Ошибка при удалении файла."
 directory_not_empty = "Каталог не пуст!"
 upload_not_supported = "Этот браузер не поддерживает загрузку через JavaScript."
+private_folder = "Войдите, чтобы получить доступ к приватной папке!"
 
 # Generic UI strings
 

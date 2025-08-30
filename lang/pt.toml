@@ -132,6 +132,7 @@ error_occured = "Ocorreu um erro:"
 error_deleting = "Ocorreu um erro ao tentar deletar o arquivo:"
 directory_not_empty = "Este diretório não está vazio!"
 upload_not_supported = "O carregamento por JavaScript não é suportado por este navegador."
+private_folder = "Faça login para acessar a pasta privada!"
 
 # Generic UI strings
 

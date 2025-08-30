@@ -132,6 +132,7 @@ error_occured = "Ein Fehler ist aufgetreten:"
 error_deleting = "Fehler beim Löschen der Datei aufgetreten."
 directory_not_empty = "Dieses Verzeichnis ist nicht leer!"
 upload_not_supported = "Der JavaScript-Uploader wird von diesem Browser nicht unterstützt."
+private_folder = "Melden Sie sich an, um auf den privaten Ordner zuzugreifen!"
 
 # Generic UI strings
 

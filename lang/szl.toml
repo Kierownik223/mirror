@@ -132,6 +132,7 @@ error_occured = "Feler sie zdarzōł:"
 error_deleting = "Feler przi kasowaniy pliku."
 directory_not_empty = "Ten folder niy je pusty!"
 upload_not_supported = "Tyn przeglōndorz niy wspiyro ładowanio z JavaScriptym."
+private_folder = "Zaloguj się, aby dostać się do prywatnego folderu!"
 
 # Generic UI strings
 

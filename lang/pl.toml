@@ -132,6 +132,7 @@ error_occured = "Wystąpił błąd:"
 error_deleting = "Podczas usuwania pliku wystąpił błąd."
 directory_not_empty = "Ten katalog nie jest pusty!"
 upload_not_supported = "Wrzucarka JavaScript nie jest wspierana przez tę przeglądarkę."
+private_folder = "Zaloguj się, aby uzyskać dostęp do prywatnego folderu!"
 
 # Generic UI strings
 

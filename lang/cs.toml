@@ -132,6 +132,7 @@ error_occured = "Došlo k chybě:"
 error_deleting = "Při mazání souboru došlo k chybě."
 directory_not_empty = "Tento adresář není prázdný!"
 upload_not_supported = "JavaScript nahrávání není v tomto prohlížeči podporováno."
+private_folder = "Přihlaste se pro přístup k soukromé složce!"
 
 # Generic UI strings
 

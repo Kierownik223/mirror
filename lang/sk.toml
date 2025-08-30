@@ -132,6 +132,7 @@ error_occured = "Došlo k chybe:"
 error_deleting = "Pri mazaní súboru došlo k chybe."
 directory_not_empty = "Tento priečinok nie je prázdny!"
 upload_not_supported = "Tento prehliadač nepodporuje nahrávanie cez JavaScript."
+private_folder = "Prihláste sa na prístup do súkromnej složky!"
 
 # Generic UI strings
 
