@@ -19,7 +19,7 @@ use time::{Duration, OffsetDateTime};
 
 use crate::{
     db::{fetch_user, login_user, Db},
-    utils::{get_bool_cookie, get_root_domain, get_session, get_theme, is_logged_in},
+    utils::{get_bool_cookie, get_root_domain, get_session, get_theme, is_logged_in, map_io_error_to_status},
     Config, Host, IndexResponse, Language, MarmakUser, TranslationStore, UsePlain, UserToken,
     XForwardedFor,
 };
@@ -170,9 +170,8 @@ async fn direct<'a>(
         }
 
         let private_key_pem =
-            fs::read_to_string("private.key").map_err(|_| Status::InternalServerError)?;
-        let private_key = RsaPrivateKey::from_pkcs1_pem(&private_key_pem)
-            .map_err(|_| Status::InternalServerError)?;
+            fs::read_to_string("private.key").map_err(map_io_error_to_status)?;
+        let private_key = RsaPrivateKey::from_pkcs1_pem(&private_key_pem).expect("Failed to create private_key");
 
         let encrypted_data = base64::engine::general_purpose::URL_SAFE
             .decode(&token.replace(".", "="))
@@ -180,14 +179,14 @@ async fn direct<'a>(
 
         let decrypted_data = private_key
             .decrypt(Pkcs1v15Encrypt, &encrypted_data)
-            .map_err(|_| Status::InternalServerError)?;
+            .expect("Failed to decrypt payload");
 
         let mut json_bytes = Vec::new();
         BASE64_STANDARD
             .decode_vec(&decrypted_data, &mut json_bytes)
             .map_err(|_| Status::BadRequest)?;
 
-        let json = String::from_utf8(json_bytes).map_err(|_| Status::InternalServerError)?;
+        let json = String::from_utf8(json_bytes).expect("Failed to get payload string");
         let received_user: UserToken =
             serde_json::from_str(&json).map_err(|_| Status::BadRequest)?;
 
