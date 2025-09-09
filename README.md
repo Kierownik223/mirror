@@ -43,56 +43,27 @@ Before first startup, copy `config.toml.example` to `config.toml` and `Rocket.to
 
 #### Caddy
 
-Below is a configuration for Caddy (which is the recommended reverse-proxy for Mirror)
+An example configuration is provided as a Caddyfile.
+
+#### Apache2
+
+Please note that Apache2 is not fully supported.  
+Change `standalone` to `true` in the `config.toml` file and use this config:
 
 ```
-http://dl.example.com, https://dl.example.com {
-    header /static/fonts/* Access-Control-Allow-Origin *
+<VirtualHost *:80>
+	ProxyPreserveHost On
+	ProxyPass / http://127.0.0.1:2115/
+	ProxyPassReverse / http://127.0.0.1:2115/
 
-    route {
-        header Cache-Control private
-        header /api/* Cache-Control no-cache
-        header /poster* Cache-Control public
-    }
-
-    handle /static/* {
-        root * /path/to/mirror/files
-        header /static* Cache-Control public
-        file_server
-    }
-
-    @xap path *.xap
-    @appx path *.appx
-    @appxbundle path *.appxbundle
-
-    reverse_proxy :2115 {
-            @dl header X-Send-File *
-            handle_response @dl {
-                    root * /path/to/mirror
-                    rewrite * /{rp.header.X-Send-File}
-                    method * GET
-
-                    header * Cache-Control {rp.header.Cache-Control}
-
-                    file_server
-
-                    header @xap Content-Type "application/x-silverlight-app"
-                    header @appx Content-Type "application/appx"
-                    header @appxbundle Content-Type "application/appxbundle"
-            }
-    }
-
-    redir /direct /account{uri} 302
-
-    handle_errors 502 {
-            respond "MARMAK Mirror is currently unavailable. Please try again later." 503
-    }
-}
+	ProxyErrorOverride Off
+</VirtualHost>
 ```
 
-#### Apache2, nginx, etc.
+#### nginx
 
-These webservers are unsupported as of now.
+Please note that Apache2 is not fully supported.  
+Change `standalone` to `true` in the `config.toml` file and use the [standard reverse proxy config](https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/) with the address of `127.0.0.1:2115`
 
 ## Usage
 
