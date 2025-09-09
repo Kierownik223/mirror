@@ -19,7 +19,10 @@ use time::{Duration, OffsetDateTime};
 
 use crate::{
     db::{fetch_user, login_user, Db},
-    utils::{get_bool_cookie, get_root_domain, get_session, get_theme, is_logged_in, map_io_error_to_status},
+    utils::{
+        get_bool_cookie, get_root_domain, get_session, get_theme, is_logged_in,
+        map_io_error_to_status,
+    },
     Config, Host, IndexResponse, Language, MarmakUser, TranslationStore, UsePlain, UserToken,
     XForwardedFor,
 };
@@ -169,9 +172,9 @@ async fn direct<'a>(
             return Ok(Redirect::to(if perms == 0 { "/admin" } else { "/" }));
         }
 
-        let private_key_pem =
-            fs::read_to_string("private.key").map_err(map_io_error_to_status)?;
-        let private_key = RsaPrivateKey::from_pkcs1_pem(&private_key_pem).expect("Failed to create private_key");
+        let private_key_pem = fs::read_to_string("private.key").map_err(map_io_error_to_status)?;
+        let private_key =
+            RsaPrivateKey::from_pkcs1_pem(&private_key_pem).expect("Failed to create private_key");
 
         let encrypted_data = base64::engine::general_purpose::URL_SAFE
             .decode(&token.replace(".", "="))

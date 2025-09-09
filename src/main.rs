@@ -742,7 +742,13 @@ async fn index(
                 },
             );
 
-            if path.extension().unwrap_or_default().to_str().unwrap_or_default() == "wav" {
+            if path
+                .extension()
+                .unwrap_or_default()
+                .to_str()
+                .unwrap_or_default()
+                == "wav"
+            {
                 return Ok(IndexResponse::Template(generic_template));
             }
 
