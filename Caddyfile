@@ -3,9 +3,9 @@
         header /static/fonts/* Access-Control-Allow-Origin *
 
         # Serve static files without using the backend
-	@static {
-		path /static/* /favicon.ico /robots.txt
-	}
+        @static {
+                path /static/* /favicon.ico /robots.txt
+        }
 
         handle @static {
                 # Change this path to reflect your configuration
@@ -14,14 +14,14 @@
                 header * Cache-Control "public, max-age=604800"
                 header * -Onion-Location
                 file_server
-	}
+        }
 
         # Extra support for Windows package files
         @xap path *.xap
         @appx path *.appx
         @appxbundle path *.appxbundle
 
-       	reverse_proxy :2115 {
+        reverse_proxy :2115 {
                 @dl header X-Send-File *
                 handle_response @dl {
                         # Change this path to reflect your configuration
@@ -30,7 +30,7 @@
                         rewrite * /{rp.header.X-Send-File}
                         method * GET
 
-	                header * Cache-Control {rp.header.Cache-Control}
+                        header * Cache-Control {rp.header.Cache-Control}
 
                         file_server
 
@@ -45,15 +45,15 @@
         redir /direct /account{uri} 302
 
         # Redirect legacy /?dir={dir} requests
-	map {query.dir} {bare_dir} {
-		~^(.*[^/])/*$ "${1}"
-		default {query.dir}
-	}
+        map {query.dir} {bare_dir} {
+                ~^(.*[^/])/*$ "${1}"
+                default {query.dir}
+        }
 
-	@dir query dir=*
-	handle @dir {
-		redir {bare_dir}/
-	}
+        @dir query dir=*
+        handle @dir {
+                redir {bare_dir}/
+        }
 
         # Respond with 503 instead of 502 to avoid Cloudflare error page
         handle_errors 502 {
