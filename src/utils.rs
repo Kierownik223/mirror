@@ -190,10 +190,10 @@ pub fn get_theme<'a>(jar: &CookieJar<'_>) -> String {
     let mut theme = jar
         .get("theme")
         .map(|cookie| cookie.value())
-        .unwrap_or("standard");
+        .unwrap_or("default");
 
     if !Path::new(&format!("files/static/styles/{}.css", &theme)).exists() {
-        theme = "standard";
+        theme = "default";
     }
 
     theme.to_string()

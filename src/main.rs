@@ -1001,7 +1001,7 @@ fn settings(
             jar.add(create_cookie("theme", &theme_opt));
             redir = true;
         } else {
-            jar.add(create_cookie("theme", "standard"));
+            jar.add(create_cookie("theme", "default"));
         }
     }
 

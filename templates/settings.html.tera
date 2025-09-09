@@ -24,13 +24,13 @@
     <br>
     <img src="/static/images/icons/ui/{% if hires %}hires/{% endif %}theme.png" class="icon">{{ strings.change_theme }}<br>
     <select name="theme">
-        <option value="standard" {% if theme=="standard" %}selected{% endif %}>{{ strings.theme_default }}</option>
-        <option value="darkblu" {% if theme=="darkblu" %}selected{% endif %}>{{ strings.theme_darkblu }}</option>
+        <option value="default" {% if theme=="default" %}selected{% endif %}>{{ strings.theme_default }}</option>
+        <option value="darkblue" {% if theme=="darkblue" %}selected{% endif %}>{{ strings.theme_darkblue }}</option>
         <option value="greenish" {% if theme=="greenish" %}selected{% endif %}>{{ strings.theme_greenish }}</option>
         <option value="antique" {% if theme=="antique" %}selected{% endif %}>{{ strings.theme_antique }}</option>
-        <option value="dark" {% if theme=="dark" %}selected{% endif %}>OLED</option>
-        <option value="matrix" {% if theme=="matrix" %}selected{% endif %}>OLED Matrix</option>
-        <option value="light" {% if theme=="light" %}selected{% endif %}>#fff</option>
+        <option value="oled" {% if theme=="oled" %}selected{% endif %}>OLED</option>
+        <option value="oledmatrix" {% if theme=="oledmatrix" %}selected{% endif %}>OLED Matrix</option>
+        <option value="white" {% if theme=="white" %}selected{% endif %}>#fff</option>
         {% if theme == "venti" %}<option value="venti" selected>Venti by Olek47</option>{% endif %}
     </select>
     <br>
