@@ -1,0 +1,62 @@
+:80 {
+        # Allow other sites to use Mirror fonts
+        header /static/fonts/* Access-Control-Allow-Origin *
+
+        # Serve static files without using the backend
+	@static {
+		path /static/* /favicon.ico /robots.txt
+	}
+
+        handle @static {
+                # Change this path to reflect your configuration
+                root * /path/to/mirror/files
+
+                header * Cache-Control "public, max-age=604800"
+                header * -Onion-Location
+                file_server
+	}
+
+        # Extra support for Windows package files
+        @xap path *.xap
+        @appx path *.appx
+        @appxbundle path *.appxbundle
+
+       	reverse_proxy :2115 {
+                @dl header X-Send-File *
+                handle_response @dl {
+                        # Change this path to reflect your configuration
+                        root * /path/to/mirror
+
+                        rewrite * /{rp.header.X-Send-File}
+                        method * GET
+
+	                header * Cache-Control {rp.header.Cache-Control}
+
+                        file_server
+
+                        # Extra support for Windows package files
+                        header @xap Content-Type "application/x-silverlight-app"
+                        header @appx Content-Type "application/appx"
+                        header @appxbundle Content-Type "application/appxbundle"
+                }
+        }
+
+        # Allow direct
+        redir /direct /account{uri} 302
+
+        # Redirect legacy /?dir={dir} requests
+	map {query.dir} {bare_dir} {
+		~^(.*[^/])/*$ "${1}"
+		default {query.dir}
+	}
+
+	@dir query dir=*
+	handle @dir {
+		redir {bare_dir}/
+	}
+
+        # Respond with 503 instead of 502 to avoid Cloudflare error page
+        handle_errors 502 {
+                respond "MARMAK Mirror is currently unavailable. Please try again later." 503
+        }
+}
