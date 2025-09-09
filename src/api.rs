@@ -86,7 +86,13 @@ async fn listing(
 ) -> Result<Cached<Json<Vec<MirrorFile>>>, Status> {
     let username = get_session(jar).0;
 
-    let path = get_real_path(&file, username)?.0.display().to_string();
+    let path = get_real_path(&file, username)?.0;
+
+    if path.is_file() {
+        return Err(Status::NotAcceptable);
+    }
+
+    let path = path.display().to_string();
 
     let mut file_list = read_files(&path).map_err(map_io_error_to_status)?;
     let mut dir_list = read_dirs_async(&path, sizes)
@@ -127,6 +133,10 @@ async fn file_with_downloads(
 
     let md = fs::metadata(&path).map_err(|_| Status::InternalServerError)?;
 
+    if md.is_dir() {
+        return Err(Status::NotAcceptable);
+    }
+
     let name = path
         .file_name()
         .unwrap()
@@ -134,7 +144,7 @@ async fn file_with_downloads(
         .unwrap_or_default()
         .to_string();
     let downloads = get_downloads(db, &file).await.unwrap_or(0);
-    let ext = path.extension().unwrap().to_str().unwrap_or_default();
+    let ext = path.extension().unwrap_or_default().to_str().unwrap_or_default();
     let mut icon = ext;
 
     if ext == "mp3" || ext == "m4a" || ext == "m4b" || ext == "flac" {
@@ -197,6 +207,10 @@ async fn file(
 
     let md = fs::metadata(&path).map_err(|_| Status::InternalServerError)?;
 
+    if md.is_dir() {
+        return Err(Status::NotAcceptable);
+    }
+
     let name = path
         .file_name()
         .unwrap()
@@ -204,7 +218,7 @@ async fn file(
         .unwrap_or_default()
         .to_string();
 
-    let ext = path.extension().unwrap().to_str().unwrap_or_default();
+    let ext = path.extension().unwrap_or_default().to_str().unwrap_or_default();
     let mut icon = ext;
 
     if ext == "mp3" || ext == "m4a" || ext == "m4b" || ext == "flac" {
