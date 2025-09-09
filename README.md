@@ -62,7 +62,7 @@ Change `standalone` to `true` in the `config.toml` file and use this config:
 
 #### nginx
 
-Please note that Apache2 is not fully supported.  
+Please note that nginx is not fully supported.  
 Change `standalone` to `true` in the `config.toml` file and use the [standard reverse proxy config](https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/) with the address of `127.0.0.1:2115`
 
 ## Usage
