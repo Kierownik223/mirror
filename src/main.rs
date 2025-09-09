@@ -716,32 +716,34 @@ async fn index(
             let audiopath = Path::new("/").join(file.clone()).display().to_string();
             let audiopath = audiopath.as_str();
 
+            let generic_template = Template::render(
+                if *useplain.0 { "plain/audio" } else { "audio" },
+                context! {
+                    title: format!("{} {}", strings.get("listening").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
+                    lang: &lang,
+                    strings,
+                    root_domain: &root_domain,
+                    host: host.0,
+                    config: config.inner(),
+                    path: audiopath,
+                    audiotitle: &path.file_name().unwrap().to_str().unwrap(),
+                    theme: &theme,
+                    is_logged_in: is_logged_in(&jar),
+                    username: &username,
+                    admin: perms == 0,
+                    hires,
+                    smallhead,
+                    artist: "N/A",
+                    year: "N/A",
+                    album: "N/A",
+                    genre: "N/A",
+                    track: "N/A",
+                    cover: false
+                },
+            );
+
             if path.extension().unwrap_or_default().to_str().unwrap_or_default() == "wav" {
-                return Ok(IndexResponse::Template(Template::render(
-                    if *useplain.0 { "plain/audio" } else { "audio" },
-                    context! {
-                        title: format!("{} {}", strings.get("listening").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
-                        lang,
-                        strings,
-                        root_domain,
-                        host: host.0,
-                        config: config.inner(),
-                        path: audiopath,
-                        audiotitle: &path.file_name().unwrap().to_str().unwrap(),
-                        theme,
-                        is_logged_in: is_logged_in(&jar),
-                        username,
-                        admin: perms == 0,
-                        hires,
-                        smallhead,
-                        artist: "N/A",
-                        year: "N/A",
-                        album: "N/A",
-                        genre: "N/A",
-                        track: "N/A",
-                        cover: false
-                    },
-                )));
+                return Ok(IndexResponse::Template(generic_template));
             }
 
             if let Ok(tag) = Tag::new().read_from_path(&path) {
@@ -786,7 +788,7 @@ async fn index(
                     },
                 )))
             } else {
-                open_file(path, cache_control).await
+                return Ok(IndexResponse::Template(generic_template));
             }
         }
         "folder" => {
