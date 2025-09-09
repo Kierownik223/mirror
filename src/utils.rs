@@ -303,6 +303,9 @@ pub fn add_path_to_zip(
 }
 
 pub fn map_io_error_to_status(e: Error) -> Status {
+    if cfg!(debug_assertions) {
+        eprintln!("IO Error: {}", e.kind());
+    }
     match e.kind() {
         ErrorKind::NotFound => Status::NotFound,
         ErrorKind::PermissionDenied => Status::Forbidden,
