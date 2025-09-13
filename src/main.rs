@@ -61,8 +61,33 @@ struct Config {
 
 impl Config {
     fn load() -> Self {
-        let config_str = fs::read_to_string("config.toml").expect("Failed to read config file");
-        toml::from_str(&config_str).expect("Failed to parse config file")
+        let config_str = fs::read_to_string("config.toml").unwrap_or_default();
+        toml::from_str(&config_str).unwrap_or_default()
+    }
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Config {
+            extensions: vec![
+                "exe".into(), "cab".into(), "appx".into(), "xap".into(), "appxbundle".into(), "zip".into(), "7z".into(), "apk".into(), "rar".into(),
+            ],
+            hidden_files: vec![
+                "static".into(), "uploads".into(), "private".into(), "robots.txt".into(), "favicon.ico".into(), "top".into(), "RESTRICTED".into(), "metadata".into(), "HIDDEN".into(),
+            ],
+            enable_login: false,
+            enable_api: true,
+            enable_marmak_link: true,
+            enable_direct: false,
+            instance_info: "My Mirror Instance!".into(),
+            x_sendfile_header: "X-Send-File".into(),
+            x_sendfile_prefix: String::new(),
+            standalone: true,
+            fallback_root_domain: "marmak.net.pl".into(),
+            enable_file_db: false,
+            enable_zip_downloads: false,
+            max_age: 86400,
+        }
     }
 }
 
