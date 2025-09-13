@@ -178,7 +178,7 @@ impl<'r> FromRequest<'r> for Host<'r> {
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         match request.headers().get_one("Host") {
             Some(value) => Outcome::Success(Host(value)),
-            None => Outcome::Error((Status::BadRequest, ())),
+            None => Outcome::Success(Host("127.0.0.1")),
         }
     }
 }
