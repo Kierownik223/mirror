@@ -8,7 +8,7 @@ use rocket::response::{Redirect, Responder};
 use rocket::{response, State};
 use rocket::{Request, Response};
 use rocket_db_pools::{Connection, Database};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::ffi::OsStr;
@@ -27,6 +27,7 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
+use crate::config::Config;
 use crate::db::{add_download, FileDb};
 use crate::i18n::TranslationStore;
 use crate::utils::{
@@ -37,59 +38,10 @@ use crate::utils::{
 mod account;
 mod admin;
 mod api;
+mod config;
 mod db;
 mod i18n;
 mod utils;
-
-#[derive(Debug, Deserialize, Clone, Serialize)]
-struct Config {
-    extensions: Vec<String>,
-    hidden_files: Vec<String>,
-    enable_login: bool,
-    enable_api: bool,
-    enable_marmak_link: bool,
-    enable_direct: bool,
-    instance_info: String,
-    x_sendfile_header: String,
-    x_sendfile_prefix: String,
-    standalone: bool,
-    fallback_root_domain: String,
-    enable_file_db: bool,
-    enable_zip_downloads: bool,
-    max_age: u64,
-}
-
-impl Config {
-    fn load() -> Self {
-        let config_str = fs::read_to_string("config.toml").unwrap_or_default();
-        toml::from_str(&config_str).unwrap_or_default()
-    }
-}
-
-impl Default for Config {
-    fn default() -> Self {
-        Config {
-            extensions: vec![
-                "exe".into(), "cab".into(), "appx".into(), "xap".into(), "appxbundle".into(), "zip".into(), "7z".into(), "apk".into(), "rar".into(),
-            ],
-            hidden_files: vec![
-                "static".into(), "uploads".into(), "private".into(), "robots.txt".into(), "favicon.ico".into(), "top".into(), "RESTRICTED".into(), "metadata".into(), "HIDDEN".into(),
-            ],
-            enable_login: false,
-            enable_api: true,
-            enable_marmak_link: true,
-            enable_direct: false,
-            instance_info: "My Mirror Instance!".into(),
-            x_sendfile_header: "X-Send-File".into(),
-            x_sendfile_prefix: String::new(),
-            standalone: true,
-            fallback_root_domain: "marmak.net.pl".into(),
-            enable_file_db: false,
-            enable_zip_downloads: false,
-            max_age: 86400,
-        }
-    }
-}
 
 #[macro_use]
 extern crate rocket;
