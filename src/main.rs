@@ -41,7 +41,8 @@ mod api;
 mod config;
 mod db;
 mod i18n;
-#[cfg(test)] mod tests;
+#[cfg(test)]
+mod tests;
 mod utils;
 
 #[macro_use]

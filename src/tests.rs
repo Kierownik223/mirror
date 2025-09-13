@@ -1,15 +1,21 @@
 use std::fs;
 
 use super::rocket;
-use rocket::local::blocking::Client;
 use rocket::http::{Header, Status};
+use rocket::local::blocking::Client;
 
 #[test]
 fn api() {
     let client = Client::tracked(rocket()).expect("valid rocket instance");
     let response = client.get("/api").dispatch();
     assert_eq!(response.status(), Status::Ok);
-    assert_eq!(response.into_string().unwrap(), format!("{{\"version\":\"{}\"}}", env!("CARGO_PKG_VERSION").to_string()));
+    assert_eq!(
+        response.into_string().unwrap(),
+        format!(
+            "{{\"version\":\"{}\"}}",
+            env!("CARGO_PKG_VERSION").to_string()
+        )
+    );
 }
 
 #[test]
@@ -27,8 +33,12 @@ Content-Disposition: form-data; name=\"path\"\r\n\r\n\
 --TEST-BOUNDARY--\r\n\
 ";
 
-    let response = client.post("/api/upload")
-        .header(Header::new("Content-Type", "multipart/form-data; boundary=TEST-BOUNDARY"))
+    let response = client
+        .post("/api/upload")
+        .header(Header::new(
+            "Content-Type",
+            "multipart/form-data; boundary=TEST-BOUNDARY",
+        ))
         .body(data)
         .dispatch();
 
@@ -42,9 +52,7 @@ fn rename() {
     let _ = fs::File::create("files/rename.txt").expect("Failed to create file");
     let client = Client::tracked(rocket()).expect("valid rocket instance");
     let data = "{\"name\":\"file.txt\"}";
-    let response = client.patch("/api/rename.txt")
-        .body(data)
-        .dispatch();
+    let response = client.patch("/api/rename.txt").body(data).dispatch();
 
     assert_eq!(response.status(), Status::Ok);
 
@@ -56,8 +64,7 @@ fn delete() {
     let _ = fs::File::create("files/delete.txt").expect("Failed to create file");
 
     let client = Client::tracked(rocket()).expect("valid rocket instance");
-    let response = client.delete("/api/delete.txt")
-        .dispatch();
-    
+    let response = client.delete("/api/delete.txt").dispatch();
+
     assert_eq!(response.status(), Status::NoContent);
 }
