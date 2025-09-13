@@ -146,7 +146,11 @@ async fn file_with_downloads(
         .unwrap_or_default()
         .to_string();
     let downloads = get_downloads(db, &file).await.unwrap_or(0);
-    let ext = path.extension().unwrap_or_default().to_str().unwrap_or_default();
+    let ext = path
+        .extension()
+        .unwrap_or_default()
+        .to_str()
+        .unwrap_or_default();
     let mut icon = ext;
 
     if ext == "mp3" || ext == "m4a" || ext == "m4b" || ext == "flac" {
@@ -220,7 +224,11 @@ async fn file(
         .unwrap_or_default()
         .to_string();
 
-    let ext = path.extension().unwrap_or_default().to_str().unwrap_or_default();
+    let ext = path
+        .extension()
+        .unwrap_or_default()
+        .to_str()
+        .unwrap_or_default();
     let mut icon = ext;
 
     if ext == "mp3" || ext == "m4a" || ext == "m4b" || ext == "flac" {

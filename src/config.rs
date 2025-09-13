@@ -2,7 +2,6 @@ use std::fs;
 
 use serde::{Deserialize, Serialize};
 
-
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct Config {
     pub extensions: Vec<String>,
@@ -32,10 +31,26 @@ impl Default for Config {
     fn default() -> Self {
         Config {
             extensions: vec![
-                "exe".into(), "cab".into(), "appx".into(), "xap".into(), "appxbundle".into(), "zip".into(), "7z".into(), "apk".into(), "rar".into(),
+                "exe".into(),
+                "cab".into(),
+                "appx".into(),
+                "xap".into(),
+                "appxbundle".into(),
+                "zip".into(),
+                "7z".into(),
+                "apk".into(),
+                "rar".into(),
             ],
             hidden_files: vec![
-                "static".into(), "uploads".into(), "private".into(), "robots.txt".into(), "favicon.ico".into(), "top".into(), "RESTRICTED".into(), "metadata".into(), "HIDDEN".into(),
+                "static".into(),
+                "uploads".into(),
+                "private".into(),
+                "robots.txt".into(),
+                "favicon.ico".into(),
+                "top".into(),
+                "RESTRICTED".into(),
+                "metadata".into(),
+                "HIDDEN".into(),
             ],
             enable_login: false,
             enable_api: true,
