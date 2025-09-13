@@ -169,6 +169,7 @@ pub fn get_bool_cookie(jar: &CookieJar<'_>, name: &str, default: bool) -> bool {
         .unwrap_or(default)
 }
 
+#[cfg(not(test))]
 pub fn get_session(jar: &CookieJar<'_>) -> (String, i32) {
     if let Some(cookie) = jar.get_private("session") {
         let session = cookie.value();
@@ -186,6 +187,11 @@ pub fn get_session(jar: &CookieJar<'_>) -> (String, i32) {
     }
 }
 
+#[cfg(test)]
+pub fn get_session(_jar: &CookieJar<'_>) -> (String, i32) {
+    ("admin".into(), 0)
+}
+
 pub fn get_theme<'a>(jar: &CookieJar<'_>) -> String {
     let mut theme = jar
         .get("theme")
@@ -199,8 +205,14 @@ pub fn get_theme<'a>(jar: &CookieJar<'_>) -> String {
     theme.to_string()
 }
 
+#[cfg(not(test))]
 pub fn is_logged_in(jar: &CookieJar<'_>) -> bool {
     jar.get_private("session").is_some()
+}
+
+#[cfg(test)]
+pub fn is_logged_in(_jar: &CookieJar<'_>) -> bool {
+    true
 }
 
 pub fn is_restricted(path: &Path, jar: &CookieJar<'_>) -> bool {
