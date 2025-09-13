@@ -384,8 +384,10 @@ async fn file(
     let username = get_session(jar).0;
     let (path, is_private) = get_real_path(&file, username)?;
 
-    if is_restricted(&path, jar) {
-        return Err(Status::Unauthorized);
+    if config.enable_login {
+        if is_restricted(&path, jar) {
+            return Err(Status::Unauthorized);
+        }
     }
 
     let cache_control_string;
@@ -421,8 +423,10 @@ async fn download_with_counter(
         return Err(Status::NotFound);
     }
 
-    if is_restricted(&path, jar) {
-        return Err(Status::Unauthorized);
+    if config.enable_login {
+        if is_restricted(&path, jar) {
+            return Err(Status::Unauthorized);
+        }
     }
 
     let ext = if path.is_file() {
@@ -466,8 +470,10 @@ async fn download(
     let username = get_session(jar).0;
     let (path, is_private) = get_real_path(&file, username)?;
 
-    if is_restricted(&path, jar) {
-        return Err(Status::Unauthorized);
+    if config.enable_login {
+        if is_restricted(&path, jar) {
+            return Err(Status::Unauthorized);
+        }
     }
 
     let cache_control_string;
@@ -541,8 +547,10 @@ async fn index(
         return Err(Status::UnprocessableEntity);
     }
 
-    if is_restricted(&path, jar) {
-        return Err(Status::Unauthorized);
+    if config.enable_login {
+        if is_restricted(&path, jar) {
+            return Err(Status::Unauthorized);
+        }
     }
 
     let ext = if path.is_file() {
@@ -1157,8 +1165,10 @@ async fn iframe(
     let username = get_session(jar).0;
     let path = get_real_path(&file, username.clone())?.0;
 
-    if is_restricted(&path, jar) {
-        return Err(Status::Unauthorized);
+    if config.enable_login {
+        if is_restricted(&path, jar) {
+            return Err(Status::Unauthorized);
+        }
     }
 
     let path = get_real_path(&file, username)?.0.display().to_string();

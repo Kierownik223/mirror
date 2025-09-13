@@ -99,8 +99,10 @@ async fn listing(
         .await
         .map_err(map_io_error_to_status)?;
 
-    if is_restricted(&Path::new("files/").join(&file), jar) {
-        return Err(Status::Forbidden);
+    if config.enable_login {
+        if is_restricted(&Path::new("files/").join(&file), jar) {
+            return Err(Status::Forbidden);
+        }
     }
 
     dir_list.retain(|x| !config.hidden_files.contains(&x.name));
