@@ -5,7 +5,7 @@ use rand::thread_rng;
 use rocket::{
     fairing::AdHoc,
     form::Form,
-    http::{Cookie, CookieJar, Status},
+    http::{Cookie, CookieJar, SameSite, Status},
     response::Redirect,
     State,
 };
@@ -200,23 +200,18 @@ async fn direct<'a>(
                         serde_json::from_str(&mirror_settings).unwrap_or_default();
 
                     for (key, value) in decoded {
-                        let mut now = OffsetDateTime::now_utc();
-                        now += Duration::days(365);
-                        let mut cookie = Cookie::new(key, value);
-                        cookie.set_expires(now);
-                        jar.add(cookie);
+                        let year = OffsetDateTime::now_utc() + Duration::days(365);
+                        let mut cookie = Cookie::new(key, value.to_string());
+                        cookie.set_expires(year);
+                        cookie.set_same_site(SameSite::Lax);
                     }
                 }
             }
 
-            jar.add_private(Cookie::new(
-                "session",
-                format!(
-                    "{}.{}",
-                    received_user.username,
-                    db_user.perms.unwrap_or_default()
-                ),
-            ));
+            let mut session_cookie = Cookie::new("session", format!("{}.{}", received_user.username, db_user.perms.unwrap_or_default()));
+            session_cookie.set_same_site(SameSite::Lax);
+
+            jar.add_private(session_cookie);
             return Ok(Redirect::to("/"));
         }
 
