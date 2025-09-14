@@ -9,7 +9,7 @@ use std::{
 
 use rocket::{
     fs::NamedFile,
-    http::{Cookie, CookieJar, Status},
+    http::{Cookie, CookieJar, SameSite, Status},
 };
 use time::{Duration, OffsetDateTime};
 use tokio::sync::RwLock;
@@ -266,9 +266,10 @@ pub async fn open_file(path: PathBuf, cache_control: &str) -> Result<IndexRespon
 }
 
 pub fn create_cookie<'a>(name: &'a str, value: &str) -> Cookie<'a> {
-    let now = OffsetDateTime::now_utc() + Duration::days(365);
+    let year = OffsetDateTime::now_utc() + Duration::days(365);
     let mut cookie = Cookie::new(name, value.to_string());
-    cookie.set_expires(now);
+    cookie.set_expires(year);
+    cookie.set_same_site(SameSite::Lax);
     cookie
 }
 
