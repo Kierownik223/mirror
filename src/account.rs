@@ -255,6 +255,7 @@ async fn direct<'a>(
 
                 return Ok(Redirect::to(redirect_url));
             } else {
+                jar.remove_private("session");
                 return Err(Status::Forbidden);
             }
         }
