@@ -95,19 +95,16 @@ async fn login(
                     now += Duration::days(365);
                     let mut cookie = Cookie::new(key, value);
                     cookie.set_expires(now);
+                    cookie.set_same_site(SameSite::Lax);
                     jar.add(cookie);
                 }
             }
         }
 
-        jar.add_private(Cookie::new(
-            "session",
-            format!(
-                "{}.{}",
-                &db_user.username,
-                &db_user.perms.unwrap_or_default().to_string()
-            ),
-        ));
+        let mut session_cookie = Cookie::new("session", format!("{}.{}", &db_user.username, &db_user.perms.unwrap_or_default().to_string()));
+        session_cookie.set_same_site(SameSite::Lax);
+
+        jar.add_private(session_cookie);
 
         println!(
             "Login for user {} from {} succeeded",
