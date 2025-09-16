@@ -209,6 +209,11 @@ async fn direct<'a>(
             session_cookie.set_same_site(SameSite::Lax);
 
             jar.add_private(session_cookie);
+
+            if !Path::new(&format!("files/private/{}", &db_user.username)).exists() {
+                let _ = fs::create_dir(format!("files/private/{}", &db_user.username));
+            }
+
             return Ok(Redirect::to("/"));
         }
 
