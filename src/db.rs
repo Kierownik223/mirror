@@ -22,7 +22,7 @@ pub async fn login_user(
     verify_password: bool,
 ) -> Option<MarmakUser> {
     let query_result = sqlx::query(
-        "SELECT username, password, perms, mirror_settings FROM users WHERE username = ? AND verified = ?",
+        "SELECT username, password, perms, mirror_settings FROM users WHERE username = ? AND verified = 1",
     )
     .bind(username)
     .fetch_one(&mut **db)
@@ -71,7 +71,7 @@ pub async fn login_user(
 
 pub async fn fetch_user(mut db: Connection<Db>, username: &str) -> Option<MarmakUser> {
     let query_result =
-        sqlx::query("SELECT password, perms, mirror_settings FROM users WHERE username = ? AND verified = ?")
+        sqlx::query("SELECT password, perms, mirror_settings FROM users WHERE username = ? AND verified = 1")
             .bind(username)
             .fetch_one(&mut **db)
             .await;
