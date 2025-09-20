@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{config::Config, MarmakUser};
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Claims {
     pub username: String,
     pub email: Option<String>,
@@ -22,7 +22,7 @@ pub struct Claims {
     iat: usize,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct JWT {
     pub claims: Claims,
 }
@@ -56,7 +56,7 @@ impl<'r> FromRequest<'r> for JWT {
 
 impl Default for JWT {
     fn default() -> Self {
-        JWT { claims: Claims { username: "defaultuser0".into(), email: None, perms: 1, exp: 1, iat: 0 } }
+        JWT { claims: Claims { username: "Nobody".into(), email: None, perms: 1, exp: 1, iat: 0 } }
     }
 }
 
