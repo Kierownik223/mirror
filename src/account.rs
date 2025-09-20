@@ -192,7 +192,7 @@ async fn direct<'a>(
 
         if let Some(db_user) = login_user(db, &received_user.username, "", ip.0, false).await {
             if !get_bool_cookie(jar, "nooverride", false) {
-                if let Some(mirror_settings) = db_user.mirror_settings {
+                if let Some(mirror_settings) = db_user.mirror_settings.as_ref() {
                     let decoded: HashMap<String, String> =
                         serde_json::from_str(&mirror_settings).unwrap_or_default();
 
@@ -205,10 +205,13 @@ async fn direct<'a>(
                 }
             }
 
-            let mut session_cookie = Cookie::new("session", format!("{}.{}", received_user.username, db_user.perms.unwrap_or_default()));
-            session_cookie.set_same_site(SameSite::Lax);
+            let jwt = create_jwt(&db_user).map_err(|_| Status::InternalServerError)?;
 
-            jar.add_private(session_cookie);
+            let mut jwt_cookie = Cookie::new("matoken", jwt);
+            jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0, &config.fallback_root_domain)));
+            jwt_cookie.set_same_site(SameSite::Lax);
+
+            jar.add(jwt_cookie);
 
             if !Path::new(&format!("files/private/{}", &db_user.username)).exists() {
                 let _ = fs::create_dir(format!("files/private/{}", &db_user.username));
