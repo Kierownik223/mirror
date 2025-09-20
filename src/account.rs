@@ -102,6 +102,7 @@ async fn login(
 
         let mut jwt_cookie = Cookie::new("matoken", jwt);
         jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0, &config.fallback_root_domain)));
+        jwt_cookie.set_same_site(SameSite::Lax);
 
         jar.add(jwt_cookie);
 
