@@ -26,3 +26,5 @@ enable_file_db = true
 enable_zip_downloads = false
 # Max-Age for Cache-Control header
 max_age = 86400
+# JSON Web Token secret key
+jwt_secret = "secure-secret-key-thats-definitely-not-it"

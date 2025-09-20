@@ -18,6 +18,7 @@ pub struct Config {
     pub enable_file_db: bool,
     pub enable_zip_downloads: bool,
     pub max_age: u64,
+    pub jwt_secret: String,
 }
 
 impl Config {
@@ -64,6 +65,7 @@ impl Default for Config {
             enable_file_db: false,
             enable_zip_downloads: false,
             max_age: 86400,
+            jwt_secret: String::new(),
         }
     }
 }
