@@ -39,7 +39,7 @@ pub async fn login_user(
                         return Some(MarmakUser {
                             username: username,
                             password: password.to_string(),
-                            perms: Some(perms),
+                            perms: perms,
                             mirror_settings: settings,
                             email: row.try_get::<String, _>("email").ok(),
                         });
@@ -53,7 +53,7 @@ pub async fn login_user(
                         return Some(MarmakUser {
                             username: username,
                             password: password.to_string(),
-                            perms: Some(perms),
+                            perms: perms,
                             mirror_settings: settings,
                             email: row.try_get::<String, _>("email").ok(),
                         });
@@ -86,7 +86,7 @@ pub async fn fetch_user(mut db: Connection<Db>, username: &str) -> Option<Marmak
                 return Some(MarmakUser {
                     username: username.to_string(),
                     password: row.try_get::<String, _>("password").ok().unwrap(),
-                    perms: Some(perms),
+                    perms: perms,
                     mirror_settings: settings,
                     email: row.try_get::<String, _>("email").ok(),
                 });

@@ -214,7 +214,7 @@ impl<'r> FromRequest<'r> for Language {
 struct MarmakUser {
     username: String,
     password: String,
-    perms: Option<i32>,
+    perms: i32,
     mirror_settings: Option<String>,
     email: Option<String>,
 }

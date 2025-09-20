@@ -65,7 +65,7 @@ pub fn create_jwt(user: &MarmakUser) -> Result<String, Error> {
     let claims = Claims {
         username: (*user.username).to_string(),
         email: user.email.clone(),
-        perms: user.perms.unwrap_or(1),
+        perms: user.perms,
         exp: expiration as usize,
         iat: Utc::now().timestamp() as usize,
     };
