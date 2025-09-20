@@ -54,6 +54,12 @@ impl<'r> FromRequest<'r> for JWT {
     }
 }
 
+impl Default for JWT {
+    fn default() -> Self {
+        JWT { claims: Claims { username: "defaultuser0".into(), email: None, perms: 1, exp: 1, iat: 0 } }
+    }
+}
+
 pub fn create_jwt(user: &MarmakUser) -> Result<String, Error> {
     let secret = Config::load().jwt_secret;
 
