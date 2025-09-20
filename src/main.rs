@@ -20,7 +20,7 @@ use time::{Duration, OffsetDateTime};
 use tokio::sync::RwLock;
 use tokio::time::sleep;
 use utils::{
-    create_cookie, get_bool_cookie, get_session, get_theme, is_logged_in, is_restricted, open_file,
+    create_cookie, get_bool_cookie, get_theme, is_restricted, open_file,
     parse_language, read_dirs, read_files,
 };
 use walkdir::WalkDir;
@@ -30,6 +30,7 @@ use rocket_dyn_templates::{context, Template};
 use crate::config::Config;
 use crate::db::{add_download, FileDb};
 use crate::i18n::TranslationStore;
+use crate::jwt::JWT;
 use crate::utils::{
     get_genre, get_real_path, get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output,
     read_dirs_async,
@@ -219,6 +220,12 @@ struct MarmakUser {
     email: Option<String>,
 }
 
+#[derive(Debug, PartialEq, Eq, FromForm)]
+struct LoginUser {
+    username: String,
+    password: String,
+}
+
 #[derive(serde::Deserialize, serde::Serialize)]
 struct UserToken {
     username: String,
@@ -298,9 +305,12 @@ impl<'r> Responder<'r, 'r> for IndexResponse {
 #[get("/poster/<file..>")]
 async fn poster(
     file: PathBuf,
-    jar: &CookieJar<'_>,
+    token: Result<JWT, Status>,
 ) -> Result<Result<Cached<(ContentType, Vec<u8>)>, Result<IndexResponse, Status>>, Status> {
-    let username = get_session(jar).0;
+    let username = match token.as_ref() {
+        Ok(token) => &token.claims.username,
+        Err(_) => &"Nobody".into()
+    };
     let (path, is_private) = if let Ok(rest) = file.strip_prefix("private") {
         if username == "Nobody" {
             if rest
@@ -382,14 +392,17 @@ async fn poster(
 #[get("/file/<file..>")]
 async fn file(
     file: PathBuf,
-    jar: &CookieJar<'_>,
     config: &rocket::State<Config>,
+    token: Result<JWT, Status>,
 ) -> Result<IndexResponse, Status> {
-    let username = get_session(jar).0;
-    let (path, is_private) = get_real_path(&file, username)?;
+    let username = match token.as_ref() {
+        Ok(token) => &token.claims.username,
+        Err(_) => &"Nobody".into()
+    };
+    let (path, is_private) = get_real_path(&file, username.to_string())?;
 
     if config.enable_login {
-        if is_restricted(&path, jar) {
+        if is_restricted(&path, token.is_ok()) {
             return Err(Status::Unauthorized);
         }
     }
@@ -411,11 +424,14 @@ async fn file(
 async fn download_with_counter(
     db: Connection<FileDb>,
     file: PathBuf,
-    jar: &CookieJar<'_>,
     config: &rocket::State<Config>,
+    token: Result<JWT, Status>,
 ) -> Result<IndexResponse, Status> {
-    let username = get_session(jar).0;
-    let (path, is_private) = get_real_path(&file, username)?;
+    let username = match token.as_ref() {
+        Ok(token) => &token.claims.username,
+        Err(_) => &"Nobody".into()
+    };
+    let (path, is_private) = get_real_path(&file, username.to_string())?;
 
     if is_private {
         return open_file(path, "private").await;
@@ -428,7 +444,7 @@ async fn download_with_counter(
     }
 
     if config.enable_login {
-        if is_restricted(&path, jar) {
+        if is_restricted(&path, token.is_ok()) {
             return Err(Status::Unauthorized);
         }
     }
@@ -468,14 +484,17 @@ async fn download_with_counter(
 #[get("/<file..>?download")]
 async fn download(
     file: PathBuf,
-    jar: &CookieJar<'_>,
     config: &rocket::State<Config>,
+    token: Result<JWT, Status>,
 ) -> Result<IndexResponse, Status> {
-    let username = get_session(jar).0;
-    let (path, is_private) = get_real_path(&file, username)?;
+    let username = match token.as_ref() {
+        Ok(token) => &token.claims.username,
+        Err(_) => &"Nobody".into()
+    };
+    let (path, is_private) = get_real_path(&file, username.to_string())?;
 
     if config.enable_login {
-        if is_restricted(&path, jar) {
+        if is_restricted(&path, token.is_ok()) {
             return Err(Status::Unauthorized);
         }
     }
@@ -506,8 +525,13 @@ async fn index(
     useplain: UsePlain<'_>,
     viewers: UseViewers<'_>,
     sizes: &State<FileSizes>,
+    token: Result<JWT, Status>,
 ) -> IndexResult {
-    let (username, perms) = get_session(jar);
+    let jwt = token.clone().unwrap_or_default();
+    
+    let username = jwt.claims.username;
+    let perms = jwt.claims.perms;
+
     let path: PathBuf;
     let is_private: bool;
 
@@ -538,7 +562,7 @@ async fn index(
                     host: host.0,
                     config: config.inner(),
                     theme,
-                    is_logged_in: is_logged_in(jar),
+                    is_logged_in: token.is_ok(),
                     admin: perms == 0,
                     hires,
                     smallhead,
@@ -552,7 +576,7 @@ async fn index(
     }
 
     if config.enable_login {
-        if is_restricted(&path, jar) {
+        if is_restricted(&path, token.is_ok()) {
             return Err(Status::Unauthorized);
         }
     }
@@ -597,7 +621,7 @@ async fn index(
                     config: config.inner(),
                     path: Path::new("/").join(&file).display().to_string(),
                     theme,
-                    is_logged_in: is_logged_in(jar),
+                    is_logged_in: token.is_ok(),
                     hires,
                     admin: perms == 0,
                     smallhead,
@@ -629,7 +653,7 @@ async fn index(
                     path: Path::new("/").join(&file).display().to_string(),
                     files,
                     theme,
-                    is_logged_in: is_logged_in(jar),
+                    is_logged_in: token.is_ok(),
                     username,
                     admin: perms == 0,
                     hires,
@@ -687,7 +711,7 @@ async fn index(
                     poster: format!("/images/videoposters{}.jpg", videopath.replace("video/", "")),
                     vidtitle,
                     theme,
-                    is_logged_in: is_logged_in(&jar),
+                    is_logged_in: token.is_ok(),
                     username,
                     admin: perms == 0,
                     hires,
@@ -717,7 +741,7 @@ async fn index(
                     path: audiopath,
                     audiotitle: &path.file_name().unwrap().to_str().unwrap(),
                     theme: &theme,
-                    is_logged_in: is_logged_in(&jar),
+                    is_logged_in: token.is_ok(),
                     username: &username,
                     admin: perms == 0,
                     hires,
@@ -769,7 +793,7 @@ async fn index(
                         path: audiopath,
                         audiotitle,
                         theme,
-                        is_logged_in: is_logged_in(&jar),
+                        is_logged_in: token.is_ok(),
                         username,
                         admin: perms == 0,
                         hires,
@@ -787,7 +811,7 @@ async fn index(
             }
         }
         "folder" => {
-            if is_hidden(&path, jar) {
+            if is_hidden(&path, if token.is_ok() {Some(token.clone().unwrap().claims.perms)} else {None}) {
                 return Err(Status::NotFound);
             }
 
@@ -848,7 +872,7 @@ async fn index(
                     dirs,
                     files,
                     theme,
-                    is_logged_in: is_logged_in(jar),
+                    is_logged_in: token.is_ok(),
                     username,
                     admin: perms == 0,
                     hires,
@@ -920,7 +944,7 @@ async fn index(
                     dirs,
                     files,
                     theme,
-                    is_logged_in: is_logged_in(jar),
+                    is_logged_in: token.is_ok(),
                     username,
                     admin: perms == 0,
                     hires,
@@ -948,7 +972,7 @@ async fn index(
                         config: config.inner(),
                         path: Path::new("/").join(&file).display().to_string(),
                         theme,
-                        is_logged_in: is_logged_in(jar),
+                        is_logged_in: token.is_ok(),
                         username,
                         admin: perms == 0,
                         hires,
@@ -973,6 +997,7 @@ fn settings(
     host: Host<'_>,
     config: &State<Config>,
     useplain: UsePlain<'_>,
+    token: Result<JWT, Status>,
 ) -> IndexResponse {
     let mut lang = lang.0;
     let theme = get_theme(jar);
@@ -1033,8 +1058,8 @@ fn settings(
 
     let show_cookie_notice = jar.iter().next().is_none();
 
-    let username = if is_logged_in(jar) {
-        get_session(jar).0
+    let username = if token.is_ok() {
+        token.clone().unwrap().claims.username
     } else {
         String::new()
     };
@@ -1053,9 +1078,9 @@ fn settings(
             root_domain: get_root_domain(host.0, &config.fallback_root_domain),
             host: host.0,
             config: config.inner(),
-            is_logged_in: is_logged_in(jar),
+            is_logged_in: token.is_ok(),
             username,
-            admin: get_session(jar).1 == 0,
+            admin: token.unwrap_or_default().claims.perms == 0,
             hires: get_bool_cookie(jar, "hires", false),
             smallhead: get_bool_cookie(jar, "smallhead", false),
             plain: *useplain.0,
@@ -1074,32 +1099,30 @@ async fn fetch_settings(
     jar: &CookieJar<'_>,
     lang: Language,
     translations: &State<TranslationStore>,
+    token: Result<JWT, Status>,
 ) -> Result<RawHtml<String>, Status> {
-    if !is_logged_in(jar) {
-        return Err(Status::Unauthorized);
-    } else {
-        let strings = translations.get_translation(&lang.0);
-        let username = get_session(jar).0;
+    let token = token?;
+    let strings = translations.get_translation(&lang.0);
+    let username = token.claims.username;
 
-        if let Some(db_user) = fetch_user(db, username.as_str()).await {
-            let decoded: HashMap<String, String> =
-                serde_json::from_str(&db_user.mirror_settings.unwrap_or("{}".to_string()))
-                    .expect("Failed to parse JSON");
+    if let Some(db_user) = fetch_user(db, username.as_str()).await {
+        let decoded: HashMap<String, String> =
+            serde_json::from_str(&db_user.mirror_settings.unwrap_or("{}".to_string()))
+                .expect("Failed to parse JSON");
 
-            for (key, value) in decoded {
-                let mut now = OffsetDateTime::now_utc();
-                now += Duration::days(365);
-                let mut cookie = Cookie::new(key, value);
-                cookie.set_expires(now);
-                jar.add(cookie);
-            }
+        for (key, value) in decoded {
+            let mut now = OffsetDateTime::now_utc();
+            now += Duration::days(365);
+            let mut cookie = Cookie::new(key, value);
+            cookie.set_expires(now);
+            jar.add(cookie);
         }
-
-        return Ok(RawHtml(format!(
-            "<script>alert(\"{}\");window.location.replace(\"/settings\");</script>",
-            strings.get("fetch_success").unwrap()
-        )));
     }
+
+    return Ok(RawHtml(format!(
+        "<script>alert(\"{}\");window.location.replace(\"/settings\");</script>",
+        strings.get("fetch_success").unwrap()
+    )));
 }
 
 #[get("/settings/sync")]
@@ -1108,37 +1131,35 @@ async fn sync_settings(
     jar: &CookieJar<'_>,
     lang: Language,
     translations: &State<TranslationStore>,
+    token: Result<JWT, Status>,
 ) -> Result<RawHtml<String>, Status> {
-    if !is_logged_in(jar) {
-        return Err(Status::Unauthorized);
-    } else {
-        let strings = translations.get_translation(&lang.0);
-        let username = get_session(jar).0;
+    let token = token?;
+    let strings = translations.get_translation(&lang.0);
+    let username = token.claims.username;
 
-        let keys = vec![
-            "lang",
-            "hires",
-            "smallhead",
-            "theme",
-            "nooverride",
-            "viewers",
-        ];
+    let keys = vec![
+        "lang",
+        "hires",
+        "smallhead",
+        "theme",
+        "nooverride",
+        "viewers",
+    ];
 
-        let mut cookie_map: HashMap<String, Option<String>> = HashMap::new();
-        for key in keys {
-            let value = jar.get(key).map(|cookie| cookie.value().to_string());
-            cookie_map.insert(key.to_string(), value);
-        }
-
-        let settings = serde_json::to_string(&cookie_map).expect("Failed to serialize cookie data");
-
-        db::update_settings(db, username.as_str(), settings.as_str()).await;
-
-        return Ok(RawHtml(format!(
-            "<script>alert(\"{}\");window.location.replace(\"/settings\");</script>",
-            strings.get("sync_success").unwrap()
-        )));
+    let mut cookie_map: HashMap<String, Option<String>> = HashMap::new();
+    for key in keys {
+        let value = jar.get(key).map(|cookie| cookie.value().to_string());
+        cookie_map.insert(key.to_string(), value);
     }
+
+    let settings = serde_json::to_string(&cookie_map).expect("Failed to serialize cookie data");
+
+    db::update_settings(db, username.as_str(), settings.as_str()).await;
+
+    return Ok(RawHtml(format!(
+        "<script>alert(\"{}\");window.location.replace(\"/settings\");</script>",
+        strings.get("sync_success").unwrap()
+    )));
 }
 
 #[get("/settings/reset")]
@@ -1165,17 +1186,21 @@ async fn iframe(
     file: PathBuf,
     jar: &CookieJar<'_>,
     config: &rocket::State<Config>,
+    token: Result<JWT, Status>,
 ) -> Result<IndexResponse, Status> {
-    let username = get_session(jar).0;
-    let path = get_real_path(&file, username.clone())?.0;
+    let username = match token.as_ref() {
+        Ok(token) => &token.claims.username,
+        Err(_) => &"Nobody".into()
+    };
+    let path = get_real_path(&file, username.to_string())?.0;
 
     if config.enable_login {
-        if is_restricted(&path, jar) {
+        if is_restricted(&path, token.is_ok()) {
             return Err(Status::Unauthorized);
         }
     }
 
-    let path = get_real_path(&file, username)?.0.display().to_string();
+    let path = get_real_path(&file, username.to_string())?.0.display().to_string();
 
     let mut dirs = read_dirs(&path).map_err(map_io_error_to_status)?;
 
@@ -1269,8 +1294,8 @@ async fn default(status: Status, req: &Request<'_>) -> Template {
             host,
             config: config,
             theme: get_theme(jar),
-            is_logged_in: is_logged_in(jar),
-            admin: get_session(jar).1 == 0,
+            is_logged_in: false,
+            admin: false,
             hires: get_bool_cookie(jar, "hires", false),
             smallhead: get_bool_cookie(jar, "smallhead", false),
         },

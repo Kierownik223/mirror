@@ -18,10 +18,10 @@ use serde_json::json;
 use time::{Duration, OffsetDateTime};
 
 use crate::{
-    db::{fetch_user, login_user, Db}, jwt::create_jwt, utils::{
-        get_bool_cookie, get_root_domain, get_session, get_theme, is_logged_in,
+    db::{fetch_user, login_user, Db}, jwt::{create_jwt, JWT}, utils::{
+        get_bool_cookie, get_root_domain, get_theme,
         map_io_error_to_status,
-    }, Config, Host, IndexResponse, Language, MarmakUser, TranslationStore, UsePlain, UserToken, XForwardedFor
+    }, Config, Host, IndexResponse, Language, LoginUser, TranslationStore, UsePlain, UserToken, XForwardedFor
 };
 
 #[get("/login?<next>")]
@@ -33,9 +33,10 @@ fn login_page(
     config: &State<Config>,
     useplain: UsePlain<'_>,
     next: Option<&str>,
+    token: Result<JWT, Status>,
 ) -> IndexResponse {
-    if is_logged_in(jar) {
-        let perms = get_session(jar).1;
+    if token.is_ok() {
+        let perms = token.unwrap().claims.perms;
         if perms == 0 {
             return IndexResponse::Redirect(Redirect::to("/admin/"));
         } else {
@@ -57,7 +58,7 @@ fn login_page(
             host: host.0,
             config: config.inner(),
             theme: get_theme(jar),
-            is_logged_in: is_logged_in(jar),
+            is_logged_in: token.is_ok(),
             username: "",
             admin: false,
             hires: get_bool_cookie(jar, "hires", false),
@@ -71,7 +72,7 @@ fn login_page(
 #[post("/login?<next>", data = "<user>")]
 async fn login(
     db: Connection<Db>,
-    user: Form<MarmakUser>,
+    user: Form<LoginUser>,
     jar: &CookieJar<'_>,
     ip: XForwardedFor<'_>,
     next: Option<&str>,
@@ -80,6 +81,7 @@ async fn login(
     host: Host<'_>,
     config: &State<Config>,
     useplain: UsePlain<'_>,
+    token: Result<JWT, Status>,
 ) -> Result<IndexResponse, Status> {
     if let Some(db_user) = login_user(db, &user.username, &user.password, &ip.0, true).await {
         if !get_bool_cookie(jar, "nooverride", false) {
@@ -117,7 +119,7 @@ async fn login(
 
         let mut redirect_url = next.unwrap_or("/");
 
-        if db_user.perms.unwrap_or(1) == 0 {
+        if db_user.perms == 0 {
             redirect_url = next.unwrap_or("/admin");
         }
 
@@ -142,8 +144,8 @@ async fn login(
                 host: host.0,
                 config: config.inner(),
                 theme: get_theme(jar),
-                is_logged_in: is_logged_in(jar),
-                admin: get_session(jar).1 == 0,
+                is_logged_in: token.is_ok(),
+                admin: token.unwrap_or_default().claims.perms == 0,
                 hires: get_bool_cookie(jar, "hires", false),
                 smallhead: get_bool_cookie(jar, "smallhead", false),
                 message: strings.get("invalid_info"),
@@ -162,10 +164,11 @@ async fn direct<'a>(
     ip: XForwardedFor<'_>,
     host: Host<'_>,
     config: &rocket::State<Config>,
+    jwt: Result<JWT, Status>,
 ) -> Result<Redirect, Status> {
     if let Some(token) = token {
-        if is_logged_in(jar) {
-            let perms = get_session(jar).1;
+        if jwt.is_ok() {
+            let perms = jwt.unwrap().claims.perms;
             return Ok(Redirect::to(if perms == 0 { "/admin" } else { "/" }));
         }
 
@@ -224,12 +227,13 @@ async fn direct<'a>(
     }
 
     if let Some(to) = to {
-        if !is_logged_in(jar) {
+        if jwt.is_err() {
             return Err(Status::Unauthorized);
         } else {
-            if let Some(db_user) = fetch_user(db, get_session(jar).0.as_str()).await {
+            let token = jwt?;
+            if let Some(db_user) = fetch_user(db, &token.claims.username).await {
                 let user_data =
-                    json!({"username": get_session(jar).0, "password_hash": db_user.password});
+                    json!({"username": &token.claims.username, "password_hash": db_user.password});
                 let b64token = BASE64_STANDARD.encode(user_data.to_string());
 
                 let public_key_pem =
@@ -260,7 +264,7 @@ async fn direct<'a>(
 
                 return Ok(Redirect::to(redirect_url));
             } else {
-                jar.remove("matoken");
+                jar.remove(Cookie::build("matoken").domain(format!(".{}", get_root_domain(host.0, &config.fallback_root_domain))).same_site(SameSite::Lax));
                 return Err(Status::Forbidden);
             }
         }
@@ -270,8 +274,8 @@ async fn direct<'a>(
 }
 
 #[get("/logout")]
-fn logout(jar: &CookieJar<'_>) -> Redirect {
-    jar.remove("matoken");
+fn logout(jar: &CookieJar<'_>, host: Host<'_>, config: &rocket::State<Config>) -> Redirect {
+    jar.remove(Cookie::build("matoken").domain(format!(".{}", get_root_domain(host.0, &config.fallback_root_domain))).same_site(SameSite::Lax));
     Redirect::to("/account/login")
 }
 

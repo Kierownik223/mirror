@@ -169,29 +169,6 @@ pub fn get_bool_cookie(jar: &CookieJar<'_>, name: &str, default: bool) -> bool {
         .unwrap_or(default)
 }
 
-#[cfg(not(test))]
-pub fn get_session(jar: &CookieJar<'_>) -> (String, i32) {
-    if let Some(cookie) = jar.get_private("session") {
-        let session = cookie.value();
-
-        let mut parts = session.splitn(2, '.');
-        let username = parts.next().unwrap_or("defaultuser").to_owned();
-        let perms = parts
-            .next()
-            .and_then(|p| p.parse::<i32>().ok())
-            .unwrap_or(1);
-
-        (username, perms)
-    } else {
-        ("Nobody".into(), 1)
-    }
-}
-
-#[cfg(test)]
-pub fn get_session(_jar: &CookieJar<'_>) -> (String, i32) {
-    ("admin".into(), 0)
-}
-
 pub fn get_theme<'a>(jar: &CookieJar<'_>) -> String {
     let mut theme = jar
         .get("theme")
@@ -205,22 +182,12 @@ pub fn get_theme<'a>(jar: &CookieJar<'_>) -> String {
     theme.to_string()
 }
 
-#[cfg(not(test))]
-pub fn is_logged_in(jar: &CookieJar<'_>) -> bool {
-    jar.get_private("session").is_some()
-}
-
-#[cfg(test)]
-pub fn is_logged_in(_jar: &CookieJar<'_>) -> bool {
-    true
-}
-
-pub fn is_restricted(path: &Path, jar: &CookieJar<'_>) -> bool {
+pub fn is_restricted(path: &Path, is_logged_in: bool) -> bool {
     let mut current = Some(path);
 
     while let Some(p) = current {
         if p.join("RESTRICTED").exists() {
-            return !is_logged_in(jar);
+            return !is_logged_in;
         }
         current = p.parent();
     }
@@ -228,14 +195,13 @@ pub fn is_restricted(path: &Path, jar: &CookieJar<'_>) -> bool {
     false
 }
 
-pub fn is_hidden(path: &Path, jar: &CookieJar<'_>) -> bool {
+pub fn is_hidden(path: &Path, perms: Option<i32>) -> bool {
     let mut current = Some(path);
 
     while let Some(p) = current {
         if p.join("HIDDEN").exists() {
-            if is_logged_in(jar) {
-                let (_, perms) = get_session(jar);
-                return perms != 0;
+            if perms.is_some() {
+                return perms.unwrap() != 0;
             } else {
                 return true;
             }
