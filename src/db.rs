@@ -22,7 +22,7 @@ pub async fn login_user(
     verify_password: bool,
 ) -> Option<MarmakUser> {
     let query_result = sqlx::query(
-        "SELECT username, password, perms, mirror_settings FROM users WHERE username = ? AND verified = 1",
+        "SELECT username, password, perms, mirror_settings, email FROM users WHERE username = ? AND verified = 1",
     )
     .bind(username)
     .fetch_one(&mut **db)
@@ -41,6 +41,7 @@ pub async fn login_user(
                             password: password.to_string(),
                             perms: Some(perms),
                             mirror_settings: settings,
+                            email: row.try_get::<String, _>("email").ok(),
                         });
                     } else {
                         None
@@ -54,6 +55,7 @@ pub async fn login_user(
                             password: password.to_string(),
                             perms: Some(perms),
                             mirror_settings: settings,
+                            email: row.try_get::<String, _>("email").ok(),
                         });
                     } else {
                         None
@@ -70,11 +72,12 @@ pub async fn login_user(
 }
 
 pub async fn fetch_user(mut db: Connection<Db>, username: &str) -> Option<MarmakUser> {
-    let query_result =
-        sqlx::query("SELECT password, perms, mirror_settings FROM users WHERE username = ? AND verified = 1")
-            .bind(username)
-            .fetch_one(&mut **db)
-            .await;
+    let query_result = sqlx::query(
+        "SELECT password, perms, mirror_settings, email FROM users WHERE username = ? AND verified = 1",
+    )
+    .bind(username)
+    .fetch_one(&mut **db)
+    .await;
 
     match query_result {
         Ok(row) => {
@@ -85,6 +88,7 @@ pub async fn fetch_user(mut db: Connection<Db>, username: &str) -> Option<Marmak
                     password: row.try_get::<String, _>("password").ok().unwrap(),
                     perms: Some(perms),
                     mirror_settings: settings,
+                    email: row.try_get::<String, _>("email").ok(),
                 });
             } else {
                 None

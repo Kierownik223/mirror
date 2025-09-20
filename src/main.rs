@@ -215,6 +215,7 @@ struct MarmakUser {
     password: String,
     perms: Option<i32>,
     mirror_settings: Option<String>,
+    email: Option<String>,
 }
 
 #[derive(serde::Deserialize, serde::Serialize)]
