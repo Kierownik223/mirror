@@ -256,7 +256,7 @@ async fn direct<'a>(
 
                 return Ok(Redirect::to(redirect_url));
             } else {
-                jar.remove_private("session");
+                jar.remove("matoken");
                 return Err(Status::Forbidden);
             }
         }
@@ -267,7 +267,7 @@ async fn direct<'a>(
 
 #[get("/logout")]
 fn logout(jar: &CookieJar<'_>) -> Redirect {
-    jar.remove_private("session");
+    jar.remove("matoken");
     Redirect::to("/account/login")
 }
 
