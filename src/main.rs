@@ -41,6 +41,7 @@ mod api;
 mod config;
 mod db;
 mod i18n;
+mod jwt;
 #[cfg(test)]
 mod tests;
 mod utils;

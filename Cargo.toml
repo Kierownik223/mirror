@@ -8,6 +8,8 @@ publish = false
 audiotags = "0.5"
 base64 = "0.22"
 bcrypt = "0.17"
+chrono = "0.4.42"
+jsonwebtoken = "9.3.1"
 markdown = "1"
 rand = "0.8"
 rocket = { version = "0.5", features = ["json", "secrets"]}
