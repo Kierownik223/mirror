@@ -18,13 +18,10 @@ use serde_json::json;
 use time::{Duration, OffsetDateTime};
 
 use crate::{
-    db::{fetch_user, login_user, Db},
-    utils::{
+    db::{fetch_user, login_user, Db}, jwt::create_jwt, utils::{
         get_bool_cookie, get_root_domain, get_session, get_theme, is_logged_in,
         map_io_error_to_status,
-    },
-    Config, Host, IndexResponse, Language, MarmakUser, TranslationStore, UsePlain, UserToken,
-    XForwardedFor,
+    }, Config, Host, IndexResponse, Language, MarmakUser, TranslationStore, UsePlain, UserToken, XForwardedFor
 };
 
 #[get("/login?<next>")]
@@ -83,10 +80,10 @@ async fn login(
     host: Host<'_>,
     config: &State<Config>,
     useplain: UsePlain<'_>,
-) -> IndexResponse {
+) -> Result<IndexResponse, Status> {
     if let Some(db_user) = login_user(db, &user.username, &user.password, &ip.0, true).await {
         if !get_bool_cookie(jar, "nooverride", false) {
-            if let Some(mirror_settings) = db_user.mirror_settings {
+            if let Some(mirror_settings) = db_user.mirror_settings.as_ref() {
                 let decoded: HashMap<String, String> =
                     serde_json::from_str(&mirror_settings).unwrap_or_default();
 
@@ -101,10 +98,12 @@ async fn login(
             }
         }
 
-        let mut session_cookie = Cookie::new("session", format!("{}.{}", &db_user.username, &db_user.perms.unwrap_or_default().to_string()));
-        session_cookie.set_same_site(SameSite::Lax);
+        let jwt = create_jwt(&db_user).map_err(|_| Status::InternalServerError)?;
 
-        jar.add_private(session_cookie);
+        let mut jwt_cookie = Cookie::new("matoken", jwt);
+        jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0, &config.fallback_root_domain)));
+
+        jar.add(jwt_cookie);
 
         println!(
             "Login for user {} from {} succeeded",
@@ -121,9 +120,9 @@ async fn login(
             redirect_url = next.unwrap_or("/admin");
         }
 
-        IndexResponse::Redirect(Redirect::to(
+        Ok(IndexResponse::Redirect(Redirect::to(
             urlencoding::encode(redirect_url).replace("%2F", "/"),
-        ))
+        )))
     } else {
         let strings = translations.get_translation(&lang.0);
 
@@ -132,7 +131,7 @@ async fn login(
             &user.username, &user.password, &ip.0
         );
 
-        IndexResponse::Template(Template::render(
+        Ok(IndexResponse::Template(Template::render(
             if *useplain.0 { "plain/login" } else { "login" },
             context! {
                 title: "Login",
@@ -149,7 +148,7 @@ async fn login(
                 message: strings.get("invalid_info"),
                 next: "",
             },
-        ))
+        )))
     }
 }
 
