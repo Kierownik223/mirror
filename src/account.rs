@@ -134,8 +134,8 @@ async fn login(
         let strings = translations.get_translation(&lang.0);
 
         println!(
-            "Failed login attempt to user {} with password {} from {}",
-            &user.username, &user.password, &ip.0
+            "Failed login attempt to user {} with from {}",
+            &user.username, &ip.0
         );
 
         Ok(IndexResponse::Template(Template::render(
