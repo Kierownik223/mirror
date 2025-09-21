@@ -36,7 +36,7 @@ async fn upload(
 ) -> Result<IndexResponse, Status> {
     let token = token?;
     
-    let username = token.claims.username;
+    let username = token.claims.sub;
     let perms = token.claims.perms;
 
     if perms != 0 {
@@ -166,7 +166,7 @@ fn sysinfo(
 ) -> Result<IndexResponse, Status> {
     let token = token?;
     
-    let username = token.claims.username;
+    let username = token.claims.sub;
     let perms = token.claims.perms;
 
     if perms != 0 {
@@ -244,7 +244,7 @@ fn uploader(
 ) -> Result<IndexResponse, Status> {
     let token = token?;
     
-    let username = token.claims.username;
+    let username = token.claims.sub;
     let perms = token.claims.perms;
 
     if perms != 0 {
@@ -290,7 +290,7 @@ fn admin(
 ) -> Result<IndexResponse, Status> {
     let token = token?;
 
-    let username = token.claims.username;
+    let username = token.claims.sub;
     let perms = token.claims.perms;
 
     if perms != 0 {

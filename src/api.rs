@@ -82,7 +82,7 @@ async fn listing(
     token: Result<JWT, Status>,
 ) -> Result<Cached<Json<Vec<MirrorFile>>>, Status> {
     let username = match token.as_ref() {
-        Ok(token) => &token.claims.username,
+        Ok(token) => &token.claims.sub,
         Err(_) => &"Nobody".into()
     };
 
@@ -126,7 +126,7 @@ async fn file_with_downloads(
     token: Result<JWT, Status>,
 ) -> Result<Result<Cached<Json<MirrorFile>>, Cached<Json<MusicFile>>>, Status> {
     let username = match token.as_ref() {
-        Ok(token) => &token.claims.username,
+        Ok(token) => &token.claims.sub,
         Err(_) => &"Nobody".into()
     };
 
@@ -209,7 +209,7 @@ async fn file(
     token: Result<JWT, Status>,
 ) -> Result<Result<Cached<Json<MirrorFile>>, Cached<Json<MusicFile>>>, Status> {
     let username = match token.as_ref() {
-        Ok(token) => &token.claims.username,
+        Ok(token) => &token.claims.sub,
         Err(_) => &"Nobody".into()
     };
     
@@ -298,7 +298,7 @@ async fn rename(
 ) -> Result<Json<MirrorFile>, Status> {
     let token = token?;
 
-    let username = token.claims.username;
+    let username = token.claims.sub;
     let perms = token.claims.perms;
 
     let path = get_real_path_with_perms(&file, username, perms)?.0;
@@ -348,7 +348,7 @@ async fn rename(
 async fn delete<'a>(file: PathBuf, token: Result<JWT, Status>) -> Result<(Status, Json<Error>), Status> {
     let token = token?;
     
-    let username = token.claims.username;
+    let username = token.claims.sub;
     let perms = token.claims.perms;
 
     let path = get_real_path_with_perms(&file, username, perms)?.0;
@@ -436,7 +436,7 @@ fn sysinfo(token: Result<JWT, Status>) -> Result<Cached<Json<Sysinfo>>, Status> 
 fn user(jar: &CookieJar<'_>, token: Result<JWT, Status>) -> Result<Cached<Json<User>>, Status> {
     let token = token?;
     
-    let username = token.claims.username;
+    let username = token.claims.sub;
     let perms = token.claims.perms;
 
     let keys = vec![
@@ -479,7 +479,7 @@ async fn upload(
 ) -> Result<Json<Vec<UploadFile>>, Status> {
     let token = token?;
     
-    let username = token.claims.username;
+    let username = token.claims.sub;
     let perms = token.claims.perms;
 
     let options = MultipartFormDataOptions::with_multipart_form_data_fields(vec![

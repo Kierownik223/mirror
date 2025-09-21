@@ -308,7 +308,7 @@ async fn poster(
     token: Result<JWT, Status>,
 ) -> Result<Result<Cached<(ContentType, Vec<u8>)>, Result<IndexResponse, Status>>, Status> {
     let username = match token.as_ref() {
-        Ok(token) => &token.claims.username,
+        Ok(token) => &token.claims.sub,
         Err(_) => &"Nobody".into()
     };
     let (path, is_private) = if let Ok(rest) = file.strip_prefix("private") {
@@ -396,7 +396,7 @@ async fn file(
     token: Result<JWT, Status>,
 ) -> Result<IndexResponse, Status> {
     let username = match token.as_ref() {
-        Ok(token) => &token.claims.username,
+        Ok(token) => &token.claims.sub,
         Err(_) => &"Nobody".into()
     };
     let (path, is_private) = get_real_path(&file, username.to_string())?;
@@ -428,7 +428,7 @@ async fn download_with_counter(
     token: Result<JWT, Status>,
 ) -> Result<IndexResponse, Status> {
     let username = match token.as_ref() {
-        Ok(token) => &token.claims.username,
+        Ok(token) => &token.claims.sub,
         Err(_) => &"Nobody".into()
     };
     let (path, is_private) = get_real_path(&file, username.to_string())?;
@@ -488,7 +488,7 @@ async fn download(
     token: Result<JWT, Status>,
 ) -> Result<IndexResponse, Status> {
     let username = match token.as_ref() {
-        Ok(token) => &token.claims.username,
+        Ok(token) => &token.claims.sub,
         Err(_) => &"Nobody".into()
     };
     let (path, is_private) = get_real_path(&file, username.to_string())?;
@@ -529,7 +529,7 @@ async fn index(
 ) -> IndexResult {
     let jwt = token.clone().unwrap_or_default();
     
-    let username = jwt.claims.username;
+    let username = jwt.claims.sub;
     let perms = jwt.claims.perms;
 
     let path: PathBuf;
@@ -1059,7 +1059,7 @@ fn settings(
     let show_cookie_notice = jar.iter().next().is_none();
 
     let username = if token.is_ok() {
-        token.clone().unwrap().claims.username
+        token.clone().unwrap().claims.sub
     } else {
         String::new()
     };
@@ -1103,7 +1103,7 @@ async fn fetch_settings(
 ) -> Result<RawHtml<String>, Status> {
     let token = token?;
     let strings = translations.get_translation(&lang.0);
-    let username = token.claims.username;
+    let username = token.claims.sub;
 
     if let Some(db_user) = fetch_user(db, username.as_str()).await {
         let decoded: HashMap<String, String> =
@@ -1135,7 +1135,7 @@ async fn sync_settings(
 ) -> Result<RawHtml<String>, Status> {
     let token = token?;
     let strings = translations.get_translation(&lang.0);
-    let username = token.claims.username;
+    let username = token.claims.sub;
 
     let keys = vec![
         "lang",
@@ -1189,7 +1189,7 @@ async fn iframe(
     token: Result<JWT, Status>,
 ) -> Result<IndexResponse, Status> {
     let username = match token.as_ref() {
-        Ok(token) => &token.claims.username,
+        Ok(token) => &token.claims.sub,
         Err(_) => &"Nobody".into()
     };
     let path = get_real_path(&file, username.to_string())?.0;

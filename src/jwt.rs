@@ -15,7 +15,7 @@ use crate::{config::Config, MarmakUser};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Claims {
-    pub username: String,
+    pub sub: String,
     pub email: Option<String>,
     pub perms: i32,
     exp: usize,
@@ -56,7 +56,7 @@ impl<'r> FromRequest<'r> for JWT {
 
 impl Default for JWT {
     fn default() -> Self {
-        JWT { claims: Claims { username: "Nobody".into(), email: None, perms: 1, exp: 1, iat: 0 } }
+        JWT { claims: Claims { sub: "Nobody".into(), email: None, perms: 1, exp: 1, iat: 0 } }
     }
 }
 
@@ -69,7 +69,7 @@ pub fn create_jwt(user: &MarmakUser) -> Result<String, Error> {
         .timestamp();
 
     let claims = Claims {
-        username: (*user.username).to_string(),
+        sub: (*user.username).to_string(),
         email: user.email.clone(),
         perms: user.perms,
         exp: expiration as usize,

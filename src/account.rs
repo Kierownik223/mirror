@@ -231,9 +231,9 @@ async fn direct<'a>(
             return Err(Status::Unauthorized);
         } else {
             let token = jwt?;
-            if let Some(db_user) = fetch_user(db, &token.claims.username).await {
+            if let Some(db_user) = fetch_user(db, &token.claims.sub).await {
                 let user_data =
-                    json!({"username": &token.claims.username, "password_hash": db_user.password});
+                    json!({"username": &token.claims.sub, "password_hash": db_user.password});
                 let b64token = BASE64_STANDARD.encode(user_data.to_string());
 
                 let public_key_pem =
