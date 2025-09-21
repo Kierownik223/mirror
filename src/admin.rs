@@ -16,10 +16,11 @@ use rocket_multipart_form_data::{
 };
 
 use crate::{
-    jwt::JWT, utils::{
-        format_size, get_bool_cookie, get_extension_from_filename, get_root_domain,
-        get_theme,
-    }, Config, Disk, Host, IndexResponse, Language, MirrorFile, TranslationStore, UsePlain
+    jwt::JWT,
+    utils::{
+        format_size, get_bool_cookie, get_extension_from_filename, get_root_domain, get_theme,
+    },
+    Config, Disk, Host, IndexResponse, Language, MirrorFile, TranslationStore, UsePlain,
 };
 
 #[post("/upload", data = "<data>")]
@@ -35,7 +36,7 @@ async fn upload(
     token: Result<JWT, Status>,
 ) -> Result<IndexResponse, Status> {
     let token = token?;
-    
+
     let username = token.claims.sub;
     let perms = token.claims.perms;
 
@@ -165,7 +166,7 @@ fn sysinfo(
     token: Result<JWT, Status>,
 ) -> Result<IndexResponse, Status> {
     let token = token?;
-    
+
     let username = token.claims.sub;
     let perms = token.claims.perms;
 
@@ -243,7 +244,7 @@ fn uploader(
     token: Result<JWT, Status>,
 ) -> Result<IndexResponse, Status> {
     let token = token?;
-    
+
     let username = token.claims.sub;
     let perms = token.claims.perms;
 

@@ -20,8 +20,8 @@ use time::{Duration, OffsetDateTime};
 use tokio::sync::RwLock;
 use tokio::time::sleep;
 use utils::{
-    create_cookie, get_bool_cookie, get_theme, is_restricted, open_file,
-    parse_language, read_dirs, read_files,
+    create_cookie, get_bool_cookie, get_theme, is_restricted, open_file, parse_language, read_dirs,
+    read_files,
 };
 use walkdir::WalkDir;
 
@@ -309,7 +309,7 @@ async fn poster(
 ) -> Result<Result<Cached<(ContentType, Vec<u8>)>, Result<IndexResponse, Status>>, Status> {
     let username = match token.as_ref() {
         Ok(token) => &token.claims.sub,
-        Err(_) => &"Nobody".into()
+        Err(_) => &"Nobody".into(),
     };
     let (path, is_private) = if let Ok(rest) = file.strip_prefix("private") {
         if username == "Nobody" {
@@ -397,7 +397,7 @@ async fn file(
 ) -> Result<IndexResponse, Status> {
     let username = match token.as_ref() {
         Ok(token) => &token.claims.sub,
-        Err(_) => &"Nobody".into()
+        Err(_) => &"Nobody".into(),
     };
     let (path, is_private) = get_real_path(&file, username.to_string())?;
 
@@ -429,7 +429,7 @@ async fn download_with_counter(
 ) -> Result<IndexResponse, Status> {
     let username = match token.as_ref() {
         Ok(token) => &token.claims.sub,
-        Err(_) => &"Nobody".into()
+        Err(_) => &"Nobody".into(),
     };
     let (path, is_private) = get_real_path(&file, username.to_string())?;
 
@@ -489,7 +489,7 @@ async fn download(
 ) -> Result<IndexResponse, Status> {
     let username = match token.as_ref() {
         Ok(token) => &token.claims.sub,
-        Err(_) => &"Nobody".into()
+        Err(_) => &"Nobody".into(),
     };
     let (path, is_private) = get_real_path(&file, username.to_string())?;
 
@@ -528,7 +528,7 @@ async fn index(
     token: Result<JWT, Status>,
 ) -> IndexResult {
     let jwt = token.clone().unwrap_or_default();
-    
+
     let username = jwt.claims.sub;
     let perms = jwt.claims.perms;
 
@@ -811,7 +811,14 @@ async fn index(
             }
         }
         "folder" => {
-            if is_hidden(&path, if token.is_ok() {Some(token.clone().unwrap().claims.perms)} else {None}) {
+            if is_hidden(
+                &path,
+                if token.is_ok() {
+                    Some(token.clone().unwrap().claims.perms)
+                } else {
+                    None
+                },
+            ) {
                 return Err(Status::NotFound);
             }
 
@@ -1190,7 +1197,7 @@ async fn iframe(
 ) -> Result<IndexResponse, Status> {
     let username = match token.as_ref() {
         Ok(token) => &token.claims.sub,
-        Err(_) => &"Nobody".into()
+        Err(_) => &"Nobody".into(),
     };
     let path = get_real_path(&file, username.to_string())?.0;
 
@@ -1200,7 +1207,10 @@ async fn iframe(
         }
     }
 
-    let path = get_real_path(&file, username.to_string())?.0.display().to_string();
+    let path = get_real_path(&file, username.to_string())?
+        .0
+        .display()
+        .to_string();
 
     let mut dirs = read_dirs(&path).map_err(map_io_error_to_status)?;
 

@@ -22,11 +22,14 @@ use rocket_multipart_form_data::{
 use zip::write::SimpleFileOptions;
 
 use crate::{
-    db::{get_downloads, FileDb}, jwt::JWT, read_files, utils::{
+    db::{get_downloads, FileDb},
+    jwt::JWT,
+    read_files,
+    utils::{
         add_path_to_zip, format_size, get_extension_from_filename, get_genre, get_real_path,
-        get_real_path_with_perms, is_restricted, map_io_error_to_status,
-        read_dirs_async,
-    }, Cached, Config, Disk, FileSizes, Host, MirrorFile, Sysinfo
+        get_real_path_with_perms, is_restricted, map_io_error_to_status, read_dirs_async,
+    },
+    Cached, Config, Disk, FileSizes, Host, MirrorFile, Sysinfo,
 };
 
 #[derive(serde::Serialize)]
@@ -83,7 +86,7 @@ async fn listing(
 ) -> Result<Cached<Json<Vec<MirrorFile>>>, Status> {
     let username = match token.as_ref() {
         Ok(token) => &token.claims.sub,
-        Err(_) => &"Nobody".into()
+        Err(_) => &"Nobody".into(),
     };
 
     let path = get_real_path(&file, username.to_string())?.0;
@@ -127,7 +130,7 @@ async fn file_with_downloads(
 ) -> Result<Result<Cached<Json<MirrorFile>>, Cached<Json<MusicFile>>>, Status> {
     let username = match token.as_ref() {
         Ok(token) => &token.claims.sub,
-        Err(_) => &"Nobody".into()
+        Err(_) => &"Nobody".into(),
     };
 
     let path = get_real_path(&file, username.to_string())?.0;
@@ -210,9 +213,9 @@ async fn file(
 ) -> Result<Result<Cached<Json<MirrorFile>>, Cached<Json<MusicFile>>>, Status> {
     let username = match token.as_ref() {
         Ok(token) => &token.claims.sub,
-        Err(_) => &"Nobody".into()
+        Err(_) => &"Nobody".into(),
     };
-    
+
     let path = get_real_path(&file, username.to_string())?.0;
 
     if !&path.exists() {
@@ -345,9 +348,12 @@ async fn rename(
 }
 
 #[delete("/<file..>")]
-async fn delete<'a>(file: PathBuf, token: Result<JWT, Status>) -> Result<(Status, Json<Error>), Status> {
+async fn delete<'a>(
+    file: PathBuf,
+    token: Result<JWT, Status>,
+) -> Result<(Status, Json<Error>), Status> {
     let token = token?;
-    
+
     let username = token.claims.sub;
     let perms = token.claims.perms;
 
@@ -396,7 +402,7 @@ async fn delete<'a>(file: PathBuf, token: Result<JWT, Status>) -> Result<(Status
 #[get("/sysinfo")]
 fn sysinfo(token: Result<JWT, Status>) -> Result<Cached<Json<Sysinfo>>, Status> {
     let _token = token?;
-    
+
     let mut sys = System::new_all();
 
     sys.refresh_specifics(RefreshKind::without_processes(RefreshKind::without_cpu(
@@ -435,7 +441,7 @@ fn sysinfo(token: Result<JWT, Status>) -> Result<Cached<Json<Sysinfo>>, Status> 
 #[get("/user")]
 fn user(jar: &CookieJar<'_>, token: Result<JWT, Status>) -> Result<Cached<Json<User>>, Status> {
     let token = token?;
-    
+
     let username = token.claims.sub;
     let perms = token.claims.perms;
 
@@ -478,7 +484,7 @@ async fn upload(
     token: Result<JWT, Status>,
 ) -> Result<Json<Vec<UploadFile>>, Status> {
     let token = token?;
-    
+
     let username = token.claims.sub;
     let perms = token.claims.perms;
 
@@ -613,8 +619,7 @@ async fn download_zip(
         let full_path = format!("files{}", path_decoded.deref());
         let fs_path = PathBuf::from(&full_path);
         if fs_path.exists() {
-            if let Err(e) = add_path_to_zip(&mut zip_writer, &root_base, &fs_path, zip_options)
-            {
+            if let Err(e) = add_path_to_zip(&mut zip_writer, &root_base, &fs_path, zip_options) {
                 eprintln!("Failed to add {:?} to zip: {}", fs_path, e);
             }
         }

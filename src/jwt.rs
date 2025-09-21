@@ -56,7 +56,15 @@ impl<'r> FromRequest<'r> for JWT {
 
 impl Default for JWT {
     fn default() -> Self {
-        JWT { claims: Claims { sub: "Nobody".into(), email: None, perms: 1, exp: 1, iat: 0 } }
+        JWT {
+            claims: Claims {
+                sub: "Nobody".into(),
+                email: None,
+                perms: 1,
+                exp: 1,
+                iat: 0,
+            },
+        }
     }
 }
 
