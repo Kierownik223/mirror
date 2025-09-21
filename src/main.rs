@@ -1,7 +1,7 @@
 use audiotags::{MimeType, Tag};
 use db::{fetch_user, Db};
 use rocket::fs::NamedFile;
-use rocket::http::{ContentType, Cookie, CookieJar, Status};
+use rocket::http::{ContentType, Cookie, CookieJar, SameSite, Status};
 use rocket::request::{FromRequest, Outcome};
 use rocket::response::content::RawHtml;
 use rocket::response::{Redirect, Responder};
@@ -1122,6 +1122,7 @@ async fn fetch_settings(
             now += Duration::days(365);
             let mut cookie = Cookie::new(key, value);
             cookie.set_expires(now);
+            cookie.set_same_site(SameSite::Lax);
             jar.add(cookie);
         }
     }
