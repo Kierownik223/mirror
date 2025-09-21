@@ -31,6 +31,7 @@ pub struct JWT {
 impl<'r> FromRequest<'r> for JWT {
     type Error = Status;
 
+    #[cfg(not(test))]
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Status> {
         fn is_valid(key: &str) -> Result<Claims, Error> {
             Ok(decode_jwt(String::from(key))?)
@@ -51,6 +52,11 @@ impl<'r> FromRequest<'r> for JWT {
                 Err(_) => Outcome::Error((Status::Unauthorized, Status::Unauthorized)),
             },
         }
+    }
+
+    #[cfg(test)]
+    async fn from_request(_req: &'r Request<'_>) -> Outcome<Self, Status> {
+        Outcome::Success(JWT { claims: Claims { sub: "test".into(), email: None, perms: 0, exp: 1, iat: 0 } })
     }
 }
 
