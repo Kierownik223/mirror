@@ -161,7 +161,13 @@ iframe {
 }
 
 @media only screen and (max-width: 640px) {
-    .main > table td:nth-child(3) {
+    .hide {
+        display: none;
+    }
+}
+
+@media only screen and (max-width: 300px) {
+    .hide-more {
         display: none;
     }
 }

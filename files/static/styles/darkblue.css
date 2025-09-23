@@ -69,6 +69,7 @@ div.line {
 
 table {
     width: 100%;
+    overflow-wrap: anywhere;
 }
 
 th {
@@ -122,8 +123,18 @@ iframe {
     font-size: 0px;
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 640px) {
+    .hide {
+        display: none;
+    }
+    
     .dialog-content {
         width: auto !important;
+    }
+}
+
+@media only screen and (max-width: 300px) {
+    .hide-more {
+        display: none;
     }
 }

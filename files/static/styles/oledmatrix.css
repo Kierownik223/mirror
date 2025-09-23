@@ -33,13 +33,6 @@ body {
     border-top: 1px solid #303030;
 }
 
-
-@media only screen and (max-width: 600px) {
-    .dialog-content {
-        width: auto !important;
-    }
-}
-
 a {
     color: #32a852;
     text-decoration: none;
@@ -110,6 +103,7 @@ td:first-child {
 
 tr a {
     display: block;
+    overflow-wrap: anywhere;
 }
 
 tr:hover {
@@ -168,7 +162,17 @@ td input {
 }
 
 @media only screen and (max-width: 640px) {
-    .main > table td:nth-child(3) {
+    .hide {
+        display: none;
+    }
+    
+    .dialog-content {
+        width: auto !important;
+    }
+}
+
+@media only screen and (max-width: 300px) {
+    .hide-more {
         display: none;
     }
 }
