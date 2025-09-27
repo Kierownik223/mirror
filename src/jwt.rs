@@ -1,9 +1,12 @@
 use chrono::Utc;
 use jsonwebtoken::{
-    decode, encode,
-    errors::{Error, ErrorKind},
-    Algorithm, DecodingKey, EncodingKey, Header, Validation,
+    encode,
+    errors::Error,
+    Algorithm, EncodingKey, Header,
 };
+
+#[cfg(not(test))]
+use jsonwebtoken::{decode, errors::ErrorKind, DecodingKey, Validation};
 use rocket::{
     http::Status,
     request::{FromRequest, Outcome},
@@ -99,6 +102,7 @@ pub fn create_jwt(user: &MarmakUser) -> Result<String, Error> {
     )
 }
 
+#[cfg(not(test))]
 pub fn decode_jwt(token: String) -> Result<Claims, ErrorKind> {
     let secret = &CONFIG.jwt_secret;
 
