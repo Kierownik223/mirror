@@ -8,7 +8,7 @@ use rocket::{
     data::ToByteUnit,
     fairing::AdHoc,
     http::{ContentType, CookieJar, Status},
-    Data, State,
+    Data,
 };
 use rocket_dyn_templates::{context, Template};
 use rocket_multipart_form_data::{
@@ -16,11 +16,9 @@ use rocket_multipart_form_data::{
 };
 
 use crate::{
-    jwt::JWT,
-    utils::{
+    config::CONFIG, jwt::JWT, utils::{
         format_size, get_bool_cookie, get_extension_from_filename, get_root_domain, get_theme,
-    },
-    Config, Disk, Host, IndexResponse, Language, MirrorFile, TranslationStore, UsePlain,
+    }, Disk, Host, IndexResponse, Language, MirrorFile, TranslationStore, UsePlain
 };
 
 #[post("/upload", data = "<data>")]
@@ -31,7 +29,6 @@ async fn upload(
     translations: &rocket::State<TranslationStore>,
     lang: Language,
     host: Host<'_>,
-    config: &State<Config>,
     useplain: UsePlain<'_>,
     token: Result<JWT, Status>,
 ) -> Result<IndexResponse, Status> {
@@ -137,9 +134,9 @@ async fn upload(
                 title: strings.get("uploader").unwrap(),
                 lang,
                 strings,
-                root_domain: get_root_domain(host.0, &config.fallback_root_domain),
+                root_domain: get_root_domain(host.0, &CONFIG.fallback_root_domain),
                 host: host.0,
-                config: config.inner(),
+                config: CONFIG,
                 theme: get_theme(jar),
                 is_logged_in: true,
                 hires: get_bool_cookie(jar, "hires", false),
@@ -161,7 +158,6 @@ fn sysinfo(
     translations: &rocket::State<TranslationStore>,
     lang: Language,
     host: Host<'_>,
-    config: &State<Config>,
     useplain: UsePlain<'_>,
     token: Result<JWT, Status>,
 ) -> Result<IndexResponse, Status> {
@@ -212,9 +208,9 @@ fn sysinfo(
             title: strings.get("sysinfo").unwrap(),
             lang,
             strings,
-            root_domain: get_root_domain(host.0, &config.fallback_root_domain),
+            root_domain: get_root_domain(host.0, &CONFIG.fallback_root_domain),
             host: host.0,
-            config: config.inner(),
+            config: CONFIG,
             theme: get_theme(jar),
             is_logged_in: true,
             hires: get_bool_cookie(jar, "hires", false),
@@ -239,7 +235,6 @@ fn uploader(
     translations: &rocket::State<TranslationStore>,
     lang: Language,
     host: Host<'_>,
-    config: &State<Config>,
     useplain: UsePlain<'_>,
     token: Result<JWT, Status>,
 ) -> Result<IndexResponse, Status> {
@@ -264,9 +259,9 @@ fn uploader(
             title: strings.get("uploader").unwrap(),
             lang,
             strings,
-            root_domain: get_root_domain(host.0, &config.fallback_root_domain),
+            root_domain: get_root_domain(host.0, &CONFIG.fallback_root_domain),
             host: host.0,
-            config: config.inner(),
+            config: CONFIG,
             theme: get_theme(jar),
             is_logged_in: true,
             hires: get_bool_cookie(jar, "hires", false),
@@ -285,7 +280,6 @@ fn admin(
     translations: &rocket::State<TranslationStore>,
     lang: Language,
     host: Host<'_>,
-    config: &State<Config>,
     useplain: UsePlain<'_>,
     token: Result<JWT, Status>,
 ) -> Result<IndexResponse, Status> {
@@ -306,9 +300,9 @@ fn admin(
             title: strings.get("admin").unwrap(),
             lang,
             strings,
-            root_domain: get_root_domain(host.0, &config.fallback_root_domain),
+            root_domain: get_root_domain(host.0, &CONFIG.fallback_root_domain),
             host: host.0,
-            config: config.inner(),
+            config: CONFIG,
             theme: get_theme(jar),
             is_logged_in: true,
             hires: get_bool_cookie(jar, "hires", false),

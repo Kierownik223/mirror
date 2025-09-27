@@ -22,14 +22,10 @@ use rocket_multipart_form_data::{
 use zip::write::SimpleFileOptions;
 
 use crate::{
-    db::{get_downloads, FileDb},
-    jwt::JWT,
-    read_files,
-    utils::{
+    config::CONFIG, db::{get_downloads, FileDb}, jwt::JWT, read_files, utils::{
         add_path_to_zip, format_size, get_extension_from_filename, get_genre, get_real_path,
         get_real_path_with_perms, is_restricted, map_io_error_to_status, read_dirs_async,
-    },
-    Cached, Config, Disk, FileSizes, Host, MirrorFile, Sysinfo,
+    }, Cached, Config, Disk, FileSizes, Host, MirrorFile, Sysinfo
 };
 
 #[derive(serde::Serialize)]
@@ -80,7 +76,6 @@ struct RenameRequest {
 #[get("/listing/<file..>")]
 async fn listing(
     file: PathBuf,
-    config: &rocket::State<Config>,
     sizes: &State<FileSizes>,
     token: Result<JWT, Status>,
 ) -> Result<Cached<Json<Vec<MirrorFile>>>, Status> {
@@ -102,14 +97,14 @@ async fn listing(
         .await
         .map_err(map_io_error_to_status)?;
 
-    if config.enable_login {
+    if CONFIG.enable_login {
         if is_restricted(&Path::new("files/").join(&file), token.is_ok()) {
             return Err(Status::Forbidden);
         }
     }
 
-    dir_list.retain(|x| !config.hidden_files.contains(&x.name));
-    file_list.retain(|x| !config.hidden_files.contains(&x.name));
+    dir_list.retain(|x| !CONFIG.hidden_files.contains(&x.name));
+    file_list.retain(|x| !CONFIG.hidden_files.contains(&x.name));
 
     dir_list.sort();
     file_list.sort();

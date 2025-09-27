@@ -18,11 +18,7 @@ use serde_json::json;
 use time::{Duration, OffsetDateTime};
 
 use crate::{
-    db::{fetch_user, login_user, Db},
-    jwt::{create_jwt, JWT},
-    utils::{get_bool_cookie, get_root_domain, get_theme, map_io_error_to_status},
-    Config, Host, IndexResponse, Language, LoginUser, TranslationStore, UsePlain, UserToken,
-    XForwardedFor,
+    config::CONFIG, db::{fetch_user, login_user, Db}, jwt::{create_jwt, JWT}, utils::{get_bool_cookie, get_root_domain, get_theme, map_io_error_to_status}, Config, Host, IndexResponse, Language, LoginUser, TranslationStore, UsePlain, UserToken, XForwardedFor
 };
 
 #[get("/login?<next>")]
@@ -31,7 +27,6 @@ fn login_page(
     translations: &rocket::State<TranslationStore>,
     lang: Language,
     host: Host<'_>,
-    config: &State<Config>,
     useplain: UsePlain<'_>,
     next: Option<&str>,
     token: Result<JWT, Status>,
@@ -55,9 +50,9 @@ fn login_page(
             title: "Login",
             lang,
             strings,
-            root_domain: get_root_domain(host.0, &config.fallback_root_domain),
+            root_domain: get_root_domain(host.0, &CONFIG.fallback_root_domain),
             host: host.0,
-            config: config.inner(),
+            config: CONFIG,
             theme: get_theme(jar),
             is_logged_in: token.is_ok(),
             username: "",
@@ -80,7 +75,6 @@ async fn login(
     translations: &State<TranslationStore>,
     lang: Language,
     host: Host<'_>,
-    config: &State<Config>,
     useplain: UsePlain<'_>,
     token: Result<JWT, Status>,
 ) -> Result<IndexResponse, Status> {
@@ -106,7 +100,7 @@ async fn login(
         let mut jwt_cookie = Cookie::new("matoken", jwt);
         jwt_cookie.set_domain(format!(
             ".{}",
-            get_root_domain(host.0, &config.fallback_root_domain)
+            get_root_domain(host.0, &CONFIG.fallback_root_domain)
         ));
         jwt_cookie.set_same_site(SameSite::Lax);
 
@@ -144,9 +138,9 @@ async fn login(
                 title: "Login",
                 lang,
                 strings,
-                root_domain: get_root_domain(host.0, &config.fallback_root_domain),
+                root_domain: get_root_domain(host.0, &CONFIG.fallback_root_domain),
                 host: host.0,
-                config: config.inner(),
+                config: CONFIG,
                 theme: get_theme(jar),
                 is_logged_in: token.is_ok(),
                 admin: token.unwrap_or_default().claims.perms == 0,
@@ -167,7 +161,6 @@ async fn direct<'a>(
     to: Option<String>,
     ip: XForwardedFor<'_>,
     host: Host<'_>,
-    config: &rocket::State<Config>,
     jwt: Result<JWT, Status>,
 ) -> Result<Redirect, Status> {
     if let Some(token) = token {
@@ -217,7 +210,7 @@ async fn direct<'a>(
             let mut jwt_cookie = Cookie::new("matoken", jwt);
             jwt_cookie.set_domain(format!(
                 ".{}",
-                get_root_domain(host.0, &config.fallback_root_domain)
+                get_root_domain(host.0, &CONFIG.fallback_root_domain)
             ));
             jwt_cookie.set_same_site(SameSite::Lax);
 
@@ -256,7 +249,7 @@ async fn direct<'a>(
                 let encrypted_b64 =
                     base64::engine::general_purpose::URL_SAFE.encode(encrypted_data);
 
-                let root_domain = get_root_domain(host.0, &config.fallback_root_domain);
+                let root_domain = get_root_domain(host.0, &CONFIG.fallback_root_domain);
 
                 let redirect_url = format!(
                     "http://{}/direct?token={}",
@@ -275,7 +268,7 @@ async fn direct<'a>(
                     Cookie::build("matoken")
                         .domain(format!(
                             ".{}",
-                            get_root_domain(host.0, &config.fallback_root_domain)
+                            get_root_domain(host.0, &CONFIG.fallback_root_domain)
                         ))
                         .same_site(SameSite::Lax),
                 );
@@ -288,12 +281,12 @@ async fn direct<'a>(
 }
 
 #[get("/logout")]
-fn logout(jar: &CookieJar<'_>, host: Host<'_>, config: &rocket::State<Config>) -> Redirect {
+fn logout(jar: &CookieJar<'_>, host: Host<'_>) -> Redirect {
     jar.remove(
         Cookie::build("matoken")
             .domain(format!(
                 ".{}",
-                get_root_domain(host.0, &config.fallback_root_domain)
+                get_root_domain(host.0, &CONFIG.fallback_root_domain)
             ))
             .same_site(SameSite::Lax),
     );

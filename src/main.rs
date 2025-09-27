@@ -27,7 +27,7 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::config::Config;
+use crate::config::{Config, CONFIG};
 use crate::db::{add_download, FileDb};
 use crate::i18n::TranslationStore;
 use crate::jwt::JWT;
@@ -392,7 +392,6 @@ async fn poster(
 #[get("/file/<file..>")]
 async fn file(
     file: PathBuf,
-    config: &rocket::State<Config>,
     token: Result<JWT, Status>,
 ) -> Result<IndexResponse, Status> {
     let username = match token.as_ref() {
@@ -401,7 +400,7 @@ async fn file(
     };
     let (path, is_private) = get_real_path(&file, username.to_string())?;
 
-    if config.enable_login {
+    if CONFIG.enable_login {
         if is_restricted(&path, token.is_ok()) {
             return Err(Status::Unauthorized);
         }
@@ -410,10 +409,10 @@ async fn file(
     let cache_control_string;
     let cache_control = if is_private {
         "private"
-    } else if config.max_age == 0 {
+    } else if CONFIG.max_age == 0 {
         "public"
     } else {
-        cache_control_string = format!("public, max-age={}", config.max_age);
+        cache_control_string = format!("public, max-age={}", CONFIG.max_age);
         &cache_control_string
     };
 
@@ -424,7 +423,6 @@ async fn file(
 async fn download_with_counter(
     db: Connection<FileDb>,
     file: PathBuf,
-    config: &rocket::State<Config>,
     token: Result<JWT, Status>,
 ) -> Result<IndexResponse, Status> {
     let username = match token.as_ref() {
@@ -443,7 +441,7 @@ async fn download_with_counter(
         return Err(Status::NotFound);
     }
 
-    if config.enable_login {
+    if CONFIG.enable_login {
         if is_restricted(&path, token.is_ok()) {
             return Err(Status::Unauthorized);
         }
@@ -456,16 +454,16 @@ async fn download_with_counter(
     }
     .to_lowercase();
 
-    if !config.extensions.contains(&ext) {
+    if !CONFIG.extensions.contains(&ext) {
         let cache_control_string;
         return open_file(
             path,
             if is_private {
                 "private"
-            } else if config.max_age == 0 {
+            } else if CONFIG.max_age == 0 {
                 "public"
             } else {
-                cache_control_string = format!("public, max-age={}", config.max_age);
+                cache_control_string = format!("public, max-age={}", CONFIG.max_age);
                 &cache_control_string
             },
         )
@@ -484,7 +482,6 @@ async fn download_with_counter(
 #[get("/<file..>?download")]
 async fn download(
     file: PathBuf,
-    config: &rocket::State<Config>,
     token: Result<JWT, Status>,
 ) -> Result<IndexResponse, Status> {
     let username = match token.as_ref() {
@@ -493,7 +490,7 @@ async fn download(
     };
     let (path, is_private) = get_real_path(&file, username.to_string())?;
 
-    if config.enable_login {
+    if CONFIG.enable_login {
         if is_restricted(&path, token.is_ok()) {
             return Err(Status::Unauthorized);
         }
@@ -504,10 +501,10 @@ async fn download(
         path,
         if is_private {
             "private"
-        } else if config.max_age == 0 {
+        } else if CONFIG.max_age == 0 {
             "public"
         } else {
-            cache_control_string = format!("public, max-age={}", config.max_age);
+            cache_control_string = format!("public, max-age={}", CONFIG.max_age);
             &cache_control_string
         },
     )
@@ -518,7 +515,6 @@ async fn download(
 async fn index(
     file: PathBuf,
     jar: &CookieJar<'_>,
-    config: &rocket::State<Config>,
     translations: &rocket::State<TranslationStore>,
     lang: Language,
     host: Host<'_>,
@@ -537,7 +533,7 @@ async fn index(
 
     let strings = translations.get_translation(&lang.0);
 
-    let root_domain = get_root_domain(host.0, &config.fallback_root_domain);
+    let root_domain = get_root_domain(host.0, &CONFIG.fallback_root_domain);
     let theme = get_theme(jar);
 
     let hires = get_bool_cookie(jar, "hires", false);
@@ -560,7 +556,7 @@ async fn index(
                     strings,
                     root_domain,
                     host: host.0,
-                    config: config.inner(),
+                    config: CONFIG,
                     theme,
                     is_logged_in: token.is_ok(),
                     admin: perms == 0,
@@ -575,7 +571,7 @@ async fn index(
         return Err(Status::UnprocessableEntity);
     }
 
-    if config.enable_login {
+    if CONFIG.enable_login {
         if is_restricted(&path, token.is_ok()) {
             return Err(Status::Unauthorized);
         }
@@ -599,10 +595,10 @@ async fn index(
     let cache_control_string;
     let cache_control = if is_private {
         "private"
-    } else if config.max_age == 0 {
+    } else if CONFIG.max_age == 0 {
         "public"
     } else {
-        cache_control_string = format!("public, max-age={}", config.max_age);
+        cache_control_string = format!("public, max-age={}", CONFIG.max_age);
         &cache_control_string
     };
 
@@ -618,7 +614,7 @@ async fn index(
                     strings,
                     root_domain,
                     host: host.0,
-                    config: config.inner(),
+                    config: CONFIG,
                     path: Path::new("/").join(&file).display().to_string(),
                     theme,
                     is_logged_in: token.is_ok(),
@@ -649,7 +645,7 @@ async fn index(
                     strings,
                     root_domain,
                     host: host.0,
-                    config: config.inner(),
+                    config: CONFIG,
                     path: Path::new("/").join(&file).display().to_string(),
                     files,
                     theme,
@@ -706,7 +702,7 @@ async fn index(
                     strings,
                     root_domain,
                     host: host.0,
-                    config: config.inner(),
+                    config: CONFIG,
                     path: videopath,
                     poster: format!("/images/videoposters{}.jpg", videopath.replace("video/", "")),
                     vidtitle,
@@ -737,7 +733,7 @@ async fn index(
                     strings,
                     root_domain: &root_domain,
                     host: host.0,
-                    config: config.inner(),
+                    config: CONFIG,
                     path: audiopath,
                     audiotitle: &path.file_name().unwrap().to_str().unwrap(),
                     theme: &theme,
@@ -789,7 +785,7 @@ async fn index(
                         strings,
                         root_domain,
                         host: host.0,
-                        config: config.inner(),
+                        config: CONFIG,
                         path: audiopath,
                         audiotitle,
                         theme,
@@ -842,8 +838,8 @@ async fn index(
                 }
             }
 
-            dirs.retain(|x| !config.hidden_files.contains(&x.name));
-            files.retain(|x| !config.hidden_files.contains(&x.name));
+            dirs.retain(|x| !CONFIG.hidden_files.contains(&x.name));
+            files.retain(|x| !CONFIG.hidden_files.contains(&x.name));
 
             dirs.sort();
             files.sort();
@@ -874,7 +870,7 @@ async fn index(
                     strings,
                     root_domain,
                     host: host.0,
-                    config: config.inner(),
+                    config: CONFIG,
                     path: &path_str,
                     dirs,
                     files,
@@ -946,7 +942,7 @@ async fn index(
                     strings,
                     root_domain,
                     host: host.0,
-                    config: config.inner(),
+                    config: CONFIG,
                     path: &path_str,
                     dirs,
                     files,
@@ -963,7 +959,7 @@ async fn index(
             )))
         }
         _ => {
-            if config.extensions.contains(&ext) {
+            if CONFIG.extensions.contains(&ext) {
                 Ok(IndexResponse::Template(Template::render(
                     if *useplain.0 {
                         "plain/details"
@@ -976,7 +972,7 @@ async fn index(
                         strings,
                         root_domain,
                         host: host.0,
-                        config: config.inner(),
+                        config: CONFIG,
                         path: Path::new("/").join(&file).display().to_string(),
                         theme,
                         is_logged_in: token.is_ok(),
@@ -1002,7 +998,6 @@ fn settings(
     lang: Language,
     translations: &State<TranslationStore>,
     host: Host<'_>,
-    config: &State<Config>,
     useplain: UsePlain<'_>,
     token: Result<JWT, Status>,
 ) -> IndexResponse {
@@ -1082,9 +1077,9 @@ fn settings(
             theme,
             lang,
             strings,
-            root_domain: get_root_domain(host.0, &config.fallback_root_domain),
+            root_domain: get_root_domain(host.0, &CONFIG.fallback_root_domain),
             host: host.0,
-            config: config.inner(),
+            config: CONFIG,
             is_logged_in: token.is_ok(),
             username,
             admin: token.unwrap_or_default().claims.perms == 0,
@@ -1193,7 +1188,6 @@ async fn reset_settings(jar: &CookieJar<'_>) -> Redirect {
 async fn iframe(
     file: PathBuf,
     jar: &CookieJar<'_>,
-    config: &rocket::State<Config>,
     token: Result<JWT, Status>,
 ) -> Result<IndexResponse, Status> {
     let username = match token.as_ref() {
@@ -1202,7 +1196,7 @@ async fn iframe(
     };
     let path = get_real_path(&file, username.to_string())?.0;
 
-    if config.enable_login {
+    if CONFIG.enable_login {
         if is_restricted(&path, token.is_ok()) {
             return Err(Status::Unauthorized);
         }
@@ -1215,7 +1209,7 @@ async fn iframe(
 
     let mut dirs = read_dirs(&path).map_err(map_io_error_to_status)?;
 
-    dirs.retain(|x| !config.hidden_files.contains(&x.name));
+    dirs.retain(|x| !CONFIG.hidden_files.contains(&x.name));
 
     dirs.sort();
 
@@ -1232,7 +1226,6 @@ async fn iframe(
 
 #[get("/sitemap.xml")]
 async fn sitemap(
-    config: &rocket::State<Config>,
     sizes: &State<FileSizes>,
     host: Host<'_>,
 ) -> Result<Cached<Template>, Status> {
@@ -1240,7 +1233,7 @@ async fn sitemap(
     let mut files = files.clone();
 
     files.retain(|file| {
-        !config
+        !CONFIG
             .hidden_files
             .iter()
             .any(|hidden| file.file.contains(hidden) || file.file.contains("private"))
@@ -1372,7 +1365,6 @@ async fn rocket() -> _ {
     tokio::spawn(calculate_sizes(background_size_state));
 
     let mut rocket = rocket::build()
-        .manage(config.clone())
         .attach(Template::fairing())
         .manage(TranslationStore::new())
         .manage(size_state)

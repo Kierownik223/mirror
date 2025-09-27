@@ -1638,6 +1638,7 @@ dependencies = [
  "bcrypt",
  "chrono",
  "jsonwebtoken",
+ "lazy_static",
  "markdown",
  "rand",
  "rocket",
