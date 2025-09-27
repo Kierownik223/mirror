@@ -1,12 +1,9 @@
 use std::fs;
 
-use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 
-lazy_static! {
-    #[derive(Serialize, Clone, Copy)]
-    pub static ref CONFIG: Config = Config::load();
-}
+pub static CONFIG: Lazy<Config> = Lazy::new(Config::load);
 
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct Config {
