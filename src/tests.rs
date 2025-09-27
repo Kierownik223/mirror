@@ -19,6 +19,13 @@ fn api() {
 }
 
 #[test]
+fn index() {
+    let client = Client::tracked(rocket()).expect("valid rocket instance");
+    let response = client.get("/").dispatch();
+    assert_eq!(response.status(), Status::Ok);
+}
+
+#[test]
 fn upload() {
     let _ = fs::create_dir("files/uploads/");
     let client = Client::tracked(rocket()).expect("valid rocket instance");
