@@ -15,7 +15,7 @@ use time::{Duration, OffsetDateTime};
 use tokio::sync::RwLock;
 use zip::write::SimpleFileOptions;
 
-use crate::{Config, FileEntry, HeaderFile, IndexResponse, MirrorFile};
+use crate::{config::CONFIG, Config, FileEntry, HeaderFile, IndexResponse, MirrorFile};
 
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
 struct FolderSize {
@@ -254,8 +254,8 @@ pub fn parse_language(header: &str) -> Option<String> {
     None
 }
 
-pub fn get_root_domain<'a>(host: &str, fallback: &str) -> String {
-    return host.splitn(2, '.').nth(1).unwrap_or(fallback).to_string();
+pub fn get_root_domain<'a>(host: &str) -> String {
+    return host.splitn(2, '.').nth(1).unwrap_or(&CONFIG.fallback_root_domain).to_string();
 }
 
 pub fn add_path_to_zip(

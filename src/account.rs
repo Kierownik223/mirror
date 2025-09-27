@@ -50,7 +50,7 @@ fn login_page(
             title: "Login",
             lang,
             strings,
-            root_domain: get_root_domain(host.0, &CONFIG.fallback_root_domain),
+            root_domain: get_root_domain(host.0),
             host: host.0,
             config: CONFIG,
             theme: get_theme(jar),
@@ -100,7 +100,7 @@ async fn login(
         let mut jwt_cookie = Cookie::new("matoken", jwt);
         jwt_cookie.set_domain(format!(
             ".{}",
-            get_root_domain(host.0, &CONFIG.fallback_root_domain)
+            get_root_domain(host.0)
         ));
         jwt_cookie.set_same_site(SameSite::Lax);
 
@@ -138,7 +138,7 @@ async fn login(
                 title: "Login",
                 lang,
                 strings,
-                root_domain: get_root_domain(host.0, &CONFIG.fallback_root_domain),
+                root_domain: get_root_domain(host.0),
                 host: host.0,
                 config: CONFIG,
                 theme: get_theme(jar),
@@ -210,7 +210,7 @@ async fn direct<'a>(
             let mut jwt_cookie = Cookie::new("matoken", jwt);
             jwt_cookie.set_domain(format!(
                 ".{}",
-                get_root_domain(host.0, &CONFIG.fallback_root_domain)
+                get_root_domain(host.0)
             ));
             jwt_cookie.set_same_site(SameSite::Lax);
 
@@ -249,7 +249,7 @@ async fn direct<'a>(
                 let encrypted_b64 =
                     base64::engine::general_purpose::URL_SAFE.encode(encrypted_data);
 
-                let root_domain = get_root_domain(host.0, &CONFIG.fallback_root_domain);
+                let root_domain = get_root_domain(host.0);
 
                 let redirect_url = format!(
                     "http://{}/direct?token={}",
@@ -268,7 +268,7 @@ async fn direct<'a>(
                     Cookie::build("matoken")
                         .domain(format!(
                             ".{}",
-                            get_root_domain(host.0, &CONFIG.fallback_root_domain)
+                            get_root_domain(host.0)
                         ))
                         .same_site(SameSite::Lax),
                 );
@@ -286,7 +286,7 @@ fn logout(jar: &CookieJar<'_>, host: Host<'_>) -> Redirect {
         Cookie::build("matoken")
             .domain(format!(
                 ".{}",
-                get_root_domain(host.0, &CONFIG.fallback_root_domain)
+                get_root_domain(host.0)
             ))
             .same_site(SameSite::Lax),
     );

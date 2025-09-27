@@ -533,7 +533,7 @@ async fn index(
 
     let strings = translations.get_translation(&lang.0);
 
-    let root_domain = get_root_domain(host.0, &CONFIG.fallback_root_domain);
+    let root_domain = get_root_domain(host.0);
     let theme = get_theme(jar);
 
     let hires = get_bool_cookie(jar, "hires", false);
@@ -1077,7 +1077,7 @@ fn settings(
             theme,
             lang,
             strings,
-            root_domain: get_root_domain(host.0, &CONFIG.fallback_root_domain),
+            root_domain: get_root_domain(host.0),
             host: host.0,
             config: CONFIG,
             is_logged_in: token.is_ok(),
@@ -1294,7 +1294,7 @@ async fn default(status: Status, req: &Request<'_>) -> Template {
             title: format!("HTTP {}", status.code),
             lang,
             strings,
-            root_domain: get_root_domain(&host, &config.fallback_root_domain),
+            root_domain: get_root_domain(&host),
             host,
             config: config,
             theme: get_theme(jar),
