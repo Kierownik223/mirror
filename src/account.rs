@@ -18,7 +18,11 @@ use serde_json::json;
 use time::{Duration, OffsetDateTime};
 
 use crate::{
-    config::CONFIG, db::{fetch_user, login_user, Db}, jwt::{create_jwt, JWT}, utils::{get_bool_cookie, get_root_domain, get_theme, map_io_error_to_status}, Host, IndexResponse, Language, LoginUser, TranslationStore, UsePlain, UserToken, XForwardedFor
+    config::CONFIG,
+    db::{fetch_user, login_user, Db},
+    jwt::{create_jwt, JWT},
+    utils::{get_bool_cookie, get_root_domain, get_theme, map_io_error_to_status},
+    Host, IndexResponse, Language, LoginUser, TranslationStore, UsePlain, UserToken, XForwardedFor,
 };
 
 #[get("/login?<next>")]
@@ -98,10 +102,7 @@ async fn login(
         let jwt = create_jwt(&db_user).map_err(|_| Status::InternalServerError)?;
 
         let mut jwt_cookie = Cookie::new("matoken", jwt);
-        jwt_cookie.set_domain(format!(
-            ".{}",
-            get_root_domain(host.0)
-        ));
+        jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
         jwt_cookie.set_same_site(SameSite::Lax);
 
         jar.add(jwt_cookie);
@@ -208,10 +209,7 @@ async fn direct<'a>(
             let jwt = create_jwt(&db_user).map_err(|_| Status::InternalServerError)?;
 
             let mut jwt_cookie = Cookie::new("matoken", jwt);
-            jwt_cookie.set_domain(format!(
-                ".{}",
-                get_root_domain(host.0)
-            ));
+            jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
             jwt_cookie.set_same_site(SameSite::Lax);
 
             jar.add(jwt_cookie);
@@ -266,10 +264,7 @@ async fn direct<'a>(
             } else {
                 jar.remove(
                     Cookie::build("matoken")
-                        .domain(format!(
-                            ".{}",
-                            get_root_domain(host.0)
-                        ))
+                        .domain(format!(".{}", get_root_domain(host.0)))
                         .same_site(SameSite::Lax),
                 );
                 return Err(Status::Forbidden);
@@ -284,10 +279,7 @@ async fn direct<'a>(
 fn logout(jar: &CookieJar<'_>, host: Host<'_>) -> Redirect {
     jar.remove(
         Cookie::build("matoken")
-            .domain(format!(
-                ".{}",
-                get_root_domain(host.0)
-            ))
+            .domain(format!(".{}", get_root_domain(host.0)))
             .same_site(SameSite::Lax),
     );
     Redirect::to("/account/login")

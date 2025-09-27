@@ -1,9 +1,5 @@
 use chrono::Utc;
-use jsonwebtoken::{
-    encode,
-    errors::Error,
-    Algorithm, EncodingKey, Header,
-};
+use jsonwebtoken::{encode, errors::Error, Algorithm, EncodingKey, Header};
 
 #[cfg(not(test))]
 use jsonwebtoken::{decode, errors::ErrorKind, DecodingKey, Validation};
@@ -59,7 +55,15 @@ impl<'r> FromRequest<'r> for JWT {
 
     #[cfg(test)]
     async fn from_request(_req: &'r Request<'_>) -> Outcome<Self, Status> {
-        Outcome::Success(JWT { claims: Claims { sub: "test".into(), email: None, perms: 0, exp: 1, iat: 0 } })
+        Outcome::Success(JWT {
+            claims: Claims {
+                sub: "test".into(),
+                email: None,
+                perms: 0,
+                exp: 1,
+                iat: 0,
+            },
+        })
     }
 }
 

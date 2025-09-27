@@ -388,10 +388,7 @@ async fn poster(
 }
 
 #[get("/file/<file..>")]
-async fn file(
-    file: PathBuf,
-    token: Result<JWT, Status>,
-) -> Result<IndexResponse, Status> {
+async fn file(file: PathBuf, token: Result<JWT, Status>) -> Result<IndexResponse, Status> {
     let username = match token.as_ref() {
         Ok(token) => &token.claims.sub,
         Err(_) => &"Nobody".into(),
@@ -478,10 +475,7 @@ async fn download_with_counter(
 }
 
 #[get("/<file..>?download")]
-async fn download(
-    file: PathBuf,
-    token: Result<JWT, Status>,
-) -> Result<IndexResponse, Status> {
+async fn download(file: PathBuf, token: Result<JWT, Status>) -> Result<IndexResponse, Status> {
     let username = match token.as_ref() {
         Ok(token) => &token.claims.sub,
         Err(_) => &"Nobody".into(),
@@ -1223,10 +1217,7 @@ async fn iframe(
 }
 
 #[get("/sitemap.xml")]
-async fn sitemap(
-    sizes: &State<FileSizes>,
-    host: Host<'_>,
-) -> Result<Cached<Template>, Status> {
+async fn sitemap(sizes: &State<FileSizes>, host: Host<'_>) -> Result<Cached<Template>, Status> {
     let files = sizes.read().await;
     let mut files = files.clone();
 

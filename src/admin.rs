@@ -16,9 +16,12 @@ use rocket_multipart_form_data::{
 };
 
 use crate::{
-    config::CONFIG, jwt::JWT, utils::{
+    config::CONFIG,
+    jwt::JWT,
+    utils::{
         format_size, get_bool_cookie, get_extension_from_filename, get_root_domain, get_theme,
-    }, Disk, Host, IndexResponse, Language, MirrorFile, TranslationStore, UsePlain
+    },
+    Disk, Host, IndexResponse, Language, MirrorFile, TranslationStore, UsePlain,
 };
 
 #[post("/upload", data = "<data>")]
