@@ -15,7 +15,7 @@ use time::{Duration, OffsetDateTime};
 use tokio::sync::RwLock;
 use zip::write::SimpleFileOptions;
 
-use crate::{config::CONFIG, Config, FileEntry, HeaderFile, IndexResponse, MirrorFile};
+use crate::{config::CONFIG, FileEntry, HeaderFile, IndexResponse, MirrorFile};
 
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
 struct FolderSize {
@@ -213,12 +213,11 @@ pub fn is_hidden(path: &Path, perms: Option<i32>) -> bool {
 }
 
 pub async fn open_file(path: PathBuf, cache_control: &str) -> Result<IndexResponse, Status> {
-    let config = Config::load();
     if !path.exists() {
         return Err(Status::NotFound);
     }
 
-    if config.standalone {
+    if CONFIG.standalone {
         match NamedFile::open(&path).await {
             Ok(f) => Ok(IndexResponse::NamedFile(f, cache_control.to_string())),
             Err(_) => Err(Status::InternalServerError),

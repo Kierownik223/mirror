@@ -18,7 +18,7 @@ use serde_json::json;
 use time::{Duration, OffsetDateTime};
 
 use crate::{
-    config::CONFIG, db::{fetch_user, login_user, Db}, jwt::{create_jwt, JWT}, utils::{get_bool_cookie, get_root_domain, get_theme, map_io_error_to_status}, Config, Host, IndexResponse, Language, LoginUser, TranslationStore, UsePlain, UserToken, XForwardedFor
+    config::CONFIG, db::{fetch_user, login_user, Db}, jwt::{create_jwt, JWT}, utils::{get_bool_cookie, get_root_domain, get_theme, map_io_error_to_status}, Host, IndexResponse, Language, LoginUser, TranslationStore, UsePlain, UserToken, XForwardedFor
 };
 
 #[get("/login?<next>")]
@@ -295,11 +295,9 @@ fn logout(jar: &CookieJar<'_>, host: Host<'_>) -> Redirect {
 
 pub fn build_account() -> AdHoc {
     AdHoc::on_ignite("Account", |rocket| async {
-        let config = Config::load();
-
         let mut rocket = rocket.mount("/account", routes![login_page, login, logout]);
 
-        if config.enable_direct {
+        if CONFIG.enable_direct {
             rocket = rocket.mount("/account", routes![direct]);
         }
 

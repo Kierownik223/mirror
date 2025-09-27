@@ -27,7 +27,7 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::config::{Config, CONFIG};
+use crate::config::CONFIG;
 use crate::db::{add_download, FileDb};
 use crate::i18n::TranslationStore;
 use crate::jwt::JWT;
@@ -89,13 +89,11 @@ struct HeaderFile(String, String);
 
 impl<'r> Responder<'r, 'r> for HeaderFile {
     fn respond_to(self, _: &Request<'_>) -> response::Result<'r> {
-        let config = Config::load();
-
         let mut builder = Response::build();
 
         builder.raw_header(
-            config.x_sendfile_header,
-            format!("{}{}", config.x_sendfile_prefix, self.0),
+            &CONFIG.x_sendfile_header,
+            format!("{}{}", CONFIG.x_sendfile_prefix, self.0),
         );
 
         builder.raw_header("Cache-Control", self.1);
@@ -1282,8 +1280,6 @@ async fn default(status: Status, req: &Request<'_>) -> Template {
 
     let host = req.host().unwrap().to_string();
 
-    let config = Config::load();
-
     Template::render(
         if *useplain.0 {
             format!("plain/error/{}", status.code)
@@ -1296,7 +1292,7 @@ async fn default(status: Status, req: &Request<'_>) -> Template {
             strings,
             root_domain: get_root_domain(&host),
             host,
-            config: config,
+            config: CONFIG,
             theme: get_theme(jar),
             is_logged_in: false,
             admin: false,
@@ -1357,8 +1353,6 @@ async fn calculate_sizes(state: FileSizes) {
 #[launch]
 #[tokio::main]
 async fn rocket() -> _ {
-    let config = Config::load();
-
     let size_state: FileSizes = Arc::new(RwLock::new(Vec::new()));
 
     let background_size_state = Arc::clone(&size_state);
@@ -1382,7 +1376,7 @@ async fn rocket() -> _ {
             ],
         );
 
-    if config.enable_login {
+    if CONFIG.enable_login {
         rocket = rocket
             .attach(account::build_account())
             .attach(admin::build())
@@ -1390,7 +1384,7 @@ async fn rocket() -> _ {
             .mount("/", routes![fetch_settings, sync_settings,]);
     }
 
-    if config.enable_file_db {
+    if CONFIG.enable_file_db {
         rocket = rocket
             .attach(FileDb::init())
             .mount("/", routes![download_with_counter])
@@ -1398,7 +1392,7 @@ async fn rocket() -> _ {
         rocket = rocket.mount("/", routes![download])
     }
 
-    if config.enable_api {
+    if CONFIG.enable_api {
         rocket = rocket.attach(api::build_api());
     }
 

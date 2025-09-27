@@ -25,7 +25,7 @@ use crate::{
     config::CONFIG, db::{get_downloads, FileDb}, jwt::JWT, read_files, utils::{
         add_path_to_zip, format_size, get_extension_from_filename, get_genre, get_real_path,
         get_real_path_with_perms, is_restricted, map_io_error_to_status, read_dirs_async,
-    }, Cached, Config, Disk, FileSizes, Host, MirrorFile, Sysinfo
+    }, Cached, Disk, FileSizes, Host, MirrorFile, Sysinfo
 };
 
 #[derive(serde::Serialize)]
@@ -642,7 +642,6 @@ fn default(status: Status, _req: &Request) -> Json<Error> {
 
 pub fn build_api() -> AdHoc {
     AdHoc::on_ignite("API", |mut rocket| async {
-        let config = Config::load();
         rocket = rocket
             .mount(
                 "/api",
@@ -650,13 +649,13 @@ pub fn build_api() -> AdHoc {
             )
             .register("/api", catchers![default]);
 
-        if config.enable_file_db {
+        if CONFIG.enable_file_db {
             rocket = rocket.mount("/api", routes![file_with_downloads])
         } else {
             rocket = rocket.mount("/api", routes![file])
         }
 
-        if config.enable_zip_downloads {
+        if CONFIG.enable_zip_downloads {
             rocket = rocket.mount("/api", routes![download_zip])
         }
 

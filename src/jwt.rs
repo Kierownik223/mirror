@@ -11,7 +11,7 @@ use rocket::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{config::Config, MarmakUser};
+use crate::{config::CONFIG, MarmakUser};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Claims {
@@ -75,7 +75,7 @@ impl Default for JWT {
 }
 
 pub fn create_jwt(user: &MarmakUser) -> Result<String, Error> {
-    let secret = Config::load().jwt_secret;
+    let secret = &CONFIG.jwt_secret;
 
     let expiration = Utc::now()
         .checked_add_signed(chrono::Duration::seconds(3600))
@@ -100,7 +100,7 @@ pub fn create_jwt(user: &MarmakUser) -> Result<String, Error> {
 }
 
 pub fn decode_jwt(token: String) -> Result<Claims, ErrorKind> {
-    let secret = Config::load().jwt_secret;
+    let secret = &CONFIG.jwt_secret;
 
     let token = token.trim_start_matches("Bearer").trim();
 
