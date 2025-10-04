@@ -1134,7 +1134,11 @@ async fn default(status: Status, req: &Request<'_>) -> Template {
 
     let strings = translations.get_translation(lang.as_str());
 
-    let host = req.host().unwrap().to_string();
+    let host = if req.host().is_some() {
+        &req.host().unwrap().to_string()
+    } else {
+        "127.0.0.1"
+    };
 
     Template::render(
         if *useplain.0 {
