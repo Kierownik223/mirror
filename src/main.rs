@@ -1,10 +1,9 @@
 use audiotags::{MimeType, Tag};
 use db::{fetch_user, Db};
-use rocket::fs::NamedFile;
 use rocket::http::{ContentType, Cookie, CookieJar, SameSite, Status};
 use rocket::response::content::RawHtml;
-use rocket::response::{Redirect, Responder};
-use rocket::{response, State};
+use rocket::response::Redirect;
+use rocket::State;
 use rocket::Request;
 use rocket_db_pools::{Connection, Database};
 use serde::Serialize;
@@ -31,6 +30,7 @@ use crate::db::{add_download, FileDb};
 use crate::guards::{HeaderFile, Host, Settings, UsePlain, UseViewers};
 use crate::i18n::{Language, TranslationStore};
 use crate::jwt::JWT;
+use crate::responders::{Cached, IndexResponse, IndexResult};
 use crate::utils::{
     get_cache_control, get_genre, get_real_path, get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output, read_dirs_async
 };
@@ -43,6 +43,7 @@ mod db;
 mod i18n;
 mod jwt;
 mod guards;
+mod responders;
 #[cfg(test)]
 mod tests;
 mod utils;
@@ -118,50 +119,6 @@ type FileSizes = Arc<RwLock<Vec<FileEntry>>>;
 struct FileEntry {
     size: u64,
     file: String,
-}
-
-pub struct Cached<R> {
-    response: R,
-    header: &'static str,
-}
-
-impl<'r, R: 'r + Responder<'r, 'static> + Send> Responder<'r, 'static> for Cached<R> {
-    fn respond_to(self, request: &'r Request<'_>) -> response::Result<'static> {
-        let mut res = self.response.respond_to(request)?;
-
-        res.set_raw_header("Cache-Control", self.header);
-
-        Ok(res)
-    }
-}
-
-enum IndexResponse {
-    Template(Template),
-    HeaderFile(HeaderFile),
-    NamedFile(NamedFile, String),
-    Redirect(Redirect),
-}
-
-type IndexResult = Result<IndexResponse, Status>;
-
-#[rocket::async_trait]
-impl<'r> Responder<'r, 'r> for IndexResponse {
-    fn respond_to(self, req: &'r rocket::Request<'_>) -> rocket::response::Result<'r> {
-        match self {
-            IndexResponse::Template(t) => {
-                let mut res = t.respond_to(req)?;
-                res.set_raw_header("Cache-Control", "private");
-                Ok(res)
-            }
-            IndexResponse::HeaderFile(h) => h.respond_to(req),
-            IndexResponse::NamedFile(f, cache_control) => {
-                let mut res = f.respond_to(req)?;
-                res.set_raw_header("Cache-Control", cache_control);
-                Ok(res)
-            }
-            IndexResponse::Redirect(r) => r.respond_to(req),
-        }
-    }
 }
 
 #[get("/poster/<file..>")]
