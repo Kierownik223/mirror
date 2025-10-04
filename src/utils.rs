@@ -183,6 +183,9 @@ pub fn get_theme<'a>(jar: &CookieJar<'_>) -> String {
 }
 
 pub fn is_restricted(path: &Path, is_logged_in: bool) -> bool {
+    if !CONFIG.enable_login {
+        return false;
+    }
     let mut current = Some(path);
 
     while let Some(p) = current {

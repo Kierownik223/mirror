@@ -260,10 +260,8 @@ async fn file(file: PathBuf, token: Result<JWT, Status>) -> Result<IndexResponse
     };
     let (path, is_private) = get_real_path(&file, username.to_string())?;
 
-    if CONFIG.enable_login {
-        if is_restricted(&path, token.is_ok()) {
-            return Err(Status::Unauthorized);
-        }
+    if is_restricted(&path, token.is_ok()) {
+        return Err(Status::Unauthorized);
     }
 
     let cache_control_string;
@@ -301,10 +299,8 @@ async fn download_with_counter(
         return Err(Status::NotFound);
     }
 
-    if CONFIG.enable_login {
-        if is_restricted(&path, token.is_ok()) {
-            return Err(Status::Unauthorized);
-        }
+    if is_restricted(&path, token.is_ok()) {
+        return Err(Status::Unauthorized);
     }
 
     let ext = if path.is_file() {
@@ -347,10 +343,8 @@ async fn download(file: PathBuf, token: Result<JWT, Status>) -> Result<IndexResp
     };
     let (path, is_private) = get_real_path(&file, username.to_string())?;
 
-    if CONFIG.enable_login {
-        if is_restricted(&path, token.is_ok()) {
-            return Err(Status::Unauthorized);
-        }
+    if is_restricted(&path, token.is_ok()) {
+        return Err(Status::Unauthorized);
     }
 
     let cache_control_string;
@@ -428,10 +422,8 @@ async fn index(
         return Err(Status::UnprocessableEntity);
     }
 
-    if CONFIG.enable_login {
-        if is_restricted(&path, token.is_ok()) {
-            return Err(Status::Unauthorized);
-        }
+    if is_restricted(&path, token.is_ok()) {
+        return Err(Status::Unauthorized);
     }
 
     let ext = if path.is_file() {
@@ -1053,10 +1045,8 @@ async fn iframe(
     };
     let path = get_real_path(&file, username.to_string())?.0;
 
-    if CONFIG.enable_login {
-        if is_restricted(&path, token.is_ok()) {
-            return Err(Status::Unauthorized);
-        }
+    if is_restricted(&path, token.is_ok()) {
+        return Err(Status::Unauthorized);
     }
 
     let path = get_real_path(&file, username.to_string())?
