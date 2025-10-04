@@ -18,8 +18,29 @@ use serde_json::json;
 use time::{Duration, OffsetDateTime};
 
 use crate::{
-    config::CONFIG, db::{fetch_user, login_user, Db}, guards::XForwardedFor, jwt::{create_jwt, JWT}, utils::{get_bool_cookie, get_root_domain, get_theme, map_io_error_to_status}, Host, IndexResponse, Language, LoginUser, TranslationStore, UsePlain, UserToken
+    config::CONFIG, db::{fetch_user, login_user, Db}, guards::XForwardedFor, jwt::{create_jwt, JWT}, utils::{get_bool_cookie, get_root_domain, get_theme, map_io_error_to_status}, Host, IndexResponse, Language, TranslationStore, UsePlain
 };
+
+#[derive(Debug, PartialEq, Eq, FromForm)]
+pub struct MarmakUser {
+    pub username: String,
+    pub password: String,
+    pub perms: i32,
+    pub mirror_settings: Option<String>,
+    pub email: Option<String>,
+}
+
+#[derive(Debug, PartialEq, Eq, FromForm)]
+struct LoginUser {
+    username: String,
+    password: String,
+}
+
+#[derive(serde::Deserialize, serde::Serialize)]
+struct UserToken {
+    username: String,
+    password_hash: String,
+}
 
 #[get("/login?<next>")]
 fn login_page(

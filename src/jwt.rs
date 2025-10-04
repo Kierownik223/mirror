@@ -10,7 +10,7 @@ use rocket::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{config::CONFIG, MarmakUser};
+use crate::{account::MarmakUser, config::CONFIG};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Claims {

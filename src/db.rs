@@ -4,7 +4,7 @@ use sqlx::Row;
 use bcrypt::verify;
 use uuid::Uuid;
 
-use crate::MarmakUser;
+use crate::account::MarmakUser;
 
 #[derive(Database)]
 #[database("marmak")]

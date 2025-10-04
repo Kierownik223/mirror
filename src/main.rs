@@ -74,27 +74,6 @@ impl Ord for MirrorFile {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, FromForm)]
-struct MarmakUser {
-    username: String,
-    password: String,
-    perms: i32,
-    mirror_settings: Option<String>,
-    email: Option<String>,
-}
-
-#[derive(Debug, PartialEq, Eq, FromForm)]
-struct LoginUser {
-    username: String,
-    password: String,
-}
-
-#[derive(serde::Deserialize, serde::Serialize)]
-struct UserToken {
-    username: String,
-    password_hash: String,
-}
-
 #[derive(serde::Serialize)]
 struct Disk {
     fs: String,
