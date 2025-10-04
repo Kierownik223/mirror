@@ -1,4 +1,9 @@
-use rocket::{fs::NamedFile, http::Status, response::{self, Redirect, Responder}, Request};
+use rocket::{
+    fs::NamedFile,
+    http::Status,
+    response::{self, Redirect, Responder},
+    Request,
+};
 use rocket_dyn_templates::Template;
 
 use crate::guards::HeaderFile;

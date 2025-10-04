@@ -1,4 +1,8 @@
-use rocket::{request::{FromRequest, Outcome}, response::{self, Responder}, Request, Response};
+use rocket::{
+    request::{FromRequest, Outcome},
+    response::{self, Responder},
+    Request, Response,
+};
 
 use crate::{config::CONFIG, utils::get_bool_cookie};
 

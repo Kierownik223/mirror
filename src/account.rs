@@ -18,7 +18,12 @@ use serde_json::json;
 use time::{Duration, OffsetDateTime};
 
 use crate::{
-    config::CONFIG, db::{fetch_user, login_user, Db}, guards::XForwardedFor, jwt::{create_jwt, JWT}, utils::{get_bool_cookie, get_root_domain, get_theme, map_io_error_to_status}, Host, IndexResponse, Language, TranslationStore, UsePlain
+    config::CONFIG,
+    db::{fetch_user, login_user, Db},
+    guards::XForwardedFor,
+    jwt::{create_jwt, JWT},
+    utils::{get_bool_cookie, get_root_domain, get_theme, map_io_error_to_status},
+    Host, IndexResponse, Language, TranslationStore, UsePlain,
 };
 
 #[derive(Debug, PartialEq, Eq, FromForm)]

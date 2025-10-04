@@ -1,6 +1,10 @@
 use std::{collections::HashMap, fs, path::Path};
 
-use rocket::{http::CookieJar, request::{FromRequest, Outcome}, Request};
+use rocket::{
+    http::CookieJar,
+    request::{FromRequest, Outcome},
+    Request,
+};
 use toml::Value;
 
 use crate::utils::parse_language;

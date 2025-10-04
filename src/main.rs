@@ -3,8 +3,8 @@ use db::{fetch_user, Db};
 use rocket::http::{ContentType, Cookie, CookieJar, SameSite, Status};
 use rocket::response::content::RawHtml;
 use rocket::response::Redirect;
-use rocket::State;
 use rocket::Request;
+use rocket::State;
 use rocket_db_pools::{Connection, Database};
 use serde::Serialize;
 use std::cmp::Ordering;
@@ -32,7 +32,8 @@ use crate::i18n::{Language, TranslationStore};
 use crate::jwt::JWT;
 use crate::responders::{Cached, IndexResponse, IndexResult};
 use crate::utils::{
-    get_cache_control, get_genre, get_real_path, get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output, read_dirs_async
+    get_cache_control, get_genre, get_real_path, get_root_domain, is_hidden,
+    map_io_error_to_status, parse_7z_output, read_dirs_async,
 };
 
 mod account;
@@ -40,9 +41,9 @@ mod admin;
 mod api;
 mod config;
 mod db;
+mod guards;
 mod i18n;
 mod jwt;
-mod guards;
 mod responders;
 #[cfg(test)]
 mod tests;
@@ -236,11 +237,7 @@ async fn download_with_counter(
     .to_lowercase();
 
     if !CONFIG.extensions.contains(&ext) {
-        return open_file(
-            path,
-            &get_cache_control(is_private),
-        )
-        .await;
+        return open_file(path, &get_cache_control(is_private)).await;
     } else if &ext == "folder" {
         return Err(Status::Forbidden);
     }
@@ -264,11 +261,7 @@ async fn download(file: PathBuf, token: Result<JWT, Status>) -> Result<IndexResp
         return Err(Status::Unauthorized);
     }
 
-    open_file(
-        path,
-        &get_cache_control(is_private),
-    )
-    .await
+    open_file(path, &get_cache_control(is_private)).await
 }
 
 #[get("/<file..>", rank = 10)]
