@@ -2,7 +2,6 @@ use audiotags::{MimeType, Tag};
 use db::{fetch_user, Db};
 use rocket::fs::NamedFile;
 use rocket::http::{ContentType, Cookie, CookieJar, SameSite, Status};
-use rocket::request::{FromRequest, Outcome};
 use rocket::response::content::RawHtml;
 use rocket::response::{Redirect, Responder};
 use rocket::{response, State};
@@ -30,7 +29,7 @@ use rocket_dyn_templates::{context, Template};
 use crate::config::CONFIG;
 use crate::db::{add_download, FileDb};
 use crate::guards::{HeaderFile, Host, Settings, UsePlain, UseViewers};
-use crate::i18n::TranslationStore;
+use crate::i18n::{Language, TranslationStore};
 use crate::jwt::JWT;
 use crate::utils::{
     get_genre, get_real_path, get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output,
@@ -72,30 +71,6 @@ impl PartialEq for MirrorFile {
 impl Ord for MirrorFile {
     fn cmp(&self, other: &Self) -> Ordering {
         self.name.cmp(&other.name)
-    }
-}
-
-#[derive(serde::Serialize)]
-struct Language(String);
-
-#[rocket::async_trait]
-impl<'r> FromRequest<'r> for Language {
-    type Error = ();
-
-    async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        let cookies: &CookieJar = request.cookies();
-
-        if let Some(cookie_lang) = cookies.get("lang").map(|c| c.value().to_string()) {
-            return Outcome::Success(Language(cookie_lang));
-        }
-
-        if let Some(header_lang) = request.headers().get_one("Accept-Language") {
-            if let Some(lang) = parse_language(header_lang) {
-                return Outcome::Success(Language(lang));
-            }
-        }
-
-        Outcome::Success(Language("en".to_string()))
     }
 }
 

@@ -1,6 +1,9 @@
 use std::{collections::HashMap, fs, path::Path};
 
+use rocket::{http::CookieJar, request::{FromRequest, Outcome}, Request};
 use toml::Value;
+
+use crate::utils::parse_language;
 
 type Translations = HashMap<String, HashMap<String, String>>;
 
@@ -70,5 +73,29 @@ impl TranslationStore {
 
     pub fn available_languages(&self) -> &Vec<(String, String)> {
         &self.language_names
+    }
+}
+
+#[derive(serde::Serialize)]
+pub struct Language(pub String);
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for Language {
+    type Error = ();
+
+    async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
+        let cookies: &CookieJar = request.cookies();
+
+        if let Some(cookie_lang) = cookies.get("lang").map(|c| c.value().to_string()) {
+            return Outcome::Success(Language(cookie_lang));
+        }
+
+        if let Some(header_lang) = request.headers().get_one("Accept-Language") {
+            if let Some(lang) = parse_language(header_lang) {
+                return Outcome::Success(Language(lang));
+            }
+        }
+
+        Outcome::Success(Language("en".to_string()))
     }
 }
