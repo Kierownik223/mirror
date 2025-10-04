@@ -32,8 +32,7 @@ use crate::guards::{HeaderFile, Host, Settings, UsePlain, UseViewers};
 use crate::i18n::{Language, TranslationStore};
 use crate::jwt::JWT;
 use crate::utils::{
-    get_genre, get_real_path, get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output,
-    read_dirs_async,
+    get_cache_control, get_genre, get_real_path, get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output, read_dirs_async
 };
 
 mod account;
@@ -264,17 +263,7 @@ async fn file(file: PathBuf, token: Result<JWT, Status>) -> Result<IndexResponse
         return Err(Status::Unauthorized);
     }
 
-    let cache_control_string;
-    let cache_control = if is_private {
-        "private"
-    } else if CONFIG.max_age == 0 {
-        "public"
-    } else {
-        cache_control_string = format!("public, max-age={}", CONFIG.max_age);
-        &cache_control_string
-    };
-
-    open_file(path, cache_control).await
+    open_file(path, &get_cache_control(is_private)).await
 }
 
 #[get("/<file..>?download")]
@@ -311,17 +300,9 @@ async fn download_with_counter(
     .to_lowercase();
 
     if !CONFIG.extensions.contains(&ext) {
-        let cache_control_string;
         return open_file(
             path,
-            if is_private {
-                "private"
-            } else if CONFIG.max_age == 0 {
-                "public"
-            } else {
-                cache_control_string = format!("public, max-age={}", CONFIG.max_age);
-                &cache_control_string
-            },
+            &get_cache_control(is_private),
         )
         .await;
     } else if &ext == "folder" {
@@ -347,17 +328,9 @@ async fn download(file: PathBuf, token: Result<JWT, Status>) -> Result<IndexResp
         return Err(Status::Unauthorized);
     }
 
-    let cache_control_string;
     open_file(
         path,
-        if is_private {
-            "private"
-        } else if CONFIG.max_age == 0 {
-            "public"
-        } else {
-            cache_control_string = format!("public, max-age={}", CONFIG.max_age);
-            &cache_control_string
-        },
+        &get_cache_control(is_private),
     )
     .await
 }
@@ -441,15 +414,7 @@ async fn index(
         return Err(Status::NotFound);
     }
 
-    let cache_control_string;
-    let cache_control = if is_private {
-        "private"
-    } else if CONFIG.max_age == 0 {
-        "public"
-    } else {
-        cache_control_string = format!("public, max-age={}", CONFIG.max_age);
-        &cache_control_string
-    };
+    let cache_control = &get_cache_control(is_private);
 
     match ext.as_str() {
         "md" => {

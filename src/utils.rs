@@ -422,3 +422,13 @@ pub fn get_genre(genre: &str) -> Result<String, Status> {
         None => Ok(genre.to_string()),
     }
 }
+
+pub fn get_cache_control(is_private: bool) -> String {
+    if is_private {
+        "private".into()
+    } else if CONFIG.max_age == 0 {
+        "public".into()
+    } else {
+        format!("public, max-age={}", CONFIG.max_age)
+    }
+}
