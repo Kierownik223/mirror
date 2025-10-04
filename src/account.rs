@@ -18,11 +18,7 @@ use serde_json::json;
 use time::{Duration, OffsetDateTime};
 
 use crate::{
-    config::CONFIG,
-    db::{fetch_user, login_user, Db},
-    jwt::{create_jwt, JWT},
-    utils::{get_bool_cookie, get_root_domain, get_theme, map_io_error_to_status},
-    Host, IndexResponse, Language, LoginUser, TranslationStore, UsePlain, UserToken, XForwardedFor,
+    config::CONFIG, db::{fetch_user, login_user, Db}, guards::XForwardedFor, jwt::{create_jwt, JWT}, utils::{get_bool_cookie, get_root_domain, get_theme, map_io_error_to_status}, Host, IndexResponse, Language, LoginUser, TranslationStore, UsePlain, UserToken
 };
 
 #[get("/login?<next>")]

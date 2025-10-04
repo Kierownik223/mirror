@@ -6,7 +6,7 @@ use rocket::request::{FromRequest, Outcome};
 use rocket::response::content::RawHtml;
 use rocket::response::{Redirect, Responder};
 use rocket::{response, State};
-use rocket::{Request, Response};
+use rocket::Request;
 use rocket_db_pools::{Connection, Database};
 use serde::Serialize;
 use std::cmp::Ordering;
@@ -29,6 +29,7 @@ use rocket_dyn_templates::{context, Template};
 
 use crate::config::CONFIG;
 use crate::db::{add_download, FileDb};
+use crate::guards::{HeaderFile, Host, Settings, UsePlain, UseViewers};
 use crate::i18n::TranslationStore;
 use crate::jwt::JWT;
 use crate::utils::{
@@ -43,6 +44,7 @@ mod config;
 mod db;
 mod i18n;
 mod jwt;
+mod guards;
 #[cfg(test)]
 mod tests;
 mod utils;
@@ -70,118 +72,6 @@ impl PartialEq for MirrorFile {
 impl Ord for MirrorFile {
     fn cmp(&self, other: &Self) -> Ordering {
         self.name.cmp(&other.name)
-    }
-}
-
-#[derive(FromForm, serde::Serialize)]
-struct Settings<'r> {
-    theme: Option<&'r str>,
-    lang: Option<&'r str>,
-    hires: Option<&'r str>,
-    smallhead: Option<&'r str>,
-    plain: Option<&'r str>,
-    nooverride: Option<&'r str>,
-    viewers: Option<&'r str>,
-    filebrowser: Option<&'r str>,
-}
-
-struct HeaderFile(String, String);
-
-impl<'r> Responder<'r, 'r> for HeaderFile {
-    fn respond_to(self, _: &Request<'_>) -> response::Result<'r> {
-        let mut builder = Response::build();
-
-        builder.raw_header(
-            &CONFIG.x_sendfile_header,
-            format!("{}{}", CONFIG.x_sendfile_prefix, self.0),
-        );
-
-        builder.raw_header("Cache-Control", self.1);
-
-        builder.ok()
-    }
-}
-
-struct XForwardedFor<'r>(&'r str);
-
-#[rocket::async_trait]
-impl<'r> FromRequest<'r> for XForwardedFor<'r> {
-    type Error = ();
-
-    async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        match request.headers().get_one("X-Forwarded-For") {
-            Some(value) => {
-                let mut ip = value.split(',').next().map(str::trim).unwrap_or(value);
-
-                if ip == "127.0.0.1" || ip == "::1" {
-                    ip = "(unknown)";
-                }
-
-                Outcome::Success(XForwardedFor(ip))
-            }
-            None => Outcome::Success(XForwardedFor("(unknown)")),
-        }
-    }
-}
-struct UsePlain<'r>(&'r bool);
-
-#[rocket::async_trait]
-impl<'r> FromRequest<'r> for UsePlain<'r> {
-    type Error = ();
-
-    async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        match request.headers().get_one("User-Agent") {
-            Some(value) => {
-                if get_bool_cookie(request.cookies(), "plain", false) {
-                    return Outcome::Success(UsePlain(&true));
-                }
-
-                if value.starts_with("Mozilla/1") || value.starts_with("Mozilla/2") {
-                    return Outcome::Success(UsePlain(&true));
-                }
-
-                Outcome::Success(UsePlain(&false))
-            }
-            None => Outcome::Success(UsePlain(&true)),
-        }
-    }
-}
-
-struct UseViewers<'r>(&'r bool);
-
-#[rocket::async_trait]
-impl<'r> FromRequest<'r> for UseViewers<'r> {
-    type Error = ();
-
-    async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        match request.headers().get_one("User-Agent") {
-            Some(value) => {
-                if value.starts_with("Winamp") || value.starts_with("VLC") {
-                    return Outcome::Success(UseViewers(&false));
-                }
-
-                if get_bool_cookie(request.cookies(), "viewers", true) {
-                    return Outcome::Success(UseViewers(&true));
-                }
-
-                Outcome::Success(UseViewers(&false))
-            }
-            None => Outcome::Success(UseViewers(&true)),
-        }
-    }
-}
-
-struct Host<'r>(&'r str);
-
-#[rocket::async_trait]
-impl<'r> FromRequest<'r> for Host<'r> {
-    type Error = ();
-
-    async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        match request.headers().get_one("Host") {
-            Some(value) => Outcome::Success(Host(value)),
-            None => Outcome::Success(Host("127.0.0.1")),
-        }
     }
 }
 
