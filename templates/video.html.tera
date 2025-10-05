@@ -6,16 +6,24 @@
     <meta name="theme-color" content="#000000">
     <link rel="shortcut icon" href="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png" type="image/x-icon">
     <link rel="icon" href="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">
-    <meta property="og:title" content="{{ vidtitle }}">
-    <meta property="og:url" content="{{ host }}/">
-    <meta property="og:description" content="{{ details | striptags }}">
-    <meta property="og:type" content=website>
-    <meta property="og:image" content="{{ poster }}">
+    <meta property="og:url" content="https://{{ host }}{{ path }}" />
+    <meta property="twitter:site" content="MARMAK Mirror" />
+    <meta property="twitter:creator" content="MARMAK" />
+    <meta property="twitter:title" content="{{ vidtitle }}" />
+    <meta property="twitter:player:stream"  content="/file{{ path | urlencode }}" />
+    <meta property="twitter:player:stream:content_type" content="video/mp4" />
+    <meta property="og:video" content="/file{{ path | urlencode }}" />
+    <meta property="og:video:secure_url" content="/file{{ path | urlencode }}" />
+    <meta property="og:video:type" content="video/mp4" />
+    <meta property="og:image" content="{{ poster }}" />
+    <meta property="twitter:image" content="0" />
+    <meta property="twitter:card" content="player" />
+    <meta property="og:title" content="{{ vidtitle }}" />
+    <meta property="og:description" content="{{ details | striptags }}" />
+    <meta property="og:site_name" content="MARMAK Mirror" />
     <meta property="og:locale" content="{{ lang }}">
-    <meta property="og:site_name" content="MARMAK Mirror">
-    <meta property="og:video" content="http://{{ host }}{{ path }}?download"/>
-    <meta property="og:video:secure_url" content="https://{{ host }}{{ path }}?download"/>
-    <meta name="description" content="{{ title }}">
+    <meta name="description" content="{{ details | striptags }}">
+
     <title>{{ vidtitle | safe }} - MARMAK Mirror</title>
 {% endblock head %}
 
