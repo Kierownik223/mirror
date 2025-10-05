@@ -273,7 +273,7 @@
 
                             alert("{{ strings.rename_success }}");
                         } catch (e) {
-                            alert("{{ strings.error_occured }} " + (e.message || ""));
+                            location.reload();
                         }
                     } else if (xhr.status === 404) {
                         alert("{{ strings.not_found }}");
@@ -301,7 +301,11 @@
             if (window.location && typeof window.location.pathname === "string") {
                 pathname = window.location.pathname;
             }
-            var path = pathname + encodeURIComponent(filePath);
+            if (typeof encodeURIComponent === 'undefined') {
+                var path = pathname + escape(filePath);
+            } else {
+                var path = pathname + encodeURIComponent(filePath);
+            }
             var confirmMsg = "{{ strings.delete_confirmation }} " + decodeURIComponent(path) + "?";
 
             if (message) {
@@ -516,6 +520,10 @@
         }
 
         (function () {
+            if (!window.addEventListener || !document.body.ondrop) {
+                return;
+            }
+
             var dropTarget = document.body;
 
             function preventDefaults(e) {
@@ -559,7 +567,9 @@
                     if (window.location && typeof window.location.pathname === "string") {
                         pathname = window.location.pathname;
                     }
-                    uploadViaAPI(dt.files, pathname);
+                    if (typeof uploadViaAPI === "function") {
+                        uploadViaAPI(dt.files, pathname);
+                    }
                 }
             }, false);
         })();
