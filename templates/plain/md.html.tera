@@ -2,10 +2,32 @@
 
 {% block content %}
 <div>
-    {{ strings.reading_markdown }} {{ path }}
+    {% filter spaceless %}
+    <span>
+        {{ strings.reading_markdown }} <span>
+            <span>/</span>
+            {% if path != "/" %}
+                {% set segments = path | split(pat="/") %}
+                {% set num_segments = segments | length %}
+                {% for i in range(end=num_segments) %}
+                    {% set subpath = segments | slice(start=0, end=i+1) %}
+                    {% set url = subpath | join(sep="/") %}
+                    {% if url != "" %}
+                        {% if i == num_segments - 1 %}
+                            <span>{{ segments[i] }}</span>
+                        {% else %}
+                            <span><a href="{{ url | safe | urlencode }}/">{{ segments[i] }}</a>/</span>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            {% endfilter %}
+        </span>
+    </span>
+    &nbsp;
     <a href="?download" download>{{ strings.download }}</a><br>
 </div>
 <hr>
 <a href="./">./</a>
-{{ markdown | safe}}
+{{ markdown | safe }}
 {% endblock content %}

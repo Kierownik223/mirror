@@ -3,8 +3,8 @@
 {% block content %}
 <div>
     {% filter spaceless %}
-    <span class="title">
-        {{ strings.viewing_zip }} <span class="breadcrumbs">
+    <span>
+        {{ strings.viewing_zip }} <span>
             <span>/</span>
             {% if path != "/" %}
                 {% set segments = path | split(pat="/") %}
@@ -16,7 +16,7 @@
                         {% if i == num_segments - 1 %}
                             <span>{{ segments[i] }}</span>
                         {% else %}
-                            <span><a href="{{ url | urlencode }}/">{{ segments[i] }}</a>/</span>
+                            <span><a href="{{ url | safe | urlencode }}/">{{ segments[i] }}</a>/</span>
                         {% endif %}
                     {% endif %}
                 {% endfor %}

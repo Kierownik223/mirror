@@ -7,14 +7,14 @@
     <meta name="theme-color" content="#000000">
     <link rel="shortcut icon" href="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png" type="image/x-icon">
     <link rel="icon" href="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">
-    <meta property="og:title" content="{{ title }}">
-    <meta property="og:url" content="{{ host }}/">
-    <meta property="og:description" content="{{ title }}">
+    <meta property="og:title" content="{{ title | safe }}">
+    <meta property="og:url" content="{{ host | safe }}/">
+    <meta property="og:description" content="{{ title | safe }}">
     <meta property="og:type" content=website>
     <meta property="og:image" content="/static/images/icons/hires/favicon.png">
     <meta property="og:locale" content="en">
     <meta property="og:site_name" content="MARMAK Mirror">
-    <meta name="description" content="{{ title }}">
+    <meta name="description" content="{{ title | safe }}">
     <title>{{ title | safe }} - MARMAK Mirror</title>
     {% endblock head %}
     <link rel="stylesheet" href="/static/styles/{{ theme }}.css">
