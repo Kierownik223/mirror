@@ -10,14 +10,13 @@
     <link rel="icon" href="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">
 
     <meta property="og:title" content="{{ title | safe }}">
-    <meta property="og:url" content="https://{{ host }}{{ path | urlencode | safe }}" />
     <meta property="og:description" content="{{ title | safe }}">
     <meta property="og:type" content=website>
     <meta property="og:image" content="/static/images/icons/hires/favicon.png">
     <meta property="og:locale" content="en">
     <meta property="og:site_name" content="MARMAK Mirror">
     <meta name="description" content="{{ title | safe }}">
-    
+
     <title>{{ title | safe }} - MARMAK Mirror</title>
     {% endblock head %}
     <link rel="stylesheet" href="/static/styles/{{ theme }}.css">
