@@ -8,7 +8,7 @@
         {% set subpath = segments | slice(start=0, end=i+1) %}
         {% set url = subpath | join(sep="/") %}
         {% if url != "" %}
-            <span><a href="{{ url | safe | urlencode }}/">{{ segments[i] }}</a>/</span>
+            <span><a href="{{ url | urlencode | safe }}/">{{ segments[i] }}</a>/</span>
         {% endif %}
     {% endfor %}
 {% endif %}

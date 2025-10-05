@@ -17,7 +17,7 @@
                         {% if i == num_segments - 1 %}
                             <span>{{ segments[i] }}</span>
                         {% else %}
-                            <span><a href="{{ url | safe | urlencode }}/">{{ segments[i] }}</a>/</span>
+                            <span><a href="{{ url | urlencode | safe }}/">{{ segments[i] }}</a>/</span>
                         {% endif %}
                     {% endif %}
                 {% endfor %}
