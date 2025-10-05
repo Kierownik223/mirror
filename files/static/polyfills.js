@@ -11,3 +11,9 @@ if (typeof decodeURIComponent !== "function") {
         return unescape(s);
     };
 }
+
+if (typeof encodeURIComponent !== "function") {
+    encodeURIComponent = function (s) {
+        return escape(s);
+    };
+}
