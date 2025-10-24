@@ -7,7 +7,9 @@
     <meta name="theme-color" content="#000000">
 
     <link rel="shortcut icon" href="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png" type="image/x-icon">
-    <link rel="icon" href="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">
+    <link rel="icon" type="image/png" href="/static/images/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/static/images/favicon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png" />
 
     <meta property="og:title" content="{{ title | safe }}">
     <meta property="og:description" content="{{ title | safe }}">
@@ -16,6 +18,15 @@
     <meta property="og:locale" content="en">
     <meta property="og:site_name" content="MARMAK Mirror">
     <meta name="description" content="{{ title | safe }}">
+    <meta name="apple-mobile-web-app-title" content="MARMAK Mirror" />
+    <link rel="manifest" href="/static/site.webmanifest" />
+
+    <meta name="msapplication-square70x70logo" content="/static/images/mstile-icon-128.png">
+    <meta name="msapplication-square150x150logo" content="/static/images/mstile-icon-270.png">
+    <meta name="msapplication-square310x310logo" content="/static/images/mstile-icon-558.png">
+    <meta name="msapplication-wide310x150logo" content="/static/images/mstile-icon-558-270.png">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
 
     <title>{{ title | safe }} - MARMAK Mirror</title>
     {% endblock head %}
