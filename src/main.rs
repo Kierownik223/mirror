@@ -947,7 +947,7 @@ async fn iframe(
         .0
         .display()
         .to_string();
-
+    
     let mut dirs = read_dirs(&path).map_err(map_io_error_to_status)?;
 
     dirs.retain(|x| !CONFIG.hidden_files.contains(&x.name));
@@ -957,7 +957,7 @@ async fn iframe(
     Ok(IndexResponse::Template(Template::render(
         "iframe",
         context! {
-            path,
+            path: file.display().to_string(),
             dirs,
             theme: get_theme(jar),
             hires: get_bool_cookie(jar, "hires", false)
