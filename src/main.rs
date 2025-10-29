@@ -1,16 +1,19 @@
 use audiotags::{MimeType, Tag};
 use db::{fetch_user, Db};
+use rocket::data::ToByteUnit;
 use rocket::http::{ContentType, Cookie, CookieJar, SameSite, Status};
 use rocket::response::content::RawHtml;
 use rocket::response::Redirect;
-use rocket::Request;
+use rocket::{Data, Request};
 use rocket::State;
 use rocket_db_pools::{Connection, Database};
+use rocket_multipart_form_data::{MultipartFormData, MultipartFormDataField, MultipartFormDataOptions, Repetition};
 use serde::Serialize;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::ffi::OsStr;
 use std::fs;
+use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::Arc;
@@ -32,8 +35,7 @@ use crate::i18n::{Language, TranslationStore};
 use crate::jwt::JWT;
 use crate::responders::{Cached, IndexResponse, IndexResult};
 use crate::utils::{
-    get_cache_control, get_genre, get_real_path, get_root_domain, is_hidden,
-    map_io_error_to_status, parse_7z_output, read_dirs_async,
+    get_cache_control, get_extension_from_filename, get_genre, get_real_path, get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output, read_dirs_async
 };
 
 mod account;
@@ -947,7 +949,7 @@ async fn iframe(
         .0
         .display()
         .to_string();
-    
+
     let mut dirs = read_dirs(&path).map_err(map_io_error_to_status)?;
 
     dirs.retain(|x| !CONFIG.hidden_files.contains(&x.name));
@@ -992,6 +994,202 @@ async fn sitemap(sizes: &State<FileSizes>, host: Host<'_>) -> Result<Cached<Temp
         response: Template::render("sitemap", context),
         header: "public",
     })
+}
+
+#[get("/upload?<path>")]
+fn uploader(
+    jar: &CookieJar<'_>,
+    translations: &rocket::State<TranslationStore>,
+    lang: Language,
+    host: Host<'_>,
+    useplain: UsePlain<'_>,
+    token: Result<JWT, Status>,
+    path: Option<&str>,
+) -> Result<IndexResponse, Status> {
+    let token = token?;
+
+    let username = token.claims.sub;
+    let perms = token.claims.perms;
+
+    let strings = translations.get_translation(&lang.0);
+
+    return Ok(IndexResponse::Template(Template::render(
+        if *useplain.0 {
+            "plain/upload"
+        } else {
+            "upload"
+        },
+        context! {
+            title: strings.get("uploader").unwrap(),
+            lang,
+            strings,
+            root_domain: get_root_domain(host.0),
+            host: host.0,
+            config: (*CONFIG).clone(),
+            theme: get_theme(jar),
+            is_logged_in: true,
+            hires: get_bool_cookie(jar, "hires", false),
+            smallhead: get_bool_cookie(jar, "smallhead", false),
+            username: username,
+            admin: perms == 0,
+            filebrowser: !get_bool_cookie(jar, "filebrowser", false),
+            path: path.unwrap_or_default(),
+            uploadedfiles: vec![MirrorFile { name: "".to_string(), ext: "".to_string(), icon: "default".to_string(), size: 0, downloads: None }]
+        },
+    )));
+}
+
+#[post("/upload", data = "<data>")]
+async fn upload(
+    content_type: &ContentType,
+    data: Data<'_>,
+    jar: &CookieJar<'_>,
+    translations: &rocket::State<TranslationStore>,
+    lang: Language,
+    host: Host<'_>,
+    useplain: UsePlain<'_>,
+    token: Result<JWT, Status>,
+) -> Result<IndexResponse, Status> {
+    let token = token?;
+
+    let username = token.claims.sub;
+    let perms = token.claims.perms;
+
+    let options = MultipartFormDataOptions::with_multipart_form_data_fields(vec![
+        MultipartFormDataField::file("files")
+            .repetition(Repetition::infinite())
+            .size_limit(u64::from(100.megabytes())),
+        MultipartFormDataField::text("path"),
+    ]);
+
+    let form_data = match MultipartFormData::parse(content_type, data, options).await {
+        Ok(data) => data,
+        Err(err) => {
+            eprintln!("Failed to parse multipart form data: {:?}", err);
+            return Err(Status::BadRequest);
+        }
+    };
+
+    let mut user_path = form_data
+        .texts
+        .get("path")
+        .and_then(|paths| paths.first().map(|p| p.text.trim_matches('/').to_string()))
+        .unwrap_or("uploads".to_string());
+
+    if user_path.is_empty() {
+        user_path = "uploads".to_string();
+    }
+
+    let is_private = user_path.starts_with("private");
+    if !is_private && perms != 0 {
+        return Err(Status::Forbidden);
+    }
+
+    let base_path = if is_private {
+        format!(
+            "files/private/{}/{}",
+            username,
+            user_path.trim_start_matches("private")
+        )
+    } else {
+        format!("files/{}", user_path)
+    };
+
+    let mut uploaded_files: Vec<MirrorFile> = Vec::new();
+
+    if let Some(file_fields) = form_data.files.get("files") {
+        for file_field in file_fields {
+            if let Some(file_name) = &file_field.file_name {
+                let normalized_path = file_name.replace('\\', "/");
+                let file_name = &Path::new(&normalized_path)
+                    .file_name()
+                    .and_then(|name| name.to_str())
+                    .unwrap()
+                    .to_string();
+
+                let upload_path = format!("{}/{}", base_path, file_name);
+
+                match std::fs::File::create(&upload_path) {
+                    Ok(mut file) => {
+                        if let Ok(mut temp_file) = std::fs::File::open(&file_field.path) {
+                            let mut buffer = Vec::new();
+                            let _ = temp_file.read_to_end(&mut buffer);
+
+                            let _ = file.write_all(&buffer);
+                            let mut icon = get_extension_from_filename(file_name)
+                                .unwrap_or("")
+                                .to_string()
+                                .to_lowercase();
+                            if !Path::new(
+                                &("files/static/images/icons/".to_owned() + &icon + ".png")
+                                    .to_string(),
+                            )
+                            .exists()
+                            {
+                                icon = "default".to_string();
+                            }
+
+                            if perms == 0 {
+                                uploaded_files.push(MirrorFile {
+                                    name: file_name.to_string(),
+                                    ext: format!("/{}/{}", user_path, file_name),
+                                    size: 0,
+                                    icon: icon,
+                                    downloads: None,
+                                });
+                            } else {
+                                uploaded_files.push(MirrorFile {
+                                    name: file_name.to_string(),
+                                    ext: format!("/{}/{}", user_path.replacen(format!("/{}", &username).as_str(), "", 1), file_name),
+                                    size: 0,
+                                    icon: icon,
+                                    downloads: None,
+                                });
+                            }
+                        } else {
+                            eprintln!("Failed to open temp file for: {}", file_name);
+                            return Err(Status::InternalServerError);
+                        }
+                    }
+                    Err(err) => {
+                        eprintln!("Failed to create target file {}: {:?}", upload_path, err);
+                        continue;
+                    }
+                }
+            } else {
+                eprintln!("A file was uploaded without a name, skipping.");
+                continue;
+            }
+        }
+
+        let strings = translations.get_translation(&lang.0);
+
+        return Ok(IndexResponse::Template(Template::render(
+            if *useplain.0 {
+                "plain/upload"
+            } else {
+                "upload"
+            },
+            context! {
+                title: strings.get("uploader").unwrap(),
+                lang,
+                strings,
+                root_domain: get_root_domain(host.0),
+                host: host.0,
+                config: (*CONFIG).clone(),
+                theme: get_theme(jar),
+                is_logged_in: true,
+                hires: get_bool_cookie(jar, "hires", false),
+                smallhead: get_bool_cookie(jar, "smallhead", false),
+                username,
+                admin: perms == 0,
+                filebrowser: !get_bool_cookie(jar, "filebrowser", false),
+                uploadedfiles: uploaded_files
+            },
+        )));
+    } else {
+        return Err(Status::BadRequest);
+    }
 }
 
 #[catch(422)]
@@ -1116,7 +1314,9 @@ async fn rocket() -> _ {
                 iframe,
                 poster,
                 file,
-                sitemap
+                sitemap,
+                uploader,
+                upload
             ],
         );
 

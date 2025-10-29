@@ -1,159 +1,18 @@
-use std::{
-    io::{Read, Write},
-    path::Path,
-};
-
 use ::sysinfo::{Disks, System};
 use rocket::{
-    data::ToByteUnit,
     fairing::AdHoc,
-    http::{ContentType, CookieJar, Status},
-    Data,
+    http::{CookieJar, Status},
 };
 use rocket_dyn_templates::{context, Template};
-use rocket_multipart_form_data::{
-    MultipartFormData, MultipartFormDataField, MultipartFormDataOptions, Repetition,
-};
 
 use crate::{
     config::CONFIG,
     jwt::JWT,
     utils::{
-        format_size, get_bool_cookie, get_extension_from_filename, get_root_domain, get_theme,
+        format_size, get_bool_cookie, get_root_domain, get_theme,
     },
-    Disk, Host, IndexResponse, Language, MirrorFile, TranslationStore, UsePlain,
+    Disk, Host, IndexResponse, Language, TranslationStore, UsePlain,
 };
-
-#[post("/upload", data = "<data>")]
-async fn upload(
-    content_type: &ContentType,
-    data: Data<'_>,
-    jar: &CookieJar<'_>,
-    translations: &rocket::State<TranslationStore>,
-    lang: Language,
-    host: Host<'_>,
-    useplain: UsePlain<'_>,
-    token: Result<JWT, Status>,
-) -> Result<IndexResponse, Status> {
-    let token = token?;
-
-    let username = token.claims.sub;
-    let perms = token.claims.perms;
-
-    if perms != 0 {
-        return Err(Status::Forbidden);
-    }
-
-    let options = MultipartFormDataOptions::with_multipart_form_data_fields(vec![
-        MultipartFormDataField::file("files")
-            .repetition(Repetition::infinite())
-            .size_limit(u64::from(100.megabytes())),
-        MultipartFormDataField::text("path"),
-    ]);
-
-    let form_data = match MultipartFormData::parse(content_type, data, options).await {
-        Ok(data) => data,
-        Err(err) => {
-            eprintln!("Failed to parse multipart form data: {:?}", err);
-            return Err(Status::BadRequest);
-        }
-    };
-
-    let mut user_path = form_data
-        .texts
-        .get("path")
-        .and_then(|paths| paths.first().map(|p| p.text.trim_matches('/').to_string()))
-        .unwrap_or("uploads".to_string());
-
-    if user_path.is_empty() {
-        user_path = "uploads".to_string();
-    }
-
-    let mut uploaded_files: Vec<MirrorFile> = Vec::new();
-
-    if let Some(file_fields) = form_data.files.get("files") {
-        for file_field in file_fields {
-            if let Some(file_name) = &file_field.file_name {
-                let normalized_path = file_name.replace('\\', "/");
-                let file_name = &Path::new(&normalized_path)
-                    .file_name()
-                    .and_then(|name| name.to_str())
-                    .unwrap()
-                    .to_string();
-
-                let upload_path = format!("files/{}/{}", user_path, file_name);
-
-                match std::fs::File::create(&upload_path) {
-                    Ok(mut file) => {
-                        if let Ok(mut temp_file) = std::fs::File::open(&file_field.path) {
-                            let mut buffer = Vec::new();
-                            let _ = temp_file.read_to_end(&mut buffer);
-
-                            let _ = file.write_all(&buffer);
-                            let mut icon = get_extension_from_filename(file_name)
-                                .unwrap_or("")
-                                .to_string()
-                                .to_lowercase();
-                            if !Path::new(
-                                &("files/static/images/icons/".to_owned() + &icon + ".png")
-                                    .to_string(),
-                            )
-                            .exists()
-                            {
-                                icon = "default".to_string();
-                            }
-                            uploaded_files.push(MirrorFile {
-                                name: file_name.to_string(),
-                                ext: format!("/{}/{}", user_path, file_name),
-                                size: 0,
-                                icon: icon,
-                                downloads: None,
-                            });
-                        } else {
-                            eprintln!("Failed to open temp file for: {}", file_name);
-                            return Err(Status::InternalServerError);
-                        }
-                    }
-                    Err(err) => {
-                        eprintln!("Failed to create target file {}: {:?}", upload_path, err);
-                        continue;
-                    }
-                }
-            } else {
-                eprintln!("A file was uploaded without a name, skipping.");
-                continue;
-            }
-        }
-
-        let strings = translations.get_translation(&lang.0);
-
-        return Ok(IndexResponse::Template(Template::render(
-            if *useplain.0 {
-                "plain/upload"
-            } else {
-                "upload"
-            },
-            context! {
-                title: strings.get("uploader").unwrap(),
-                lang,
-                strings,
-                root_domain: get_root_domain(host.0),
-                host: host.0,
-                config: (*CONFIG).clone(),
-                theme: get_theme(jar),
-                is_logged_in: true,
-                hires: get_bool_cookie(jar, "hires", false),
-                smallhead: get_bool_cookie(jar, "smallhead", false),
-                username: username,
-                admin: perms == 0,
-                filebrowser: !get_bool_cookie(jar, "filebrowser", false),
-                uploadedfiles: uploaded_files
-            },
-        )));
-    } else {
-        return Err(Status::BadRequest);
-    }
-}
 
 #[get("/sysinfo")]
 fn sysinfo(
@@ -232,51 +91,6 @@ fn sysinfo(
     )));
 }
 
-#[get("/upload")]
-fn uploader(
-    jar: &CookieJar<'_>,
-    translations: &rocket::State<TranslationStore>,
-    lang: Language,
-    host: Host<'_>,
-    useplain: UsePlain<'_>,
-    token: Result<JWT, Status>,
-) -> Result<IndexResponse, Status> {
-    let token = token?;
-
-    let username = token.claims.sub;
-    let perms = token.claims.perms;
-
-    if perms != 0 {
-        return Err(Status::Forbidden);
-    }
-
-    let strings = translations.get_translation(&lang.0);
-
-    return Ok(IndexResponse::Template(Template::render(
-        if *useplain.0 {
-            "plain/upload"
-        } else {
-            "upload"
-        },
-        context! {
-            title: strings.get("uploader").unwrap(),
-            lang,
-            strings,
-            root_domain: get_root_domain(host.0),
-            host: host.0,
-            config: (*CONFIG).clone(),
-            theme: get_theme(jar),
-            is_logged_in: true,
-            hires: get_bool_cookie(jar, "hires", false),
-            smallhead: get_bool_cookie(jar, "smallhead", false),
-            username: username,
-            admin: perms == 0,
-            filebrowser: !get_bool_cookie(jar, "filebrowser", false),
-            uploadedfiles: vec![MirrorFile { name: "".to_string(), ext: "".to_string(), icon: "default".to_string(), size: 0, downloads: None }]
-        },
-    )));
-}
-
 #[get("/")]
 fn admin(
     jar: &CookieJar<'_>,
@@ -318,6 +132,6 @@ fn admin(
 
 pub fn build() -> AdHoc {
     AdHoc::on_ignite("Admin", |rocket| async {
-        rocket.mount("/admin", routes![upload, uploader, sysinfo, admin])
+        rocket.mount("/admin", routes![sysinfo, admin])
     })
 }

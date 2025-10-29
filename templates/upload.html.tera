@@ -1,12 +1,14 @@
 {% extends "base" %}
 
 {% block content %}
-<a href="/">MARMAK Mirror</a>/<a href="/admin/">{{ strings.admin }}</a>/<a href="/admin/upload">{{ strings.uploader }}</a><br>
+<a href="/">MARMAK Mirror</a>/<a href="/upload">{{ strings.uploader }}</a><br>
 {{ strings.welcome }}, {{ username }}!
+{% if admin %}
 <br>
 <a href="/admin/"><span><img src="/static/images/icons/ui/{% if hires %}hires/{% endif %}admin.png" class="icon">{{ strings.admin }}</span></a>
 <a href="/uploads/"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">Uploads</span></a>
 <br>
+{% endif %}
 
 <div id="uploadResults" style="margin-top: 10px; box-sizing: border-box;">
     {% for s in uploadedfiles %}
@@ -24,18 +26,22 @@
         <input type="file" name="files" id="file" class="text" multiple required>
     </center>
 
+    {% if admin %}
     <label for="path">
         <img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png">{{ strings.target_dir }}:
     </label>
     <center>
         <div class="textbox-container">
-            <input type="text" id="path" name="path" class="text" placeholder="{{ strings.target_placeholder }}">
+            <input type="text" id="path" name="path" class="text" placeholder="{{ strings.target_placeholder }}" value="{{ path }}">
         </div>
         {% if filebrowser %}
         <button type="button" onclick="openDialog()"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">{{ strings.browse }}</span></button>
         {% endif %}
     </center>
     <br>
+    {% else %}
+    <input type="hidden" id="path" name="path" value="/private/">
+    {% endif %}
 
     <img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}md.png">{{ strings.max_size }}<br><br>
 
