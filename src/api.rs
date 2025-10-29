@@ -522,8 +522,6 @@ async fn upload(
         return Err(Status::Forbidden);
     }
 
-    print!("is_private: {}", is_private);
-
     let base_path = if is_private {
         format!(
             "files/private/{}/{}",
@@ -533,8 +531,6 @@ async fn upload(
     } else {
         format!("files/{}", user_path)
     };
-
-    print!("base_path: {}", base_path);
 
     let mut uploaded_files: Vec<UploadFile> = Vec::new();
 
