@@ -1039,7 +1039,7 @@ fn uploader(
     )));
 }
 
-#[post("/upload", data = "<data>")]
+#[post("/upload?<path>", data = "<data>")]
 async fn upload(
     content_type: &ContentType,
     data: Data<'_>,
@@ -1049,6 +1049,7 @@ async fn upload(
     host: Host<'_>,
     useplain: UsePlain<'_>,
     token: Result<JWT, Status>,
+    path: Option<&str>,
 ) -> Result<IndexResponse, Status> {
     let token = token?;
 
@@ -1184,6 +1185,7 @@ async fn upload(
                 username,
                 admin: perms == 0,
                 filebrowser: !get_bool_cookie(jar, "filebrowser", false),
+                path: path.unwrap_or_default(),
                 uploadedfiles: uploaded_files
             },
         )));
