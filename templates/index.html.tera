@@ -524,6 +524,7 @@
             return (bytes / Math.pow(k, i)).toFixed(1) + " " + sizes[i];
         }
 
+        {% if path != "/" or admin or private %}
         (function () {
             if (!window.addEventListener) {
                 return;
@@ -578,6 +579,7 @@
                 }
             }, false);
         })();
+        {% endif %}
     </script>
 {% endif %}
 {% endblock scripts %}
