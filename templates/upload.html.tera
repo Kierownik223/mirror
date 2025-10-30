@@ -148,6 +148,10 @@ function uploadViaAPI() {
                         a.href = result.url;
                         var filePath = a.pathname;
 
+                        if (!filePath.startsWith("/")) {
+                            filePath = "/" + filePath;
+                        }
+
                         label.innerHTML = '<a href="' + result.url + '"><span><img src="' + iconPath + '" class="icon">' + result.name + '</span></a> {{ strings.upload_success }} <a style="cursor: pointer;" onclick="deleteFile(this, \'' + filePath + '\')">{{ strings.delete }}</a>{% if config.linkshortener %} <a style="cursor: pointer;" onclick="shorten(this, \'http://{{ host }}' + filePath + '\')">Shorten</a><br>{% endif %}';
                     } catch (e) {
                         label.textContent = file.name + " {{ strings.upload_parse_error }}";
