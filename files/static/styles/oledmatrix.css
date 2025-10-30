@@ -44,7 +44,6 @@ a:hover {
 }
 
 a span {
-    display: inline-flex;
     white-space: pre;
 }
 
