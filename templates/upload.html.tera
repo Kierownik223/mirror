@@ -11,11 +11,17 @@
 {% endif %}
 
 <div id="uploadResults" style="margin-top: 10px; box-sizing: border-box;">
-    {% for s in uploadedfiles %}
-    {% if s.name != "" %}
-    <a href="{{ s.ext }}"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}</span></a> {{ strings.upload_success }}<br>
-    {% endif %}
-    {% endfor %}
+    <div>
+        {% for s in uploadedfiles %}
+        {% if s.name != "" %}
+        <div>
+            <div>
+                <a href="{{ s.ext }}"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}</span></a> {{ strings.upload_success }} <a style="cursor: pointer;" onclick="deleteFile(this, '{{ s.ext }}')">{{ strings.delete }}</a>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
 </div>
 
 <form method="post" enctype="multipart/form-data" id="uploadForm">
