@@ -114,6 +114,12 @@ delete_success = "úspěšně odstraněn!"
 delete_confirmation = "Opravdu chcete odstranit"
 delete = "Odstranit"
 
+# Link shortener
+
+shorten = "Zkrátit"
+error_shortening = "Při zkracování URL došlo k chybě."
+shortening_ratelimit = "Zkrátili jste příliš mnoho odkazů. Zkuste to prosím znovu za hodinu."
+
 # Errors
 
 error = "Chyba"

@@ -114,6 +114,12 @@ delete_success = "removed successfully!"
 delete_confirmation = "Are you sure you want to delete"
 delete = "Delete"
 
+# Link shortener
+
+shorten = "Shorten"
+error_shortening = "An error occurred while shortening the URL."
+shortening_ratelimit = "You have shortened too many links. Please try again after an hour."
+
 # Errors
 
 error = "Error"

@@ -114,6 +114,12 @@ delete_success = "skasowany porzōndnie!"
 delete_confirmation = "Chcesz naprowde skasować"
 delete = "Skasuj"
 
+# Link shortener
+
+shorten = "Skrůcić"
+error_shortening = "Při skrůcaniu URL trefiła sie feler."
+shortening_ratelimit = "Skrůcił żeś za moc linkōw. Sprōbuj za godzina."
+
 # Errors
 
 error = "Feler"

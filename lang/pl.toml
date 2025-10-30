@@ -114,6 +114,12 @@ delete_success = "usunięty pomyślnie!"
 delete_confirmation = "Czy na pewno chcesz usunąć"
 delete = "Usuń"
 
+# Link shortener
+
+shorten = "Skróć link"
+error_shortening = "Wystąpił błąd podczas skracania."
+shortening_ratelimit = "Skróciłeś za dużo linków. Spróbuj ponownie za godzinę."
+
 # Errors
 
 error = "Błąd"

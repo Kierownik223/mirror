@@ -114,6 +114,12 @@ delete_success = "успешно удален!"
 delete_confirmation = "Вы уверены, что хотите удалить"
 delete = "Удалить"
 
+# Link shortener
+
+shorten = "Сократить"
+error_shortening = "Произошла ошибка при сокращении URL."
+shortening_ratelimit = "Вы сократили слишком много ссылок. Попробуйте снова через час."
+
 # Errors
 
 error = "Ошибка"
