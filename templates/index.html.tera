@@ -386,6 +386,7 @@
             }
         }
 
+        {% if path != "/" or admin or private %}
         function uploadViaAPI(files, path) {
             if (!files || !files.length) {
                 alert("{{ strings.select_files }}");
@@ -524,7 +525,6 @@
             return (bytes / Math.pow(k, i)).toFixed(1) + " " + sizes[i];
         }
 
-        {% if path != "/" or admin or private %}
         (function () {
             if (!window.addEventListener) {
                 return;
