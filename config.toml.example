@@ -28,3 +28,7 @@ enable_zip_downloads = false
 max_age = 86400
 # JSON Web Token secret key
 jwt_secret = "secure-secret-key-thats-definitely-not-it"
+# Enable LinkShortener integration
+linkshortener = true
+# LinkShortener API URL
+linkshortener_url = "https://short.marmak.net.pl/api/url"

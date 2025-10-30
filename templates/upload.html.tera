@@ -16,8 +16,7 @@
         {% if s.name != "" %}
         <div>
             <div>
-                <a href="{{ s.ext }}"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}</span></a> {{ strings.upload_success }} <a style="cursor: pointer;" onclick="deleteFile(this, '{{ s.ext }}')">{{ strings.delete }}</a> <a style="cursor: pointer;" onclick="shorten(this, 'http://{{ host }}{{ s.ext | urlencode }}')">{{ strings.shorten }}</a>
-            </div>
+                <a href="{{ s.ext }}"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}</span></a> {{ strings.upload_success }} <a style="cursor: pointer;" onclick="deleteFile(this, '{{ s.ext }}')">{{ strings.delete }}</a>{% if config.linkshortener %} <a style="cursor: pointer;" onclick="shorten(this, 'http://{{ host }}{{ s.ext | urlencode }}')">{{ strings.shorten }}</a>{% endif %}            </div>
         </div>
         {% endif %}
         {% endfor %}
@@ -60,6 +59,7 @@
 {% endblock content %}
 
 {% block scripts %}
+<script src="/static/polyfills.js"></script>
 <script>
 function uploadViaAPI() {
     var input = document.getElementById('file');
@@ -148,7 +148,7 @@ function uploadViaAPI() {
                         a.href = result.url;
                         var filePath = a.pathname;
 
-                        label.innerHTML = '<a href="' + result.url + '"><span><img src="' + iconPath + '" class="icon">' + result.name + '</span></a> {{ strings.upload_success }} <a style="cursor: pointer;" onclick="deleteFile(this, \'' + filePath + '\')">{{ strings.delete }}</a> <a style="cursor: pointer;" onclick="shorten(this, \'http://{{ host }}/' + filePath + '\')">Shorten</a><br>';
+                        label.innerHTML = '<a href="' + result.url + '"><span><img src="' + iconPath + '" class="icon">' + result.name + '</span></a> {{ strings.upload_success }} <a style="cursor: pointer;" onclick="deleteFile(this, \'' + filePath + '\')">{{ strings.delete }}</a>{% if config.linkshortener %} <a style="cursor: pointer;" onclick="shorten(this, \'http://{{ host }}' + filePath + '\')">Shorten</a><br>{% endif %}';
                     } catch (e) {
                         label.textContent = file.name + " {{ strings.upload_parse_error }}";
                     }
@@ -218,7 +218,7 @@ function deleteFile(element, filePath) {
 
     xhr.send();
 }
-
+{% if config.linkshortener %}
 function shorten(element, url) {
     element.onclick = null;
     var xhr;
@@ -235,7 +235,7 @@ function shorten(element, url) {
     }
 
     try {
-        xhr.open("POST", "https://short.marmak.net.pl/api/url", true);
+        xhr.open("POST", "{{ config.linkshortener_url | safe }}", true);
         xhr.setRequestHeader("Content-Type", "application/json");
     } catch (e) {
         alert("{{ strings.error_shortening }}");
@@ -273,6 +273,7 @@ function shorten(element, url) {
         element.onclick = function () { shorten(element, url); };
     }
 }
+{% endif %}
 </script>
 
 {% if filebrowser %}

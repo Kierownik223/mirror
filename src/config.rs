@@ -22,6 +22,8 @@ pub struct Config {
     pub enable_zip_downloads: bool,
     pub max_age: u64,
     pub jwt_secret: String,
+    pub linkshortener: bool,
+    pub linkshortener_url: String,
 }
 
 impl Config {
@@ -69,6 +71,8 @@ impl Default for Config {
             enable_zip_downloads: false,
             max_age: 86400,
             jwt_secret: String::new(),
+            linkshortener: true,
+            linkshortener_url: "https://short.marmak.net.pl/api/url".into(),
         }
     }
 }
