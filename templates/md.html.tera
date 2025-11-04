@@ -29,5 +29,7 @@
         <a href="#" onclick="window.print()"><span><img class="icon" src="/static/images/icons/ui/{% if hires %}hires/{% endif %}print.png">{{ strings.print }}</span></a></div><br>
     <a href="./"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png">./</a>
 </div>
+<div class="markdown">
 {{ markdown | safe }}
+</div>
 {% endblock content %}

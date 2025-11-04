@@ -127,6 +127,10 @@ iframe {
     font-size: 0.1px;
 }
 
+.markdown img {
+	max-width: 100%;
+}
+
 @media only screen and (max-width: 640px) {
     .hide {
         display: none;
