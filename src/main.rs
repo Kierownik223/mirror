@@ -30,7 +30,7 @@ use rocket_dyn_templates::{context, Template};
 
 use crate::config::CONFIG;
 use crate::db::{add_download, FileDb};
-use crate::guards::{HeaderFile, Host, Settings, UsePlain, UseViewers};
+use crate::guards::{FullUri, HeaderFile, Host, Settings, UsePlain, UseViewers};
 use crate::i18n::{Language, TranslationStore};
 use crate::jwt::JWT;
 use crate::responders::{Cached, IndexResponse, IndexResult};
@@ -277,6 +277,7 @@ async fn index(
     viewers: UseViewers<'_>,
     sizes: &State<FileSizes>,
     token: Result<JWT, Status>,
+    uri: FullUri,
 ) -> IndexResult {
     let jwt = token.clone().unwrap_or_default();
 
@@ -333,6 +334,9 @@ async fn index(
     let ext = if path.is_file() {
         path.extension().and_then(OsStr::to_str).unwrap_or("")
     } else {
+        if !uri.0.ends_with("/") {
+            return Ok(IndexResponse::Redirect(Redirect::moved(format!("{}/", uri.0))))
+        }
         if is_private {
             "privatefolder"
         } else {

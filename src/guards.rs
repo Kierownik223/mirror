@@ -117,3 +117,15 @@ impl<'r> FromRequest<'r> for Host<'r> {
         }
     }
 }
+
+pub struct FullUri(pub String);
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for FullUri {
+    type Error = ();
+
+    async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
+        let uri = req.uri().to_string();
+        Outcome::Success(FullUri(uri))
+    }
+}
