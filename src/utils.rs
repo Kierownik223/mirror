@@ -17,12 +17,6 @@ use zip::write::SimpleFileOptions;
 
 use crate::{config::CONFIG, FileEntry, HeaderFile, IndexResponse, MirrorFile};
 
-#[derive(Debug, serde::Deserialize, serde::Serialize)]
-struct FolderSize {
-    size: u64,
-    file: String,
-}
-
 pub fn read_dirs(path: &str) -> Result<Vec<MirrorFile>, Error> {
     let mut dir_list = Vec::new();
 
