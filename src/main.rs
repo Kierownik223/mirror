@@ -330,6 +330,10 @@ async fn index(
         return Err(Status::UnprocessableEntity);
     }
 
+    if !path.exists() {
+        return Err(Status::NotFound);
+    }
+
     if is_restricted(&path, token.is_ok()) {
         return Err(Status::Unauthorized);
     }
@@ -350,10 +354,6 @@ async fn index(
         }
     }
     .to_lowercase();
-
-    if !path.exists() {
-        return Err(Status::NotFound);
-    }
 
     let cache_control = &get_cache_control(is_private);
 
