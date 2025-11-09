@@ -8,9 +8,7 @@ use rocket_dyn_templates::{context, Template};
 use crate::{
     config::CONFIG,
     jwt::JWT,
-    utils::{
-        format_size, get_bool_cookie, get_root_domain, get_theme,
-    },
+    utils::{format_size, get_bool_cookie, get_root_domain, get_theme},
     Disk, Host, IndexResponse, Language, TranslationStore, UsePlain,
 };
 

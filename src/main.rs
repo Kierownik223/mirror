@@ -4,10 +4,12 @@ use rocket::data::ToByteUnit;
 use rocket::http::{ContentType, Cookie, CookieJar, SameSite, Status};
 use rocket::response::content::RawHtml;
 use rocket::response::Redirect;
-use rocket::{Data, Request};
 use rocket::State;
+use rocket::{Data, Request};
 use rocket_db_pools::{Connection, Database};
-use rocket_multipart_form_data::{MultipartFormData, MultipartFormDataField, MultipartFormDataOptions, Repetition};
+use rocket_multipart_form_data::{
+    MultipartFormData, MultipartFormDataField, MultipartFormDataOptions, Repetition,
+};
 use serde::Serialize;
 use std::cmp::Ordering;
 use std::collections::HashMap;
@@ -35,7 +37,8 @@ use crate::i18n::{Language, TranslationStore};
 use crate::jwt::JWT;
 use crate::responders::{Cached, IndexResponse, IndexResult};
 use crate::utils::{
-    get_cache_control, get_extension_from_filename, get_genre, get_real_path, get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output, read_dirs_async
+    get_cache_control, get_extension_from_filename, get_genre, get_real_path, get_root_domain,
+    is_hidden, map_io_error_to_status, parse_7z_output, read_dirs_async,
 };
 
 mod account;
@@ -335,7 +338,10 @@ async fn index(
         path.extension().and_then(OsStr::to_str).unwrap_or("")
     } else {
         if !uri.0.ends_with("/") {
-            return Ok(IndexResponse::Redirect(Redirect::moved(format!("{}/", uri.0))))
+            return Ok(IndexResponse::Redirect(Redirect::moved(format!(
+                "{}/",
+                uri.0
+            ))));
         }
         if is_private {
             "privatefolder"
@@ -1145,7 +1151,15 @@ async fn upload(
                             } else {
                                 uploaded_files.push(MirrorFile {
                                     name: file_name.to_string(),
-                                    ext: format!("/{}/{}", user_path.replacen(format!("/{}", &username).as_str(), "", 1), file_name),
+                                    ext: format!(
+                                        "/{}/{}",
+                                        user_path.replacen(
+                                            format!("/{}", &username).as_str(),
+                                            "",
+                                            1
+                                        ),
+                                        file_name
+                                    ),
                                     size: 0,
                                     icon: icon,
                                     downloads: None,
