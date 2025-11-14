@@ -977,6 +977,27 @@ async fn iframe(
     )))
 }
 
+#[get("/scripts/<file>/<lang>/script.js")]
+async fn scripts(
+    file: &str,
+    lang: &str,
+    translations: &State<TranslationStore>,
+) -> Result<(ContentType, Template), Status> {
+    let strings = translations.get_translation(lang);
+
+    if Path::new(&format!("templates/{}", file)).exists() {
+        return Err(Status::NotFound);
+    }
+    
+    Ok((ContentType::new("text", "javascript; charset=utf-8"), Template::render(
+        format!("scripts/{}", file),
+        context! {
+            config: (*CONFIG).clone(),
+            strings,
+        },
+    )))
+}
+
 #[get("/sitemap.xml")]
 async fn sitemap(sizes: &State<FileSizes>, host: Host<'_>) -> Result<Cached<Template>, Status> {
     let files = sizes.read().await;
@@ -1336,7 +1357,8 @@ async fn rocket() -> _ {
                 file,
                 sitemap,
                 uploader,
-                upload
+                upload,
+                scripts
             ],
         );
 
