@@ -982,20 +982,26 @@ async fn scripts(
     file: &str,
     lang: &str,
     translations: &State<TranslationStore>,
-) -> Result<(ContentType, Template), Status> {
+) -> Result<Cached<(ContentType, Template)>, Status> {
     let strings = translations.get_translation(lang);
 
     if Path::new(&format!("templates/{}", file)).exists() {
         return Err(Status::NotFound);
     }
-    
-    Ok((ContentType::new("text", "javascript; charset=utf-8"), Template::render(
-        format!("scripts/{}", file),
-        context! {
-            config: (*CONFIG).clone(),
-            strings,
-        },
-    )))
+
+    Ok(Cached {
+        response: (
+            ContentType::new("text", "javascript; charset=utf-8"),
+            Template::render(
+                format!("scripts/{}", file),
+                context! {
+                    config: (*CONFIG).clone(),
+                    strings,
+                },
+            ),
+        ),
+        header: "public, max-age=604800",
+    })
 }
 
 #[get("/sitemap.xml")]
