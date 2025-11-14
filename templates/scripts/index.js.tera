@@ -1,0 +1,239 @@
+function toggleAllCheckboxes(master) {
+    var inputs = document.getElementsByTagName("input");
+    for (var i = 0; i < inputs.length; i++) {
+        if (inputs[i].type === "checkbox" && hasClass(inputs[i], "delete-checkbox")) {
+            inputs[i].checked = master.checked;
+        }
+    }
+}
+
+function hasClass(el, cls) {
+    return el.className && (" " + el.className + " ").indexOf(" " + cls + " ") > -1;
+}
+
+function deleteSelected() {
+    var inputs = document.getElementsByTagName("input");
+    var filePathList = [];
+    var elementList = [];
+    var pathname = "/";
+    if (window.location && typeof window.location.pathname === "string") {
+        pathname = window.location.pathname;
+    }
+
+    for (var i = 0; i < inputs.length; i++) {
+        var input = inputs[i];
+        if (input.type === "checkbox" && hasClass(input, "delete-checkbox") && input.checked) {
+            filePathList[filePathList.length] = input.value;
+
+            var row = input;
+            while (row && row.nodeType === 1 && String(row.tagName).toLowerCase() !== "tr") {
+                row = row.parentNode;
+            }
+
+            elementList[elementList.length] = row;
+        }
+    }
+
+    if (filePathList.length === 0) {
+        return;
+    }
+
+    var i, confirmMsg = "{{ strings.delete_confirmation }}\n";
+    for (i = 0; i < filePathList.length; i++) {
+        confirmMsg += filePathList[i] + "\n";
+    }
+
+    if (!confirm(confirmMsg)) {
+        return;
+    }
+
+    var currentIndex = 0;
+    function deleteNext() {
+        if (currentIndex >= filePathList.length) return;
+        var path = filePathList[currentIndex];
+        var rowElement = elementList[currentIndex];
+        currentIndex++;
+
+        deleteFile(rowElement, path, false, deleteNext);
+    }
+
+    deleteNext();
+}
+
+function renameFile(element, filePath) {
+    var pathname = "/";
+    if (window.location && typeof window.location.pathname === "string") {
+        pathname = window.location.pathname;
+    }
+    var path = pathname + encodeURIComponent(filePath);
+    var confirmMsg = "{{ strings.delete_confirmation }} " + decodeURIComponent(path) + "?";
+
+    var newName = prompt("{{ strings.new_name }}:", filePath);
+
+    if (newName == null) {
+        return;
+    }
+
+    var xhr;
+    if (window.XMLHttpRequest) {
+        xhr = new XMLHttpRequest();
+    } else {
+        try {
+            xhr = new ActiveXObject("Microsoft.XMLHTTP");
+        } catch (e) {
+            alert("{{ strings.error_deleting }}");
+            return;
+        }
+    }
+
+    try {
+        xhr.open("PATCH", "/api" + path, true);
+    } catch (e) {
+        alert("{{ strings.error_renaming }}");
+        return;
+    }
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                try {
+                    var response = JSON.parse(xhr.responseText);
+
+                    element.onclick = function () { renameFile(element, response.name) };
+
+                    var row = element;
+                    while (row && row.nodeType === 1) {
+                        if (String(row.tagName).toLowerCase() === 'tr') break;
+                        row = row.parentNode;
+                    }
+
+                    if (row) {
+                        var cells = row.getElementsByTagName("td");
+                        if (cells.length > 0) {
+                            var td = cells[1];
+                            var link = td.querySelector("a");
+
+                            if (link) {
+                                link.setAttribute("href", "../" + response.name);
+
+                                link.innerHTML = "";
+
+                                var img = document.createElement("img");
+                                img.src = "/static/images/icons/{% if hires %}hires/{% endif %}" + response.icon + ".png";
+                                img.className = "icon";
+
+                                link.appendChild(img);
+                                link.appendChild(document.createTextNode(response.name));
+                            }
+                        }
+                    }
+
+                    alert("{{ strings.rename_success }}");
+                } catch (e) {
+                    location.reload();
+                }
+            } else if (xhr.status === 404) {
+                alert("{{ strings.not_found }}");
+            } else {
+                try {
+                    var errorResponse = JSON.parse(xhr.responseText);
+                    alert("{{ strings.error_occured }} " + errorResponse.message);
+                } catch (e) {
+                    alert("{{ strings.error_occured }}");
+                }
+            }
+        }
+    };
+
+    try {
+        xhr.send("{\"name\":\"" + newName + "\"}");
+    } catch (e) {
+        alert("{{ strings.error_deleting }}");
+        if (onComplete) onComplete();
+    }
+}
+
+function deleteFile(element, filePath, message, onComplete) {
+    var pathname = "/";
+    if (window.location && typeof window.location.pathname === "string") {
+        pathname = window.location.pathname;
+    }
+    if (typeof encodeURIComponent === 'undefined') {
+        var path = pathname + escape(filePath);
+    } else {
+        var path = pathname + encodeURIComponent(filePath);
+    }
+    var confirmMsg = "{{ strings.delete_confirmation }} " + decodeURIComponent(path) + "?";
+
+    if (message) {
+        if (!confirm(confirmMsg)) {
+            return;
+        }
+    }
+
+    var xhr;
+    if (window.XMLHttpRequest) {
+        xhr = new XMLHttpRequest();
+    } else {
+        try {
+            xhr = new ActiveXObject("Microsoft.XMLHTTP");
+        } catch (e) {
+            alert("{{ strings.error_deleting }}");
+            return;
+        }
+    }
+
+    try {
+        xhr.open("DELETE", "/api" + path, true);
+    } catch (e) {
+        alert("{{ strings.error_deleting }}");
+        return;
+    }
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4) {
+            if (xhr.status == 204) {
+                try {
+                    var row = element;
+                    while (row && row.nodeType === 1) {
+                        if (String(row.tagName).toLowerCase() === 'tr') break;
+                        row = row.parentNode;
+                    }
+
+                    if (row && row.parentNode) {
+                        try {
+                            row.parentNode.removeChild(row);
+                        } catch (e) {
+                            row.outerHTML = "";
+                        }
+                    }
+
+                    if (message) {
+                        alert(decodeURIComponent(path) + " {{ strings.delete_success }}");
+                    }
+                } catch (e) {
+                    alert("{{ strings.error_occured }} " + (e.message || ""));
+                }
+            } else if (xhr.status == 409) {
+                alert("{{ strings.directory_not_empty }}");
+            } else if (xhr.status == 404) {
+                alert("{{ strings.not_found }}");
+            } else {
+                try {
+                    var errorResponse = JSON.parse(xhr.responseText);
+                    alert("{{ strings.error_occured }} " + errorResponse.message);
+                } catch (e) {
+                    alert("{{ strings.error_occured }}");
+                }
+            }
+            if (onComplete) onComplete();
+        }
+    };
+
+    try {
+        xhr.send();
+    } catch (e) {
+        alert("{{ strings.error_deleting }}");
+        if (onComplete) onComplete();
+    }
+}

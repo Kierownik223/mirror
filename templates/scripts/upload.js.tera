@@ -1,0 +1,161 @@
+function uploadViaAPI() {
+    var input = document.getElementById('file');
+    var path_input = document.getElementById('path');
+
+    var hasFormData = typeof window.FormData !== "undefined";
+    var hasFiles = input && typeof input.files !== "undefined";
+
+    if (!input || !path_input || !hasFormData || !hasFiles) {
+        alert("{{ strings.upload_not_supported }}");
+        return;
+    }
+
+    var path = path_input.value;
+    var files = input.files;
+
+    if (!files.length) {
+        alert("{{ strings.select_files }}");
+        return;
+    }
+
+    var resultsDiv = document.getElementById('uploadResults');
+    resultsDiv.innerHTML = "";
+
+    for (var i = 0; i < files.length; i++) {
+        (function(file) {
+            var container = document.createElement("div");
+
+            var label = document.createElement("div");
+            label.textContent = "{{ strings.uploading }} " + file.name;
+            container.appendChild(label);
+
+            var progressBar = document.createElement("progress");
+            progressBar.max = 100;
+            progressBar.value = 0;
+            progressBar.style.width = "100%";
+            container.appendChild(progressBar);
+
+            var info = document.createElement("div");
+            info.style.fontSize = "small";
+            info.textContent = "0% - 0 B / " + formatBytes(file.size) + " @ 0 KB/s";
+            container.appendChild(info);
+
+            resultsDiv.appendChild(container);
+
+            var formData = new FormData();
+            formData.append("files", file);
+            formData.append("path", path);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/api/upload", true);
+
+            var startTime = new Date().getTime();
+
+            xhr.upload.onprogress = function(e) {
+                if (e.lengthComputable) {
+                    var percent = (e.loaded / e.total) * 100;
+                    var elapsed = (new Date().getTime() - startTime) / 1000;
+                    var speed = e.loaded / elapsed;
+
+                    progressBar.value = percent;
+
+                    info.textContent =
+                        percent.toFixed(1) + "% - " + formatBytes(e.loaded) + " / " + formatBytes(e.total) +
+                        " @ " + formatBytes(speed) + "/s";
+                }
+            };
+
+            xhr.onload = function() {
+                progressBar.style.display = "none";
+                info.style.display = "none";
+
+                if (xhr.status === 200) {
+                    try {
+                        var response = JSON.parse(xhr.responseText);
+                        var result = response[0];
+
+                        if (!result || result.url == null) {
+                            label.textContent = "{{ strings.upload_error }} " + (result && result.error ? result.error : "");
+                            return;
+                        }
+
+                        var iconPath = '/static/images/icons/{% if hires | safe %}hires/{% endif %}' + result.icon + '.png';
+
+                        var a = document.createElement('a');
+                        a.href = result.url;
+                        var filePath = a.pathname;
+
+                        if (!filePath.startsWith("/")) {
+                            filePath = "/" + filePath;
+                        }
+
+                        label.innerHTML = '<a href="' + result.url + '"><span><img src="' + iconPath + '" class="icon">' + result.name + '</span></a> {{ strings.upload_success }} <a style="cursor: pointer;" onclick="deleteFile(this, \'' + filePath + '\')">{{ strings.delete }}</a>{% if config.linkshortener %} <a style="cursor: pointer;" onclick="shorten(this, \'http://{{ host }}' + filePath + '\')">{{ strings.shorten }}</a><br>{% endif %}';
+                    } catch (e) {
+                        label.textContent = file.name + " {{ strings.upload_parse_error }}";
+                    }
+                } else {
+                    label.textContent = file.name + " {{ strings.upload_failed_status }} " + xhr.status;
+                }
+            };
+
+            xhr.onerror = function() {
+                progressBar.style.display = "none";
+                info.style.display = "none";
+                label.textContent = file.name + " {{ strings.upload_failed_network }}";
+            };
+
+            try {
+                xhr.send(formData);
+            } catch (e) {
+                label.textContent = file.name + " {{ strings.upload_error }}";
+            }
+        })(files[i]);
+    }
+}
+
+function formatBytes(bytes) {
+    if (bytes === 0) return "0 B";
+    var k = 1024;
+    var sizes = ["B", "KB", "MB", "GB", "TB"];
+    var i = Math.floor(Math.log(bytes) / Math.log(k));
+    return (bytes / Math.pow(k, i)).toFixed(1) + " " + sizes[i];
+}
+
+function deleteFile(element, filePath) {
+    var path = "/" + filePath.replace(/^\/+/, '');
+
+    if (!confirm("{{ strings.delete_confirmation }} " + decodeURIComponent(path) + "?")) {
+        return;
+    }
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("DELETE", "/api" + path, true);
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 204) {
+                var row = element.parentNode.parentElement;
+                if (row && row.parentNode) {
+                    row.parentNode.removeChild(row);
+                }
+                alert(decodeURIComponent(path) + " {{ strings.delete_success }}");
+            } else if (xhr.status === 409) {
+                alert("{{ strings.directory_not_empty }}");
+            } else {
+                try {
+                    var errorResponse = JSON.parse(xhr.responseText);
+                    alert("{{ strings.error_occured }} " + errorResponse.message);
+                } catch (e) {
+                    alert("{{ strings.error_occured }}");
+                }
+            }
+        }
+    };
+
+    xhr.onerror = function () {
+        console.error("Error deleting file.");
+        alert("{{ strings.error_deleting }}");
+    };
+
+    xhr.send();
+}

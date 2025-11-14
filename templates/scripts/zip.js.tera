@@ -1,0 +1,60 @@
+function downloadAsZip() {
+    var inputs = document.getElementsByTagName("input");
+    var filePathList = [];
+    var pathname = "/";
+    if (window.location && typeof window.location.pathname === "string") {
+        pathname = window.location.pathname;
+    }
+
+    for (var i = 0; i < inputs.length; i++) {
+        var input = inputs[i];
+        if (input.type === "checkbox" && hasClass(input, "delete-checkbox") && input.checked) {
+            filePathList.push(pathname + input.value);
+        }
+    }
+
+    if (filePathList.length === 0) {
+        alert("{{ strings.select_files }}");
+        return;
+    }
+
+    var formData = new FormData();
+    formData.append("files", JSON.stringify(filePathList));
+
+    var download_link = document.getElementById("downloadZip");
+    download_link.innerText = "{{ strings.preparing_zip }}";
+    download_link.onclick = null;
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/zip", true);
+
+    xhr.responseType = "blob";
+
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            var blob = xhr.response;
+
+            if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+                window.navigator.msSaveOrOpenBlob(blob, "download.zip");
+            } else {
+                var link = document.createElement('a');
+                var url = window.URL.createObjectURL(blob);
+                link.href = url;
+                link.download = "download.zip";
+                link.click();
+                window.URL.revokeObjectURL(url);
+            }
+
+            download_link.innerText = "{{ strings.download_zip }} (BETA)";
+            download_link.onclick = function () { downloadAsZip(); };
+        } else {
+            alert("{{ strings.error }}");
+        }
+    };
+
+    xhr.onerror = function () {
+        alert("{{ strings.error }}");
+    };
+
+    xhr.send(formData);
+}

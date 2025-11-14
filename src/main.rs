@@ -982,6 +982,7 @@ async fn scripts(
     file: &str,
     lang: &str,
     translations: &State<TranslationStore>,
+    host: Host<'_>,
 ) -> Result<Cached<(ContentType, Template)>, Status> {
     let strings = translations.get_translation(lang);
 
@@ -997,6 +998,7 @@ async fn scripts(
                 context! {
                     config: (*CONFIG).clone(),
                     strings,
+                    host: host.0,
                 },
             ),
         ),

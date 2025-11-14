@@ -1,0 +1,54 @@
+function shorten(element, url) {
+    element.onclick = null;
+    var xhr;
+    if (window.XMLHttpRequest) {
+        xhr = new XMLHttpRequest();
+    } else {
+        try {
+            xhr = new ActiveXObject("Microsoft.XMLHTTP");
+        } catch (e) {
+            alert("{{ strings.error_shortening }}");
+            element.onclick = function () { shorten(element, url); };
+            return;
+        }
+    }
+
+    try {
+        xhr.open("POST", "{{ config.linkshortener_url | safe }}", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+    } catch (e) {
+        alert("{{ strings.error_shortening }}");
+        element.onclick = function () { shorten(element, url); };
+        return;
+    }
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4) {
+            if (xhr.status == 200) {
+                if (element) {
+                    var response = JSON.parse(xhr.responseText);
+                    element.innerText = response.link;
+                    element.href = response.link;
+                    element.onclick = function (e) { e.preventDefault(); try { navigator.clipboard.writeText(response.link); } catch (e) { window.clipboardData.setData('Text', response.link); } };
+                } else {
+                    alert(JSON.parse(xhr.responseText).url);
+                    element.onclick = function () { shorten(element, url); };
+                }
+            } else if (xhr.status == 419) {
+                alert("{{ strings.shortening_ratelimit }}");
+                element.onclick = function () { shorten(element, url); };
+                return;
+            } else {
+                alert("{{ strings.error_shortening }}");
+                return;
+            }
+        }
+    };
+
+    try {
+        xhr.send("{\"url\":\"" + url + "\"}");
+    } catch (e) {
+        alert("{{ strings.error_shortening }}");
+        element.onclick = function () { shorten(element, url); };
+    }
+}
