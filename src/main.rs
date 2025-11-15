@@ -87,6 +87,7 @@ struct Disk {
     total_space: u64,
     used_space_readable: String,
     total_space_readable: String,
+    mount_point: String,
 }
 
 #[derive(serde::Serialize)]

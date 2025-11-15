@@ -55,9 +55,9 @@
                                 var div = document.createElement("div");
                                 disksContainer.appendChild(div);
                                 try {
-                                    div.innerHTML = '<label for="usage">' + disk.used_space_readable + "/" + disk.total_space_readable + '</label><progress style="width:100%; box-sizing:border-box;" class="disk_usage" max="' + disk.total_space + '" value="' + disk.used_space + '"></progress>';
+                                    div.innerHTML = '<label for="usage">' + disk.mount_point + ': ' + disk.used_space_readable + "/" + disk.total_space_readable + '</label><progress style="width:100%; box-sizing:border-box;" class="disk_usage" max="' + disk.total_space + '" value="' + disk.used_space + '"></progress>';
                                 } catch (e) {
-                                    div.innerHTML = disk.used_space_readable + "/" + disk.total_space_readable;
+                                    div.innerHTML = disk.mount_point + ': ' + disk.used_space_readable + "/" + disk.total_space_readable;
                                 }
                             }
                         }

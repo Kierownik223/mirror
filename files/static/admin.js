@@ -34,9 +34,9 @@
                             disksContainer.appendChild(diskDiv);
 
                             try {
-                                diskDiv.innerHTML = '<label for="usage">' + disk.used_space_readable + "/" + disk.total_space_readable + '</label><progress style="width:100%; box-sizing:border-box;" class="disk_usage" max="' + disk.total_space + '" value="' + disk.used_space + '"></progress>';
+                                diskDiv.innerHTML = '<label for="usage">' + disk.mount_point + ': ' + disk.used_space_readable + "/" + disk.total_space_readable + '</label><progress style="width:100%; box-sizing:border-box;" class="disk_usage" max="' + disk.total_space + '" value="' + disk.used_space + '"></progress>';
                             } catch (e) {
-                                diskDiv.innerHTML = disk.used_space_readable + "/" + disk.total_space_readable;
+                                diskDiv.innerHTML = disk.mount_point + ': ' + disk.used_space_readable + "/" + disk.total_space_readable;
                             }
                         }
                     } catch (e) {

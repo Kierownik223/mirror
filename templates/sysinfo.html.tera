@@ -14,8 +14,7 @@
 <div id="disks">
     {% for s in disks %}
     <div>
-        <label for="usage"><span class="free_space_readable">{{ s.used_space_readable }}</span>/<span
-                class="total_space_readable">{{ s.total_space_readable }}</span></label>
+        <label for="usage">{{ s.mount_point }}: {{ s.used_space_readable }}/{{ s.total_space_readable }}</label>
         <progress style="width:100%;box-sizing:border-box;" class="disk_usage" max="{{ s.total_space }}"
             value="{{ s.used_space }}"></progress>
     </div>

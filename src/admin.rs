@@ -54,6 +54,7 @@ fn sysinfo(
                 total_space: x.total_space(),
                 used_space_readable: format_size(used_space),
                 total_space_readable: format_size(x.total_space()),
+                mount_point: x.mount_point().display().to_string(),
             }
         })
         .collect();

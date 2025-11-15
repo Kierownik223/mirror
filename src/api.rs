@@ -422,6 +422,7 @@ fn sysinfo(token: Result<JWT, Status>) -> Result<Cached<Json<Sysinfo>>, Status> 
                 total_space: disk.total_space(),
                 used_space_readable: format_size(disk.total_space() - disk.available_space()),
                 total_space_readable: format_size(disk.total_space()),
+                mount_point: disk.mount_point().display().to_string(),
             });
         }
     }
