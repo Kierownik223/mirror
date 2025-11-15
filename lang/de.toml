@@ -36,6 +36,7 @@ dont_override_settings = "Einstellungen nicht überschreiben"
 save_settings = "Einstellungen speichern"
 reset_settings = "Einstellungen zurücksetzen"
 viewers = "Dateidetailbetrachter"
+use_si_prefixes = "Verwenden Sie SI-Präfixe"
 
 # Files
 

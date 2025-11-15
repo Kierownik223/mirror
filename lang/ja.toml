@@ -36,6 +36,7 @@ dont_override_settings = "設定を上書きしない"
 save_settings = "設定を保存"
 reset_settings = "設定をリセット"
 viewers = "ファイルの詳細ビューア"
+use_si_prefixes = "SI接頭語を使用してください"
 
 # Files
 

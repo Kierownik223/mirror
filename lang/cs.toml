@@ -36,6 +36,7 @@ dont_override_settings = "Nepřepisovat nastavení"
 save_settings = "Uložit nastavení"
 reset_settings = "Obnovit nastavení"
 viewers = "Zobrazovače podrobností souboru"
+use_si_prefixes = "Používejte předpony SI"
 
 # Files
 
