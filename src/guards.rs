@@ -16,6 +16,7 @@ pub struct Settings<'r> {
     pub nooverride: Option<&'r str>,
     pub viewers: Option<&'r str>,
     pub filebrowser: Option<&'r str>,
+    pub use_si: Option<&'r str>,
 }
 
 pub struct HeaderFile(pub String, pub String);

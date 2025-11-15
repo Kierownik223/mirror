@@ -774,6 +774,7 @@ fn settings(
         ("nooverride", opt.nooverride),
         ("viewers", opt.viewers),
         ("filebrowser", opt.filebrowser),
+        ("use_si", opt.use_si),
     ];
 
     let mut redir = false;
@@ -849,6 +850,7 @@ fn settings(
             nooverride: get_bool_cookie(jar, "nooverride", false),
             viewers: get_bool_cookie(jar, "viewers", true),
             filebrowser: get_bool_cookie(jar, "filebrowser", false),
+            use_si: get_bool_cookie(jar, "use_si", true),
             language_names,
             show_cookie_notice,
         },

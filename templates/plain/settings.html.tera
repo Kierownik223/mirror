@@ -32,6 +32,11 @@
     <label><input type="radio" name="plain" value="true" {% if plain %}checked {% endif %}>{{ strings.enable }}</label>
     <label><input type="radio" name="plain" value="false" {% if not plain %}checked {% endif %}>{{ strings.disable }}</label>
     <br>
+    <label for="use_si">{{ strings.use_si_prefixes }}</label>
+    <br>
+    <label><input type="radio" name="use_si" value="true" {% if plain %}checked {% endif %}>{{ strings.enable }}</label>
+    <label><input type="radio" name="use_si" value="false" {% if not plain %}checked {% endif %}>{{ strings.disable }}</label>
+    <br>
     <center>
         <input type="submit" value="{{ strings.save_settings }}">
     </center>
