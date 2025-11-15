@@ -12,6 +12,10 @@
         {% endif %}
     {% endfor %}
 {% endif %}
+{% if admin and path != "/" or private %}
+&nbsp;
+<a href="/upload?path={{ path }}">{{ strings.uploader }}</a>
+{% endif %}
 <hr>
 {% if path != "/" %}
 <a href="../">../</a><br>

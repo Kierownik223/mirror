@@ -4,7 +4,7 @@
 <a href="/">MARMAK Mirror</a>/<a href="/admin/">{{ strings.admin }}</a>/<br>
 {{ strings.welcome }}, {{ username }}!
 <br>
-<a href="/admin/upload">{{ strings.uploader }}</a>
+<a href="/upload">{{ strings.uploader }}</a>
 &nbsp;
 <a href="/admin/sysinfo">{{ strings.sysinfo }}</a>
 {% if config.enable_direct %}

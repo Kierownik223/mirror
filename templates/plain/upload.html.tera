@@ -1,12 +1,14 @@
 {% extends "plain/base" %}
 
 {% block content %}
-<a href="/">MARMAK Mirror</a>/<a href="/admin/">{{ strings.admin }}</a>/<a href="/admin/upload">{{ strings.uploader }}</a><br>
+<a href="/">MARMAK Mirror</a>/<a href="/upload">{{ strings.uploader }}</a><br>
 {{ strings.welcome }}, {{ username }}!
+{% if admin %}
 <br>
 <a href="/admin/">{{ strings.admin }}</a>
 &nbsp;
 <a href="/uploads/">Uploads</a>
+{% endif %}
 <br>
 {% for s in uploadedfiles %}
 {% if s.name != "" %}
@@ -22,6 +24,7 @@
         <input type="file" name="files" id="file" multiple required>
     </center>
 
+    {% if admin %}
     <label for="path">
         {{ strings.target_dir }}:
     </label>
@@ -29,6 +32,9 @@
         <input type="text" id="path" name="path" placeholder="{{ strings.target_placeholder }}">
     </center>
     <br>
+    {% else %}
+    <input type="hidden" id="path" name="path" value="/private/">
+    {% endif %}
 
     {{ strings.max_size }}<br><br>
 
