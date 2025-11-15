@@ -37,8 +37,7 @@ use crate::i18n::{Language, TranslationStore};
 use crate::jwt::JWT;
 use crate::responders::{Cached, IndexResponse, IndexResult};
 use crate::utils::{
-    get_cache_control, get_extension_from_filename, get_genre, get_real_path, get_root_domain,
-    is_hidden, map_io_error_to_status, parse_7z_output, read_dirs_async,
+    format_size_filter, get_cache_control, get_extension_from_filename, get_genre, get_real_path, get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output, read_dirs_async
 };
 
 mod account;
@@ -298,6 +297,7 @@ async fn index(
 
     let hires = get_bool_cookie(jar, "hires", false);
     let smallhead = get_bool_cookie(jar, "smallhead", false);
+    let use_si = get_bool_cookie(jar, "use_si", true);
 
     if let Ok((p, i)) = get_real_path(&file, username.clone()) {
         path = p;
@@ -409,7 +409,8 @@ async fn index(
                     username,
                     admin: perms == 0,
                     hires,
-                    smallhead
+                    smallhead,
+                    use_si,
                 },
             )))
         }
@@ -640,6 +641,7 @@ async fn index(
                     topmarkdown,
                     filebrowser: !get_bool_cookie(jar, "filebrowser", false),
                     private: is_private,
+                    use_si,
                 },
             )))
         }
@@ -711,6 +713,7 @@ async fn index(
                     markdown,
                     filebrowser: !get_bool_cookie(jar, "filebrowser", false),
                     private: is_private,
+                    use_si,
                 },
             )))
         }
@@ -738,6 +741,7 @@ async fn index(
                         smallhead,
                         filename: path.file_name().unwrap().to_str(),
                         filesize: fs::metadata(&path).unwrap().len(),
+                        use_si,
                     },
                 )))
             } else {
@@ -1351,7 +1355,9 @@ async fn rocket() -> _ {
     tokio::spawn(calculate_sizes(background_size_state));
 
     let mut rocket = rocket::build()
-        .attach(Template::fairing())
+        .attach(Template::custom(|engine| {
+            engine.tera.register_filter("format_size", format_size_filter);
+        }))
         .manage(TranslationStore::new())
         .manage(size_state)
         .register("/", catchers![default, unprocessable_entry, forbidden])

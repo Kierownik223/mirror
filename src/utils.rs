@@ -11,6 +11,7 @@ use rocket::{
     fs::NamedFile,
     http::{Cookie, CookieJar, SameSite, Status},
 };
+use tera::{Value, to_value, try_get_value};
 use time::{Duration, OffsetDateTime};
 use tokio::sync::RwLock;
 use zip::write::SimpleFileOptions;
@@ -397,6 +398,18 @@ pub fn format_size(bytes: u64, use_si: bool) -> String {
     let value = bytes_f64 / k.powi(i as i32);
 
     format!("{:.1} {}", value, sizes[i])
+}
+
+pub fn format_size_filter(value: &Value, args: &HashMap<String, Value>) -> Result<Value, tera::Error> {
+    let num = try_get_value!("format_size", "value", u64, value);
+
+    let use_si = match args.get("use_si") {
+        Some(use_si) => try_get_value!("format_size", "use_si", bool, use_si),
+        None => false,
+    };
+
+    Ok(to_value(format_size(num, use_si))
+        .expect("json serializing should always be possible for a string"))
 }
 
 pub fn get_genre(genre: &str) -> Result<String, Status> {

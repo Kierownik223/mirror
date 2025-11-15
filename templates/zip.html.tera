@@ -39,7 +39,7 @@
         <tr>
             <td><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name
                 }}</td>
-            <td class="hide-more">{{ s.size | filesizeformat | replace(from=" B", to="  ") | replace(from="B", to="iB") | replace(from="  ", to=" B")}}</td>
+            <td class="hide-more">{{ s.size | format_size(use_si=use_si) }}</td>
             {% if s.ext == "Folder" %}
             <td class="hide">{{ strings.folder }}</td>
             {% else %}
