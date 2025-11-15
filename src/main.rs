@@ -37,7 +37,8 @@ use crate::i18n::{Language, TranslationStore};
 use crate::jwt::JWT;
 use crate::responders::{Cached, IndexResponse, IndexResult};
 use crate::utils::{
-    format_size_filter, get_cache_control, get_extension_from_filename, get_genre, get_real_path, get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output, read_dirs_async
+    format_size_filter, get_cache_control, get_extension_from_filename, get_genre, get_real_path,
+    get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output, read_dirs_async,
 };
 
 mod account;
@@ -1358,8 +1359,12 @@ async fn rocket() -> _ {
 
     let mut rocket = rocket::build()
         .attach(Template::custom(|engine| {
-            engine.tera.register_filter("format_size", format_size_filter);
+            engine
+                .tera
+                .register_filter("format_size", format_size_filter);
+
             engine.tera.autoescape_on(vec![]);
+            
         }))
         .manage(TranslationStore::new())
         .manage(size_state)

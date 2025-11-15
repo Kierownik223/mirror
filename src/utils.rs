@@ -11,7 +11,7 @@ use rocket::{
     fs::NamedFile,
     http::{Cookie, CookieJar, SameSite, Status},
 };
-use tera::{Value, to_value, try_get_value};
+use tera::{to_value, try_get_value, Value};
 use time::{Duration, OffsetDateTime};
 use tokio::sync::RwLock;
 use zip::write::SimpleFileOptions;
@@ -392,7 +392,11 @@ pub fn format_size(bytes: u64, use_si: bool) -> String {
     }
 
     let k: f64 = if use_si { 1000.0 } else { 1024.0 };
-    let sizes = if use_si { ["B", "KB", "MB", "GB", "TB"] } else { ["B", "KiB", "MiB", "GiB", "TiB"] };
+    let sizes = if use_si {
+        ["B", "KB", "MB", "GB", "TB"]
+    } else {
+        ["B", "KiB", "MiB", "GiB", "TiB"]
+    };
     let bytes_f64 = bytes as f64;
     let i = (bytes_f64.ln() / k.ln()).floor() as usize;
     let value = bytes_f64 / k.powi(i as i32);
@@ -400,7 +404,10 @@ pub fn format_size(bytes: u64, use_si: bool) -> String {
     format!("{:.1} {}", value, sizes[i])
 }
 
-pub fn format_size_filter(value: &Value, args: &HashMap<String, Value>) -> Result<Value, tera::Error> {
+pub fn format_size_filter(
+    value: &Value,
+    args: &HashMap<String, Value>,
+) -> Result<Value, tera::Error> {
     let num = try_get_value!("format_size", "value", u64, value);
 
     let use_si = match args.get("use_si") {

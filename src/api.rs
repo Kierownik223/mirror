@@ -400,7 +400,11 @@ async fn delete<'a>(
 }
 
 #[get("/sysinfo?<use_si>")]
-fn sysinfo(token: Result<JWT, Status>, use_si: Option<&str>, jar: &CookieJar<'_>) -> Result<Cached<Json<Sysinfo>>, Status> {
+fn sysinfo(
+    token: Result<JWT, Status>,
+    use_si: Option<&str>,
+    jar: &CookieJar<'_>,
+) -> Result<Cached<Json<Sysinfo>>, Status> {
     let _token = token?;
 
     let mut sys = System::new_all();
@@ -408,9 +412,9 @@ fn sysinfo(token: Result<JWT, Status>, use_si: Option<&str>, jar: &CookieJar<'_>
     let use_si = match use_si {
         Some(u) => match u {
             "false" => false,
-            _ => true
+            _ => true,
         },
-        None => crate::utils::get_bool_cookie(jar, "use_si", true)
+        None => crate::utils::get_bool_cookie(jar, "use_si", true),
     };
 
     sys.refresh_specifics(RefreshKind::without_processes(RefreshKind::without_cpu(
@@ -428,7 +432,10 @@ fn sysinfo(token: Result<JWT, Status>, use_si: Option<&str>, jar: &CookieJar<'_>
                 fs: disk.file_system().to_str().unwrap().to_string(),
                 used_space: disk.total_space() - disk.available_space(),
                 total_space: disk.total_space(),
-                used_space_readable: format_size(disk.total_space() - disk.available_space(), use_si),
+                used_space_readable: format_size(
+                    disk.total_space() - disk.available_space(),
+                    use_si,
+                ),
                 total_space_readable: format_size(disk.total_space(), use_si),
                 mount_point: disk.mount_point().display().to_string(),
             });
