@@ -385,13 +385,13 @@ pub fn parse_7z_output(output: &str) -> Vec<MirrorFile> {
     files
 }
 
-pub fn format_size(bytes: u64) -> String {
+pub fn format_size(bytes: u64, use_si: bool) -> String {
     if bytes == 0 {
         return "0 B".to_string();
     }
 
-    let k: f64 = 1024.0;
-    let sizes = ["B", "KiB", "MiB", "GiB", "TiB"];
+    let k: f64 = if use_si { 1000.0 } else { 1024.0 };
+    let sizes = if use_si { ["B", "KB", "MB", "GB", "TB"] } else { ["B", "KiB", "MiB", "GiB", "TiB"] };
     let bytes_f64 = bytes as f64;
     let i = (bytes_f64.ln() / k.ln()).floor() as usize;
     let value = bytes_f64 / k.powi(i as i32);
