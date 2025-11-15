@@ -30,6 +30,8 @@ fn sysinfo(
         return Err(Status::Forbidden);
     }
 
+    let use_si = get_bool_cookie(jar, "use_si", true);
+
     let strings = translations.get_translation(&lang.0);
 
     let mut sys = System::new_all();
@@ -52,8 +54,8 @@ fn sysinfo(
                 fs: x.file_system().to_str().unwrap().to_string(),
                 used_space,
                 total_space: x.total_space(),
-                used_space_readable: format_size(used_space),
-                total_space_readable: format_size(x.total_space()),
+                used_space_readable: format_size(used_space, use_si),
+                total_space_readable: format_size(x.total_space(), use_si),
                 mount_point: x.mount_point().display().to_string(),
             }
         })
@@ -79,9 +81,9 @@ fn sysinfo(
             smallhead: get_bool_cookie(jar, "smallhead", false),
             username: username,
             total_mem: total_mem,
-            total_mem_readable: format_size(total_mem),
+            total_mem_readable: format_size(total_mem, use_si),
             used_mem: used_mem,
-            used_mem_readable: format_size(used_mem),
+            used_mem_readable: format_size(used_mem, use_si),
             sys_name: sys_name,
             sys_ver: sys_ver,
             hostname: hostname,
