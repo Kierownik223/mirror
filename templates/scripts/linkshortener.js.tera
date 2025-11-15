@@ -14,7 +14,7 @@ function shorten(element, url) {
     }
 
     try {
-        xhr.open("POST", "{{ config.linkshortener_url | safe }}", true);
+        xhr.open("POST", "{{ config.linkshortener_url }}", true);
         xhr.setRequestHeader("Content-Type", "application/json");
     } catch (e) {
         alert("{{ strings.error_shortening }}");

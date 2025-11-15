@@ -8,18 +8,18 @@
     <link rel="shortcut icon" href="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png" type="image/x-icon">
     <link rel="icon" href="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">
 
-    <meta property="og:title" content="{{ audiotitle | safe }}">
-    <meta property="og:url" content="https://{{ host }}{{ path | urlencode | safe }}" />
-    <meta property="og:description" content="{{ title | safe }}">
+    <meta property="og:title" content="{{ audiotitle }}">
+    <meta property="og:url" content="https://{{ host }}{{ path | urlencode }}" />
+    <meta property="og:description" content="{{ title }}">
     <meta property="og:type" content=website>
-    <meta property="og:image" content="/poster{{ path | urlencode | safe }}">
+    <meta property="og:image" content="/poster{{ path | urlencode }}">
     <meta property="og:locale" content="{{ lang }}">
     <meta property="og:site_name" content="MARMAK Mirror">
-    <meta property="og:audio" content="/file{{ path | urlencode | safe }}"/>
-    <meta property="og:audio:secure_url" content="/file{{ path | urlencode | safe }}"/>
-    <meta name="description" content="{{ title | safe }}">
+    <meta property="og:audio" content="/file{{ path | urlencode }}"/>
+    <meta property="og:audio:secure_url" content="/file{{ path | urlencode }}"/>
+    <meta name="description" content="{{ title }}">
 
-    <title>{{ audiotitle | safe }} - MARMAK Mirror</title>
+    <title>{{ audiotitle }} - MARMAK Mirror</title>
 {% endblock head %}
 
 {% block content %}
@@ -38,7 +38,7 @@
                             {% if i == num_segments - 1 %}
                                 <span>{{ segments[i] }}</span>
                             {% else %}
-                                <span><a href="{{ url | urlencode | safe }}/">{{ segments[i] }}</a>/</span>
+                                <span><a href="{{ url | urlencode }}/">{{ segments[i] }}</a>/</span>
                             {% endif %}
                         {% endif %}
                     {% endfor %}
@@ -46,10 +46,10 @@
                 {% endfilter %}
             </span>
         </span>
-        <div style="float: right;"><span><a href="/file{{ path | urlencode | safe }}" download><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">{{ strings.download }}</span></a></div><br>
+        <div style="float: right;"><span><a href="/file{{ path | urlencode }}" download><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">{{ strings.download }}</span></a></div><br>
         <a href="./"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png">./</a>
     </div>
-    <audio id="audio" src="/file{{ path | urlencode | safe }}" controls style="width: 100%;" poster="/poster{{ path | urlencode | safe }}">{{ strings.no_audio }}</audio>
+    <audio id="audio" src="/file{{ path | urlencode }}" controls style="width: 100%;" poster="/poster{{ path | urlencode }}">{{ strings.no_audio }}</audio>
     <a href="#" id="prev">Prev</a> <a href="#" id="next">Next</a> <br>
     <span id="artist">{% if artist != "" %}{{ artist }}{% else %}N/A{% endif %}</span> - <b style="font-size: 24px;"><span id="track">{% if track != 0 %}{{ track }}.{% endif %}</span> <span id="title">{{ audiotitle }}</span></b>
     <div style="display: flex; align-items: center; justify-content: space-between;">
@@ -58,7 +58,7 @@
             {{ strings.year }}: <b id="year">{% if year != 0 %}{{ year }}{% else %}N/A{% endif %}</b><br>
             {{ strings.genre }}: <b id="genre">{% if genre != "" %}{{ genre }}{% else %}N/A{% endif %}</b><br>
         </div>
-        <img id="cover" src="/poster{{ path | urlencode | safe }}" alt="{{ strings.album_cover }}" style="width: 30%; max-height: 100%;">
+        <img id="cover" src="/poster{{ path | urlencode }}" alt="{{ strings.album_cover }}" style="width: 30%; max-height: 100%;">
     </div>
 {% endblock content %}
 
@@ -70,7 +70,7 @@
             title: '{{ audiotitle }}',
             artist: '{{ artist }}',
             album: '{{ album }}',
-            artwork: [{src: '/poster{{ path | safe }}'}],
+            artwork: [{src: '/poster{{ path }}'}],
         });
     }
 </script>

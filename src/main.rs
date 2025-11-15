@@ -1359,6 +1359,7 @@ async fn rocket() -> _ {
     let mut rocket = rocket::build()
         .attach(Template::custom(|engine| {
             engine.tera.register_filter("format_size", format_size_filter);
+            engine.tera.autoescape_on(vec![]);
         }))
         .manage(TranslationStore::new())
         .manage(size_state)

@@ -10,7 +10,7 @@
             {% set subpath = segments | slice(start=0, end=i+1) %}
             {% set url = subpath | join(sep="/") %}
             {% if url != "" %}
-                <span><a href="{{ url | urlencode | safe }}/">{{ segments[i] }}</a>/</span><span class="seg"> </span>
+                <span><a href="{{ url | urlencode }}/">{{ segments[i] }}</a>/</span><span class="seg"> </span>
             {% endif %}
         {% endfor %}
     {% endif %}
@@ -50,26 +50,26 @@
         {% for s in dirs %}
         <tr>
             {% if is_logged_in and config.enable_zip_downloads or admin or private %}
-            <td><input type="checkbox" class="delete-checkbox" value="{{ s.name | safe | addslashes }}"></td>
+            <td><input type="checkbox" class="delete-checkbox" value="{{ s.name | addslashes }}"></td>
             {% endif %}
             <td><a href="{{ s.name | urlencode }}/"><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}/</a></td>
             <td class="hide-more">{{ s.size | format_size(use_si=use_si) }}</td>
             <td class="hide">{{ strings.folder }}</td>
             {% if admin or private %}
-            <td><a style="cursor: pointer;" href="javascript:;" onclick="deleteFile(this, '{{ s.name | safe | addslashes }}', true)">{{ strings.delete }}</a></td>
+            <td><a style="cursor: pointer;" href="javascript:;" onclick="deleteFile(this, '{{ s.name | addslashes }}', true)">{{ strings.delete }}</a></td>
             {% endif %}
         </tr>
         {% endfor %}
         {% for s in files %}
         <tr>
             {% if is_logged_in and config.enable_zip_downloads or admin or private %}
-            <td><input type="checkbox" class="delete-checkbox" value="{{ s.name | safe | addslashes }}"></td>
+            <td><input type="checkbox" class="delete-checkbox" value="{{ s.name | addslashes }}"></td>
             {% endif %}
             <td><a href="{{ s.name | urlencode }}"><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}</a></td>
             <td class="hide-more">{{ s.size | format_size(use_si=use_si) }}</td>
             <td class="hide">{{ strings.file }}</td>
             {% if admin or private %}
-            <td><a style="cursor: pointer;" href="javascript:;" onclick="renameFile(this, '{{ s.name | safe | addslashes }}', true)">{{ strings.rename }}</a> <a style="cursor: pointer;" href="javascript:;" onclick="deleteFile(this, '{{ s.name | safe | addslashes }}', true)">{{ strings.delete }}</a></td>
+            <td><a style="cursor: pointer;" href="javascript:;" onclick="renameFile(this, '{{ s.name | addslashes }}', true)">{{ strings.rename }}</a> <a style="cursor: pointer;" href="javascript:;" onclick="deleteFile(this, '{{ s.name | addslashes }}', true)">{{ strings.delete }}</a></td>
             {% endif %}
         </tr>
         {% endfor %}
@@ -77,7 +77,7 @@
 </table>
 {% if markdown != "" %}
 <p><span><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}md.png">README.md</span></p>
-{{ markdown | safe}}
+{{ markdown }}
 {% endif %}
 {% endblock content %}
 

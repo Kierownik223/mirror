@@ -16,7 +16,7 @@
                         {% if i == num_segments - 1 %}
                             <span>{{ segments[i] }}</span>
                         {% else %}
-                            <span><a href="{{ url | urlencode | safe }}/">{{ segments[i] }}</a>/</span>
+                            <span><a href="{{ url | urlencode }}/">{{ segments[i] }}</a>/</span>
                         {% endif %}
                     {% endif %}
                 {% endfor %}
@@ -25,13 +25,13 @@
         </span>
     </span>
     &nbsp;
-    <a href="/file{{ path | urlencode | safe }}" download>{{ strings.download }}</a><br>
+    <a href="/file{{ path | urlencode }}" download>{{ strings.download }}</a><br>
 </div>
 <hr>
 <a href="./">./</a>
-<video src="/file{{ path | urlencode | safe }}" controls style="height: 60vh; width: 100%;" poster="{{ poster | urlencode | safe }}">{{ strings.no_video }}</video>
+<video src="/file{{ path | urlencode }}" controls style="height: 60vh; width: 100%;" poster="{{ poster | urlencode }}">{{ strings.no_video }}</video>
 {% if displaydetails %}
 <b style="font-size: 24px;">{{ vidtitle }}</b>
-{{ details | safe }}
+{{ details }}
 {% endif %}
 {% endblock content %}

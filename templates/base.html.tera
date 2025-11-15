@@ -11,13 +11,13 @@
     <link rel="icon" type="image/svg+xml" href="/static/images/favicon.svg" />
     <link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png" />
 
-    <meta property="og:title" content="{{ title | safe }}">
-    <meta property="og:description" content="{{ title | safe }}">
+    <meta property="og:title" content="{{ title }}">
+    <meta property="og:description" content="{{ title }}">
     <meta property="og:type" content=website>
     <meta property="og:image" content="/static/images/icons/hires/favicon.png">
     <meta property="og:locale" content="en">
     <meta property="og:site_name" content="MARMAK Mirror">
-    <meta name="description" content="{{ title | safe }}">
+    <meta name="description" content="{{ title }}">
     <meta name="apple-mobile-web-app-title" content="MARMAK Mirror" />
     <link rel="manifest" href="/static/site.webmanifest" />
 
@@ -28,7 +28,7 @@
 
     <meta name="apple-mobile-web-app-capable" content="yes">
 
-    <title>{{ title | safe }} - MARMAK Mirror</title>
+    <title>{{ title }} - MARMAK Mirror</title>
     {% endblock head %}
     <link rel="stylesheet" href="/static/styles/{{ theme }}.css">
     <!--[if lt IE 7]>

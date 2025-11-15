@@ -15,7 +15,7 @@
                     {% if i == num_segments - 1 %}
                         <span>{{ segments[i] }}</span>
                     {% else %}
-                        <span><a href="{{ url | urlencode | safe }}/">{{ segments[i] }}</a>/</span>
+                        <span><a href="{{ url | urlencode }}/">{{ segments[i] }}</a>/</span>
                     {% endif %}
                 {% endif %}
             {% endfor %}
@@ -24,10 +24,10 @@
     </span>
 </span>
 &nbsp;
-<a href="/file{{ path | urlencode | safe }}" download>{{ strings.download }}</a><br>
+<a href="/file{{ path | urlencode }}" download>{{ strings.download }}</a><br>
 <hr>
 <a href="./">./</a>
-<audio src="/file{{ path | urlencode | safe }}" controls style="width: 100%;" poster="/poster{{ path | urlencode | safe }}">{{ strings.no_audio }}</audio>
+<audio src="/file{{ path | urlencode }}" controls style="width: 100%;" poster="/poster{{ path | urlencode }}">{{ strings.no_audio }}</audio>
 {% if artist != "" %}{{ artist }} - {% endif %}<b style="font-size: 24px;">{% if track != 0 %}{{ track }}. {% endif %}{{ audiotitle }}</b><br>
 {% if album != "" %}{{ strings.album }}: <b>{{ album }}</b><br>{% endif %}
 {% if year != 0 %}{{ strings.year }}: <b>{{ year }}</b><br>{% endif %}

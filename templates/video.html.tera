@@ -8,25 +8,25 @@
     <link rel="shortcut icon" href="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png" type="image/x-icon">
     <link rel="icon" href="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">
     
-    <meta property="og:url" content="https://{{ host }}{{ path | urlencode | safe }}" />
+    <meta property="og:url" content="https://{{ host }}{{ path | urlencode }}" />
     <meta property="twitter:site" content="MARMAK Mirror" />
     <meta property="twitter:creator" content="MARMAK" />
     <meta property="twitter:title" content="{{ vidtitle }}" />
-    <meta property="twitter:player:stream"  content="/file{{ path | urlencode | safe }}" />
+    <meta property="twitter:player:stream"  content="/file{{ path | urlencode }}" />
     <meta property="twitter:player:stream:content_type" content="video/mp4" />
-    <meta property="og:video" content="/file{{ path | urlencode | safe }}" />
-    <meta property="og:video:secure_url" content="/file{{ path | urlencode | safe }}" />
+    <meta property="og:video" content="/file{{ path | urlencode }}" />
+    <meta property="og:video:secure_url" content="/file{{ path | urlencode }}" />
     <meta property="og:video:type" content="video/mp4" />
-    <meta property="og:image" content="{{ poster | urlencode | safe }}" />
+    <meta property="og:image" content="{{ poster | urlencode }}" />
     <meta property="twitter:image" content="0" />
     <meta property="twitter:card" content="player" />
-    <meta property="og:title" content="{{ vidtitle | safe }}" />
+    <meta property="og:title" content="{{ vidtitle }}" />
     <meta property="og:description" content="{{ details | striptags }}" />
     <meta property="og:site_name" content="MARMAK Mirror" />
     <meta property="og:locale" content="{{ lang }}">
     <meta name="description" content="{{ details | striptags }}">
 
-    <title>{{ vidtitle | safe }} - MARMAK Mirror</title>
+    <title>{{ vidtitle }} - MARMAK Mirror</title>
 {% endblock head %}
 
 {% block content %}
@@ -45,7 +45,7 @@
                             {% if i == num_segments - 1 %}
                                 <span>{{ segments[i] }}</span>
                             {% else %}
-                                <span><a href="{{ url | urlencode | safe }}/">{{ segments[i] }}</a>/</span>
+                                <span><a href="{{ url | urlencode }}/">{{ segments[i] }}</a>/</span>
                             {% endif %}
                         {% endif %}
                     {% endfor %}
@@ -53,12 +53,12 @@
                 {% endfilter %}
             </span>
         </span>
-        <div style="float: right;"><a href="/file{{ path | urlencode | safe }}" download><span><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">{{ strings.download }}</span></a></div><br>
+        <div style="float: right;"><a href="/file{{ path | urlencode }}" download><span><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">{{ strings.download }}</span></a></div><br>
         <a href="./"><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png">./</a>
     </div>
-    <video src="/file{{ path | urlencode | safe }}" controls style="height: 60vh; width: 100%;" poster="{{ poster | urlencode | safe }}">{{ strings.no_video }}</video>
+    <video src="/file{{ path | urlencode }}" controls style="height: 60vh; width: 100%;" poster="{{ poster | urlencode }}">{{ strings.no_video }}</video>
     {% if displaydetails %}
     <b style="font-size: 24px;">{{ vidtitle }}</b>
-    {{ details | safe }}
+    {{ details }}
     {% endif %}
 {% endblock content %}
