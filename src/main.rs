@@ -579,7 +579,6 @@ async fn index(
             }
 
             let mut markdown = String::new();
-            let mut topmarkdown = false;
             let path_str = Path::new("/").join(&file).display().to_string();
 
             let mut files =
@@ -587,10 +586,6 @@ async fn index(
             let mut dirs = read_dirs_async(&path.display().to_string(), sizes)
                 .await
                 .map_err(map_io_error_to_status)?;
-
-            if files.iter().any(|f| f.name == "top") {
-                topmarkdown = true;
-            }
 
             if files.iter().any(|f| f.name == "RESTRICTED") {
                 for dir in dirs.iter_mut() {
@@ -641,8 +636,6 @@ async fn index(
                     hires,
                     smallhead,
                     markdown,
-                    topmarkdown,
-                    dir_browser: get_bool_cookie(jar, "dir_browser", true),
                     private: is_private,
                     use_si,
                 },
@@ -714,7 +707,6 @@ async fn index(
                     hires,
                     smallhead,
                     markdown,
-                    dir_browser: get_bool_cookie(jar, "dir_browser", true),
                     private: is_private,
                     use_si,
                 },
