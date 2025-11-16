@@ -916,6 +916,9 @@ async fn sync_settings(
         "theme",
         "nooverride",
         "viewers",
+        "use_si",
+        "audio_player",
+        "video_player",
     ];
 
     let mut cookie_map: HashMap<String, Option<String>> = HashMap::new();
@@ -944,6 +947,9 @@ async fn reset_settings(jar: &CookieJar<'_>) -> Redirect {
         "nooverride",
         "plain",
         "viewers",
+        "use_si",
+        "audio_player",
+        "video_player",
     ];
 
     for key in keys {
