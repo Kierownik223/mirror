@@ -39,6 +39,7 @@ viewers = "Przeglądarki szczegółów plików"
 use_si_prefixes = "Używaj przedrostków SI"
 audio_player = "Używaj zaawansowanego odtwarzacza audio"
 video_player = "Używaj zaawansowanego odtwarzacza wideo"
+directory_browser = "Przeglądarka katalogów na wrzucarce"
 
 # Files
 
