@@ -37,6 +37,8 @@ save_settings = "Salvar configurações"
 reset_settings = "Redefinir configurações"
 viewers = "Visualizadores de detalhes do arquivo"
 use_si_prefixes = "Use prefixos SI"
+audio_player = "Usar reprodutor de áudio avançado"
+video_player = "Usar reprodutor de vídeo avançado"
 
 # Files
 

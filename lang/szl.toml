@@ -37,6 +37,8 @@ save_settings = "Zapiś ustawiynia"
 reset_settings = "Resetuj ustawiynia"
 viewers = "Szczegōłowi widzowie ô pliku"
 use_si_prefixes = "Używej prefixōw SI"
+audio_player = "Użyć zaawansowanego audio ôdgrowocza"
+video_player = "Użyć zaawansowanego video ôdgrowocza"
 
 # Files
 

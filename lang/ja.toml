@@ -37,6 +37,8 @@ save_settings = "設定を保存"
 reset_settings = "設定をリセット"
 viewers = "ファイルの詳細ビューア"
 use_si_prefixes = "SI接頭語を使用してください"
+audio_player = "高度なオーディオプレーヤーを使用する"
+video_player = "高度なビデオプレーヤーを使用する"
 
 # Files
 

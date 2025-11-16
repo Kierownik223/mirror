@@ -37,6 +37,8 @@ save_settings = "Uložiť nastavenia"
 reset_settings = "Obnoviť nastavenia"
 viewers = "Zobrazovače detailov súboru"
 use_si_prefixes = "Používajte predpony SI"
+audio_player = "Použiť pokročilý audio prehrávač"
+video_player = "Použiť pokročilý video prehrávač"
 
 # Files
 
