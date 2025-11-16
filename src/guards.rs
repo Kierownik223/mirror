@@ -18,6 +18,7 @@ pub struct Settings<'r> {
     pub filebrowser: Option<&'r str>,
     pub use_si: Option<&'r str>,
     pub audio_player: Option<&'r str>,
+    pub video_player: Option<&'r str>,
 }
 
 pub struct HeaderFile(pub String, pub String);

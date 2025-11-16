@@ -42,6 +42,11 @@
     <label><input type="radio" name="audio_player" value="true" {% if audio_player %}checked {% endif %}>{{ strings.enable }}</label>
     <label><input type="radio" name="audio_player" value="false" {% if not audio_player %}checked {% endif %}>{{ strings.disable }}</label>
     <br>
+    <label for="video_player">{{ strings.video_player }}</label>
+    <br>
+    <label><input type="radio" name="video_player" value="true" {% if video_player %}checked {% endif %}>{{ strings.enable }}</label>
+    <label><input type="radio" name="video_player" value="false" {% if not video_player %}checked {% endif %}>{{ strings.disable }}</label>
+    <br>
     <center>
         <input type="submit" value="{{ strings.save_settings }}">
     </center>

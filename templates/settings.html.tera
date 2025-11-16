@@ -68,6 +68,11 @@
     <br>
     <label><input type="radio" name="audio_player" value="true" {% if audio_player %}checked {% endif %}>{{ strings.enable }}</label>
     <label><input type="radio" name="audio_player" value="false" {% if not audio_player %}checked {% endif %}>{{ strings.disable }}</label>
+    <br>
+    <label for="video_player"><img src="/static/images/icons/{% if hires %}hires/{% endif %}mp4.png" class="icon">{{ strings.video_player }}</label>
+    <br>
+    <label><input type="radio" name="video_player" value="true" {% if video_player %}checked {% endif %}>{{ strings.enable }}</label>
+    <label><input type="radio" name="video_player" value="false" {% if not video_player %}checked {% endif %}>{{ strings.disable }}</label>
     {% if is_logged_in and admin %}
     <br>
     <label for="nooverride"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">Disable file browser in uploader</label>
