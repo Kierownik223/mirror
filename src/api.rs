@@ -651,10 +651,13 @@ async fn index() -> Json<MirrorInfo> {
 }
 
 #[catch(default)]
-fn default(status: Status, _req: &Request) -> Json<Error> {
-    Json(Error {
-        message: format!("{}", status),
-    })
+fn default(status: Status, _req: &Request) -> Cached<Json<Error>> {
+    Cached {
+        response: Json(Error {
+            message: format!("{}", status),
+        }),
+        header: "no-cache",
+    }
 }
 
 pub fn build_api() -> AdHoc {

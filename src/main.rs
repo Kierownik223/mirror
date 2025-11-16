@@ -1259,7 +1259,7 @@ fn unprocessable_entry() -> Status {
 }
 
 #[catch(default)]
-async fn default(status: Status, req: &Request<'_>) -> Template {
+async fn default(status: Status, req: &Request<'_>) -> Cached<Template> {
     let jar = req.cookies();
     let translations = req.guard::<&State<TranslationStore>>().await.unwrap();
     let useplain = req.guard::<UsePlain<'_>>().await.unwrap();
@@ -1280,29 +1280,32 @@ async fn default(status: Status, req: &Request<'_>) -> Template {
     let host = if req.host().is_some() {
         &req.host().unwrap().to_string()
     } else {
-        "127.0.0.1"
+        &(*CONFIG).fallback_root_domain
     };
 
-    Template::render(
-        if *useplain.0 {
-            format!("plain/error/{}", status.code)
-        } else {
-            format!("error/{}", status.code)
-        },
-        context! {
-            title: format!("HTTP {}", status.code),
-            lang,
-            strings,
-            root_domain: get_root_domain(&host),
-            host,
-            config: (*CONFIG).clone(),
-            theme: get_theme(jar),
-            is_logged_in: false,
-            admin: false,
-            hires: get_bool_cookie(jar, "hires", false),
-            smallhead: get_bool_cookie(jar, "smallhead", false),
-        },
-    )
+    Cached {
+        response: Template::render(
+            if *useplain.0 {
+                format!("plain/error/{}", status.code)
+            } else {
+                format!("error/{}", status.code)
+            },
+            context! {
+                title: format!("HTTP {}", status.code),
+                lang,
+                strings,
+                root_domain: get_root_domain(&host),
+                host,
+                config: (*CONFIG).clone(),
+                theme: get_theme(jar),
+                is_logged_in: false,
+                admin: false,
+                hires: get_bool_cookie(jar, "hires", false),
+                smallhead: get_bool_cookie(jar, "smallhead", false),
+            },
+        ),
+        header: "no-cache",
+    }
 }
 
 #[catch(401)]
@@ -1368,7 +1371,6 @@ async fn rocket() -> _ {
                 .register_filter("format_size", format_size_filter);
 
             engine.tera.autoescape_on(vec![]);
-            
         }))
         .manage(TranslationStore::new())
         .manage(size_state)
