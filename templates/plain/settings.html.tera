@@ -37,6 +37,11 @@
     <label><input type="radio" name="use_si" value="true" {% if plain %}checked {% endif %}>{{ strings.enable }}</label>
     <label><input type="radio" name="use_si" value="false" {% if not plain %}checked {% endif %}>{{ strings.disable }}</label>
     <br>
+    <label for="audio_player">{{ strings.audio_player }}</label>
+    <br>
+    <label><input type="radio" name="audio_player" value="true" {% if audio_player %}checked {% endif %}>{{ strings.enable }}</label>
+    <label><input type="radio" name="audio_player" value="false" {% if not audio_player %}checked {% endif %}>{{ strings.disable }}</label>
+    <br>
     <center>
         <input type="submit" value="{{ strings.save_settings }}">
     </center>

@@ -299,6 +299,7 @@ async fn index(
     let hires = get_bool_cookie(jar, "hires", false);
     let smallhead = get_bool_cookie(jar, "smallhead", false);
     let use_si = get_bool_cookie(jar, "use_si", true);
+    let audio_player = get_bool_cookie(jar, "audio_player", true);
 
     if let Ok((p, i)) = get_real_path(&file, username.clone()) {
         path = p;
@@ -476,7 +477,7 @@ async fn index(
             )))
         }
         "mp3" | "m4a" | "m4b" | "flac" | "wav" => {
-            if !*viewers.0 {
+            if !*viewers.0 || !audio_player {
                 return open_file(path, "private").await;
             }
 
@@ -776,6 +777,7 @@ fn settings(
         ("viewers", opt.viewers),
         ("filebrowser", opt.filebrowser),
         ("use_si", opt.use_si),
+        ("audio_player", opt.audio_player),
     ];
 
     let mut redir = false;
@@ -852,6 +854,7 @@ fn settings(
             viewers: get_bool_cookie(jar, "viewers", true),
             filebrowser: get_bool_cookie(jar, "filebrowser", false),
             use_si: get_bool_cookie(jar, "use_si", true),
+            audio_player: get_bool_cookie(jar, "audio_player", true),
             language_names,
             show_cookie_notice,
         },
