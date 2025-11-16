@@ -123,11 +123,17 @@ async fn login(
 
         let jwt = create_jwt(&db_user).map_err(|_| Status::InternalServerError)?;
 
-        let mut jwt_cookie = Cookie::new("matoken", jwt);
+        let mut jwt_cookie = Cookie::new("matoken", jwt.clone());
         jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
         jwt_cookie.set_same_site(SameSite::Lax);
 
         jar.add(jwt_cookie);
+
+        let mut local_jwt_cookie = Cookie::new("token", jwt.clone());
+        local_jwt_cookie.set_domain(host.0.to_string());
+        local_jwt_cookie.set_same_site(SameSite::Lax);
+
+        jar.add(local_jwt_cookie);
 
         println!(
             "Login for user {} from {} succeeded",

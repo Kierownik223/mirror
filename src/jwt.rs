@@ -40,7 +40,10 @@ impl<'r> FromRequest<'r> for JWT {
             Some(token) => Some(token),
             None => match req.cookies().get("matoken") {
                 Some(cookie) => Some(cookie.value()),
-                None => None,
+                None => match req.cookies().get("token") {
+                    Some(cookie) => Some(cookie.value()),
+                    None => None,
+                },
             },
         };
 
