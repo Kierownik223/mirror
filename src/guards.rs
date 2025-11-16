@@ -68,8 +68,12 @@ impl<'r> FromRequest<'r> for UsePlain<'r> {
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         match request.headers().get_one("User-Agent") {
             Some(value) => {
-                if get_bool_cookie(request.cookies(), "plain", false) {
-                    return Outcome::Success(UsePlain(&true));
+                if request.cookies().get("plain").is_some() {
+                    if !get_bool_cookie(request.cookies(), "plain", false) {
+                        return Outcome::Success(UsePlain(&false));
+                    } else {
+                        return Outcome::Success(UsePlain(&true));
+                    }
                 }
 
                 if value.starts_with("Mozilla/1") || value.starts_with("Mozilla/2") {
@@ -78,7 +82,17 @@ impl<'r> FromRequest<'r> for UsePlain<'r> {
 
                 Outcome::Success(UsePlain(&false))
             }
-            None => Outcome::Success(UsePlain(&true)),
+            None => {
+                if request.cookies().get("plain").is_some() {
+                    if !get_bool_cookie(request.cookies(), "plain", false) {
+                        return Outcome::Success(UsePlain(&false));
+                    } else {
+                        return Outcome::Success(UsePlain(&true));
+                    }
+                }
+                
+                Outcome::Success(UsePlain(&true))
+            }
         }
     }
 }
