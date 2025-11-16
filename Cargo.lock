@@ -1589,7 +1589,7 @@ dependencies = [
 
 [[package]]
 name = "mirror"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "audiotags",
  "base64 0.22.1",
