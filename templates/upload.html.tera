@@ -39,7 +39,7 @@
         <div class="textbox-container">
             <input type="text" id="path" name="path" class="text" placeholder="{{ strings.target_placeholder }}" value="{{ path }}">
         </div>
-        {% if filebrowser %}
+        {% if dir_browser %}
         <button type="button" onclick="openDialog()"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">{{ strings.browse }}</span></button>
         {% endif %}
     </center>
@@ -65,7 +65,7 @@
 <script src="/scripts/linkshortener/{{ lang }}/script.js"></script>
 {% endif %}
 
-{% if filebrowser %}
+{% if dir_browser %}
 <div id="browse_dialog" class="dialog">
     <div class="dialog-content">
         <img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">{{ strings.select_folder }}:

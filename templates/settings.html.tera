@@ -75,10 +75,10 @@
     <label><input type="radio" name="use_si" value="false"{% if not use_si %} checked{% endif %}>{{ strings.disable }}</label>
     {% if is_logged_in and admin %}
     <br>
-    <label for="nooverride"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">Disable file browser in uploader</label>
+    <label for="dir_browser"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">{{ strings.directory_browser }}</label>
     <br>
-    <label><input type="radio" name="filebrowser" value="true"{% if filebrowser %} checked{% endif %}>{{ strings.enable }}</label>
-    <label><input type="radio" name="filebrowser" value="false"{% if not filebrowser %} checked{% endif %}>{{ strings.disable }}</label>
+    <label><input type="radio" name="dir_browser" value="true"{% if dir_browser %} checked{% endif %}>{{ strings.enable }}</label>
+    <label><input type="radio" name="dir_browser" value="false"{% if not dir_browser %} checked{% endif %}>{{ strings.disable }}</label>
     {% endif %}
     <br>
     <center>
