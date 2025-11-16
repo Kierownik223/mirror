@@ -29,6 +29,6 @@
 {% if markdown != "" %}
 <hr>
 README.md<br>
-{{ markdown | escape }}
+{{ markdown }}
 {% endif %}
 {% endblock content %}

@@ -29,7 +29,7 @@
         {{ strings.target_dir }}:
     </label>
     <center>
-        <input type="text" id="path" name="path" placeholder="{{ strings.target_placeholder }}">
+        <input type="text" id="path" name="path" placeholder="{{ strings.target_placeholder }}" value="{{ path }}">
     </center>
     <br>
     {% else %}
