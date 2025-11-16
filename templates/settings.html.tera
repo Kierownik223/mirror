@@ -18,67 +18,67 @@
     <img src="/static/images/icons/ui/{% if hires %}hires/{% endif %}lang.png" class="icon">{{ strings.change_lang }}<br>
     <select name="lang">
         {% for s in language_names %}
-        <option value="{{ s.0 }}" {% if lang==s.0 %}selected{% endif %}>{{ s.1 }} ({{ s.0 }})</option>
+        <option value="{{ s.0 }}"{% if lang==s.0 %} selected{% endif %}>{{ s.1 }} ({{ s.0 }})</option>
         {% endfor %}
     </select>
     <br>
     <img src="/static/images/icons/ui/{% if hires %}hires/{% endif %}theme.png" class="icon">{{ strings.change_theme }}<br>
     <select name="theme">
-        <option value="default" {% if theme=="default" %}selected{% endif %}>{{ strings.theme_default }}</option>
-        <option value="darkblue" {% if theme=="darkblue" %}selected{% endif %}>{{ strings.theme_darkblue }}</option>
-        <option value="greenish" {% if theme=="greenish" %}selected{% endif %}>{{ strings.theme_greenish }}</option>
-        <option value="antique" {% if theme=="antique" %}selected{% endif %}>{{ strings.theme_antique }}</option>
-        <option value="oled" {% if theme=="oled" %}selected{% endif %}>OLED</option>
-        <option value="oledmatrix" {% if theme=="oledmatrix" %}selected{% endif %}>OLED Matrix</option>
-        <option value="white" {% if theme=="white" %}selected{% endif %}>#fff</option>
+        <option value="default"{% if theme=="default" %} selected{% endif %}>{{ strings.theme_default }}</option>
+        <option value="darkblue"{% if theme=="darkblue" %} selected{% endif %}>{{ strings.theme_darkblue }}</option>
+        <option value="greenish"{% if theme=="greenish" %} selected{% endif %}>{{ strings.theme_greenish }}</option>
+        <option value="antique"{% if theme=="antique" %} selected{% endif %}>{{ strings.theme_antique }}</option>
+        <option value="oled"{% if theme=="oled" %} selected{% endif %}>OLED</option>
+        <option value="oledmatrix"{% if theme=="oledmatrix" %} selected{% endif %}>OLED Matrix</option>
+        <option value="white"{% if theme=="white" %} selected{% endif %}>#fff</option>
         {% if theme == "venti" %}<option value="venti" selected>Venti by Olek47</option>{% endif %}
     </select>
     <br>
     <label for="hires"><img src="/static/images/icons/ui/{% if hires %}hires/{% endif %}floppy.png" class="icon">{{ strings.hires }}</label>
     <br>
-    <label><input type="radio" name="hires" value="true" {% if hires %}checked {% endif %}>{{ strings.enable }}</label>
-    <label><input type="radio" name="hires" value="false" {% if not hires %}checked {% endif %}>{{ strings.disable }}</label>
+    <label><input type="radio" name="hires" value="true"{% if hires %} checked{% endif %}>{{ strings.enable }}</label>
+    <label><input type="radio" name="hires" value="false"{% if not hires %} checked{% endif %}>{{ strings.disable }}</label>
     <br>
     <label for="smallhead"><img src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png" class="icon">{{ strings.smallhead }}</label>
     <br>
-    <label><input type="radio" name="smallhead" value="true" {% if smallhead %}checked {% endif %}>{{ strings.enable }}</label>
-    <label><input type="radio" name="smallhead" value="false" {% if not smallhead %}checked {% endif %}>{{ strings.disable }}</label>
+    <label><input type="radio" name="smallhead" value="true"{% if smallhead %} checked{% endif %}>{{ strings.enable }}</label>
+    <label><input type="radio" name="smallhead" value="false"{% if not smallhead %} checked{% endif %}>{{ strings.disable }}</label>
     <br>
     <label for="plain"><img src="/static/images/icons/{% if hires %}hires/{% endif %}default.png" class="icon">{{ strings.plain }}</label>
     <br>
-    <label><input type="radio" name="plain" value="true" {% if plain %}checked {% endif %}>{{ strings.enable }}</label>
-    <label><input type="radio" name="plain" value="false" {% if not plain %}checked {% endif %}>{{ strings.disable }}</label>
+    <label><input type="radio" name="plain" value="true"{% if plain %} checked{% endif %}>{{ strings.enable }}</label>
+    <label><input type="radio" name="plain" value="false"{% if not plain %} checked{% endif %}>{{ strings.disable }}</label>
     <br>
     <label for="nooverride"><img src="/static/images/icons/ui/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.dont_override_settings }}</label>
     <br>
-    <label><input type="radio" name="nooverride" value="true" {% if nooverride %}checked {% endif %}>{{ strings.enable }}</label>
-    <label><input type="radio" name="nooverride" value="false" {% if not nooverride %}checked {% endif %}>{{ strings.disable }}</label>
+    <label><input type="radio" name="nooverride" value="true"{% if nooverride %} checked{% endif %}>{{ strings.enable }}</label>
+    <label><input type="radio" name="nooverride" value="false"{% if not nooverride %} checked{% endif %}>{{ strings.disable }}</label>
     <br>
     <label for="viewers"><img src="/static/images/icons/{% if hires %}hires/{% endif %}exe.png" class="icon">{{ strings.viewers }}</label>
     <br>
-    <label><input type="radio" name="viewers" value="true" {% if viewers %}checked {% endif %}>{{ strings.enable }}</label>
-    <label><input type="radio" name="viewers" value="false" {% if not viewers %}checked {% endif %}>{{ strings.disable }}</label>
-    <br>
-    <label for="use_si"><img src="/static/images/icons/{% if hires %}hires/{% endif %}md.png" class="icon">{{ strings.use_si_prefixes }}</label>
-    <br>
-    <label><input type="radio" name="use_si" value="true" {% if use_si %}checked {% endif %}>{{ strings.enable }}</label>
-    <label><input type="radio" name="use_si" value="false" {% if not use_si %}checked {% endif %}>{{ strings.disable }}</label>
+    <label><input type="radio" name="viewers" value="true"{% if viewers %} checked{% endif %}>{{ strings.enable }}</label>
+    <label><input type="radio" name="viewers" value="false"{% if not viewers %} checked{% endif %}>{{ strings.disable }}</label>
     <br>
     <label for="audio_player"><img src="/static/images/icons/{% if hires %}hires/{% endif %}mp3.png" class="icon">{{ strings.audio_player }}</label>
     <br>
-    <label><input type="radio" name="audio_player" value="true" {% if audio_player %}checked {% endif %}>{{ strings.enable }}</label>
-    <label><input type="radio" name="audio_player" value="false" {% if not audio_player %}checked {% endif %}>{{ strings.disable }}</label>
+    <label><input type="radio" name="audio_player" value="true"{% if audio_player %} checked{% endif %}>{{ strings.enable }}</label>
+    <label><input type="radio" name="audio_player" value="false"{% if not audio_player %} checked{% endif %}>{{ strings.disable }}</label>
     <br>
     <label for="video_player"><img src="/static/images/icons/{% if hires %}hires/{% endif %}mp4.png" class="icon">{{ strings.video_player }}</label>
     <br>
-    <label><input type="radio" name="video_player" value="true" {% if video_player %}checked {% endif %}>{{ strings.enable }}</label>
-    <label><input type="radio" name="video_player" value="false" {% if not video_player %}checked {% endif %}>{{ strings.disable }}</label>
+    <label><input type="radio" name="video_player" value="true"{% if video_player %} checked{% endif %}>{{ strings.enable }}</label>
+    <label><input type="radio" name="video_player" value="false"{% if not video_player %} checked{% endif %}>{{ strings.disable }}</label>
+    <br>
+    <label for="use_si"><img src="/static/images/icons/{% if hires %}hires/{% endif %}md.png" class="icon">{{ strings.use_si_prefixes }}</label>
+    <br>
+    <label><input type="radio" name="use_si" value="true"{% if use_si %} checked{% endif %}>{{ strings.enable }}</label>
+    <label><input type="radio" name="use_si" value="false"{% if not use_si %} checked{% endif %}>{{ strings.disable }}</label>
     {% if is_logged_in and admin %}
     <br>
     <label for="nooverride"><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">Disable file browser in uploader</label>
     <br>
-    <label><input type="radio" name="filebrowser" value="true" {% if filebrowser %}checked {% endif %}>{{ strings.enable }}</label>
-    <label><input type="radio" name="filebrowser" value="false" {% if not filebrowser %}checked {% endif %}>{{ strings.disable }}</label>
+    <label><input type="radio" name="filebrowser" value="true"{% if filebrowser %} checked{% endif %}>{{ strings.enable }}</label>
+    <label><input type="radio" name="filebrowser" value="false"{% if not filebrowser %} checked{% endif %}>{{ strings.disable }}</label>
     {% endif %}
     <br>
     <center>
