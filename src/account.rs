@@ -236,11 +236,17 @@ async fn direct<'a>(
 
             let jwt = create_jwt(&db_user).map_err(|_| Status::InternalServerError)?;
 
-            let mut jwt_cookie = Cookie::new("matoken", jwt);
+            let mut jwt_cookie = Cookie::new("matoken", jwt.clone());
             jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
             jwt_cookie.set_same_site(SameSite::Lax);
 
             jar.add(jwt_cookie);
+
+            let mut local_jwt_cookie = Cookie::new("token", jwt.clone());
+            local_jwt_cookie.set_domain(host.0.to_string());
+            local_jwt_cookie.set_same_site(SameSite::Lax);
+
+            jar.add(local_jwt_cookie);
 
             if !Path::new(&format!("files/private/{}", &db_user.username)).exists() {
                 let _ = fs::create_dir(format!("files/private/{}", &db_user.username));
@@ -308,6 +314,11 @@ fn logout(jar: &CookieJar<'_>, host: Host<'_>) -> Redirect {
     jar.remove(
         Cookie::build("matoken")
             .domain(format!(".{}", get_root_domain(host.0)))
+            .same_site(SameSite::Lax),
+    );
+    jar.remove(
+        Cookie::build("token")
+            .domain(host.0.to_string())
             .same_site(SameSite::Lax),
     );
     Redirect::to("/account/login")
