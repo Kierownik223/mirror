@@ -3,6 +3,7 @@ use std::{
     ffi::OsStr,
     fs,
     io::{Cursor, Error, ErrorKind},
+    net::{Ipv4Addr, Ipv6Addr},
     path::{Path, PathBuf},
     sync::Arc,
 };
@@ -252,6 +253,10 @@ pub fn parse_language(header: &str) -> Option<String> {
 }
 
 pub fn get_root_domain<'a>(host: &str) -> String {
+    if host.parse::<Ipv4Addr>().is_ok() || host.parse::<Ipv6Addr>().is_ok() {
+        return CONFIG.fallback_root_domain.to_string();
+    }
+
     return host
         .splitn(2, '.')
         .nth(1)
