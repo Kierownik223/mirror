@@ -499,7 +499,7 @@ async fn index(
                     year: "N/A",
                     album: "N/A",
                     genre: "N/A",
-                    track: "N/A",
+                    track: None::<u16>,
                     cover: false
                 },
             );
