@@ -451,3 +451,21 @@ pub fn get_cache_control(is_private: bool) -> String {
         format!("public, max-age={}", CONFIG.max_age)
     }
 }
+
+pub fn get_name_from_path(path: &PathBuf) -> String {
+    path
+        .file_name()
+        .unwrap_or_default()
+        .to_str()
+        .unwrap_or_default()
+        .to_string()
+}
+
+pub fn get_extension_from_path(path: &PathBuf) -> String {
+    path
+        .extension()
+        .unwrap_or_default()
+        .to_str()
+        .unwrap_or_default()
+        .to_string()
+}

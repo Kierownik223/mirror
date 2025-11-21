@@ -22,15 +22,9 @@ use rocket_multipart_form_data::{
 use zip::write::SimpleFileOptions;
 
 use crate::{
-    config::CONFIG,
-    db::{get_downloads, FileDb},
-    jwt::JWT,
-    read_files,
-    utils::{
-        add_path_to_zip, format_size, get_extension_from_filename, get_genre, get_real_path,
-        get_real_path_with_perms, is_restricted, map_io_error_to_status, read_dirs_async,
-    },
-    Cached, Disk, FileSizes, Host, MirrorFile, Sysinfo,
+    Cached, Disk, FileSizes, Host, MirrorFile, Sysinfo, config::CONFIG, db::{FileDb, get_downloads}, jwt::JWT, read_files, utils::{
+        add_path_to_zip, format_size, get_extension_from_filename, get_extension_from_path, get_genre, get_name_from_path, get_real_path, get_real_path_with_perms, is_restricted, map_io_error_to_status, read_dirs_async
+    }
 };
 
 #[derive(serde::Serialize)]
@@ -146,26 +140,21 @@ async fn file_with_downloads(
         return Err(Status::NotAcceptable);
     }
 
-    let name = path
-        .file_name()
-        .unwrap_or_default()
-        .to_str()
-        .unwrap_or_default()
-        .to_string();
+    let name = get_name_from_path(&path);
     let downloads = get_downloads(db, &file).await.unwrap_or(0);
-    let ext = path
-        .extension()
-        .unwrap_or_default()
-        .to_str()
-        .unwrap_or_default();
-    let mut icon = ext;
+    let ext = get_extension_from_path(&path);
+    let mut icon = get_extension_from_path(&path);
+
+    if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
+        icon = "default".into();
+    }
 
     if ext == "mp3" || ext == "m4a" || ext == "m4b" || ext == "flac" {
         if let Ok(tag) = Tag::new().read_from_path(&path) {
             let title = tag
                 .title()
                 .map(|s| s.to_string())
-                .unwrap_or_else(|| path.file_name().unwrap_or_default().to_str().unwrap_or_default().to_string());
+                .unwrap_or(get_name_from_path(&path));
 
             let artist = tag.artist().map(|s| s.to_string());
             let album = tag.album_title().map(|s| s.to_string());
@@ -190,14 +179,10 @@ async fn file_with_downloads(
         }
     }
 
-    if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
-        icon = "default";
-    }
-
     Ok(Ok(Cached {
         response: Json(MirrorFile {
             name,
-            ext: ext.to_string(),
+            ext,
             icon: icon.to_string(),
             size: md.len(),
             downloads: Some(downloads),
@@ -228,26 +213,20 @@ async fn file(
         return Err(Status::NotAcceptable);
     }
 
-    let name = path
-        .file_name()
-        .unwrap_or_default()
-        .to_str()
-        .unwrap_or_default()
-        .to_string();
+    let name = get_name_from_path(&path);
+    let ext = get_extension_from_path(&path);
+    let mut icon = get_extension_from_path(&path);
 
-    let ext = path
-        .extension()
-        .unwrap_or_default()
-        .to_str()
-        .unwrap_or_default();
-    let mut icon = ext;
+    if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
+        icon = "default".into();
+    }
 
     if ext == "mp3" || ext == "m4a" || ext == "m4b" || ext == "flac" {
         if let Ok(tag) = Tag::new().read_from_path(&path) {
             let title = tag
                 .title()
                 .map(|s| s.to_string())
-                .unwrap_or_else(|| path.file_name().unwrap_or_default().to_str().unwrap_or_default().to_string());
+                .unwrap_or(get_name_from_path(&path));
 
             let artist = tag.artist().map(|s| s.to_string());
             let album = tag.album_title().map(|s| s.to_string());
@@ -272,19 +251,10 @@ async fn file(
         }
     }
 
-    if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
-        icon = "default";
-    }
-
     Ok(Ok(Cached {
         response: Json(MirrorFile {
             name,
-            ext: path
-                .extension()
-                .unwrap_or_default()
-                .to_str()
-                .unwrap_or_default()
-                .to_string(),
+            ext,
             icon: icon.to_string(),
             size: md.len(),
             downloads: None,
@@ -316,31 +286,18 @@ async fn rename(
     fs::rename(&path, &new_path).map_err(map_io_error_to_status)?;
 
     let md = fs::metadata(&new_path).map_err(map_io_error_to_status)?;
-    let name = new_path
-        .file_name()
-        .unwrap_or_default()
-        .to_str()
-        .unwrap_or_default()
-        .to_string();
 
-    let mut icon = new_path
-        .extension()
-        .unwrap_or_default()
-        .to_str()
-        .unwrap_or("default");
+    let ext = get_extension_from_path(&new_path);
+
+    let mut icon = ext.as_str();
 
     if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
         icon = "default";
     }
 
     Ok(Json(MirrorFile {
-        name,
-        ext: new_path
-            .extension()
-            .unwrap_or_default()
-            .to_str()
-            .unwrap_or_default()
-            .to_string(),
+        name: get_extension_from_path(&new_path),
+        ext: get_extension_from_path(&new_path),
         icon: icon.to_string(),
         size: md.len(),
         downloads: None,
@@ -429,7 +386,7 @@ fn sysinfo(
     for disk in &sys_disks {
         if disk.total_space() != 0 {
             disks.push(Disk {
-                fs: disk.file_system().to_str().unwrap_or_default().to_string(),
+                fs: disk.file_system().to_str().unwrap_or("unknown").to_string(),
                 used_space: disk.total_space() - disk.available_space(),
                 total_space: disk.total_space(),
                 used_space_readable: format_size(
@@ -474,7 +431,7 @@ fn user(jar: &CookieJar<'_>, token: Result<JWT, Status>) -> Result<Cached<Json<U
     let mut settings: HashMap<String, String> = HashMap::new();
     for key in keys {
         let value = jar.get(key).map(|cookie| cookie.value().to_string());
-        settings.insert(key.to_string(), value.unwrap_or_default());
+        settings.insert(key.to_string(), value.unwrap_or("false".into()));
     }
 
     Ok(Cached {
@@ -554,11 +511,7 @@ async fn upload(
         for file_field in file_fields {
             if let Some(file_name) = &file_field.file_name {
                 let normalized_path = file_name.replace('\\', "/");
-                let file_name = &Path::new(&normalized_path)
-                    .file_name()
-                    .and_then(|name| name.to_str())
-                    .unwrap_or_default()
-                    .to_string();
+                let file_name = &get_name_from_path(&Path::new(&normalized_path).to_path_buf());
 
                 let upload_path = format!("{}/{}", base_path, file_name);
 

@@ -37,8 +37,7 @@ use crate::i18n::{Language, TranslationStore};
 use crate::jwt::JWT;
 use crate::responders::{Cached, IndexResponse, IndexResult};
 use crate::utils::{
-    format_size_filter, get_cache_control, get_extension_from_filename, get_genre, get_real_path,
-    get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output, read_dirs_async,
+    format_size_filter, get_cache_control, get_extension_from_path, get_genre, get_name_from_path, get_real_path, get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output, read_dirs_async
 };
 
 mod account;
@@ -118,13 +117,7 @@ async fn poster(
     };
     let (path, is_private) = if let Ok(rest) = file.strip_prefix("private") {
         if username == "Nobody" {
-            if rest
-                .extension()
-                .unwrap_or_default()
-                .to_str()
-                .unwrap_or_default()
-                == "mp3"
-            {
+            if get_extension_from_path(&rest.to_path_buf()) == "mp3" {
                 return Ok(Err(open_file(
                     Path::new(&"files/static/images/icons/256x256/mp3.png").to_path_buf(),
                     "private",
@@ -363,7 +356,7 @@ async fn index(
 
     match ext.as_str() {
         "md" => {
-            let markdown_text = fs::read_to_string(&path).unwrap_or_default();
+            let markdown_text = fs::read_to_string(&path).unwrap_or_else(|e| format!("{} {:?}", strings.get("error_occured").unwrap_or(&"error_occured".to_string()), e));
             let markdown = markdown::to_html(&markdown_text);
             Ok(IndexResponse::Template(Template::render(
                 if *useplain.0 { "plain/md" } else { "md" },
@@ -495,7 +488,7 @@ async fn index(
                     host: host.0,
                     config: (*CONFIG).clone(),
                     path: audiopath,
-                    audiotitle: &path.file_name().unwrap_or_default().to_str().unwrap_or_default(),
+                    audiotitle: get_name_from_path(&path),
                     theme: &theme,
                     is_logged_in: token.is_ok(),
                     username: &username,
@@ -511,25 +504,21 @@ async fn index(
                 },
             );
 
-            if path
-                .extension()
-                .unwrap_or_default()
-                .to_str()
-                .unwrap_or_default()
-                == "wav"
-            {
+            if get_extension_from_path(&path) == "wav" {
                 return Ok(IndexResponse::Template(generic_template));
             }
 
             if let Ok(tag) = Tag::new().read_from_path(&path) {
                 let audiotitle = tag
                     .title()
-                    .unwrap_or(&path.file_name().unwrap_or_default().to_str().unwrap_or_default());
-                let artist = tag.artist().unwrap_or_default();
-                let year = tag.year().unwrap_or(0);
-                let album = tag.album_title().unwrap_or_default();
-                let genre = get_genre(tag.genre().unwrap_or_default())?;
-                let track = tag.track_number().unwrap_or(0);
+                    .map(|s| s.to_string())
+                    .unwrap_or(get_name_from_path(&path));
+
+                let artist = tag.artist().map(|s| s.to_string());
+                let album = tag.album_title().map(|s| s.to_string());
+                let genre = tag.genre().map(|s| get_genre(s).unwrap_or(s.to_string()));
+                let year = tag.year();
+                let track = tag.track_number();
 
                 let mut cover = false;
 
@@ -734,7 +723,7 @@ async fn index(
                         admin: perms == 0,
                         hires,
                         smallhead,
-                        filename: path.file_name().unwrap_or_default().to_str(),
+                        filename: get_name_from_path(&path),
                         filesize: fs::metadata(&path).unwrap().len(),
                         use_si,
                     },
@@ -1153,11 +1142,7 @@ async fn upload(
         for file_field in file_fields {
             if let Some(file_name) = &file_field.file_name {
                 let normalized_path = file_name.replace('\\', "/");
-                let file_name = &Path::new(&normalized_path)
-                    .file_name()
-                    .and_then(|name| name.to_str())
-                    .unwrap_or_default()
-                    .to_string();
+                let file_name = get_name_from_path(&Path::new(&normalized_path).to_path_buf());
 
                 let upload_path = format!("{}/{}", base_path, file_name);
 
@@ -1168,30 +1153,23 @@ async fn upload(
                             let _ = temp_file.read_to_end(&mut buffer);
 
                             let _ = file.write_all(&buffer);
-                            let mut icon = get_extension_from_filename(file_name)
-                                .unwrap_or("")
-                                .to_string()
-                                .to_lowercase();
-                            if !Path::new(
-                                &("files/static/images/icons/".to_owned() + &icon + ".png")
-                                    .to_string(),
-                            )
-                            .exists()
+                            let mut icon = get_extension_from_path(&Path::new(&normalized_path).to_path_buf());
+                            if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists()
                             {
                                 icon = "default".to_string();
                             }
 
                             if perms == 0 {
                                 uploaded_files.push(MirrorFile {
-                                    name: file_name.to_string(),
-                                    ext: format!("/{}/{}", user_path, file_name),
+                                    name: file_name,
+                                    ext: format!("/{}/{}", user_path, get_name_from_path(&Path::new(&normalized_path).to_path_buf())),
                                     size: 0,
                                     icon: icon,
                                     downloads: None,
                                 });
                             } else {
                                 uploaded_files.push(MirrorFile {
-                                    name: file_name.to_string(),
+                                    name: file_name,
                                     ext: format!(
                                         "/{}/{}",
                                         user_path.replacen(
@@ -1199,7 +1177,7 @@ async fn upload(
                                             "",
                                             1
                                         ),
-                                        file_name
+                                        get_name_from_path(&Path::new(&normalized_path).to_path_buf())
                                     ),
                                     size: 0,
                                     icon: icon,

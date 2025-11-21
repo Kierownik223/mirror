@@ -28,8 +28,8 @@
 <hr>
 <a href="./">./</a>
 <audio src="/file{{ path | urlencode }}" controls style="width: 100%;" poster="/poster{{ path | urlencode }}">{{ strings.no_audio }}</audio>
-{% if artist != "" %}{{ artist }} - {% endif %}<b style="font-size: 24px;">{% if track != 0 %}{{ track }}. {% endif %}{{ audiotitle }}</b><br>
-{% if album != "" %}{{ strings.album }}: <b>{{ album }}</b><br>{% endif %}
-{% if year != 0 %}{{ strings.year }}: <b>{{ year }}</b><br>{% endif %}
-{% if genre != "" %}{{ strings.genre }}: <b>{{ genre }}</b><br>{% endif %}
+{% if artist %}{{ artist }} - {% endif %}<b style="font-size: 24px;">{% if track %}{{ track }}. {% endif %}{{ audiotitle }}</b><br>
+{% if album %}{{ strings.album }}: <b>{{ album }}</b><br>{% endif %}
+{% if year %}{{ strings.year }}: <b>{{ year }}</b><br>{% endif %}
+{% if genre %}{{ strings.genre }}: <b>{{ genre }}</b><br>{% endif %}
 {% endblock content %}

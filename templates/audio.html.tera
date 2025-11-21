@@ -51,12 +51,12 @@
     </div>
     <audio id="audio" src="/file{{ path | urlencode }}" controls style="width: 100%;" poster="/poster{{ path | urlencode }}">{{ strings.no_audio }}</audio>
     <a href="#" id="prev">Prev</a> <a href="#" id="next">Next</a> <br>
-    <span id="artist">{% if artist != "" %}{{ artist }}{% else %}N/A{% endif %}</span> - <b style="font-size: 24px;"><span id="track">{% if track != 0 %}{{ track }}.{% endif %}</span> <span id="title">{{ audiotitle }}</span></b>
+    <span id="artist">{% if artist %}{{ artist }}{% else %}N/A{% endif %}</span> - <b style="font-size: 24px;"><span id="track">{% if track %}{{ track }}.{% endif %}</span> <span id="title">{{ audiotitle }}</span></b>
     <div style="display: flex; align-items: center; justify-content: space-between;">
         <div style="flex: 1;">
-            {{ strings.album }}: <b id="album">{% if album != "" %}{{ album }}{% else %}N/A{% endif %}</b><br>
-            {{ strings.year }}: <b id="year">{% if year != 0 %}{{ year }}{% else %}N/A{% endif %}</b><br>
-            {{ strings.genre }}: <b id="genre">{% if genre != "" %}{{ genre }}{% else %}N/A{% endif %}</b><br>
+            {{ strings.album }}: <b id="album">{% if album %}{{ album }}{% else %}N/A{% endif %}</b><br>
+            {{ strings.year }}: <b id="year">{% if year %}{{ year }}{% else %}N/A{% endif %}</b><br>
+            {{ strings.genre }}: <b id="genre">{% if genre %}{{ genre }}{% else %}N/A{% endif %}</b><br>
         </div>
         <img id="cover" src="/poster{{ path | urlencode }}" alt="{{ strings.album_cover }}" style="width: 30%; max-height: 100%;">
     </div>

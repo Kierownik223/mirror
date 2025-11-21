@@ -51,7 +51,7 @@ fn sysinfo(
         .map(|x| {
             let used_space = x.total_space() - x.available_space();
             Disk {
-                fs: x.file_system().to_str().unwrap_or_default().to_string(),
+                fs: x.file_system().to_str().unwrap_or("unknown").to_string(),
                 used_space,
                 total_space: x.total_space(),
                 used_space_readable: format_size(used_space, use_si),
