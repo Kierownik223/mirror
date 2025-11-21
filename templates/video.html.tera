@@ -62,3 +62,14 @@
     {{ details }}
     {% endif %}
 {% endblock content %}
+
+{% block scripts %}
+<script>
+    if (window.navigator && navigator.mediaSession) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: '{{ vidtitle }}',
+            artwork: [{src: '{{ poster | urlencode }}'}],
+        });
+    }
+</script>
+{% endblock scripts %}
