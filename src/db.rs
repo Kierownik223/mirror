@@ -31,7 +31,10 @@ pub async fn login_user(
     match query_result {
         Ok(row) => {
             if let Some(stored_hash) = row.try_get::<String, _>("password").ok() {
-                let username = row.try_get::<String, _>("username").ok().unwrap_or_default();
+                let username = row
+                    .try_get::<String, _>("username")
+                    .ok()
+                    .unwrap_or_default();
                 if verify_password && verify(password, &stored_hash).unwrap_or(false) {
                     if let Some(perms) = row.try_get::<i32, _>("perms").ok() {
                         add_login(db, username.as_str(), ip).await;
@@ -85,7 +88,10 @@ pub async fn fetch_user(mut db: Connection<Db>, username: &str) -> Option<Marmak
                 let settings = row.try_get::<String, _>("mirror_settings").ok();
                 return Some(MarmakUser {
                     username: username.to_string(),
-                    password: row.try_get::<String, _>("password").ok().unwrap_or_default(),
+                    password: row
+                        .try_get::<String, _>("password")
+                        .ok()
+                        .unwrap_or_default(),
                     perms: perms,
                     mirror_settings: settings,
                     email: row.try_get::<String, _>("email").ok(),

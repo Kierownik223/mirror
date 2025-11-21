@@ -37,7 +37,9 @@ use crate::i18n::{Language, TranslationStore};
 use crate::jwt::JWT;
 use crate::responders::{Cached, IndexResponse, IndexResult};
 use crate::utils::{
-    format_size_filter, get_cache_control, get_extension_from_path, get_genre, get_name_from_path, get_real_path, get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output, read_dirs_async
+    format_size_filter, get_cache_control, get_extension_from_path, get_genre, get_name_from_path,
+    get_real_path, get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output,
+    read_dirs_async,
 };
 
 mod account;
@@ -356,7 +358,15 @@ async fn index(
 
     match ext.as_str() {
         "md" => {
-            let markdown_text = fs::read_to_string(&path).unwrap_or_else(|e| format!("{} {:?}", strings.get("error_occured").unwrap_or(&"error_occured".to_string()), e));
+            let markdown_text = fs::read_to_string(&path).unwrap_or_else(|e| {
+                format!(
+                    "{} {:?}",
+                    strings
+                        .get("error_occured")
+                        .unwrap_or(&"error_occured".to_string()),
+                    e
+                )
+            });
             let markdown = markdown::to_html(&markdown_text);
             Ok(IndexResponse::Template(Template::render(
                 if *useplain.0 { "plain/md" } else { "md" },
@@ -444,7 +454,10 @@ async fn index(
 
                 details = markdown::to_html(&markdown);
             } else {
-                details = strings.get("no_details").unwrap_or(&("no_details".into())).to_string();
+                details = strings
+                    .get("no_details")
+                    .unwrap_or(&("no_details".into()))
+                    .to_string();
             }
 
             Ok(IndexResponse::Template(Template::render(
@@ -874,7 +887,9 @@ async fn fetch_settings(
 
     return Ok(RawHtml(format!(
         "<script>alert(\"{}\");window.location.replace(\"/settings\");</script>",
-        strings.get("fetch_success").unwrap_or(&("fetch_success".into()))
+        strings
+            .get("fetch_success")
+            .unwrap_or(&("fetch_success".into()))
     )));
 }
 
@@ -914,7 +929,9 @@ async fn sync_settings(
 
     return Ok(RawHtml(format!(
         "<script>alert(\"{}\");window.location.replace(\"/settings\");</script>",
-        strings.get("sync_success").unwrap_or(&("sync_success".into()))
+        strings
+            .get("sync_success")
+            .unwrap_or(&("sync_success".into()))
     )));
 }
 
@@ -1153,8 +1170,10 @@ async fn upload(
                             let _ = temp_file.read_to_end(&mut buffer);
 
                             let _ = file.write_all(&buffer);
-                            let mut icon = get_extension_from_path(&Path::new(&normalized_path).to_path_buf());
-                            if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists()
+                            let mut icon =
+                                get_extension_from_path(&Path::new(&normalized_path).to_path_buf());
+                            if !Path::new(&format!("files/static/images/icons/{}.png", &icon))
+                                .exists()
                             {
                                 icon = "default".to_string();
                             }
@@ -1162,7 +1181,13 @@ async fn upload(
                             if perms == 0 {
                                 uploaded_files.push(MirrorFile {
                                     name: file_name,
-                                    ext: format!("/{}/{}", user_path, get_name_from_path(&Path::new(&normalized_path).to_path_buf())),
+                                    ext: format!(
+                                        "/{}/{}",
+                                        user_path,
+                                        get_name_from_path(
+                                            &Path::new(&normalized_path).to_path_buf()
+                                        )
+                                    ),
                                     size: 0,
                                     icon: icon,
                                     downloads: None,
@@ -1177,7 +1202,9 @@ async fn upload(
                                             "",
                                             1
                                         ),
-                                        get_name_from_path(&Path::new(&normalized_path).to_path_buf())
+                                        get_name_from_path(
+                                            &Path::new(&normalized_path).to_path_buf()
+                                        )
                                     ),
                                     size: 0,
                                     icon: icon,
@@ -1240,7 +1267,11 @@ fn unprocessable_entry() -> Status {
 async fn default(status: Status, req: &Request<'_>) -> Cached<Template> {
     let jar = req.cookies();
     let translations = req.guard::<&State<TranslationStore>>().await.unwrap();
-    let useplain = req.guard::<UsePlain<'_>>().await.succeeded().unwrap_or(UsePlain(&false));
+    let useplain = req
+        .guard::<UsePlain<'_>>()
+        .await
+        .succeeded()
+        .unwrap_or(UsePlain(&false));
 
     let mut lang = "en".to_string();
 

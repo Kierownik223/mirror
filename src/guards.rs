@@ -90,7 +90,7 @@ impl<'r> FromRequest<'r> for UsePlain<'r> {
                         return Outcome::Success(UsePlain(&true));
                     }
                 }
-                
+
                 Outcome::Success(UsePlain(&true))
             }
         }

@@ -22,9 +22,16 @@ use rocket_multipart_form_data::{
 use zip::write::SimpleFileOptions;
 
 use crate::{
-    Cached, Disk, FileSizes, Host, MirrorFile, Sysinfo, config::CONFIG, db::{FileDb, get_downloads}, jwt::JWT, read_files, utils::{
-        add_path_to_zip, format_size, get_extension_from_filename, get_extension_from_path, get_genre, get_name_from_path, get_real_path, get_real_path_with_perms, is_restricted, map_io_error_to_status, read_dirs_async
-    }
+    config::CONFIG,
+    db::{get_downloads, FileDb},
+    jwt::JWT,
+    read_files,
+    utils::{
+        add_path_to_zip, format_size, get_extension_from_filename, get_extension_from_path,
+        get_genre, get_name_from_path, get_real_path, get_real_path_with_perms, is_restricted,
+        map_io_error_to_status, read_dirs_async,
+    },
+    Cached, Disk, FileSizes, Host, MirrorFile, Sysinfo,
 };
 
 #[derive(serde::Serialize)]
