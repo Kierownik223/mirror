@@ -148,7 +148,7 @@ async fn file_with_downloads(
 
     let name = path
         .file_name()
-        .unwrap()
+        .unwrap_or_default()
         .to_str()
         .unwrap_or_default()
         .to_string();
@@ -165,7 +165,7 @@ async fn file_with_downloads(
             let title = tag
                 .title()
                 .map(|s| s.to_string())
-                .unwrap_or_else(|| path.file_name().unwrap().to_str().unwrap().to_string());
+                .unwrap_or_else(|| path.file_name().unwrap_or_default().to_str().unwrap_or_default().to_string());
 
             let artist = tag.artist().map(|s| s.to_string());
             let album = tag.album_title().map(|s| s.to_string());
@@ -230,7 +230,7 @@ async fn file(
 
     let name = path
         .file_name()
-        .unwrap()
+        .unwrap_or_default()
         .to_str()
         .unwrap_or_default()
         .to_string();
@@ -247,7 +247,7 @@ async fn file(
             let title = tag
                 .title()
                 .map(|s| s.to_string())
-                .unwrap_or_else(|| path.file_name().unwrap().to_str().unwrap().to_string());
+                .unwrap_or_else(|| path.file_name().unwrap_or_default().to_str().unwrap_or_default().to_string());
 
             let artist = tag.artist().map(|s| s.to_string());
             let album = tag.album_title().map(|s| s.to_string());
@@ -318,7 +318,7 @@ async fn rename(
     let md = fs::metadata(&new_path).map_err(map_io_error_to_status)?;
     let name = new_path
         .file_name()
-        .unwrap()
+        .unwrap_or_default()
         .to_str()
         .unwrap_or_default()
         .to_string();
@@ -429,7 +429,7 @@ fn sysinfo(
     for disk in &sys_disks {
         if disk.total_space() != 0 {
             disks.push(Disk {
-                fs: disk.file_system().to_str().unwrap().to_string(),
+                fs: disk.file_system().to_str().unwrap_or_default().to_string(),
                 used_space: disk.total_space() - disk.available_space(),
                 total_space: disk.total_space(),
                 used_space_readable: format_size(
@@ -557,7 +557,7 @@ async fn upload(
                 let file_name = &Path::new(&normalized_path)
                     .file_name()
                     .and_then(|name| name.to_str())
-                    .unwrap()
+                    .unwrap_or_default()
                     .to_string();
 
                 let upload_path = format!("{}/{}", base_path, file_name);

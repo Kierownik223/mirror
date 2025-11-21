@@ -57,8 +57,9 @@ fn login_page(
     next: Option<&str>,
     token: Result<JWT, Status>,
 ) -> IndexResponse {
-    if token.is_ok() {
-        let perms = token.unwrap().claims.perms;
+    if let Ok(token) = token {
+        let perms = token.claims.perms;
+
         if perms == 0 {
             return IndexResponse::Redirect(Redirect::to("/admin/"));
         } else {
@@ -193,8 +194,8 @@ async fn direct<'a>(
     jwt: Result<JWT, Status>,
 ) -> Result<Redirect, Status> {
     if let Some(token) = token {
-        if jwt.is_ok() {
-            let perms = jwt.unwrap().claims.perms;
+        if let Ok(jwt) = jwt {
+            let perms = jwt.claims.perms;
             return Ok(Redirect::to(if perms == 0 { "/admin" } else { "/" }));
         }
 

@@ -199,8 +199,8 @@ pub fn is_hidden(path: &Path, perms: Option<i32>) -> bool {
 
     while let Some(p) = current {
         if p.join("HIDDEN").exists() {
-            if perms.is_some() {
-                return perms.unwrap() != 0;
+            if let Some(perms) = perms {
+                return perms != 0;
             } else {
                 return true;
             }

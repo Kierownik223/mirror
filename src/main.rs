@@ -368,7 +368,7 @@ async fn index(
             Ok(IndexResponse::Template(Template::render(
                 if *useplain.0 { "plain/md" } else { "md" },
                 context! {
-                    title: format!("{} {}", strings.get("reading_markdown").unwrap(), Path::new("/").join(&file).display()),
+                    title: format!("{} {}", strings.get("reading_markdown").unwrap_or(&("reading_markdown".into())), Path::new("/").join(&file).display()),
                     lang,
                     strings,
                     root_domain,
@@ -399,7 +399,7 @@ async fn index(
             Ok(IndexResponse::Template(Template::render(
                 if *useplain.0 { "plain/zip" } else { "zip" },
                 context! {
-                    title: format!("{} {}", strings.get("viewing_zip").unwrap(), Path::new("/").join(&file).display()),
+                    title: format!("{} {}", strings.get("viewing_zip").unwrap_or(&("viewing_zip".into())), Path::new("/").join(&file).display()),
                     lang,
                     strings,
                     root_domain,
@@ -431,8 +431,8 @@ async fn index(
             let mdpath = Path::new(mdpath.as_str());
 
             let vidtitle = path.file_name();
-            let vidtitle = vidtitle.unwrap().to_str();
-            let mut vidtitle = vidtitle.unwrap().to_string();
+            let vidtitle = vidtitle.unwrap_or_default().to_str();
+            let mut vidtitle = vidtitle.unwrap_or("title").to_string();
 
             let details: String;
 
@@ -451,13 +451,13 @@ async fn index(
 
                 details = markdown::to_html(&markdown);
             } else {
-                details = strings.get("no_details").unwrap().to_string();
+                details = strings.get("no_details").unwrap_or(&("no_details".into())).to_string();
             }
 
             Ok(IndexResponse::Template(Template::render(
                 if *useplain.0 { "plain/video" } else { "video" },
                 context! {
-                    title: format!("{} {}", strings.get("watching").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
+                    title: format!("{} {}", strings.get("watching").unwrap_or(&("watching".into())), Path::new("/").join(file.clone()).display().to_string().as_str()),
                     lang,
                     strings,
                     root_domain,
@@ -488,14 +488,14 @@ async fn index(
             let generic_template = Template::render(
                 if *useplain.0 { "plain/audio" } else { "audio" },
                 context! {
-                    title: format!("{} {}", strings.get("listening").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
+                    title: format!("{} {}", strings.get("listening").unwrap_or(&("listening".into())), Path::new("/").join(file.clone()).display().to_string().as_str()),
                     lang: &lang,
                     strings,
                     root_domain: &root_domain,
                     host: host.0,
                     config: (*CONFIG).clone(),
                     path: audiopath,
-                    audiotitle: &path.file_name().unwrap().to_str().unwrap(),
+                    audiotitle: &path.file_name().unwrap_or_default().to_str().unwrap_or_default(),
                     theme: &theme,
                     is_logged_in: token.is_ok(),
                     username: &username,
@@ -524,7 +524,7 @@ async fn index(
             if let Ok(tag) = Tag::new().read_from_path(&path) {
                 let audiotitle = tag
                     .title()
-                    .unwrap_or(&path.file_name().unwrap().to_str().unwrap());
+                    .unwrap_or(&path.file_name().unwrap_or_default().to_str().unwrap_or_default());
                 let artist = tag.artist().unwrap_or_default();
                 let year = tag.year().unwrap_or(0);
                 let album = tag.album_title().unwrap_or_default();
@@ -540,7 +540,7 @@ async fn index(
                 Ok(IndexResponse::Template(Template::render(
                     if *useplain.0 { "plain/audio" } else { "audio" },
                     context! {
-                        title: format!("{} {}", strings.get("listening").unwrap(), Path::new("/").join(file.clone()).display().to_string().as_str()),
+                        title: format!("{} {}", strings.get("listening").unwrap_or(&("listening".into())), Path::new("/").join(file.clone()).display().to_string().as_str()),
                         lang,
                         strings,
                         root_domain,
@@ -569,8 +569,8 @@ async fn index(
         "folder" => {
             if is_hidden(
                 &path,
-                if token.is_ok() {
-                    Some(token.clone().unwrap().claims.perms)
+                if let Ok(token) = token.clone() {
+                    Some(token.claims.perms)
                 } else {
                     None
                 },
@@ -721,7 +721,7 @@ async fn index(
                         "details"
                     },
                     context! {
-                        title: format!("{} {}", strings.get("file_details").unwrap(), Path::new("/").join(&file).display()),
+                        title: format!("{} {}", strings.get("file_details").unwrap_or(&("file_details".into())), Path::new("/").join(&file).display()),
                         lang,
                         strings,
                         root_domain,
@@ -734,7 +734,7 @@ async fn index(
                         admin: perms == 0,
                         hires,
                         smallhead,
-                        filename: path.file_name().unwrap().to_str(),
+                        filename: path.file_name().unwrap_or_default().to_str(),
                         filesize: fs::metadata(&path).unwrap().len(),
                         use_si,
                     },
@@ -818,8 +818,8 @@ fn settings(
 
     let show_cookie_notice = jar.iter().next().is_none();
 
-    let username = if token.is_ok() {
-        token.clone().unwrap().claims.sub
+    let username = if let Ok(token) = token.clone() {
+        token.claims.sub
     } else {
         String::new()
     };
@@ -831,7 +831,7 @@ fn settings(
             "settings"
         },
         context! {
-            title: strings.get("settings").unwrap(),
+            title: strings.get("settings").unwrap_or(&("settings".into())),
             theme,
             lang,
             strings,
@@ -885,7 +885,7 @@ async fn fetch_settings(
 
     return Ok(RawHtml(format!(
         "<script>alert(\"{}\");window.location.replace(\"/settings\");</script>",
-        strings.get("fetch_success").unwrap()
+        strings.get("fetch_success").unwrap_or(&("fetch_success".into()))
     )));
 }
 
@@ -925,7 +925,7 @@ async fn sync_settings(
 
     return Ok(RawHtml(format!(
         "<script>alert(\"{}\");window.location.replace(\"/settings\");</script>",
-        strings.get("sync_success").unwrap()
+        strings.get("sync_success").unwrap_or(&("sync_success".into()))
     )));
 }
 
@@ -1071,7 +1071,7 @@ fn uploader(
             "upload"
         },
         context! {
-            title: strings.get("uploader").unwrap(),
+            title: strings.get("uploader").unwrap_or(&("uploader".into())),
             lang,
             strings,
             root_domain: get_root_domain(host.0),
@@ -1156,7 +1156,7 @@ async fn upload(
                 let file_name = &Path::new(&normalized_path)
                     .file_name()
                     .and_then(|name| name.to_str())
-                    .unwrap()
+                    .unwrap_or_default()
                     .to_string();
 
                 let upload_path = format!("{}/{}", base_path, file_name);
@@ -1231,7 +1231,7 @@ async fn upload(
                 "upload"
             },
             context! {
-                title: strings.get("uploader").unwrap(),
+                title: strings.get("uploader").unwrap_or(&("uploader".into())),
                 lang,
                 strings,
                 root_domain: get_root_domain(host.0),
@@ -1262,7 +1262,7 @@ fn unprocessable_entry() -> Status {
 async fn default(status: Status, req: &Request<'_>) -> Cached<Template> {
     let jar = req.cookies();
     let translations = req.guard::<&State<TranslationStore>>().await.unwrap();
-    let useplain = req.guard::<UsePlain<'_>>().await.unwrap();
+    let useplain = req.guard::<UsePlain<'_>>().await.succeeded().unwrap_or(UsePlain(&false));
 
     let mut lang = "en".to_string();
 

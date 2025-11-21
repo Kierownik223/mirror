@@ -51,7 +51,7 @@ fn sysinfo(
         .map(|x| {
             let used_space = x.total_space() - x.available_space();
             Disk {
-                fs: x.file_system().to_str().unwrap().to_string(),
+                fs: x.file_system().to_str().unwrap_or_default().to_string(),
                 used_space,
                 total_space: x.total_space(),
                 used_space_readable: format_size(used_space, use_si),
@@ -68,7 +68,7 @@ fn sysinfo(
             "sysinfo"
         },
         context! {
-            title: strings.get("sysinfo").unwrap(),
+            title: strings.get("sysinfo").unwrap_or(&("sysinfo".into())),
             lang,
             strings,
             root_domain: get_root_domain(host.0),
@@ -115,7 +115,7 @@ fn admin(
     return Ok(IndexResponse::Template(Template::render(
         if *useplain.0 { "plain/admin" } else { "admin" },
         context! {
-            title: strings.get("admin").unwrap(),
+            title: strings.get("admin").unwrap_or(&("admin".into())),
             lang,
             strings,
             root_domain: get_root_domain(host.0),
