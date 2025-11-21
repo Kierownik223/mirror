@@ -131,7 +131,6 @@ async fn login(
         jar.add(jwt_cookie);
 
         let mut local_jwt_cookie = Cookie::new("token", jwt.clone());
-        local_jwt_cookie.set_domain(host.0.to_string());
         local_jwt_cookie.set_same_site(SameSite::Lax);
 
         jar.add(local_jwt_cookie);
@@ -194,11 +193,6 @@ async fn direct<'a>(
     jwt: Result<JWT, Status>,
 ) -> Result<Redirect, Status> {
     if let Some(token) = token {
-        if let Ok(jwt) = jwt {
-            let perms = jwt.claims.perms;
-            return Ok(Redirect::to(if perms == 0 { "/admin" } else { "/" }));
-        }
-
         let private_key_pem = fs::read_to_string("private.key").map_err(map_io_error_to_status)?;
         let private_key =
             RsaPrivateKey::from_pkcs1_pem(&private_key_pem).expect("Failed to create private_key");
@@ -244,7 +238,6 @@ async fn direct<'a>(
             jar.add(jwt_cookie);
 
             let mut local_jwt_cookie = Cookie::new("token", jwt.clone());
-            local_jwt_cookie.set_domain(host.0.to_string());
             local_jwt_cookie.set_same_site(SameSite::Lax);
 
             jar.add(local_jwt_cookie);
