@@ -8,7 +8,7 @@ use rocket::{
 use rocket_dyn_templates::Template;
 
 use crate::{
-    api::{ApiInfoResponse, MusicFile, UploadFile, User},
+    api::{ApiInfoResponse, MusicFile, UploadFile},
     guards::HeaderFile,
     MirrorFile, Sysinfo,
 };
@@ -64,7 +64,6 @@ pub enum ApiResponse {
     MessageStatus((Status, Json<ApiInfoResponse>)),
     Message(Json<ApiInfoResponse>),
     Sysinfo(Json<Sysinfo>),
-    User(Json<User>),
     UploadFiles(Json<Vec<UploadFile>>),
 }
 
@@ -101,11 +100,6 @@ impl<'r> Responder<'r, 'r> for ApiResponse {
             }
             ApiResponse::Sysinfo(s) => {
                 let mut res = s.respond_to(req)?;
-                res.set_raw_header("Cache-Control", "no-cache");
-                Ok(res)
-            }
-            ApiResponse::User(u) => {
-                let mut res = u.respond_to(req)?;
                 res.set_raw_header("Cache-Control", "no-cache");
                 Ok(res)
             }

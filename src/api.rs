@@ -1,5 +1,4 @@
 use std::{
-    collections::HashMap,
     fs::{self, remove_dir, remove_file},
     io::{Cursor, Read, Write},
     ops::Deref,
@@ -43,14 +42,6 @@ struct MirrorInfo {
 #[derive(serde::Serialize)]
 pub struct ApiInfoResponse {
     message: String,
-}
-
-#[derive(serde::Serialize)]
-pub struct User {
-    username: String,
-    scope: String,
-    perms: i32,
-    settings: HashMap<String, String>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -387,40 +378,6 @@ fn sysinfo(token: Result<JWT, Status>, use_si: Option<&str>, jar: &CookieJar<'_>
     })))
 }
 
-#[get("/user")]
-fn user(jar: &CookieJar<'_>, token: Result<JWT, Status>) -> ApiResult {
-    let token = token?;
-
-    let username = token.claims.sub;
-    let perms = token.claims.perms;
-
-    let keys = vec![
-        "lang",
-        "useajax",
-        "hires",
-        "smallhead",
-        "theme",
-        "nolang",
-        "nooverride",
-    ];
-
-    let mut settings: HashMap<String, String> = HashMap::new();
-    for key in keys {
-        let value = jar.get(key).map(|cookie| cookie.value().to_string());
-        settings.insert(key.to_string(), value.unwrap_or("false".into()));
-    }
-
-    Ok(ApiResponse::User(Json(User {
-        username,
-        scope: match perms {
-            0 => "admin".to_string(),
-            _ => "user".to_string(),
-        },
-        perms,
-        settings,
-    })))
-}
-
 #[post("/upload?<path>", data = "<data>")]
 async fn upload(
     content_type: &ContentType,
@@ -588,7 +545,7 @@ pub fn build_api() -> AdHoc {
         rocket = rocket
             .mount(
                 "/api",
-                routes![index, listing, sysinfo, user, upload, delete, rename,],
+                routes![index, listing, sysinfo, upload, delete, rename,],
             )
             .register("/api", catchers![default]);
 
