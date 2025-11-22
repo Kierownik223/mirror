@@ -60,9 +60,9 @@
 
 {% block scripts %}
 <script src="/static/polyfills.js"></script>
-<script src="/scripts/upload/{{ lang }}/script.js"></script>
+<script src="/scripts/upload.js?lang={{ lang }}"></script>
 {% if config.linkshortener %}
-<script src="/scripts/linkshortener/{{ lang }}/script.js"></script>
+<script src="/scripts/linkshortener.js?lang={{ lang }}"></script>
 {% endif %}
 
 {% if dir_browser %}

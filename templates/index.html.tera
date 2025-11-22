@@ -84,9 +84,12 @@
 {% block scripts %}
 {% if is_logged_in %}
     <script src="/static/polyfills.js"></script>
-    <script src="/scripts/index/{{ lang }}/script.js"></script>
+    <script src="/scripts/index.js?lang={{ lang }}"></script>
     {% if path != "/" or admin or private %}
-    <script src="/scripts/indexuploader/{{ lang }}/script.js"></script>
+    <script src="/scripts/indexuploader.js?lang={{ lang }}"></script>
+    {% endif %}
+    {% if config.enable_zip_downloads %}
+    <script src="/scripts/zip.js?lang={{ lang }}"></script>
     {% endif %}
 {% endif %}
 {% endblock scripts %}

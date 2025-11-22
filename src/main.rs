@@ -995,14 +995,20 @@ async fn iframe(
     )))
 }
 
-#[get("/scripts/<file>/<lang>/script.js")]
+#[get("/scripts/<file>?<lang>")]
 async fn scripts(
     file: &str,
-    lang: &str,
+    lang: Option<&str>,
     translations: &State<TranslationStore>,
     host: Host<'_>,
 ) -> Result<Cached<(ContentType, Template)>, Status> {
-    let strings = translations.get_translation(lang);
+    let strings = translations.get_translation(lang.unwrap_or("en"));
+
+    if !file.ends_with(".js") {
+        return Err(Status::NotFound);
+    }
+
+    let file = file.trim_end_matches(".js");
 
     if Path::new(&format!("templates/{}", file)).exists() {
         return Err(Status::NotFound);
