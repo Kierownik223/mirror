@@ -26,12 +26,13 @@ use crate::{
     db::{get_downloads, FileDb},
     jwt::JWT,
     read_files,
+    responders::{ApiResponse, ApiResult},
     utils::{
         add_path_to_zip, format_size, get_extension_from_filename, get_extension_from_path,
         get_genre, get_name_from_path, get_real_path, get_real_path_with_perms, is_restricted,
         map_io_error_to_status, read_dirs_async,
     },
-    Cached, Disk, FileSizes, Host, MirrorFile, Sysinfo,
+    Disk, FileSizes, Host, MirrorFile, Sysinfo,
 };
 
 #[derive(serde::Serialize)]
@@ -40,12 +41,12 @@ struct MirrorInfo {
 }
 
 #[derive(serde::Serialize)]
-struct Error {
+pub struct ApiInfoResponse {
     message: String,
 }
 
 #[derive(serde::Serialize)]
-struct User {
+pub struct User {
     username: String,
     scope: String,
     perms: i32,
@@ -80,11 +81,7 @@ struct RenameRequest {
 }
 
 #[get("/listing/<file..>")]
-async fn listing(
-    file: PathBuf,
-    sizes: &State<FileSizes>,
-    token: Result<JWT, Status>,
-) -> Result<Cached<Json<Vec<MirrorFile>>>, Status> {
+async fn listing(file: PathBuf, sizes: &State<FileSizes>, token: Result<JWT, Status>) -> ApiResult {
     let username = match token.as_ref() {
         Ok(token) => &token.claims.sub,
         Err(_) => &"Nobody".into(),
@@ -117,10 +114,7 @@ async fn listing(
 
     dir_list.append(&mut file_list);
 
-    Ok(Cached {
-        response: Json(dir_list),
-        header: "no-cache",
-    })
+    Ok(ApiResponse::Files(Json(dir_list)))
 }
 
 #[get("/<file..>", rank = 1)]
@@ -128,7 +122,7 @@ async fn file_with_downloads(
     db: Connection<FileDb>,
     file: PathBuf,
     token: Result<JWT, Status>,
-) -> Result<Result<Cached<Json<MirrorFile>>, Cached<Json<MusicFile>>>, Status> {
+) -> ApiResult {
     let username = match token.as_ref() {
         Ok(token) => &token.claims.sub,
         Err(_) => &"Nobody".into(),
@@ -171,38 +165,29 @@ async fn file_with_downloads(
 
             let cover = tag.album_cover().is_some();
 
-            return Ok(Err(Cached {
-                response: Json(MusicFile {
-                    title,
-                    album,
-                    artist,
-                    year,
-                    genre,
-                    track,
-                    cover,
-                }),
-                header: "private",
-            }));
+            return Ok(ApiResponse::MusicFile(Json(MusicFile {
+                title,
+                album,
+                artist,
+                year,
+                genre,
+                track,
+                cover,
+            })));
         }
     }
 
-    Ok(Ok(Cached {
-        response: Json(MirrorFile {
-            name,
-            ext,
-            icon: icon.to_string(),
-            size: md.len(),
-            downloads: Some(downloads),
-        }),
-        header: "no-cache",
-    }))
+    Ok(ApiResponse::File(Json(MirrorFile {
+        name,
+        ext,
+        icon: icon.to_string(),
+        size: md.len(),
+        downloads: Some(downloads),
+    })))
 }
 
 #[get("/<file..>", rank = 1)]
-async fn file(
-    file: PathBuf,
-    token: Result<JWT, Status>,
-) -> Result<Result<Cached<Json<MirrorFile>>, Cached<Json<MusicFile>>>, Status> {
+async fn file(file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
     let username = match token.as_ref() {
         Ok(token) => &token.claims.sub,
         Err(_) => &"Nobody".into(),
@@ -243,31 +228,25 @@ async fn file(
 
             let cover = tag.album_cover().is_some();
 
-            return Ok(Err(Cached {
-                response: Json(MusicFile {
-                    title,
-                    album,
-                    artist,
-                    year,
-                    genre,
-                    track,
-                    cover,
-                }),
-                header: "private",
-            }));
+            return Ok(ApiResponse::MusicFile(Json(MusicFile {
+                title,
+                album,
+                artist,
+                year,
+                genre,
+                track,
+                cover,
+            })));
         }
     }
 
-    Ok(Ok(Cached {
-        response: Json(MirrorFile {
-            name,
-            ext,
-            icon: icon.to_string(),
-            size: md.len(),
-            downloads: None,
-        }),
-        header: "no-cache",
-    }))
+    Ok(ApiResponse::File(Json(MirrorFile {
+        name,
+        ext,
+        icon: icon.to_string(),
+        size: md.len(),
+        downloads: None,
+    })))
 }
 
 #[patch("/<file..>", data = "<rename_req>")]
@@ -275,7 +254,7 @@ async fn rename(
     file: PathBuf,
     rename_req: Json<RenameRequest>,
     token: Result<JWT, Status>,
-) -> Result<Json<MirrorFile>, Status> {
+) -> ApiResult {
     let token = token?;
 
     let username = token.claims.sub;
@@ -302,20 +281,17 @@ async fn rename(
         icon = "default";
     }
 
-    Ok(Json(MirrorFile {
+    Ok(ApiResponse::File(Json(MirrorFile {
         name: get_extension_from_path(&new_path),
         ext: get_extension_from_path(&new_path),
         icon: icon.to_string(),
         size: md.len(),
         downloads: None,
-    }))
+    })))
 }
 
 #[delete("/<file..>")]
-async fn delete<'a>(
-    file: PathBuf,
-    token: Result<JWT, Status>,
-) -> Result<(Status, Json<Error>), Status> {
+async fn delete<'a>(file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
     let token = token?;
 
     let username = token.claims.sub;
@@ -335,40 +311,36 @@ async fn delete<'a>(
         {
             return match remove_dir(path) {
                 Ok(_) => Err(Status::NoContent),
-                Err(e) => Ok((
+                Err(e) => Ok(ApiResponse::MessageStatus((
                     Status::InternalServerError,
-                    Json(Error {
+                    Json(ApiInfoResponse {
                         message: format!("An error occured: {}", e),
                     }),
-                )),
+                ))),
             };
         } else {
-            return Ok((
+            return Ok(ApiResponse::MessageStatus((
                 Status::Conflict,
-                Json(Error {
+                Json(ApiInfoResponse {
                     message: "Directory is not empty!".to_string(),
                 }),
-            ));
+            )));
         }
     }
 
     return match remove_file(path) {
         Ok(_) => Err(Status::NoContent),
-        Err(e) => Ok((
+        Err(e) => Ok(ApiResponse::MessageStatus((
             Status::InternalServerError,
-            Json(Error {
+            Json(ApiInfoResponse {
                 message: e.to_string(),
             }),
-        )),
+        ))),
     };
 }
 
 #[get("/sysinfo?<use_si>")]
-fn sysinfo(
-    token: Result<JWT, Status>,
-    use_si: Option<&str>,
-    jar: &CookieJar<'_>,
-) -> Result<Cached<Json<Sysinfo>>, Status> {
+fn sysinfo(token: Result<JWT, Status>, use_si: Option<&str>, jar: &CookieJar<'_>) -> ApiResult {
     let _token = token?;
 
     let mut sys = System::new_all();
@@ -406,20 +378,17 @@ fn sysinfo(
         }
     }
 
-    Ok(Cached {
-        response: Json(Sysinfo {
-            total_mem: total_mem,
-            total_mem_readable: format_size(total_mem, use_si),
-            used_mem: used_mem,
-            used_mem_readable: format_size(used_mem, use_si),
-            disks: disks,
-        }),
-        header: "no-cache",
-    })
+    Ok(ApiResponse::Sysinfo(Json(Sysinfo {
+        total_mem: total_mem,
+        total_mem_readable: format_size(total_mem, use_si),
+        used_mem: used_mem,
+        used_mem_readable: format_size(used_mem, use_si),
+        disks: disks,
+    })))
 }
 
 #[get("/user")]
-fn user(jar: &CookieJar<'_>, token: Result<JWT, Status>) -> Result<Cached<Json<User>>, Status> {
+fn user(jar: &CookieJar<'_>, token: Result<JWT, Status>) -> ApiResult {
     let token = token?;
 
     let username = token.claims.sub;
@@ -441,18 +410,15 @@ fn user(jar: &CookieJar<'_>, token: Result<JWT, Status>) -> Result<Cached<Json<U
         settings.insert(key.to_string(), value.unwrap_or("false".into()));
     }
 
-    Ok(Cached {
-        response: Json(User {
-            username,
-            scope: match perms {
-                0 => "admin".to_string(),
-                _ => "user".to_string(),
-            },
-            perms,
-            settings,
-        }),
-        header: "no-cache",
-    })
+    Ok(ApiResponse::User(Json(User {
+        username,
+        scope: match perms {
+            0 => "admin".to_string(),
+            _ => "user".to_string(),
+        },
+        perms,
+        settings,
+    })))
 }
 
 #[post("/upload?<path>", data = "<data>")]
@@ -462,7 +428,7 @@ async fn upload(
     host: Host<'_>,
     path: Option<String>,
     token: Result<JWT, Status>,
-) -> Result<Json<Vec<UploadFile>>, Status> {
+) -> ApiResult {
     let token = token?;
 
     let username = token.claims.sub;
@@ -552,7 +518,7 @@ async fn upload(
             }
         }
 
-        return Ok(Json(uploaded_files));
+        return Ok(ApiResponse::UploadFiles(Json(uploaded_files)));
     } else {
         return Err(Status::BadRequest);
     }
@@ -611,13 +577,10 @@ async fn index() -> Json<MirrorInfo> {
 }
 
 #[catch(default)]
-fn default(status: Status, _req: &Request) -> Cached<Json<Error>> {
-    Cached {
-        response: Json(Error {
-            message: format!("{}", status),
-        }),
-        header: "no-cache",
-    }
+fn default(status: Status, _req: &Request) -> ApiResponse {
+    ApiResponse::Message(Json(ApiInfoResponse {
+        message: format!("{}", status),
+    }))
 }
 
 pub fn build_api() -> AdHoc {

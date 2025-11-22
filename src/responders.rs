@@ -2,11 +2,16 @@ use rocket::{
     fs::NamedFile,
     http::Status,
     response::{self, Redirect, Responder},
+    serde::json::Json,
     Request,
 };
 use rocket_dyn_templates::Template;
 
-use crate::guards::HeaderFile;
+use crate::{
+    api::{ApiInfoResponse, MusicFile, UploadFile, User},
+    guards::HeaderFile,
+    MirrorFile, Sysinfo,
+};
 
 pub struct Cached<R> {
     pub response: R,
@@ -48,6 +53,67 @@ impl<'r> Responder<'r, 'r> for IndexResponse {
                 Ok(res)
             }
             IndexResponse::Redirect(r) => r.respond_to(req),
+        }
+    }
+}
+
+pub enum ApiResponse {
+    Files(Json<Vec<MirrorFile>>),
+    File(Json<MirrorFile>),
+    MusicFile(Json<MusicFile>),
+    MessageStatus((Status, Json<ApiInfoResponse>)),
+    Message(Json<ApiInfoResponse>),
+    Sysinfo(Json<Sysinfo>),
+    User(Json<User>),
+    UploadFiles(Json<Vec<UploadFile>>),
+}
+
+pub type ApiResult = Result<ApiResponse, Status>;
+
+#[rocket::async_trait]
+impl<'r> Responder<'r, 'r> for ApiResponse {
+    fn respond_to(self, req: &'r rocket::Request<'_>) -> rocket::response::Result<'r> {
+        match self {
+            ApiResponse::Files(f) => {
+                let mut res = f.respond_to(req)?;
+                res.set_raw_header("Cache-Control", "no-cache");
+                Ok(res)
+            }
+            ApiResponse::File(f) => {
+                let mut res = f.respond_to(req)?;
+                res.set_raw_header("Cache-Control", "no-cache");
+                Ok(res)
+            }
+            ApiResponse::MusicFile(f) => {
+                let mut res = f.respond_to(req)?;
+                res.set_raw_header("Cache-Control", "private");
+                Ok(res)
+            }
+            ApiResponse::MessageStatus(m) => {
+                let mut res = m.respond_to(req)?;
+                res.set_raw_header("Cache-Control", "no-cache");
+                Ok(res)
+            }
+            ApiResponse::Message(m) => {
+                let mut res = m.respond_to(req)?;
+                res.set_raw_header("Cache-Control", "no-cache");
+                Ok(res)
+            }
+            ApiResponse::Sysinfo(s) => {
+                let mut res = s.respond_to(req)?;
+                res.set_raw_header("Cache-Control", "no-cache");
+                Ok(res)
+            }
+            ApiResponse::User(u) => {
+                let mut res = u.respond_to(req)?;
+                res.set_raw_header("Cache-Control", "no-cache");
+                Ok(res)
+            }
+            ApiResponse::UploadFiles(f) => {
+                let mut res = f.respond_to(req)?;
+                res.set_raw_header("Cache-Control", "no-cache");
+                Ok(res)
+            }
         }
     }
 }
