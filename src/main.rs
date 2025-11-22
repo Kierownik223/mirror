@@ -1265,8 +1265,60 @@ async fn upload(
 }
 
 #[catch(422)]
-fn unprocessable_entry() -> Status {
-    Status::BadRequest
+async fn unprocessable_entry(_status: Status, req: &Request<'_>) -> Cached<(Status, Template)> {
+    let jar = req.cookies();
+    let translations = req.guard::<&State<TranslationStore>>().await.unwrap();
+    let useplain = req
+        .guard::<UsePlain<'_>>()
+        .await
+        .succeeded()
+        .unwrap_or(UsePlain(&false));
+
+    let mut lang = "en".to_string();
+
+    if let Some(header) = req.headers().get_one("Accept-Language") {
+        let header_lang = parse_language(header).unwrap_or("en".to_string());
+        lang = header_lang;
+    }
+
+    if let Some(cookie_lang) = jar.get("lang").map(|c| c.value()) {
+        lang = cookie_lang.to_string();
+    }
+
+    let strings = translations.get_translation(lang.as_str());
+
+    let host = if req.host().is_some() {
+        &req.host().unwrap().to_string()
+    } else {
+        &(*CONFIG).fallback_root_domain
+    };
+
+    Cached {
+        response: (
+            Status::BadRequest,
+            Template::render(
+                if *useplain.0 {
+                    "plain/error/400"
+                } else {
+                    "error/400"
+                },
+                context! {
+                    title: "HTTP 400",
+                    lang,
+                    strings,
+                    root_domain: get_root_domain(&host),
+                    host,
+                    config: (*CONFIG).clone(),
+                    theme: get_theme(jar),
+                    is_logged_in: false,
+                    admin: false,
+                    hires: get_bool_cookie(jar, "hires", false),
+                    smallhead: get_bool_cookie(jar, "smallhead", false),
+                },
+            ),
+        ),
+        header: "no-cache",
+    }
 }
 
 #[catch(default)]
