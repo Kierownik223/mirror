@@ -1010,7 +1010,7 @@ async fn scripts(
 
     let file = file.trim_end_matches(".js");
 
-    if Path::new(&format!("templates/{}", file)).exists() {
+    if !Path::new(&format!("templates/scripts/{}.js.tera", file)).exists() {
         return Err(Status::NotFound);
     }
 
