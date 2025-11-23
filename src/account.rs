@@ -312,7 +312,6 @@ fn logout(jar: &CookieJar<'_>, host: Host<'_>) -> Redirect {
     );
     jar.remove(
         Cookie::build("token")
-            .domain(host.0.to_string())
             .same_site(SameSite::Lax),
     );
     Redirect::to("/account/login")
