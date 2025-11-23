@@ -196,8 +196,8 @@ async fn file(file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
         return Err(Status::NotAcceptable);
     }
 
-    let name = get_name_from_path(&path);
     let ext = get_extension_from_path(&path);
+
     let mut icon = get_extension_from_path(&path);
 
     if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
@@ -232,9 +232,9 @@ async fn file(file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
     }
 
     Ok(ApiResponse::File(Json(MirrorFile {
-        name,
+        name: get_name_from_path(&path),
         ext,
-        icon: icon.to_string(),
+        icon,
         size: md.len(),
         downloads: None,
     })))
@@ -264,18 +264,16 @@ async fn rename(
 
     let md = fs::metadata(&new_path).map_err(map_io_error_to_status)?;
 
-    let ext = get_extension_from_path(&new_path);
-
-    let mut icon = ext.as_str();
+    let mut icon = get_extension_from_path(&new_path);
 
     if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
-        icon = "default";
+        icon = "default".into();
     }
 
     Ok(ApiResponse::File(Json(MirrorFile {
-        name: get_extension_from_path(&new_path),
+        name: get_name_from_path(&new_path),
         ext: get_extension_from_path(&new_path),
-        icon: icon.to_string(),
+        icon,
         size: md.len(),
         downloads: None,
     })))
