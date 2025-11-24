@@ -995,10 +995,11 @@ async fn iframe(
     )))
 }
 
-#[get("/scripts/<file>?<lang>")]
+#[get("/scripts/<file>?<lang>&<hires>")]
 async fn scripts(
     file: &str,
     lang: Option<&str>,
+    hires: Option<bool>,
     translations: &State<TranslationStore>,
     host: Host<'_>,
 ) -> Result<Cached<(ContentType, Template)>, Status> {
@@ -1023,6 +1024,7 @@ async fn scripts(
                     config: (*CONFIG).clone(),
                     strings,
                     host: host.0,
+                    hires: hires.unwrap_or(false),
                 },
             ),
         ),
