@@ -18,12 +18,7 @@ use serde_json::json;
 use time::{Duration, OffsetDateTime};
 
 use crate::{
-    config::CONFIG,
-    db::{fetch_user, login_user, Db},
-    guards::XForwardedFor,
-    jwt::{create_jwt, JWT},
-    utils::{get_bool_cookie, get_root_domain, get_theme, map_io_error_to_status},
-    Host, IndexResponse, Language, TranslationStore, UsePlain,
+    Host, IndexResponse, Language, TranslationStore, UsePlain, config::CONFIG, db::{Db, add_rememberme_token, fetch_user, login_user}, guards::XForwardedFor, jwt::{JWT, create_jwt}, utils::{get_bool_cookie, get_root_domain, get_theme, map_io_error_to_status}
 };
 
 #[derive(Debug, PartialEq, Eq, FromForm)]
@@ -39,6 +34,7 @@ pub struct MarmakUser {
 struct LoginUser {
     username: String,
     password: String,
+    remember_me: Option<bool>,
 }
 
 #[derive(serde::Deserialize, serde::Serialize)]
@@ -95,6 +91,7 @@ fn login_page(
 #[post("/login?<next>", data = "<user>")]
 async fn login(
     db: Connection<Db>,
+    db2: Connection<Db>,
     user: Form<LoginUser>,
     jar: &CookieJar<'_>,
     ip: XForwardedFor<'_>,
@@ -120,6 +117,26 @@ async fn login(
                     jar.add(cookie);
                 }
             }
+        }
+
+        if let Some(_) = user.remember_me {
+            println!("a");
+            let rememberme_token = add_rememberme_token(db2, &db_user.username).await;
+
+            let month = OffsetDateTime::now_utc() + Duration::days(30);
+
+            let mut rememberme_cookie = Cookie::new("maremembertoken", rememberme_token.clone());
+            rememberme_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
+            rememberme_cookie.set_expires(month);
+            rememberme_cookie.set_same_site(SameSite::Lax);
+
+            jar.add(rememberme_cookie);
+
+            let mut local_rememberme_cookie = Cookie::new("remembermetoken", rememberme_token.clone());
+            local_rememberme_cookie.set_expires(month);
+            local_rememberme_cookie.set_same_site(SameSite::Lax);
+
+            jar.add(local_rememberme_cookie);
         }
 
         let jwt = create_jwt(&db_user).map_err(|_| Status::InternalServerError)?;
@@ -312,6 +329,15 @@ fn logout(jar: &CookieJar<'_>, host: Host<'_>) -> Redirect {
     );
     jar.remove(
         Cookie::build("token")
+            .same_site(SameSite::Lax),
+    );
+    jar.remove(
+        Cookie::build("maremembermetoken")
+            .domain(format!(".{}", get_root_domain(host.0)))
+            .same_site(SameSite::Lax),
+    );
+    jar.remove(
+        Cookie::build("remembermetoken")
             .same_site(SameSite::Lax),
     );
     Redirect::to("/account/login")

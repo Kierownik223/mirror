@@ -1,3 +1,4 @@
+use rand::{Rng, distributions::Alphanumeric};
 use rocket_db_pools::{sqlx, Connection, Database};
 use sqlx::Row;
 
@@ -146,6 +147,41 @@ pub async fn get_downloads(mut db: Connection<FileDb>, path: &str) -> Option<i32
         Ok(row) => {
             if let Some(downloads) = row.try_get::<i32, _>("downloads").ok() {
                 Some(downloads)
+            } else {
+                None
+            }
+        }
+        Err(_) => None,
+    }
+}
+
+pub async fn add_rememberme_token(mut db: Connection<Db>, username: &str) -> String {
+    let token: String = rand::thread_rng()
+        .sample_iter(&Alphanumeric)
+        .take(64)
+        .map(char::from)
+        .collect();
+
+    let _ = sqlx::query("INSERT INTO sessions (id, user) VALUES (?, ?)")
+    .bind(&token)
+    .bind(username)
+    .execute(&mut **db)
+    .await;
+
+    token
+}
+
+#[cfg(not(test))]
+pub async fn fetch_user_by_session(mut db: Connection<Db>, id: &str) -> Option<MarmakUser> {
+    let query_result = sqlx::query("SELECT user FROM sessions WHERE id = ?")
+        .bind(id)
+        .fetch_one(&mut **db)
+        .await;
+
+    match query_result {
+        Ok(row) => {
+            if let Some(user) = row.try_get::<String, _>("user").ok() {
+                fetch_user(db, &user).await
             } else {
                 None
             }
