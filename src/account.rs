@@ -18,12 +18,7 @@ use serde_json::json;
 use time::{Duration, OffsetDateTime};
 
 use crate::{
-    config::CONFIG,
-    db::{add_rememberme_token, fetch_user, login_user, Db},
-    guards::XForwardedFor,
-    jwt::{create_jwt, JWT},
-    utils::{get_bool_cookie, get_root_domain, get_theme, map_io_error_to_status},
-    Host, IndexResponse, Language, TranslationStore, UsePlain,
+    Host, IndexResponse, Language, TranslationStore, UsePlain, config::CONFIG, db::{Db, add_rememberme_token, delete_session, fetch_user, login_user}, guards::XForwardedFor, jwt::{JWT, create_jwt}, utils::{get_bool_cookie, get_root_domain, get_theme, map_io_error_to_status}
 };
 
 #[derive(Debug, PartialEq, Eq, FromForm)]
@@ -327,19 +322,30 @@ async fn direct<'a>(
 }
 
 #[get("/logout")]
-fn logout(jar: &CookieJar<'_>, host: Host<'_>) -> Redirect {
+async fn logout(db: Connection<Db>, db2: Connection<Db>, jar: &CookieJar<'_>, host: Host<'_>) -> Redirect {
     jar.remove(
         Cookie::build("matoken")
             .domain(format!(".{}", get_root_domain(host.0)))
             .same_site(SameSite::Lax),
     );
     jar.remove(Cookie::build("token").same_site(SameSite::Lax));
-    jar.remove(
-        Cookie::build("maremembermetoken")
-            .domain(format!(".{}", get_root_domain(host.0)))
-            .same_site(SameSite::Lax),
-    );
-    jar.remove(Cookie::build("remembermetoken").same_site(SameSite::Lax));
+
+    if jar.get("maremembermetoken").is_some() {
+        delete_session(db, jar.get("maremembermetoken").unwrap().value()).await;
+
+        jar.remove(
+            Cookie::build("maremembermetoken")
+                .domain(format!(".{}", get_root_domain(host.0)))
+                .same_site(SameSite::Lax),
+        );
+    }
+    if jar.get("remembermetoken").is_some() {
+        delete_session(db2, jar.get("remembermetoken").unwrap().value()).await;
+
+        jar.remove(
+            Cookie::build("remembermetoken").same_site(SameSite::Lax),
+        );
+    }
     Redirect::to("/account/login")
 }
 

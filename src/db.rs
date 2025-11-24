@@ -171,6 +171,13 @@ pub async fn add_rememberme_token(mut db: Connection<Db>, username: &str) -> Str
     token
 }
 
+pub async fn delete_session(mut db: Connection<Db>, token: &str) -> () {
+    let _ = sqlx::query("DELETE FROM sessions WHERE id = ?")
+        .bind(&token)
+        .execute(&mut **db)
+        .await;
+}
+
 #[cfg(not(test))]
 pub async fn fetch_user_by_session(mut db: Connection<Db>, id: &str) -> Option<MarmakUser> {
     let query_result = sqlx::query("SELECT user FROM sessions WHERE id = ?")
