@@ -81,7 +81,6 @@ select_folder = "Ordner auswählen"
 browse = "Durchsuchen"
 select_files = "Dateien auswählen."
 uploading = "Hochladen"
-login_to_continue = "Melden Sie sich an, um fortzufahren zu"
 
 # Account
 
@@ -93,6 +92,8 @@ welcome = "Hallo"
 tip = "Tipp"
 settings_tip1 = "Wenn du deine aktuellen Einstellungen behalten möchtest, gehe zu"
 settings_tip2 = "und aktiviere „Einstellungen nicht überschreiben“."
+login_to_continue = "Melden Sie sich an, um fortzufahren zu"
+remember_me = "Merke mich für 30 Tage"
 
 # Admin
 

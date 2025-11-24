@@ -93,6 +93,7 @@ tip = "Wskazówka"
 settings_tip1 = "Jeżeli chcesz zachować swoje aktualne ustawienia, przejdź do"
 settings_tip2 = "i włącz \"Nie nadpisuj ustawień\"."
 login_to_continue = "Zaloguj się, aby przejść do"
+remember_me = "Zapamiętaj mnie na 30 dni"
 
 # Admin
 

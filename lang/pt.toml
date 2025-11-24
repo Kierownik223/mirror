@@ -93,6 +93,7 @@ tip = "Dica"
 settings_tip1 = "Se você quiser manter suas configurações atuais, vá para"
 settings_tip2 = "e ative \"Não sobrescrever configurações.\"."
 login_to_continue = "Faça login para continuar para"
+remember_me = "Lembre-se de mim por 30 dias"
 
 # Admin
 
