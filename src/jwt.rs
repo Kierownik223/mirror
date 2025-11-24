@@ -15,7 +15,7 @@ use serde::{Deserialize, Serialize};
 use crate::{account::MarmakUser, config::CONFIG};
 
 #[cfg(not(test))]
-use crate::db::{Db, fetch_user_by_session};
+use crate::db::{fetch_user_by_session, Db};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Claims {
@@ -41,37 +41,36 @@ impl<'r> FromRequest<'r> for JWT {
             Ok(decode_jwt(String::from(key))?)
         }
 
-        if req.cookies().get("remembermetoken").is_some() || req.cookies().get("membermetoken").is_some() {
+        if req.cookies().get("remembermetoken").is_some()
+            || req.cookies().get("membermetoken").is_some()
+        {
             return match req.cookies().get("maremembermetoken") {
                 Some(rememberme_cookie) => {
                     let db = req.guard::<Connection<Db>>().await.unwrap();
                     if let Some(user) = fetch_user_by_session(db, rememberme_cookie.value()).await {
                         let claims = decode_jwt(create_jwt(&user).unwrap()).unwrap();
 
-                        Outcome::Success(JWT {
-                            claims
-                        })
+                        Outcome::Success(JWT { claims })
                     } else {
                         Outcome::Error((Status::Unauthorized, Status::Unauthorized))
                     }
-                },
+                }
                 None => match req.cookies().get("remembermetoken") {
                     Some(rememberme_cookie) => {
                         let db = req.guard::<Connection<Db>>().await.unwrap();
-                        if let Some(user) = fetch_user_by_session(db, rememberme_cookie.value()).await {
-
+                        if let Some(user) =
+                            fetch_user_by_session(db, rememberme_cookie.value()).await
+                        {
                             let claims = decode_jwt(create_jwt(&user).unwrap()).unwrap();
 
-                            Outcome::Success(JWT {
-                                claims
-                            })
+                            Outcome::Success(JWT { claims })
                         } else {
                             Outcome::Error((Status::Unauthorized, Status::Unauthorized))
                         }
-                    },
-                    None => Outcome::Error((Status::Unauthorized, Status::Unauthorized))
-                }
-            }
+                    }
+                    None => Outcome::Error((Status::Unauthorized, Status::Unauthorized)),
+                },
+            };
         }
 
         let authorization = match req.headers().get_one("authorization") {
@@ -92,33 +91,32 @@ impl<'r> FromRequest<'r> for JWT {
                 Err(_) => match req.cookies().get("maremembermetoken") {
                     Some(rememberme_cookie) => {
                         let db = req.guard::<Connection<Db>>().await.unwrap();
-                        if let Some(user) = fetch_user_by_session(db, rememberme_cookie.value()).await {
+                        if let Some(user) =
+                            fetch_user_by_session(db, rememberme_cookie.value()).await
+                        {
                             let claims = decode_jwt(create_jwt(&user).unwrap()).unwrap();
 
-                            Outcome::Success(JWT {
-                                claims
-                            })
+                            Outcome::Success(JWT { claims })
                         } else {
                             Outcome::Error((Status::Unauthorized, Status::Unauthorized))
                         }
-                    },
+                    }
                     None => match req.cookies().get("remembermetoken") {
                         Some(rememberme_cookie) => {
                             let db = req.guard::<Connection<Db>>().await.unwrap();
-                            if let Some(user) = fetch_user_by_session(db, rememberme_cookie.value()).await {
-
+                            if let Some(user) =
+                                fetch_user_by_session(db, rememberme_cookie.value()).await
+                            {
                                 let claims = decode_jwt(create_jwt(&user).unwrap()).unwrap();
 
-                                Outcome::Success(JWT {
-                                    claims
-                                })
+                                Outcome::Success(JWT { claims })
                             } else {
                                 Outcome::Error((Status::Unauthorized, Status::Unauthorized))
                             }
-                        },
-                        None => Outcome::Error((Status::Unauthorized, Status::Unauthorized))
-                    }
-                }
+                        }
+                        None => Outcome::Error((Status::Unauthorized, Status::Unauthorized)),
+                    },
+                },
             },
         }
     }

@@ -18,7 +18,12 @@ use serde_json::json;
 use time::{Duration, OffsetDateTime};
 
 use crate::{
-    Host, IndexResponse, Language, TranslationStore, UsePlain, config::CONFIG, db::{Db, add_rememberme_token, fetch_user, login_user}, guards::XForwardedFor, jwt::{JWT, create_jwt}, utils::{get_bool_cookie, get_root_domain, get_theme, map_io_error_to_status}
+    config::CONFIG,
+    db::{add_rememberme_token, fetch_user, login_user, Db},
+    guards::XForwardedFor,
+    jwt::{create_jwt, JWT},
+    utils::{get_bool_cookie, get_root_domain, get_theme, map_io_error_to_status},
+    Host, IndexResponse, Language, TranslationStore, UsePlain,
 };
 
 #[derive(Debug, PartialEq, Eq, FromForm)]
@@ -132,7 +137,8 @@ async fn login(
 
             jar.add(rememberme_cookie);
 
-            let mut local_rememberme_cookie = Cookie::new("remembermetoken", rememberme_token.clone());
+            let mut local_rememberme_cookie =
+                Cookie::new("remembermetoken", rememberme_token.clone());
             local_rememberme_cookie.set_expires(month);
             local_rememberme_cookie.set_same_site(SameSite::Lax);
 
@@ -327,19 +333,13 @@ fn logout(jar: &CookieJar<'_>, host: Host<'_>) -> Redirect {
             .domain(format!(".{}", get_root_domain(host.0)))
             .same_site(SameSite::Lax),
     );
-    jar.remove(
-        Cookie::build("token")
-            .same_site(SameSite::Lax),
-    );
+    jar.remove(Cookie::build("token").same_site(SameSite::Lax));
     jar.remove(
         Cookie::build("maremembermetoken")
             .domain(format!(".{}", get_root_domain(host.0)))
             .same_site(SameSite::Lax),
     );
-    jar.remove(
-        Cookie::build("remembermetoken")
-            .same_site(SameSite::Lax),
-    );
+    jar.remove(Cookie::build("remembermetoken").same_site(SameSite::Lax));
     Redirect::to("/account/login")
 }
 

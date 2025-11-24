@@ -1,4 +1,4 @@
-use rand::{Rng, distributions::Alphanumeric};
+use rand::{distributions::Alphanumeric, Rng};
 use rocket_db_pools::{sqlx, Connection, Database};
 use sqlx::Row;
 
@@ -163,10 +163,10 @@ pub async fn add_rememberme_token(mut db: Connection<Db>, username: &str) -> Str
         .collect();
 
     let _ = sqlx::query("INSERT INTO sessions (id, user) VALUES (?, ?)")
-    .bind(&token)
-    .bind(username)
-    .execute(&mut **db)
-    .await;
+        .bind(&token)
+        .bind(username)
+        .execute(&mut **db)
+        .await;
 
     token
 }
