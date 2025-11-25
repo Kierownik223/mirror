@@ -51,7 +51,9 @@ impl<'r> FromRequest<'r> for JWT {
                     None => match req.cookies().get("maremembermetoken") {
                         Some(rememberme_cookie) => {
                             let db = req.guard::<Connection<Db>>().await.unwrap();
-                            if let Some(user) = fetch_user_by_session(db, rememberme_cookie.value()).await {
+                            if let Some(user) =
+                                fetch_user_by_session(db, rememberme_cookie.value()).await
+                            {
                                 Some((create_jwt(&user).unwrap(), true))
                             } else {
                                 None
@@ -60,7 +62,9 @@ impl<'r> FromRequest<'r> for JWT {
                         None => match req.cookies().get("remembermetoken") {
                             Some(rememberme_cookie) => {
                                 let db = req.guard::<Connection<Db>>().await.unwrap();
-                                if let Some(user) = fetch_user_by_session(db, rememberme_cookie.value()).await {
+                                if let Some(user) =
+                                    fetch_user_by_session(db, rememberme_cookie.value()).await
+                                {
                                     Some((create_jwt(&user).unwrap(), true))
                                 } else {
                                     None
@@ -76,7 +80,10 @@ impl<'r> FromRequest<'r> for JWT {
         match result {
             None => Outcome::Error((Status::Unauthorized, Status::Unauthorized)),
             Some((key, readd_token)) => match is_valid(&key) {
-                Ok(claims) => Outcome::Success(JWT { claims, token: if readd_token { Some(key) } else { None } }),
+                Ok(claims) => Outcome::Success(JWT {
+                    claims,
+                    token: if readd_token { Some(key) } else { None },
+                }),
                 Err(_) => match req.cookies().get("maremembermetoken") {
                     Some(rememberme_cookie) => {
                         let db = req.guard::<Connection<Db>>().await.unwrap();
@@ -86,7 +93,10 @@ impl<'r> FromRequest<'r> for JWT {
                             let token = create_jwt(&user).unwrap();
                             let claims = decode_jwt(&token).unwrap();
 
-                            Outcome::Success(JWT { claims, token: Some(token) })
+                            Outcome::Success(JWT {
+                                claims,
+                                token: Some(token),
+                            })
                         } else {
                             Outcome::Error((Status::Unauthorized, Status::Unauthorized))
                         }
@@ -100,7 +110,10 @@ impl<'r> FromRequest<'r> for JWT {
                                 let token = create_jwt(&user).unwrap();
                                 let claims = decode_jwt(&token).unwrap();
 
-                                Outcome::Success(JWT { claims, token: Some(token) })
+                                Outcome::Success(JWT {
+                                    claims,
+                                    token: Some(token),
+                                })
                             } else {
                                 Outcome::Error((Status::Unauthorized, Status::Unauthorized))
                             }

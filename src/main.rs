@@ -207,7 +207,12 @@ async fn poster(
 }
 
 #[get("/file/<file..>")]
-async fn file(file: PathBuf, token: Result<JWT, Status>, host: Host<'_>, jar: &CookieJar<'_>) -> Result<IndexResponse, Status> {
+async fn file(
+    file: PathBuf,
+    token: Result<JWT, Status>,
+    host: Host<'_>,
+    jar: &CookieJar<'_>,
+) -> Result<IndexResponse, Status> {
     let username = if let Ok(token) = token.as_ref() {
         if let Some(t) = &token.token {
             let mut jwt_cookie = Cookie::new("matoken", t.to_string());
@@ -300,7 +305,12 @@ async fn download_with_counter(
 }
 
 #[get("/<file..>?download")]
-async fn download(file: PathBuf, token: Result<JWT, Status>, host: Host<'_>, jar: &CookieJar<'_>) -> Result<IndexResponse, Status> {
+async fn download(
+    file: PathBuf,
+    token: Result<JWT, Status>,
+    host: Host<'_>,
+    jar: &CookieJar<'_>,
+) -> Result<IndexResponse, Status> {
     let username = if let Ok(token) = token.as_ref() {
         if let Some(t) = &token.token {
             let mut jwt_cookie = Cookie::new("matoken", t.to_string());
