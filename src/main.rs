@@ -112,11 +112,28 @@ struct FileEntry {
 async fn poster(
     file: PathBuf,
     token: Result<JWT, Status>,
+    host: Host<'_>,
+    jar: &CookieJar<'_>,
 ) -> Result<Result<Cached<(ContentType, Vec<u8>)>, Result<IndexResponse, Status>>, Status> {
-    let username = match token.as_ref() {
-        Ok(token) => &token.claims.sub,
-        Err(_) => &"Nobody".into(),
+    let username = if let Ok(token) = token {
+        if let Some(t) = token.token {
+            let mut jwt_cookie = Cookie::new("matoken", t.to_string());
+            jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
+            jwt_cookie.set_same_site(SameSite::Lax);
+
+            jar.add(jwt_cookie);
+
+            let mut local_jwt_cookie = Cookie::new("token", t.to_string());
+            local_jwt_cookie.set_same_site(SameSite::Lax);
+
+            jar.add(local_jwt_cookie);
+        }
+
+        token.claims.sub
+    } else {
+        "Nobody".into()
     };
+
     let (path, is_private) = if let Ok(rest) = file.strip_prefix("private") {
         if username == "Nobody" {
             if get_extension_from_path(&rest.to_path_buf()) == "mp3" {
@@ -190,11 +207,26 @@ async fn poster(
 }
 
 #[get("/file/<file..>")]
-async fn file(file: PathBuf, token: Result<JWT, Status>) -> Result<IndexResponse, Status> {
-    let username = match token.as_ref() {
-        Ok(token) => &token.claims.sub,
-        Err(_) => &"Nobody".into(),
+async fn file(file: PathBuf, token: Result<JWT, Status>, host: Host<'_>, jar: &CookieJar<'_>) -> Result<IndexResponse, Status> {
+    let username = if let Ok(token) = token.as_ref() {
+        if let Some(t) = &token.token {
+            let mut jwt_cookie = Cookie::new("matoken", t.to_string());
+            jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
+            jwt_cookie.set_same_site(SameSite::Lax);
+
+            jar.add(jwt_cookie);
+
+            let mut local_jwt_cookie = Cookie::new("token", t.to_string());
+            local_jwt_cookie.set_same_site(SameSite::Lax);
+
+            jar.add(local_jwt_cookie);
+        }
+
+        &token.claims.sub
+    } else {
+        &"Nobody".into()
     };
+
     let (path, is_private) = get_real_path(&file, username.to_string())?;
 
     if is_restricted(&path, token.is_ok()) {
@@ -209,11 +241,28 @@ async fn download_with_counter(
     db: Connection<FileDb>,
     file: PathBuf,
     token: Result<JWT, Status>,
+    host: Host<'_>,
+    jar: &CookieJar<'_>,
 ) -> Result<IndexResponse, Status> {
-    let username = match token.as_ref() {
-        Ok(token) => &token.claims.sub,
-        Err(_) => &"Nobody".into(),
+    let username = if let Ok(token) = token.as_ref() {
+        if let Some(t) = &token.token {
+            let mut jwt_cookie = Cookie::new("matoken", t.to_string());
+            jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
+            jwt_cookie.set_same_site(SameSite::Lax);
+
+            jar.add(jwt_cookie);
+
+            let mut local_jwt_cookie = Cookie::new("token", t.to_string());
+            local_jwt_cookie.set_same_site(SameSite::Lax);
+
+            jar.add(local_jwt_cookie);
+        }
+
+        &token.claims.sub
+    } else {
+        &"Nobody".into()
     };
+
     let (path, is_private) = get_real_path(&file, username.to_string())?;
 
     if is_private {
@@ -251,11 +300,26 @@ async fn download_with_counter(
 }
 
 #[get("/<file..>?download")]
-async fn download(file: PathBuf, token: Result<JWT, Status>) -> Result<IndexResponse, Status> {
-    let username = match token.as_ref() {
-        Ok(token) => &token.claims.sub,
-        Err(_) => &"Nobody".into(),
+async fn download(file: PathBuf, token: Result<JWT, Status>, host: Host<'_>, jar: &CookieJar<'_>) -> Result<IndexResponse, Status> {
+    let username = if let Ok(token) = token.as_ref() {
+        if let Some(t) = &token.token {
+            let mut jwt_cookie = Cookie::new("matoken", t.to_string());
+            jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
+            jwt_cookie.set_same_site(SameSite::Lax);
+
+            jar.add(jwt_cookie);
+
+            let mut local_jwt_cookie = Cookie::new("token", t.to_string());
+            local_jwt_cookie.set_same_site(SameSite::Lax);
+
+            jar.add(local_jwt_cookie);
+        }
+
+        &token.claims.sub
+    } else {
+        &"Nobody".into()
     };
+
     let (path, is_private) = get_real_path(&file, username.to_string())?;
 
     if is_restricted(&path, token.is_ok()) {
@@ -279,6 +343,19 @@ async fn index(
     uri: FullUri,
 ) -> IndexResult {
     let jwt = token.clone().unwrap_or_default();
+
+    if let Some(t) = jwt.token {
+        let mut jwt_cookie = Cookie::new("matoken", t.to_string());
+        jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
+        jwt_cookie.set_same_site(SameSite::Lax);
+
+        jar.add(jwt_cookie);
+
+        let mut local_jwt_cookie = Cookie::new("token", t.to_string());
+        local_jwt_cookie.set_same_site(SameSite::Lax);
+
+        jar.add(local_jwt_cookie);
+    }
 
     let username = jwt.claims.sub;
     let perms = jwt.claims.perms;
@@ -758,6 +835,25 @@ fn settings(
     useplain: UsePlain<'_>,
     token: Result<JWT, Status>,
 ) -> IndexResponse {
+    let (username, perms) = if let Ok(token) = token.as_ref() {
+        if let Some(t) = &token.token {
+            let mut jwt_cookie = Cookie::new("matoken", t.to_string());
+            jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
+            jwt_cookie.set_same_site(SameSite::Lax);
+
+            jar.add(jwt_cookie);
+
+            let mut local_jwt_cookie = Cookie::new("token", t.to_string());
+            local_jwt_cookie.set_same_site(SameSite::Lax);
+
+            jar.add(local_jwt_cookie);
+        }
+
+        (&token.claims.sub, &token.claims.perms)
+    } else {
+        (&"Nobody".into(), &1)
+    };
+
     let mut lang = lang.0;
     let theme = get_theme(jar);
     let strings = translations.get_translation(&lang);
@@ -820,12 +916,6 @@ fn settings(
 
     let show_cookie_notice = jar.iter().next().is_none();
 
-    let username = if let Ok(token) = token.clone() {
-        token.claims.sub
-    } else {
-        String::new()
-    };
-
     return IndexResponse::Template(Template::render(
         if *useplain.0 {
             "plain/settings"
@@ -842,7 +932,7 @@ fn settings(
             config: (*CONFIG).clone(),
             is_logged_in: token.is_ok(),
             username,
-            admin: token.unwrap_or_default().claims.perms == 0,
+            admin: *perms == 0,
             hires: get_bool_cookie(jar, "hires", false),
             smallhead: get_bool_cookie(jar, "smallhead", false),
             plain: *useplain.0,
@@ -864,9 +954,24 @@ async fn fetch_settings(
     jar: &CookieJar<'_>,
     lang: Language,
     translations: &State<TranslationStore>,
+    host: Host<'_>,
     token: Result<JWT, Status>,
 ) -> Result<RawHtml<String>, Status> {
     let token = token?;
+
+    if let Some(t) = token.token {
+        let mut jwt_cookie = rocket::http::Cookie::new("matoken", t.to_string());
+        jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
+        jwt_cookie.set_same_site(rocket::http::SameSite::Lax);
+
+        jar.add(jwt_cookie);
+
+        let mut local_jwt_cookie = rocket::http::Cookie::new("token", t.to_string());
+        local_jwt_cookie.set_same_site(rocket::http::SameSite::Lax);
+
+        jar.add(local_jwt_cookie);
+    }
+
     let strings = translations.get_translation(&lang.0);
     let username = token.claims.sub;
 
@@ -899,9 +1004,24 @@ async fn sync_settings(
     jar: &CookieJar<'_>,
     lang: Language,
     translations: &State<TranslationStore>,
+    host: Host<'_>,
     token: Result<JWT, Status>,
 ) -> Result<RawHtml<String>, Status> {
     let token = token?;
+
+    if let Some(t) = token.token {
+        let mut jwt_cookie = rocket::http::Cookie::new("matoken", t.to_string());
+        jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
+        jwt_cookie.set_same_site(rocket::http::SameSite::Lax);
+
+        jar.add(jwt_cookie);
+
+        let mut local_jwt_cookie = rocket::http::Cookie::new("token", t.to_string());
+        local_jwt_cookie.set_same_site(rocket::http::SameSite::Lax);
+
+        jar.add(local_jwt_cookie);
+    }
+
     let strings = translations.get_translation(&lang.0);
     let username = token.claims.sub;
 
@@ -961,12 +1081,28 @@ async fn reset_settings(jar: &CookieJar<'_>) -> Redirect {
 async fn iframe(
     file: PathBuf,
     jar: &CookieJar<'_>,
+    host: Host<'_>,
     token: Result<JWT, Status>,
 ) -> Result<IndexResponse, Status> {
-    let username = match token.as_ref() {
-        Ok(token) => &token.claims.sub,
-        Err(_) => &"Nobody".into(),
+    let username = if let Ok(token) = token.as_ref() {
+        if let Some(t) = &token.token {
+            let mut jwt_cookie = Cookie::new("matoken", t.to_string());
+            jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
+            jwt_cookie.set_same_site(SameSite::Lax);
+
+            jar.add(jwt_cookie);
+
+            let mut local_jwt_cookie = Cookie::new("token", t.to_string());
+            local_jwt_cookie.set_same_site(SameSite::Lax);
+
+            jar.add(local_jwt_cookie);
+        }
+
+        &token.claims.sub
+    } else {
+        &"Nobody".into()
     };
+
     let path = get_real_path(&file, username.to_string())?.0;
 
     if is_restricted(&path, token.is_ok()) {
@@ -1073,6 +1209,19 @@ fn uploader(
 ) -> Result<IndexResponse, Status> {
     let token = token?;
 
+    if let Some(t) = token.token {
+        let mut jwt_cookie = rocket::http::Cookie::new("matoken", t.to_string());
+        jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
+        jwt_cookie.set_same_site(rocket::http::SameSite::Lax);
+
+        jar.add(jwt_cookie);
+
+        let mut local_jwt_cookie = rocket::http::Cookie::new("token", t.to_string());
+        local_jwt_cookie.set_same_site(rocket::http::SameSite::Lax);
+
+        jar.add(local_jwt_cookie);
+    }
+
     let username = token.claims.sub;
     let perms = token.claims.perms;
 
@@ -1117,6 +1266,19 @@ async fn upload(
     path: Option<&str>,
 ) -> Result<IndexResponse, Status> {
     let token = token?;
+
+    if let Some(t) = token.token {
+        let mut jwt_cookie = rocket::http::Cookie::new("matoken", t.to_string());
+        jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
+        jwt_cookie.set_same_site(rocket::http::SameSite::Lax);
+
+        jar.add(jwt_cookie);
+
+        let mut local_jwt_cookie = rocket::http::Cookie::new("token", t.to_string());
+        local_jwt_cookie.set_same_site(rocket::http::SameSite::Lax);
+
+        jar.add(local_jwt_cookie);
+    }
 
     let username = token.claims.sub;
     let perms = token.claims.perms;

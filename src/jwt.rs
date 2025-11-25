@@ -29,6 +29,7 @@ pub struct Claims {
 #[derive(Debug, Clone)]
 pub struct JWT {
     pub claims: Claims,
+    pub token: Option<String>,
 }
 
 #[rocket::async_trait]
@@ -38,65 +39,54 @@ impl<'r> FromRequest<'r> for JWT {
     #[cfg(not(test))]
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Status> {
         fn is_valid(key: &str) -> Result<Claims, Error> {
-            Ok(decode_jwt(String::from(key))?)
+            Ok(decode_jwt(key)?)
         }
 
-        if req.cookies().get("remembermetoken").is_some()
-            || req.cookies().get("membermetoken").is_some()
-        {
-            return match req.cookies().get("maremembermetoken") {
-                Some(rememberme_cookie) => {
-                    let db = req.guard::<Connection<Db>>().await.unwrap();
-                    if let Some(user) = fetch_user_by_session(db, rememberme_cookie.value()).await {
-                        let claims = decode_jwt(create_jwt(&user).unwrap()).unwrap();
-
-                        Outcome::Success(JWT { claims })
-                    } else {
-                        Outcome::Error((Status::Unauthorized, Status::Unauthorized))
-                    }
-                }
-                None => match req.cookies().get("remembermetoken") {
-                    Some(rememberme_cookie) => {
-                        let db = req.guard::<Connection<Db>>().await.unwrap();
-                        if let Some(user) =
-                            fetch_user_by_session(db, rememberme_cookie.value()).await
-                        {
-                            let claims = decode_jwt(create_jwt(&user).unwrap()).unwrap();
-
-                            Outcome::Success(JWT { claims })
-                        } else {
-                            Outcome::Error((Status::Unauthorized, Status::Unauthorized))
-                        }
-                    }
-                    None => Outcome::Error((Status::Unauthorized, Status::Unauthorized)),
-                },
-            };
-        }
-
-        let authorization = match req.headers().get_one("authorization") {
-            Some(token) => Some(token),
+        let result = match req.headers().get_one("authorization") {
+            Some(token) => Some((token.to_string(), false)),
             None => match req.cookies().get("matoken") {
-                Some(cookie) => Some(cookie.value()),
+                Some(cookie) => Some((cookie.value().to_string(), false)),
                 None => match req.cookies().get("token") {
-                    Some(cookie) => Some(cookie.value()),
-                    None => None,
+                    Some(cookie) => Some((cookie.value().to_string(), false)),
+                    None => match req.cookies().get("maremembermetoken") {
+                        Some(rememberme_cookie) => {
+                            let db = req.guard::<Connection<Db>>().await.unwrap();
+                            if let Some(user) = fetch_user_by_session(db, rememberme_cookie.value()).await {
+                                Some((create_jwt(&user).unwrap(), true))
+                            } else {
+                                None
+                            }
+                        }
+                        None => match req.cookies().get("remembermetoken") {
+                            Some(rememberme_cookie) => {
+                                let db = req.guard::<Connection<Db>>().await.unwrap();
+                                if let Some(user) = fetch_user_by_session(db, rememberme_cookie.value()).await {
+                                    Some((create_jwt(&user).unwrap(), true))
+                                } else {
+                                    None
+                                }
+                            }
+                            None => None,
+                        },
+                    },
                 },
             },
         };
 
-        match authorization {
+        match result {
             None => Outcome::Error((Status::Unauthorized, Status::Unauthorized)),
-            Some(key) => match is_valid(key) {
-                Ok(claims) => Outcome::Success(JWT { claims }),
+            Some((key, readd_token)) => match is_valid(&key) {
+                Ok(claims) => Outcome::Success(JWT { claims, token: if readd_token { Some(key) } else { None } }),
                 Err(_) => match req.cookies().get("maremembermetoken") {
                     Some(rememberme_cookie) => {
                         let db = req.guard::<Connection<Db>>().await.unwrap();
                         if let Some(user) =
                             fetch_user_by_session(db, rememberme_cookie.value()).await
                         {
-                            let claims = decode_jwt(create_jwt(&user).unwrap()).unwrap();
+                            let token = create_jwt(&user).unwrap();
+                            let claims = decode_jwt(&token).unwrap();
 
-                            Outcome::Success(JWT { claims })
+                            Outcome::Success(JWT { claims, token: Some(token) })
                         } else {
                             Outcome::Error((Status::Unauthorized, Status::Unauthorized))
                         }
@@ -107,9 +97,10 @@ impl<'r> FromRequest<'r> for JWT {
                             if let Some(user) =
                                 fetch_user_by_session(db, rememberme_cookie.value()).await
                             {
-                                let claims = decode_jwt(create_jwt(&user).unwrap()).unwrap();
+                                let token = create_jwt(&user).unwrap();
+                                let claims = decode_jwt(&token).unwrap();
 
-                                Outcome::Success(JWT { claims })
+                                Outcome::Success(JWT { claims, token: Some(token) })
                             } else {
                                 Outcome::Error((Status::Unauthorized, Status::Unauthorized))
                             }
@@ -131,6 +122,7 @@ impl<'r> FromRequest<'r> for JWT {
                 exp: 1,
                 iat: 0,
             },
+            token: None,
         })
     }
 }
@@ -145,6 +137,7 @@ impl Default for JWT {
                 exp: 1,
                 iat: 0,
             },
+            token: None,
         }
     }
 }
@@ -175,7 +168,7 @@ pub fn create_jwt(user: &MarmakUser) -> Result<String, Error> {
 }
 
 #[cfg(not(test))]
-pub fn decode_jwt(token: String) -> Result<Claims, ErrorKind> {
+pub fn decode_jwt(token: &str) -> Result<Claims, ErrorKind> {
     let secret = &CONFIG.jwt_secret;
 
     let token = token.trim_start_matches("Bearer").trim();

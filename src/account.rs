@@ -54,6 +54,18 @@ fn login_page(
     token: Result<JWT, Status>,
 ) -> IndexResponse {
     if let Ok(token) = token {
+        if let Some(t) = token.token {
+            let mut jwt_cookie = Cookie::new("matoken", t.to_string());
+            jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
+            jwt_cookie.set_same_site(SameSite::Lax);
+
+            jar.add(jwt_cookie);
+
+            let mut local_jwt_cookie = Cookie::new("token", t.to_string());
+            local_jwt_cookie.set_same_site(SameSite::Lax);
+
+            jar.add(local_jwt_cookie);
+        }
         let perms = token.claims.perms;
 
         if perms == 0 {
@@ -120,12 +132,11 @@ async fn login(
         }
 
         if let Some(_) = user.remember_me {
-            println!("a");
             let rememberme_token = add_rememberme_token(db2, &db_user.username).await;
 
             let month = OffsetDateTime::now_utc() + Duration::days(30);
 
-            let mut rememberme_cookie = Cookie::new("maremembertoken", rememberme_token.clone());
+            let mut rememberme_cookie = Cookie::new("maremembermetoken", rememberme_token.clone());
             rememberme_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
             rememberme_cookie.set_expires(month);
             rememberme_cookie.set_same_site(SameSite::Lax);
@@ -275,6 +286,20 @@ async fn direct<'a>(
             return Err(Status::Unauthorized);
         } else {
             let token = jwt?;
+
+            if let Some(t) = token.token {
+                let mut jwt_cookie = Cookie::new("matoken", t.to_string());
+                jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
+                jwt_cookie.set_same_site(SameSite::Lax);
+
+                jar.add(jwt_cookie);
+
+                let mut local_jwt_cookie = Cookie::new("token", t.to_string());
+                local_jwt_cookie.set_same_site(SameSite::Lax);
+
+                jar.add(local_jwt_cookie);
+            }
+
             if let Some(db_user) = fetch_user(db, &token.claims.sub).await {
                 let user_data =
                     json!({"username": &token.claims.sub, "password_hash": db_user.password});

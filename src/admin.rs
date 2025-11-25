@@ -23,6 +23,19 @@ fn sysinfo(
 ) -> Result<IndexResponse, Status> {
     let token = token?;
 
+    if let Some(t) = token.token {
+        let mut jwt_cookie = rocket::http::Cookie::new("matoken", t.to_string());
+        jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
+        jwt_cookie.set_same_site(rocket::http::SameSite::Lax);
+
+        jar.add(jwt_cookie);
+
+        let mut local_jwt_cookie = rocket::http::Cookie::new("token", t.to_string());
+        local_jwt_cookie.set_same_site(rocket::http::SameSite::Lax);
+
+        jar.add(local_jwt_cookie);
+    }
+
     let username = token.claims.sub;
     let perms = token.claims.perms;
 
@@ -102,6 +115,19 @@ fn admin(
     token: Result<JWT, Status>,
 ) -> Result<IndexResponse, Status> {
     let token = token?;
+
+    if let Some(t) = token.token {
+        let mut jwt_cookie = rocket::http::Cookie::new("matoken", t.to_string());
+        jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
+        jwt_cookie.set_same_site(rocket::http::SameSite::Lax);
+
+        jar.add(jwt_cookie);
+
+        let mut local_jwt_cookie = rocket::http::Cookie::new("token", t.to_string());
+        local_jwt_cookie.set_same_site(rocket::http::SameSite::Lax);
+
+        jar.add(local_jwt_cookie);
+    }
 
     let username = token.claims.sub;
     let perms = token.claims.perms;
