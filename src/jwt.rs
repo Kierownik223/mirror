@@ -74,7 +74,7 @@ impl<'r> FromRequest<'r> for JWT {
                     return Some((token.to_string(), false));
                 } else {
                     if let Some(jwt) = refresh_with_code(req, token).await {
-                        return Some((jwt.0, false))
+                        return Some((jwt.0, false));
                     }
                 }
             }

@@ -365,8 +365,8 @@ async fn logout(
     );
     jar.remove(Cookie::build("token").same_site(SameSite::Lax));
 
-    if jar.get("maremembermetoken").is_some() {
-        delete_session(db, jar.get("maremembermetoken").unwrap().value()).await;
+    if let Some(cookie) = jar.get("maremembermetoken") {
+        delete_session(db, cookie.value()).await;
 
         jar.remove(
             Cookie::build("maremembermetoken")
@@ -374,8 +374,8 @@ async fn logout(
                 .same_site(SameSite::Lax),
         );
     }
-    if jar.get("remembermetoken").is_some() {
-        delete_session(db2, jar.get("remembermetoken").unwrap().value()).await;
+    if let Some(cookie) = jar.get("remembermetoken") {
+        delete_session(db2, cookie.value()).await;
 
         jar.remove(Cookie::build("remembermetoken").same_site(SameSite::Lax));
     }

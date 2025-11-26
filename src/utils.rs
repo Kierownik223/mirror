@@ -244,7 +244,7 @@ pub fn parse_language(header: &str) -> Option<String> {
         let code = lang.split(';').next()?.trim();
         let short_code = code.split('-').next()?.to_lowercase();
 
-        if fs::metadata(format!("{}/{}.toml", lang_dir, short_code)).is_ok() {
+        if Path::new(&format!("{}/{}.toml", lang_dir, short_code)).exists() {
             return Some(short_code);
         }
     }

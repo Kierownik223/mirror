@@ -1461,8 +1461,8 @@ async fn unprocessable_entry(_status: Status, req: &Request<'_>) -> Cached<(Stat
 
     let strings = translations.get_translation(lang.as_str());
 
-    let host = if req.host().is_some() {
-        &req.host().unwrap().to_string()
+    let host = if let Some(host) = req.host() {
+        &host.to_string()
     } else {
         &(*CONFIG).fallback_root_domain
     };
@@ -1518,8 +1518,8 @@ async fn default(status: Status, req: &Request<'_>) -> Cached<Template> {
 
     let strings = translations.get_translation(lang.as_str());
 
-    let host = if req.host().is_some() {
-        &req.host().unwrap().to_string()
+    let host = if let Some(host) = req.host() {
+        &host.to_string()
     } else {
         &(*CONFIG).fallback_root_domain
     };
