@@ -38,90 +38,73 @@ impl<'r> FromRequest<'r> for JWT {
 
     #[cfg(not(test))]
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Status> {
-        fn is_valid(key: &str) -> Result<Claims, Error> {
-            Ok(decode_jwt(key)?)
+        fn validate_token(token: &str) -> Result<Claims, ErrorKind> {
+            decode_jwt(token)
         }
 
-        let result = match req.headers().get_one("authorization") {
-            Some(token) => Some((token.to_string(), false)),
-            None => match req.cookies().get("matoken") {
-                Some(cookie) => Some((cookie.value().to_string(), false)),
-                None => match req.cookies().get("token") {
-                    Some(cookie) => Some((cookie.value().to_string(), false)),
-                    None => match req.cookies().get("maremembermetoken") {
-                        Some(rememberme_cookie) => {
-                            let db = req.guard::<Connection<Db>>().await.unwrap();
-                            if let Some(user) =
-                                fetch_user_by_session(db, rememberme_cookie.value()).await
-                            {
-                                Some((create_jwt(&user).unwrap(), true))
-                            } else {
-                                None
-                            }
-                        }
-                        None => match req.cookies().get("remembermetoken") {
-                            Some(rememberme_cookie) => {
-                                let db = req.guard::<Connection<Db>>().await.unwrap();
-                                if let Some(user) =
-                                    fetch_user_by_session(db, rememberme_cookie.value()).await
-                                {
-                                    Some((create_jwt(&user).unwrap(), true))
-                                } else {
-                                    None
-                                }
-                            }
-                            None => None,
-                        },
-                    },
-                },
-            },
+        async fn refresh_with_code<'r>(
+            req: &'r Request<'_>,
+            code: &str,
+        ) -> Option<(String, Claims)> {
+            let db = req.guard::<Connection<Db>>().await.succeeded()?;
+
+            let user = fetch_user_by_session(db, code).await?;
+            let token = create_jwt(&user).ok()?;
+            let claims = decode_jwt(&token).ok()?;
+
+            Some((token, claims))
+        }
+
+        async fn refresh<'r>(req: &'r Request<'_>) -> Option<(String, Claims)> {
+            for name in ["maremembermetoken", "remembermetoken"] {
+                let Some(cookie) = req.cookies().get(name) else {
+                    continue;
+                };
+                if let Some(res) = refresh_with_code(req, cookie.value()).await {
+                    return Some(res);
+                }
+            }
+
+            None
+        }
+
+        async fn get_token<'r>(req: &'r Request<'_>) -> Option<(String, bool)> {
+            if let Some(token) = req.headers().get_one("authorization") {
+                return Some((token.to_string(), false));
+            }
+
+            for name in ["matoken", "token"] {
+                if let Some(c) = req.cookies().get(name) {
+                    return Some((c.value().to_string(), false));
+                }
+            }
+
+            if let Some(token) = refresh(req).await {
+                return Some((token.0, true));
+            }
+
+            None
+        }
+
+        let Some((token, readd_token)) = get_token(req).await else {
+            return Outcome::Error((Status::Unauthorized, Status::Unauthorized));
         };
 
-        match result {
-            None => Outcome::Error((Status::Unauthorized, Status::Unauthorized)),
-            Some((key, readd_token)) => match is_valid(&key) {
-                Ok(claims) => Outcome::Success(JWT {
-                    claims,
-                    token: if readd_token { Some(key) } else { None },
-                }),
-                Err(_) => match req.cookies().get("maremembermetoken") {
-                    Some(rememberme_cookie) => {
-                        let db = req.guard::<Connection<Db>>().await.unwrap();
-                        if let Some(user) =
-                            fetch_user_by_session(db, rememberme_cookie.value()).await
-                        {
-                            let token = create_jwt(&user).unwrap();
-                            let claims = decode_jwt(&token).unwrap();
-
-                            Outcome::Success(JWT {
-                                claims,
-                                token: Some(token),
-                            })
-                        } else {
-                            Outcome::Error((Status::Unauthorized, Status::Unauthorized))
-                        }
-                    }
-                    None => match req.cookies().get("remembermetoken") {
-                        Some(rememberme_cookie) => {
-                            let db = req.guard::<Connection<Db>>().await.unwrap();
-                            if let Some(user) =
-                                fetch_user_by_session(db, rememberme_cookie.value()).await
-                            {
-                                let token = create_jwt(&user).unwrap();
-                                let claims = decode_jwt(&token).unwrap();
-
-                                Outcome::Success(JWT {
-                                    claims,
-                                    token: Some(token),
-                                })
-                            } else {
-                                Outcome::Error((Status::Unauthorized, Status::Unauthorized))
-                            }
-                        }
-                        None => Outcome::Error((Status::Unauthorized, Status::Unauthorized)),
-                    },
-                },
-            },
+        match validate_token(&token) {
+            Ok(claims) => Outcome::Success(JWT {
+                claims,
+                token: if readd_token { Some(token) } else { None },
+            }),
+            Err(_) => {
+                if let Some((new_token, claims)) = refresh(req).await {
+                    Outcome::Success(JWT {
+                        claims,
+                        token: Some(new_token),
+                    })
+                } else {
+                    Outcome::Error((Status::Unauthorized, Status::Unauthorized))
+                }
+            }
         }
     }
 
