@@ -70,7 +70,13 @@ impl<'r> FromRequest<'r> for JWT {
 
         async fn get_token<'r>(req: &'r Request<'_>) -> Option<(String, bool)> {
             if let Some(token) = req.headers().get_one("authorization") {
-                return Some((token.to_string(), false));
+                if validate_token(token).is_ok() {
+                    return Some((token.to_string(), false));
+                } else {
+                    if let Some(jwt) = refresh_with_code(req, token).await {
+                        return Some((jwt.0, false))
+                    }
+                }
             }
 
             for name in ["matoken", "token"] {
