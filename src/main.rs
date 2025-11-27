@@ -682,8 +682,10 @@ async fn index(
                 }
             }
 
-            dirs.retain(|x| !CONFIG.hidden_files.contains(&x.name));
-            files.retain(|x| !CONFIG.hidden_files.contains(&x.name));
+            if perms != 0 {
+                dirs.retain(|x| !CONFIG.hidden_files.contains(&x.name));
+                files.retain(|x| !CONFIG.hidden_files.contains(&x.name));
+            }
 
             dirs.sort();
             files.sort();
