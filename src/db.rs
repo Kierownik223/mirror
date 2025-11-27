@@ -71,7 +71,10 @@ pub async fn login_user(
                 None
             }
         }
-        Err(_) => None,
+        Err(error) => {
+            println!("Database error: {:?}", error);
+            None
+        }
     }
 }
 
@@ -101,39 +104,46 @@ pub async fn fetch_user(mut db: Connection<Db>, username: &str) -> Option<Marmak
                 None
             }
         }
-        Err(_) => None,
+        Err(error) => {
+            println!("Database error: {:?}", error);
+            None
+        }
     }
 }
 
 pub async fn update_settings(mut db: Connection<Db>, username: &str, settings: &str) -> () {
-    let _ = sqlx::query("UPDATE users SET mirror_settings = ? WHERE username = ?")
+    if let Err(error) = sqlx::query("UPDATE users SET mirror_settings = ? WHERE username = ?")
         .bind(settings)
         .bind(username)
         .fetch_one(&mut **db)
-        .await;
+        .await
+    {
+        println!("Database error: {:?}", error);
+    }
 }
 
 pub async fn add_login(mut db: Connection<Db>, username: &str, ip: &str) -> () {
-    let _ = sqlx::query("UPDATE users SET lastlogin_time = CURRENT_TIMESTAMP, lastlogin_ip = ?, lastlogin_via = 'MARMAK Mirror' WHERE username = ?")
-    .bind(ip)
-    .bind(username)
-    .fetch_one(&mut **db)
-    .await;
-    let _ = sqlx::query("INSERT INTO logins (account, time, ip, via) VALUES (?, CURRENT_TIMESTAMP, ?, 'MARMAK Mirror')")
-    .bind(username)
-    .bind(ip)
-    .fetch_one(&mut **db)
-    .await;
+    if let Err(error) = sqlx::query("INSERT INTO logins (account, time, ip, via) VALUES (?, CURRENT_TIMESTAMP, ?, 'MARMAK Mirror')")
+        .bind(username)
+        .bind(ip)
+        .fetch_one(&mut **db)
+        .await 
+    {
+        println!("Database error: {:?}", error);
+    }
 }
 
 pub async fn add_download(mut db: Connection<FileDb>, path: &str) -> () {
     let id = Uuid::new_v4().to_string();
 
-    let _ = sqlx::query("INSERT INTO files (id, path, downloads) VALUES (?, ?, 1) ON DUPLICATE KEY UPDATE downloads = downloads + 1")
-    .bind(id)
-    .bind(path)
-    .execute(&mut **db)
-    .await;
+    if let Err(error) = sqlx::query("INSERT INTO files (id, path, downloads) VALUES (?, ?, 1) ON DUPLICATE KEY UPDATE downloads = downloads + 1")
+        .bind(id)
+        .bind(path)
+        .execute(&mut **db)
+        .await
+    {
+        println!("Database error: {:?}", error);
+    }
 }
 
 pub async fn get_downloads(mut db: Connection<FileDb>, path: &str) -> Option<i32> {
@@ -151,31 +161,41 @@ pub async fn get_downloads(mut db: Connection<FileDb>, path: &str) -> Option<i32
                 None
             }
         }
-        Err(_) => None,
+        Err(error) => {
+            println!("Database error: {:?}", error);
+            None
+        }
     }
 }
 
-pub async fn add_rememberme_token(mut db: Connection<Db>, username: &str) -> String {
+pub async fn add_rememberme_token(mut db: Connection<Db>, username: &str) -> Option<String> {
     let token: String = rand::thread_rng()
         .sample_iter(&Alphanumeric)
         .take(64)
         .map(char::from)
         .collect();
 
-    let _ = sqlx::query("INSERT INTO sessions (id, user) VALUES (?, ?)")
+    if let Err(error) = sqlx::query("INSERT INTO sessions (id, user) VALUES (?, ?)")
         .bind(&token)
         .bind(username)
         .execute(&mut **db)
-        .await;
+        .await
+    {
+        println!("Database error: {:?}", error);
+        return None;
+    }
 
-    token
+    Some(token)
 }
 
 pub async fn delete_session(mut db: Connection<Db>, token: &str) -> () {
-    let _ = sqlx::query("DELETE FROM sessions WHERE id = ?")
+    if let Err(error) = sqlx::query("DELETE FROM sessions WHERE id = ?")
         .bind(&token)
         .execute(&mut **db)
-        .await;
+        .await
+    {
+        println!("Database error: {:?}", error);
+    }
 }
 
 #[cfg(not(test))]
@@ -193,6 +213,10 @@ pub async fn fetch_user_by_session(mut db: Connection<Db>, id: &str) -> Option<M
                 None
             }
         }
-        Err(_) => None,
+        Err(error) => {
+            println!("Database error: {:?}", error);
+            None
+        }
     }
 }
+

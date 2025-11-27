@@ -137,23 +137,23 @@ async fn login(
         }
 
         if let Some(_) = user.remember_me {
-            let rememberme_token = add_rememberme_token(db2, &db_user.username).await;
+            if let Some(rememberme_token) = add_rememberme_token(db2, &db_user.username).await {
+                let month = OffsetDateTime::now_utc() + Duration::days(30);
 
-            let month = OffsetDateTime::now_utc() + Duration::days(30);
+                let mut rememberme_cookie = Cookie::new("maremembermetoken", rememberme_token.clone());
+                rememberme_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
+                rememberme_cookie.set_expires(month);
+                rememberme_cookie.set_same_site(SameSite::Lax);
 
-            let mut rememberme_cookie = Cookie::new("maremembermetoken", rememberme_token.clone());
-            rememberme_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
-            rememberme_cookie.set_expires(month);
-            rememberme_cookie.set_same_site(SameSite::Lax);
+                jar.add(rememberme_cookie);
 
-            jar.add(rememberme_cookie);
+                let mut local_rememberme_cookie =
+                    Cookie::new("remembermetoken", rememberme_token.clone());
+                local_rememberme_cookie.set_expires(month);
+                local_rememberme_cookie.set_same_site(SameSite::Lax);
 
-            let mut local_rememberme_cookie =
-                Cookie::new("remembermetoken", rememberme_token.clone());
-            local_rememberme_cookie.set_expires(month);
-            local_rememberme_cookie.set_same_site(SameSite::Lax);
-
-            jar.add(local_rememberme_cookie);
+                jar.add(local_rememberme_cookie);
+            }
         }
 
         let jwt = create_jwt(&db_user).map_err(|_| Status::InternalServerError)?;
