@@ -127,7 +127,7 @@ pub async fn add_login(mut db: Connection<Db>, username: &str, ip: &str) -> () {
         .bind(username)
         .bind(ip)
         .fetch_one(&mut **db)
-        .await 
+        .await
     {
         println!("Database error: {:?}", error);
     }
@@ -219,4 +219,3 @@ pub async fn fetch_user_by_session(mut db: Connection<Db>, id: &str) -> Option<M
         }
     }
 }
-

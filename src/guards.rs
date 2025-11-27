@@ -69,7 +69,11 @@ impl<'r> FromRequest<'r> for UsePlain<'r> {
         match request.headers().get_one("User-Agent") {
             Some(value) => {
                 if let Some(cookie) = request.cookies().get("plain") {
-                    return Outcome::Success(UsePlain(if cookie.value() == "true" { &true } else { &false }));
+                    return Outcome::Success(UsePlain(if cookie.value() == "true" {
+                        &true
+                    } else {
+                        &false
+                    }));
                 }
 
                 if value.starts_with("Mozilla/1") || value.starts_with("Mozilla/2") {
@@ -80,7 +84,11 @@ impl<'r> FromRequest<'r> for UsePlain<'r> {
             }
             None => {
                 if let Some(cookie) = request.cookies().get("plain") {
-                    return Outcome::Success(UsePlain(if cookie.value() == "true" { &true } else { &false }));
+                    return Outcome::Success(UsePlain(if cookie.value() == "true" {
+                        &true
+                    } else {
+                        &false
+                    }));
                 }
 
                 Outcome::Success(UsePlain(&true))

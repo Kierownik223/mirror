@@ -133,7 +133,8 @@ async fn login(
             if let Some(rememberme_token) = add_rememberme_token(db2, &db_user.username).await {
                 let month = OffsetDateTime::now_utc() + Duration::days(30);
 
-                let mut rememberme_cookie = Cookie::new("maremembermetoken", rememberme_token.clone());
+                let mut rememberme_cookie =
+                    Cookie::new("maremembermetoken", rememberme_token.clone());
                 rememberme_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
                 rememberme_cookie.set_expires(month);
                 rememberme_cookie.set_same_site(SameSite::Lax);
