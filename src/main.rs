@@ -507,7 +507,7 @@ async fn index(
                 },
             )))
         }
-        "mp4" | "3gp" | "mkv" | "webm" => {
+        "mp4" | "mkv" | "webm" => {
             if !*viewers.0 || !video_player {
                 return open_file(path, "private").await;
             }
