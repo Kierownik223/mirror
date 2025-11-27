@@ -82,24 +82,18 @@ fn login_page(
 
     let strings = translations.get_translation(&lang.0);
 
-    let next = next.unwrap_or("");
-
     IndexResponse::Template(Template::render(
         if *useplain.0 { "plain/login" } else { "login" },
         context! {
-            title: "Login",
+            title: strings.get("log_in"),
             lang,
             strings,
             root_domain: get_root_domain(host.0),
             host: host.0,
             config: (*CONFIG).clone(),
             theme: get_theme(jar),
-            is_logged_in: token.is_ok(),
-            username: "",
-            admin: false,
             hires: get_bool_cookie(jar, "hires", false),
             smallhead: get_bool_cookie(jar, "smallhead", false),
-            message: "",
             next
         },
     ))
@@ -117,7 +111,6 @@ async fn login(
     lang: Language,
     host: Host<'_>,
     useplain: UsePlain<'_>,
-    token: Result<JWT, Status>,
 ) -> Result<IndexResponse, Status> {
     if let Some(db_user) = login_user(db, &user.username, &user.password, &ip.0, true).await {
         if !get_bool_cookie(jar, "nooverride", false) {
@@ -198,19 +191,17 @@ async fn login(
         Ok(IndexResponse::Template(Template::render(
             if *useplain.0 { "plain/login" } else { "login" },
             context! {
-                title: "Login",
+                title: strings.get("log_in"),
                 lang,
                 strings,
                 root_domain: get_root_domain(host.0),
                 host: host.0,
                 config: (*CONFIG).clone(),
                 theme: get_theme(jar),
-                is_logged_in: token.is_ok(),
-                admin: token.unwrap_or_default().claims.perms == 0,
                 hires: get_bool_cookie(jar, "hires", false),
                 smallhead: get_bool_cookie(jar, "smallhead", false),
                 message: strings.get("invalid_info"),
-                next: "",
+                next,
             },
         )))
     }
