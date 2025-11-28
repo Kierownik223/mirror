@@ -57,7 +57,7 @@ pub async fn login_user(
 
 pub async fn get_user(mut db: Connection<Db>, username: &str) -> Option<MarmakUser> {
     let query_result = sqlx::query(
-        "SELECT password, perms, mirror_settings, email FROM users WHERE username = ? AND verified = 1",
+        "SELECT username, password, perms, mirror_settings, email FROM users WHERE username = ? AND verified = 1",
     )
     .bind(username)
     .fetch_one(&mut **db)
