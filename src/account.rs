@@ -100,7 +100,7 @@ async fn login(
     host: Host<'_>,
     useplain: UsePlain<'_>,
 ) -> Result<IndexResponse, Status> {
-    if let Some(db_user) = login_user(db, &user.username, &user.password, &ip.0, true).await {
+    if let Some(db_user) = login_user(db, &user.username, &user.password, &ip.0).await {
         if !get_bool_cookie(jar, "nooverride", false) {
             if let Some(mirror_settings) = db_user.mirror_settings.as_ref() {
                 let decoded: HashMap<String, String> =

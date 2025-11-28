@@ -19,8 +19,7 @@ pub async fn login_user(
     mut db: Connection<Db>,
     username: &str,
     password: &str,
-    ip: &str,
-    verify_password: bool,
+    ip: &str
 ) -> Option<MarmakUser> {
     let query_result = sqlx::query(
         "SELECT username, password, perms, mirror_settings, email FROM users WHERE username = ? AND verified = 1",
@@ -31,42 +30,20 @@ pub async fn login_user(
 
     match query_result {
         Ok(row) => {
-            if let Some(stored_hash) = row.try_get::<String, _>("password").ok() {
-                let username = row
-                    .try_get::<String, _>("username")
-                    .ok()
-                    .unwrap_or_default();
-                if verify_password && verify(password, &stored_hash).unwrap_or(false) {
-                    if let Some(perms) = row.try_get::<i32, _>("perms").ok() {
-                        add_login(db, username.as_str(), ip).await;
-                        let settings = row.try_get::<String, _>("mirror_settings").ok();
-                        return Some(MarmakUser {
-                            username: username,
-                            password: password.to_string(),
-                            perms: perms,
-                            mirror_settings: settings,
-                            email: row.try_get::<String, _>("email").ok(),
-                        });
-                    } else {
-                        None
-                    }
-                } else if !verify_password {
-                    if let Some(perms) = row.try_get::<i32, _>("perms").ok() {
-                        add_login(db, username.as_str(), ip).await;
-                        let settings = row.try_get::<String, _>("mirror_settings").ok();
-                        return Some(MarmakUser {
-                            username: username,
-                            password: password.to_string(),
-                            perms: perms,
-                            mirror_settings: settings,
-                            email: row.try_get::<String, _>("email").ok(),
-                        });
-                    } else {
-                        None
-                    }
-                } else {
-                    None
-                }
+            let stored_hash = row.try_get::<String, _>("password").ok()?;
+            let username = row.try_get::<String, _>("username").ok()?;
+            if verify(password, &stored_hash).unwrap_or(false) {
+                let perms = row.try_get::<i32, _>("perms").ok()?;
+
+                add_login(db, username.as_str(), ip).await;
+
+                return Some(MarmakUser {
+                    username: username,
+                    password: password.to_string(),
+                    perms,
+                    mirror_settings: row.try_get::<String, _>("mirror_settings").ok(),
+                    email: row.try_get::<String, _>("email").ok(),
+                });
             } else {
                 None
             }
@@ -88,21 +65,18 @@ pub async fn fetch_user(mut db: Connection<Db>, username: &str) -> Option<Marmak
 
     match query_result {
         Ok(row) => {
-            if let Some(perms) = row.try_get::<i32, _>("perms").ok() {
-                let settings = row.try_get::<String, _>("mirror_settings").ok();
-                return Some(MarmakUser {
-                    username: username.to_string(),
-                    password: row
-                        .try_get::<String, _>("password")
-                        .ok()
-                        .unwrap_or_default(),
-                    perms: perms,
-                    mirror_settings: settings,
-                    email: row.try_get::<String, _>("email").ok(),
-                });
-            } else {
-                None
-            }
+            let perms = row.try_get::<i32, _>("perms").ok()?;
+            
+            return Some(MarmakUser {
+                username: row.try_get::<String, _>("username").ok().unwrap_or_default(),
+                password: row
+                    .try_get::<String, _>("password")
+                    .ok()
+                    .unwrap_or_default(),
+                perms,
+                mirror_settings: row.try_get::<String, _>("mirror_settings").ok(),
+                email: row.try_get::<String, _>("email").ok(),
+            });
         }
         Err(error) => {
             println!("Database error: {:?}", error);
