@@ -1,27 +1,28 @@
 use audiotags::{MimeType, Tag};
 use db::{fetch_user, Db};
-use rocket::data::ToByteUnit;
-use rocket::http::{ContentType, Cookie, CookieJar, SameSite, Status};
-use rocket::response::content::RawHtml;
-use rocket::response::Redirect;
-use rocket::time::{Duration, OffsetDateTime};
-use rocket::State;
-use rocket::{Data, Request};
+use rocket::{
+    data::ToByteUnit,
+    http::{ContentType, Cookie, CookieJar, SameSite, Status},
+    response::{content::RawHtml, Redirect},
+    time::{Duration, OffsetDateTime},
+    Data, Request, State,
+};
 use rocket_db_pools::{Connection, Database};
 use rocket_multipart_form_data::{
     MultipartFormData, MultipartFormDataField, MultipartFormDataOptions, Repetition,
 };
 use serde::Serialize;
-use std::cmp::Ordering;
-use std::collections::HashMap;
-use std::ffi::OsStr;
-use std::fs;
-use std::io::{Read, Write};
-use std::path::{Path, PathBuf};
-use std::process::Command;
-use std::sync::Arc;
-use tokio::sync::RwLock;
-use tokio::time::sleep;
+use std::{
+    cmp::Ordering,
+    collections::HashMap,
+    ffi::OsStr,
+    fs,
+    io::{Read, Write},
+    path::{Path, PathBuf},
+    process::Command,
+    sync::Arc,
+};
+use tokio::{sync::RwLock, time::sleep};
 use utils::{
     create_cookie, get_bool_cookie, get_theme, is_restricted, open_file, parse_language, read_dirs,
     read_files,
