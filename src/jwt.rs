@@ -16,7 +16,7 @@ use serde::{Deserialize, Serialize};
 use crate::{account::MarmakUser, config::CONFIG};
 
 #[cfg(not(test))]
-use crate::db::{fetch_user_by_session, Db};
+use crate::db::{get_user_by_session, Db};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Claims {
@@ -49,7 +49,7 @@ impl<'r> FromRequest<'r> for JWT {
         ) -> Option<(String, Claims)> {
             let db = req.guard::<Connection<Db>>().await.succeeded()?;
 
-            let user = fetch_user_by_session(db, code).await?;
+            let user = get_user_by_session(db, code).await?;
             let token = create_jwt(&user).ok()?;
             let claims = decode_jwt(&token).ok()?;
 

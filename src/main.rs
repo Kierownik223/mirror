@@ -1,5 +1,5 @@
 use audiotags::{MimeType, Tag};
-use db::{fetch_user, Db};
+use db::{get_user, Db};
 use rocket::{
     data::ToByteUnit,
     http::{ContentType, Cookie, CookieJar, SameSite, Status},
@@ -988,7 +988,7 @@ async fn fetch_settings(
     let strings = translations.get_translation(&lang.0);
     let username = token.claims.sub;
 
-    if let Some(db_user) = fetch_user(db, username.as_str()).await {
+    if let Some(db_user) = get_user(db, username.as_str()).await {
         let decoded: HashMap<String, String> =
             serde_json::from_str(&db_user.mirror_settings.unwrap_or("{}".to_string()))
                 .expect("Failed to parse JSON");

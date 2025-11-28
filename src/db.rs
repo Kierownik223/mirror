@@ -55,7 +55,7 @@ pub async fn login_user(
     }
 }
 
-pub async fn fetch_user(mut db: Connection<Db>, username: &str) -> Option<MarmakUser> {
+pub async fn get_user(mut db: Connection<Db>, username: &str) -> Option<MarmakUser> {
     let query_result = sqlx::query(
         "SELECT password, perms, mirror_settings, email FROM users WHERE username = ? AND verified = 1",
     )
@@ -173,7 +173,7 @@ pub async fn delete_session(mut db: Connection<Db>, token: &str) -> () {
 }
 
 #[cfg(not(test))]
-pub async fn fetch_user_by_session(mut db: Connection<Db>, id: &str) -> Option<MarmakUser> {
+pub async fn get_user_by_session(mut db: Connection<Db>, id: &str) -> Option<MarmakUser> {
     let query_result = sqlx::query("SELECT user FROM sessions WHERE id = ?")
         .bind(id)
         .fetch_one(&mut **db)
@@ -182,7 +182,7 @@ pub async fn fetch_user_by_session(mut db: Connection<Db>, id: &str) -> Option<M
     match query_result {
         Ok(row) => {
             if let Some(user) = row.try_get::<String, _>("user").ok() {
-                fetch_user(db, &user).await
+                get_user(db, &user).await
             } else {
                 None
             }
