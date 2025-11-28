@@ -1,4 +1,5 @@
-use chrono::Utc;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
+
 use jsonwebtoken::{encode, errors::Error, Algorithm, EncodingKey, Header};
 
 #[cfg(not(test))]
@@ -147,17 +148,24 @@ impl Default for JWT {
 pub fn create_jwt(user: &MarmakUser) -> Result<String, Error> {
     let secret = &CONFIG.jwt_secret;
 
-    let expiration = Utc::now()
-        .checked_add_signed(chrono::Duration::seconds(3600))
-        .expect("Invalid timestamp")
-        .timestamp();
+    let expiration = SystemTime::now()
+        .checked_add(Duration::from_secs(3600))
+        .unwrap()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs() as i64;
+
+    let now = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs();
 
     let claims = Claims {
         sub: (*user.username).to_string(),
         email: user.email.clone(),
         perms: user.perms,
         exp: expiration as usize,
-        iat: Utc::now().timestamp() as usize,
+        iat: now as usize,
     };
 
     let header = Header::new(Algorithm::HS512);

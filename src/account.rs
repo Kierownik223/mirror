@@ -5,11 +5,11 @@ use rocket::{
     form::Form,
     http::{Cookie, CookieJar, SameSite, Status},
     response::Redirect,
+    time::{Duration, OffsetDateTime},
     State,
 };
 use rocket_db_pools::Connection;
 use rocket_dyn_templates::{context, Template};
-use time::{Duration, OffsetDateTime};
 
 use crate::{
     config::CONFIG,
