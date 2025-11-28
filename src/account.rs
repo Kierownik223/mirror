@@ -1,7 +1,5 @@
 use std::{collections::HashMap, fs, path::Path};
 
-use base64::{prelude::BASE64_STANDARD, Engine};
-use rand::thread_rng;
 use rocket::{
     fairing::AdHoc,
     form::Form,
@@ -11,18 +9,14 @@ use rocket::{
 };
 use rocket_db_pools::Connection;
 use rocket_dyn_templates::{context, Template};
-use rsa::pkcs1::{DecodeRsaPrivateKey, DecodeRsaPublicKey};
-use rsa::pkcs1v15::Pkcs1v15Encrypt;
-use rsa::{RsaPrivateKey, RsaPublicKey};
-use serde_json::json;
 use time::{Duration, OffsetDateTime};
 
 use crate::{
     config::CONFIG,
-    db::{add_rememberme_token, delete_session, fetch_user, login_user, Db},
+    db::{add_rememberme_token, delete_session, login_user, Db},
     guards::XForwardedFor,
     jwt::{create_jwt, JWT},
-    utils::{get_bool_cookie, get_root_domain, get_theme, map_io_error_to_status},
+    utils::{get_bool_cookie, get_root_domain, get_theme},
     Host, IndexResponse, Language, TranslationStore, UsePlain,
 };
 
@@ -40,12 +34,6 @@ struct LoginUser {
     username: String,
     password: String,
     remember_me: Option<bool>,
-}
-
-#[derive(serde::Deserialize, serde::Serialize)]
-struct UserToken {
-    username: String,
-    password_hash: String,
 }
 
 #[get("/login?<next>")]
@@ -208,139 +196,13 @@ async fn login(
     }
 }
 
-#[get("/direct?<token>&<to>")]
-async fn direct<'a>(
-    db: Connection<Db>,
-    jar: &CookieJar<'_>,
-    token: Option<String>,
-    to: Option<String>,
-    ip: XForwardedFor<'_>,
-    host: Host<'_>,
-    jwt: Result<JWT, Status>,
-) -> Result<Redirect, Status> {
-    if let Some(token) = token {
-        let private_key_pem = fs::read_to_string("private.key").map_err(map_io_error_to_status)?;
-        let private_key =
-            RsaPrivateKey::from_pkcs1_pem(&private_key_pem).expect("Failed to create private_key");
-
-        let encrypted_data = base64::engine::general_purpose::URL_SAFE
-            .decode(&token.replace(".", "="))
-            .map_err(|_| Status::BadRequest)?;
-
-        let decrypted_data = private_key
-            .decrypt(Pkcs1v15Encrypt, &encrypted_data)
-            .expect("Failed to decrypt payload");
-
-        let mut json_bytes = Vec::new();
-        BASE64_STANDARD
-            .decode_vec(&decrypted_data, &mut json_bytes)
-            .map_err(|_| Status::BadRequest)?;
-
-        let json = String::from_utf8(json_bytes).expect("Failed to get payload string");
-        let received_user: UserToken =
-            serde_json::from_str(&json).map_err(|_| Status::BadRequest)?;
-
-        if let Some(db_user) = login_user(db, &received_user.username, "", ip.0, false).await {
-            if !get_bool_cookie(jar, "nooverride", false) {
-                if let Some(mirror_settings) = db_user.mirror_settings.as_ref() {
-                    let decoded: HashMap<String, String> =
-                        serde_json::from_str(&mirror_settings).unwrap_or_default();
-
-                    for (key, value) in decoded {
-                        let year = OffsetDateTime::now_utc() + Duration::days(365);
-                        let mut cookie = Cookie::new(key, value.to_string());
-                        cookie.set_expires(year);
-                        cookie.set_same_site(SameSite::Lax);
-                    }
-                }
-            }
-
-            let jwt = create_jwt(&db_user).map_err(|_| Status::InternalServerError)?;
-
-            let mut jwt_cookie = Cookie::new("matoken", jwt.clone());
-            jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
-            jwt_cookie.set_same_site(SameSite::Lax);
-
-            jar.add(jwt_cookie);
-
-            let mut local_jwt_cookie = Cookie::new("token", jwt.clone());
-            local_jwt_cookie.set_same_site(SameSite::Lax);
-
-            jar.add(local_jwt_cookie);
-
-            if !Path::new(&format!("files/private/{}", &db_user.username)).exists() {
-                let _ = fs::create_dir(format!("files/private/{}", &db_user.username));
-            }
-
-            return Ok(Redirect::to("/"));
-        }
-
-        return Ok(Redirect::to("/account/login"));
+#[get("/direct")]
+fn direct(jwt: Result<JWT, Status>) -> Redirect {
+    if jwt.is_ok() {
+        Redirect::to("/")
+    } else {
+        Redirect::to("/account/login")
     }
-
-    if let Some(to) = to {
-        if jwt.is_err() {
-            return Err(Status::Unauthorized);
-        } else {
-            let token = jwt?;
-
-            if let Some(t) = token.token {
-                let mut jwt_cookie = Cookie::new("matoken", t.to_string());
-                jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
-                jwt_cookie.set_same_site(SameSite::Lax);
-
-                jar.add(jwt_cookie);
-
-                let mut local_jwt_cookie = Cookie::new("token", t.to_string());
-                local_jwt_cookie.set_same_site(SameSite::Lax);
-
-                jar.add(local_jwt_cookie);
-            }
-
-            if let Some(db_user) = fetch_user(db, &token.claims.sub).await {
-                let user_data =
-                    json!({"username": &token.claims.sub, "password_hash": db_user.password});
-                let b64token = BASE64_STANDARD.encode(user_data.to_string());
-
-                let public_key_pem =
-                    fs::read_to_string("public.key").map_err(|_| Status::InternalServerError)?;
-                let public_key = RsaPublicKey::from_pkcs1_pem(&public_key_pem)
-                    .map_err(|_| Status::InternalServerError)?;
-
-                let mut rng = thread_rng();
-                let encrypted_data = public_key
-                    .encrypt(&mut rng, Pkcs1v15Encrypt, b64token.as_bytes())
-                    .map_err(|_| Status::InternalServerError)?;
-
-                let encrypted_b64 =
-                    base64::engine::general_purpose::URL_SAFE.encode(encrypted_data);
-
-                let root_domain = get_root_domain(host.0);
-
-                let redirect_url = format!(
-                    "http://{}/direct?token={}",
-                    match to.as_str() {
-                        "account" => format!("account.{}", root_domain),
-                        "marmak" => root_domain.to_string(),
-                        "karol" => format!("karol.{}", root_domain),
-                        _ => host.0.to_string(),
-                    },
-                    encrypted_b64
-                );
-
-                return Ok(Redirect::to(redirect_url));
-            } else {
-                jar.remove(
-                    Cookie::build("matoken")
-                        .domain(format!(".{}", get_root_domain(host.0)))
-                        .same_site(SameSite::Lax),
-                );
-                return Err(Status::Forbidden);
-            }
-        }
-    }
-
-    Err(Status::BadRequest)
 }
 
 #[get("/logout")]
