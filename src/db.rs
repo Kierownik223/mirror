@@ -19,7 +19,7 @@ pub async fn login_user(
     mut db: Connection<Db>,
     username: &str,
     password: &str,
-    ip: &str
+    ip: &str,
 ) -> Option<MarmakUser> {
     let query_result = sqlx::query(
         "SELECT username, password, perms, mirror_settings, email FROM users WHERE username = ? AND verified = 1",
@@ -66,9 +66,12 @@ pub async fn get_user(mut db: Connection<Db>, username: &str) -> Option<MarmakUs
     match query_result {
         Ok(row) => {
             let perms = row.try_get::<i32, _>("perms").ok()?;
-            
+
             return Some(MarmakUser {
-                username: row.try_get::<String, _>("username").ok().unwrap_or_default(),
+                username: row
+                    .try_get::<String, _>("username")
+                    .ok()
+                    .unwrap_or_default(),
                 password: row
                     .try_get::<String, _>("password")
                     .ok()
