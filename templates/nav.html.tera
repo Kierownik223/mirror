@@ -11,7 +11,7 @@
     <a href="/admin/"><span><img class="icon" src="/static/images/icons/ui/{% if hires %}hires/{% endif %}admin.png">{{ strings.admin }}</span></a>
     {% else %}
     {% if config.enable_direct %}
-    <a href="/account/direct?to=account"><span><img class="icon" src="/static/images/icons/ui/{% if hires %}hires/{% endif %}settings.png">{{ strings.manage_account }}</span></a>
+    <a href="http://account.{{ root_domain }}"><span><img class="icon" src="/static/images/icons/ui/{% if hires %}hires/{% endif %}settings.png">{{ strings.manage_account }}</span></a>
     {% endif %}
     {% endif %}
     <a href="/account/logout"><span><img class="icon" src="/static/images/icons/ui/{% if hires %}hires/{% endif %}login.png">{{ strings.log_out }}</span></a>
