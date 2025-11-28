@@ -115,7 +115,7 @@ pub async fn update_settings(mut db: Connection<Db>, username: &str, settings: &
     if let Err(error) = sqlx::query("UPDATE users SET mirror_settings = ? WHERE username = ?")
         .bind(settings)
         .bind(username)
-        .fetch_one(&mut **db)
+        .execute(&mut **db)
         .await
     {
         println!("Database error: {:?}", error);
@@ -126,7 +126,7 @@ pub async fn add_login(mut db: Connection<Db>, username: &str, ip: &str) -> () {
     if let Err(error) = sqlx::query("INSERT INTO logins (account, time, ip, via) VALUES (?, CURRENT_TIMESTAMP, ?, 'MARMAK Mirror')")
         .bind(username)
         .bind(ip)
-        .fetch_one(&mut **db)
+        .execute(&mut **db)
         .await
     {
         println!("Database error: {:?}", error);
