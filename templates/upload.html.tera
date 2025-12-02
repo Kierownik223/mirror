@@ -5,8 +5,8 @@
 {{ strings.welcome }}, {{ username }}!
 {% if admin %}
 <br>
-<a href="/admin/"><span><img src="/static/images/icons/ui/{% if hires %}hires/{% endif %}admin.png" class="icon">{{ strings.admin }}</span></a>
-<a href="/uploads/"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">Uploads</span></a>
+<a href="/admin/"><span><img src="/static/images/icons/ui/{% if settings.hires %}hires/{% endif %}admin.png" class="icon">{{ strings.admin }}</span></a>
+<a href="/uploads/"><span><img src="/static/images/icons/{% if settings.hires %}hires/{% endif %}folder.png" class="icon">Uploads</span></a>
 <br>
 {% endif %}
 
@@ -16,7 +16,7 @@
         {% if s.name != "" %}
         <div>
             <div>
-                <a href="{{ s.ext }}"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}</span></a> {{ strings.upload_success }} <a style="cursor: pointer;" onclick="deleteFile(this, '{{ s.ext }}')">{{ strings.delete }}</a>{% if config.linkshortener %} <a style="cursor: pointer;" onclick="shorten(this, 'http://{{ host }}{{ s.ext | urlencode }}')">{{ strings.shorten }}</a>{% endif %}            </div>
+                <a href="{{ s.ext }}"><span><img src="/static/images/icons/{% if settings.hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}</span></a> {{ strings.upload_success }} <a style="cursor: pointer;" onclick="deleteFile(this, '{{ s.ext }}')">{{ strings.delete }}</a>{% if config.linkshortener %} <a style="cursor: pointer;" onclick="shorten(this, 'http://{{ host }}{{ s.ext | urlencode }}')">{{ strings.shorten }}</a>{% endif %}            </div>
         </div>
         {% endif %}
         {% endfor %}
@@ -25,7 +25,7 @@
 
 <form method="post" enctype="multipart/form-data" id="uploadForm">
     <label for="file">
-        <img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}default.png">{{ strings.select_file }}:
+        <img class="icon" src="/static/images/icons/{% if settings.hires %}hires/{% endif %}default.png">{{ strings.select_file }}:
     </label>
     <center>
         <input type="file" name="files" id="file" class="text" multiple required>
@@ -33,14 +33,14 @@
 
     {% if admin %}
     <label for="path">
-        <img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png">{{ strings.target_dir }}:
+        <img class="icon" src="/static/images/icons/{% if settings.hires %}hires/{% endif %}folder.png">{{ strings.target_dir }}:
     </label>
     <center>
         <div class="textbox-container">
             <input type="text" id="path" name="path" class="text" placeholder="{{ strings.target_placeholder }}" value="{{ path }}">
         </div>
-        {% if dir_browser %}
-        <button type="button" onclick="openDialog()"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">{{ strings.browse }}</span></button>
+        {% if settings.dir_browser %}
+        <button type="button" onclick="openDialog()"><span><img src="/static/images/icons/{% if settings.hires %}hires/{% endif %}folder.png" class="icon">{{ strings.browse }}</span></button>
         {% endif %}
     </center>
     <br>
@@ -48,27 +48,27 @@
     <input type="hidden" id="path" name="path" value="/private/">
     {% endif %}
 
-    <img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}md.png">{{ strings.max_size }}<br><br>
+    <img class="icon" src="/static/images/icons/{% if settings.hires %}hires/{% endif %}md.png">{{ strings.max_size }}<br><br>
 
     <center>
-        <button type="submit"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png" class="icon">{{ strings.upload }}</span></button>
+        <button type="submit"><span><img src="/static/images/icons/{% if settings.hires %}hires/{% endif %}favicon.png" class="icon">{{ strings.upload }}</span></button>
 
-        <button type="button" onclick="uploadViaAPI()"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png" class="icon">{{ strings.upload }} (JavaScript)</span></button>
+        <button type="button" onclick="uploadViaAPI()"><span><img src="/static/images/icons/{% if settings.hires %}hires/{% endif %}favicon.png" class="icon">{{ strings.upload }} (JavaScript)</span></button>
     </center>
 </form>
 {% endblock content %}
 
 {% block scripts %}
 <script src="/static/polyfills.js"></script>
-<script src="/scripts/upload.js?lang={{ lang }}&hires={{ hires }}"></script>
+<script src="/scripts/upload.js?lang={{ lang }}&settings.hires={{ settings.hires }}"></script>
 {% if config.linkshortener %}
-<script src="/scripts/linkshortener.js?lang={{ lang }}&hires={{ hires }}"></script>
+<script src="/scripts/linkshortener.js?lang={{ lang }}&settings.hires={{ settings.hires }}"></script>
 {% endif %}
 
-{% if dir_browser %}
+{% if settings.dir_browser %}
 <div id="browse_dialog" class="dialog">
     <div class="dialog-content">
-        <img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">{{ strings.select_folder }}:
+        <img class="icon" src="/static/images/icons/{% if settings.hires %}hires/{% endif %}favicon.png">{{ strings.select_folder }}:
         <iframe id="browser_iframe" src="/iframe/"></iframe>
         <center>
             <button onclick="selectPath()">{{ strings.ok }}</button>

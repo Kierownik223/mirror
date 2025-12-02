@@ -30,7 +30,7 @@
 
     <title>{{ title }} - MARMAK Mirror</title>
     {% endblock head %}
-    <link rel="stylesheet" href="/static/styles/{{ theme }}.css">
+    <link rel="stylesheet" href="/static/styles/{{ settings.theme }}.css">
     <!--[if lt IE 7]>
     <style>
     input.text {

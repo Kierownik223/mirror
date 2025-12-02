@@ -23,17 +23,14 @@ use std::{
     sync::Arc,
 };
 use tokio::{sync::RwLock, time::sleep};
-use utils::{
-    create_cookie, get_bool_cookie, get_theme, is_restricted, open_file, parse_language, read_dirs,
-    read_files,
-};
+use utils::{create_cookie, get_theme, is_restricted, open_file, read_dirs, read_files};
 use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
 use crate::config::CONFIG;
 use crate::db::{add_download, FileDb};
-use crate::guards::{FullUri, HeaderFile, Host, Settings, UsePlain, UseViewers};
+use crate::guards::{CookieSettings, FullUri, HeaderFile, Host, Settings, UsePlain, UseViewers};
 use crate::i18n::{Language, TranslationStore};
 use crate::jwt::JWT;
 use crate::responders::{Cached, IndexResponse, IndexResult};
@@ -352,6 +349,7 @@ async fn index(
     sizes: &State<FileSizes>,
     token: Result<JWT, Status>,
     uri: FullUri,
+    settings: CookieSettings<'_>,
 ) -> IndexResult {
     let jwt = token.clone().unwrap_or_default();
 
@@ -377,13 +375,6 @@ async fn index(
     let strings = translations.get_translation(&lang.0);
 
     let root_domain = get_root_domain(host.0);
-    let theme = get_theme(jar);
-
-    let hires = get_bool_cookie(jar, "hires", false);
-    let smallhead = get_bool_cookie(jar, "smallhead", false);
-    let use_si = get_bool_cookie(jar, "use_si", true);
-    let audio_player = get_bool_cookie(jar, "audio_player", true);
-    let video_player = get_bool_cookie(jar, "video_player", true);
 
     if let Ok((p, i)) = get_real_path(&file, username.clone()) {
         path = p;
@@ -403,11 +394,9 @@ async fn index(
                     root_domain,
                     host: host.0,
                     config: (*CONFIG).clone(),
-                    theme,
                     is_logged_in: token.is_ok(),
                     admin: perms == 0,
-                    hires,
-                    smallhead,
+                    settings,
                 },
             )));
         } else {
@@ -466,12 +455,10 @@ async fn index(
                     host: host.0,
                     config: (*CONFIG).clone(),
                     path: Path::new("/").join(&file).display().to_string(),
-                    theme,
                     is_logged_in: token.is_ok(),
-                    hires,
                     admin: perms == 0,
-                    smallhead,
-                    markdown
+                    markdown,
+                    settings,
                 },
             )))
         }
@@ -498,18 +485,15 @@ async fn index(
                     config: (*CONFIG).clone(),
                     path: Path::new("/").join(&file).display().to_string(),
                     files,
-                    theme,
                     is_logged_in: token.is_ok(),
                     username,
                     admin: perms == 0,
-                    hires,
-                    smallhead,
-                    use_si,
+                    settings,
                 },
             )))
         }
         "mp4" | "mkv" | "webm" => {
-            if !*viewers.0 || !video_player {
+            if !*viewers.0 || !settings.video_player {
                 return open_file(path, "private").await;
             }
 
@@ -560,19 +544,17 @@ async fn index(
                     path: videopath,
                     poster: format!("/images/videoposters{}.jpg", videopath.replace("video/", "")),
                     vidtitle,
-                    theme,
                     is_logged_in: token.is_ok(),
                     username,
                     admin: perms == 0,
-                    hires,
-                    smallhead,
                     displaydetails,
-                    details
+                    details,
+                    settings,
                 },
             )))
         }
         "mp3" | "m4a" | "m4b" | "flac" | "wav" => {
-            if !*viewers.0 || !audio_player {
+            if !*viewers.0 || !settings.audio_player {
                 return open_file(path, "private").await;
             }
 
@@ -590,18 +572,16 @@ async fn index(
                     config: (*CONFIG).clone(),
                     path: audiopath,
                     audiotitle: get_name_from_path(&path),
-                    theme: &theme,
                     is_logged_in: token.is_ok(),
                     username: &username,
                     admin: perms == 0,
-                    hires,
-                    smallhead,
                     artist: "N/A",
                     year: "N/A",
                     album: "N/A",
                     genre: "N/A",
                     track: None::<u16>,
-                    cover: false
+                    cover: false,
+                    settings: &settings,
                 },
             );
 
@@ -638,18 +618,16 @@ async fn index(
                         config: (*CONFIG).clone(),
                         path: audiopath,
                         audiotitle,
-                        theme,
                         is_logged_in: token.is_ok(),
                         username,
                         admin: perms == 0,
-                        hires,
-                        smallhead,
                         artist,
                         year,
                         album,
                         genre,
                         track,
-                        cover
+                        cover,
+                        settings,
                     },
                 )))
             } else {
@@ -721,15 +699,12 @@ async fn index(
                     path: &path_str,
                     dirs,
                     files,
-                    theme,
                     is_logged_in: token.is_ok(),
                     username,
                     admin: perms == 0,
-                    hires,
-                    smallhead,
                     markdown,
                     private: is_private,
-                    use_si,
+                    settings,
                 },
             )))
         }
@@ -792,15 +767,12 @@ async fn index(
                     path: &path_str,
                     dirs,
                     files,
-                    theme,
                     is_logged_in: token.is_ok(),
                     username,
                     admin: perms == 0,
-                    hires,
-                    smallhead,
                     markdown,
                     private: is_private,
-                    use_si,
+                    settings,
                 },
             )))
         }
@@ -820,15 +792,12 @@ async fn index(
                         host: host.0,
                         config: (*CONFIG).clone(),
                         path: Path::new("/").join(&file).display().to_string(),
-                        theme,
                         is_logged_in: token.is_ok(),
                         username,
                         admin: perms == 0,
-                        hires,
-                        smallhead,
                         filename: get_name_from_path(&path),
                         filesize: fs::metadata(&path).unwrap().len(),
-                        use_si,
+                        settings,
                     },
                 )))
             } else {
@@ -929,6 +898,8 @@ fn settings(
 
     let show_cookie_notice = jar.iter().next().is_none();
 
+    let settings = CookieSettings::from_cookies(jar);
+
     return IndexResponse::Template(Template::render(
         if *useplain.0 {
             "plain/settings"
@@ -946,15 +917,8 @@ fn settings(
             is_logged_in: token.is_ok(),
             username,
             admin: *perms == 0,
-            hires: get_bool_cookie(jar, "hires", false),
-            smallhead: get_bool_cookie(jar, "smallhead", false),
             plain: *useplain.0,
-            nooverride: get_bool_cookie(jar, "nooverride", false),
-            viewers: get_bool_cookie(jar, "viewers", true),
-            dir_browser: get_bool_cookie(jar, "dir_browser", true),
-            use_si: get_bool_cookie(jar, "use_si", true),
-            audio_player: get_bool_cookie(jar, "audio_player", true),
-            video_player: get_bool_cookie(jar, "video_player", true),
+            settings,
             language_names,
             show_cookie_notice,
         },
@@ -1096,6 +1060,7 @@ async fn iframe(
     jar: &CookieJar<'_>,
     host: Host<'_>,
     token: Result<JWT, Status>,
+    settings: CookieSettings<'_>,
 ) -> Result<IndexResponse, Status> {
     let username = if let Ok(token) = token.as_ref() {
         if let Some(t) = &token.token {
@@ -1138,8 +1103,7 @@ async fn iframe(
         context! {
             path: file.display().to_string(),
             dirs,
-            theme: get_theme(jar),
-            hires: get_bool_cookie(jar, "hires", false)
+            settings,
         },
     )))
 }
@@ -1219,6 +1183,7 @@ fn uploader(
     useplain: UsePlain<'_>,
     token: Result<JWT, Status>,
     path: Option<&str>,
+    settings: CookieSettings<'_>,
 ) -> Result<IndexResponse, Status> {
     let token = token?;
 
@@ -1253,15 +1218,12 @@ fn uploader(
             root_domain: get_root_domain(host.0),
             host: host.0,
             config: (*CONFIG).clone(),
-            theme: get_theme(jar),
             is_logged_in: true,
-            hires: get_bool_cookie(jar, "hires", false),
-            smallhead: get_bool_cookie(jar, "smallhead", false),
             username: username,
             admin: perms == 0,
-            dir_browser: get_bool_cookie(jar, "dir_browser", true),
             path: path.unwrap_or_default(),
-            uploadedfiles: vec![MirrorFile { name: "".to_string(), ext: "".to_string(), icon: "default".to_string(), size: 0, downloads: None }]
+            uploadedfiles: vec![MirrorFile { name: "".to_string(), ext: "".to_string(), icon: "default".to_string(), size: 0, downloads: None }],
+            settings,
         },
     )));
 }
@@ -1277,6 +1239,7 @@ async fn upload(
     useplain: UsePlain<'_>,
     token: Result<JWT, Status>,
     path: Option<&str>,
+    settings: CookieSettings<'_>,
 ) -> Result<IndexResponse, Status> {
     let token = token?;
 
@@ -1427,13 +1390,11 @@ async fn upload(
                 config: (*CONFIG).clone(),
                 theme: get_theme(jar),
                 is_logged_in: true,
-                hires: get_bool_cookie(jar, "hires", false),
-                smallhead: get_bool_cookie(jar, "smallhead", false),
                 username,
                 admin: perms == 0,
-                dir_browser: get_bool_cookie(jar, "dir_browser", true),
                 path: path.unwrap_or_default(),
-                uploadedfiles: uploaded_files
+                uploadedfiles: uploaded_files,
+                settings,
             },
         )));
     } else {
@@ -1443,7 +1404,6 @@ async fn upload(
 
 #[catch(422)]
 async fn unprocessable_entry(_status: Status, req: &Request<'_>) -> Cached<(Status, Template)> {
-    let jar = req.cookies();
     let translations = req.guard::<&State<TranslationStore>>().await.unwrap();
     let useplain = req
         .guard::<UsePlain<'_>>()
@@ -1451,18 +1411,13 @@ async fn unprocessable_entry(_status: Status, req: &Request<'_>) -> Cached<(Stat
         .succeeded()
         .unwrap_or(UsePlain(&false));
 
-    let mut lang = "en".to_string();
+    let settings = req
+        .guard::<CookieSettings<'_>>()
+        .await
+        .succeeded()
+        .unwrap_or_default();
 
-    if let Some(header) = req.headers().get_one("Accept-Language") {
-        let header_lang = parse_language(header).unwrap_or("en".to_string());
-        lang = header_lang;
-    }
-
-    if let Some(cookie_lang) = jar.get("lang").map(|c| c.value()) {
-        lang = cookie_lang.to_string();
-    }
-
-    let strings = translations.get_translation(lang.as_str());
+    let strings = translations.get_translation(settings.lang);
 
     let host = if let Some(host) = req.host() {
         &host.to_string()
@@ -1481,16 +1436,14 @@ async fn unprocessable_entry(_status: Status, req: &Request<'_>) -> Cached<(Stat
                 },
                 context! {
                     title: "HTTP 400",
-                    lang,
+                    lang: settings.lang,
                     strings,
                     root_domain: get_root_domain(&host),
                     host,
                     config: (*CONFIG).clone(),
-                    theme: get_theme(jar),
                     is_logged_in: false,
                     admin: false,
-                    hires: get_bool_cookie(jar, "hires", false),
-                    smallhead: get_bool_cookie(jar, "smallhead", false),
+                    settings,
                 },
             ),
         ),
@@ -1500,7 +1453,6 @@ async fn unprocessable_entry(_status: Status, req: &Request<'_>) -> Cached<(Stat
 
 #[catch(default)]
 async fn default(status: Status, req: &Request<'_>) -> Cached<Template> {
-    let jar = req.cookies();
     let translations = req.guard::<&State<TranslationStore>>().await.unwrap();
     let useplain = req
         .guard::<UsePlain<'_>>()
@@ -1508,18 +1460,13 @@ async fn default(status: Status, req: &Request<'_>) -> Cached<Template> {
         .succeeded()
         .unwrap_or(UsePlain(&false));
 
-    let mut lang = "en".to_string();
+    let settings = req
+        .guard::<CookieSettings<'_>>()
+        .await
+        .succeeded()
+        .unwrap_or_default();
 
-    if let Some(header) = req.headers().get_one("Accept-Language") {
-        let header_lang = parse_language(header).unwrap_or("en".to_string());
-        lang = header_lang;
-    }
-
-    if let Some(cookie_lang) = jar.get("lang").map(|c| c.value()) {
-        lang = cookie_lang.to_string();
-    }
-
-    let strings = translations.get_translation(lang.as_str());
+    let strings = translations.get_translation(settings.lang);
 
     let host = if let Some(host) = req.host() {
         &host.to_string()
@@ -1536,16 +1483,14 @@ async fn default(status: Status, req: &Request<'_>) -> Cached<Template> {
             },
             context! {
                 title: format!("HTTP {}", status.code),
-                lang,
+                lang: settings.lang,
                 strings,
                 root_domain: get_root_domain(&host),
                 host,
                 config: (*CONFIG).clone(),
-                theme: get_theme(jar),
                 is_logged_in: false,
                 admin: false,
-                hires: get_bool_cookie(jar, "hires", false),
-                smallhead: get_bool_cookie(jar, "smallhead", false),
+                settings,
             },
         ),
         header: "no-cache",

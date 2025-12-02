@@ -4,20 +4,18 @@
 <a href="/">MARMAK Mirror</a>/<a href="/admin/">{{ strings.admin }}</a>/<a href="/admin/sysinfo">{{ strings.sysinfo }}</a><br>
 {{ strings.welcome }}, {{ username }}!
 <br>
-<a href="/admin/">{{ strings.admin }}</a><br>
-<label for="mem_usage"><b>{{ strings.memory_usage }}</b>: <span id="used_mem_readable">{{ used_mem_readable }}</span>/<span id="total_mem_readable">{{ total_mem_readable }}</span></label>
-<progress id="mem_usage" max="{{ total_mem }}" value="{{ used_mem }}"></progress><br>
+<a href="/admin/"><span><img src="/static/images/icons/ui/{% if settings.hires %}hires/{% endif %}admin.png" class="icon">{{ strings.admin }}</span></a><br>
+<label for="mem_usage"><b>{{ strings.memory_usage }}</b>: <span id="used_mem_readable">{{ system.used_memory | format_size(use_si=settings.use_si) }}</span>/<span id="total_mem_readable">{{ system.total_memory | format_size(use_si=settings.use_si) }}</span></label>
+<progress style="width:100%;box-sizing:border-box;" id="mem_usage" max="{{ system.total_memory }}" value="{{ system.used_memory }}"></progress> <br>
 <b>{{ strings.system }}</b>: <span id="sys_name">{{ sys_name }}</span> <br>
 <b>{{ strings.kernel_version }}</b>: <span id="sys_ver">{{ sys_ver }}</span> <br>
 <b>{{ strings.hostname }}</b>: <span id="hostname">{{ hostname }}</span> <br>
-<b>{{ strings.disk_usage }}</b>:<br>
+<b><img src="/static/images/icons/ui/{% if settings.hires %}hires/{% endif %}drive.png" class="icon">{{ strings.disk_usage }}</b>:<br>
 <div id="disks">
     {% for s in disks %}
     <div>
-        <label for="usage"><span class="free_space_readable">{{ s.used_space_readable }}</span>/<span
-                class="total_space_readable">{{ s.total_space_readable }}</span></label>
-        <progress class="disk_usage" max="{{ s.total_space }}"
-            value="{{ s.used_space }}"></progress>
+        <label for="usage">{{ s.mount_point }}: {{ s.used_space_readable }}/{{ s.total_space_readable }}</label>
+        <progress style="width:100%;box-sizing:border-box;" class="disk_usage" max="{{ s.total_space }}" value="{{ s.used_space }}"></progress>
     </div>
     {% endfor %}
 </div>

@@ -24,8 +24,8 @@
     <br>
     <label for="smallhead">{{ strings.smallhead }}</label>
     <br>
-    <label><input type="radio" name="smallhead" value="true"{% if smallhead %} checked{% endif %}>{{ strings.enable }}</label>
-    <label><input type="radio" name="smallhead" value="false"{% if not smallhead %} checked{% endif %}>{{ strings.disable }}</label>
+    <label><input type="radio" name="smallhead" value="true"{% if setttings.smallhead %} checked{% endif %}>{{ strings.enable }}</label>
+    <label><input type="radio" name="smallhead" value="false"{% if not setttings.smallhead %} checked{% endif %}>{{ strings.disable }}</label>
     <br>
     <label for="plain">{{ strings.plain }}</label>
     <br>
@@ -34,23 +34,23 @@
     <br>
     <label for="viewers">{{ strings.viewers }}</label>
     <br>
-    <label><input type="radio" name="viewers" value="true"{% if viewers %} checked{% endif %}>{{ strings.enable }}</label>
-    <label><input type="radio" name="viewers" value="false"{% if not viewers %} checked{% endif %}>{{ strings.disable }}</label>
+    <label><input type="radio" name="viewers" value="true"{% if setttings.viewers %} checked{% endif %}>{{ strings.enable }}</label>
+    <label><input type="radio" name="viewers" value="false"{% if not setttings.viewers %} checked{% endif %}>{{ strings.disable }}</label>
     <br>
     <label for="audio_player">{{ strings.audio_player }}</label>
     <br>
-    <label><input type="radio" name="audio_player" value="true"{% if audio_player %} checked{% endif %}>{{ strings.enable }}</label>
-    <label><input type="radio" name="audio_player" value="false"{% if not audio_player %} checked{% endif %}>{{ strings.disable }}</label>
+    <label><input type="radio" name="audio_player" value="true"{% if setttings.audio_player %} checked{% endif %}>{{ strings.enable }}</label>
+    <label><input type="radio" name="audio_player" value="false"{% if not setttings.audio_player %} checked{% endif %}>{{ strings.disable }}</label>
     <br>
     <label for="video_player">{{ strings.video_player }}</label>
     <br>
-    <label><input type="radio" name="video_player" value="true"{% if video_player %} checked{% endif %}>{{ strings.enable }}</label>
-    <label><input type="radio" name="video_player" value="false"{% if not video_player %} checked{% endif %}>{{ strings.disable }}</label>
+    <label><input type="radio" name="video_player" value="true"{% if setttings.video_player %} checked{% endif %}>{{ strings.enable }}</label>
+    <label><input type="radio" name="video_player" value="false"{% if not setttings.video_player %} checked{% endif %}>{{ strings.disable }}</label>
     <br>
     <label for="use_si">{{ strings.use_si_prefixes }}</label>
     <br>
-    <label><input type="radio" name="use_si" value="true"{% if use_si %} checked{% endif %}>{{ strings.enable }}</label>
-    <label><input type="radio" name="use_si" value="false"{% if not use_si %} checked{% endif %}>{{ strings.disable }}</label>
+    <label><input type="radio" name="use_si" value="true"{% if setttings.use_si %} checked{% endif %}>{{ strings.enable }}</label>
+    <label><input type="radio" name="use_si" value="false"{% if not setttings.use_si %} checked{% endif %}>{{ strings.disable }}</label>
     <br>
     <center>
         <input type="submit" value="{{ strings.save_settings }}">

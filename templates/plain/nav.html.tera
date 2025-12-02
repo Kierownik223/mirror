@@ -1,6 +1,6 @@
 <div>
-    <a href="/">{% if not smallhead %}<h1>{% endif %}MARMAK Mirror{% if not smallhead %}</h1>{% endif %}</a>{% if smallhead %}&nbsp;{% endif %}
-    {% if not smallhead %}<a href="/">{{ strings.home }}</a>&nbsp;{% endif %}
+    <a href="/">{% if not setttings.smallhead %}<h1>{% endif %}MARMAK Mirror{% if not smallhead %}</h1>{% endif %}</a>{% if smallhead %}&nbsp;{% endif %}
+    {% if not setttings.smallhead %}<a href="/">{{ strings.home }}</a>&nbsp;{% endif %}
     <a href="/settings">{{ strings.settings }}</a>&nbsp;
     {% if config.enable_marmak_link %}<a href="http://{{ root_domain }}">MARMAK</a>{% endif %}&nbsp;
     {% if config.enable_login %}

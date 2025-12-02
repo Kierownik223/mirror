@@ -1,20 +1,20 @@
 <div class="header">
-    <a href="/">{% if not smallhead %}<h1>{% endif %}<span><img class="icon" src="/static/images/icons/{% if hires %}hires/{% endif %}favicon.png">MARMAK Mirror</span>{% if not smallhead %}</h1>{% endif %}</a>
-    {% if not smallhead %}<a href="/"><span><img class="icon" src="/static/images/icons/ui/{% if hires %}hires/{% endif %}home.png">{{ strings.home }}</span></a>{% endif %}
-    <a href="/settings"><span><img class="icon" src="/static/images/icons/ui/{% if hires %}hires/{% endif %}settings.png">{{ strings.settings }}</span></a>
-    {% if config.enable_marmak_link %}<a href="http://{{ root_domain }}"><span><img class="icon" src="/static/images/icons/ui/{% if hires %}hires/{% endif %}marmak.png">MARMAK</span></a>{% endif %}
+    <a href="/">{% if not settings.smallhead %}<h1>{% endif %}<span><img class="icon" src="/static/images/icons/{% if settings.hires %}hires/{% endif %}favicon.png">MARMAK Mirror</span>{% if not smallhead %}</h1>{% endif %}</a>
+    {% if not smallhead %}<a href="/"><span><img class="icon" src="/static/images/icons/ui/{% if settings.hires %}hires/{% endif %}home.png">{{ strings.home }}</span></a>{% endif %}
+    <a href="/settings"><span><img class="icon" src="/static/images/icons/ui/{% if settings.hires %}hires/{% endif %}settings.png">{{ strings.settings }}</span></a>
+    {% if config.enable_marmak_link %}<a href="http://{{ root_domain }}"><span><img class="icon" src="/static/images/icons/ui/{% if settings.hires %}hires/{% endif %}marmak.png">MARMAK</span></a>{% endif %}
     {% if config.enable_login %}
     {% if not is_logged_in %}
-    <a href="/account/login"><span><img class="icon" src="/static/images/icons/ui/{% if hires %}hires/{% endif %}login.png">{{ strings.log_in }}</span></a>
+    <a href="/account/login"><span><img class="icon" src="/static/images/icons/ui/{% if settings.hires %}hires/{% endif %}login.png">{{ strings.log_in }}</span></a>
     {% else %}
     {% if admin %}
-    <a href="/admin/"><span><img class="icon" src="/static/images/icons/ui/{% if hires %}hires/{% endif %}admin.png">{{ strings.admin }}</span></a>
+    <a href="/admin/"><span><img class="icon" src="/static/images/icons/ui/{% if settings.hires %}hires/{% endif %}admin.png">{{ strings.admin }}</span></a>
     {% else %}
     {% if config.enable_direct %}
-    <a href="http://account.{{ root_domain }}"><span><img class="icon" src="/static/images/icons/ui/{% if hires %}hires/{% endif %}settings.png">{{ strings.manage_account }}</span></a>
+    <a href="http://account.{{ root_domain }}"><span><img class="icon" src="/static/images/icons/ui/{% if settings.hires %}hires/{% endif %}settings.png">{{ strings.manage_account }}</span></a>
     {% endif %}
     {% endif %}
-    <a href="/account/logout"><span><img class="icon" src="/static/images/icons/ui/{% if hires %}hires/{% endif %}login.png">{{ strings.log_out }}</span></a>
+    <a href="/account/logout"><span><img class="icon" src="/static/images/icons/ui/{% if settings.hires %}hires/{% endif %}login.png">{{ strings.log_out }}</span></a>
     {% endif %}
     {% endif %}
 </div>

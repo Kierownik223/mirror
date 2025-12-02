@@ -4,13 +4,13 @@
 <a href="/">MARMAK Mirror</a>/<a href="/admin/">{{ strings.admin }}</a>/<a href="/admin/sysinfo">{{ strings.sysinfo }}</a><br>
 {{ strings.welcome }}, {{ username }}!
 <br>
-<a href="/admin/"><span><img src="/static/images/icons/ui/{% if hires %}hires/{% endif %}admin.png" class="icon">{{ strings.admin }}</span></a><br>
-<label for="mem_usage"><b>{{ strings.memory_usage }}</b>: <span id="used_mem_readable">{{ system.used_memory | format_size(use_si=use_si) }}</span>/<span id="total_mem_readable">{{ system.total_memory | format_size(use_si=use_si) }}</span></label>
+<a href="/admin/"><span><img src="/static/images/icons/ui/{% if settings.hires %}hires/{% endif %}admin.png" class="icon">{{ strings.admin }}</span></a><br>
+<label for="mem_usage"><b>{{ strings.memory_usage }}</b>: <span id="used_mem_readable">{{ system.used_memory | format_size(use_si=settings.use_si) }}</span>/<span id="total_mem_readable">{{ system.total_memory | format_size(use_si=settings.use_si) }}</span></label>
 <progress style="width:100%;box-sizing:border-box;" id="mem_usage" max="{{ system.total_memory }}" value="{{ system.used_memory }}"></progress> <br>
 <b>{{ strings.system }}</b>: <span id="sys_name">{{ sys_name }}</span> <br>
 <b>{{ strings.kernel_version }}</b>: <span id="sys_ver">{{ sys_ver }}</span> <br>
 <b>{{ strings.hostname }}</b>: <span id="hostname">{{ hostname }}</span> <br>
-<b><img src="/static/images/icons/ui/{% if hires %}hires/{% endif %}drive.png" class="icon">{{ strings.disk_usage }}</b>:<br>
+<b><img src="/static/images/icons/ui/{% if settings.hires %}hires/{% endif %}drive.png" class="icon">{{ strings.disk_usage }}</b>:<br>
 <div id="disks">
     {% for s in disks %}
     <div>

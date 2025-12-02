@@ -14,9 +14,9 @@ use rocket_dyn_templates::{context, Template};
 use crate::{
     config::CONFIG,
     db::{add_rememberme_token, delete_session, login_user, Db},
-    guards::XForwardedFor,
+    guards::{CookieSettings, XForwardedFor},
     jwt::{create_jwt, JWT},
-    utils::{get_bool_cookie, get_root_domain, get_theme},
+    utils::get_root_domain,
     Host, IndexResponse, Language, TranslationStore, UsePlain,
 };
 
@@ -45,6 +45,7 @@ fn login_page(
     useplain: UsePlain<'_>,
     next: Option<&str>,
     token: Result<JWT, Status>,
+    settings: CookieSettings<'_>,
 ) -> IndexResponse {
     if let Ok(token) = token {
         if let Some(t) = token.token {
@@ -79,10 +80,8 @@ fn login_page(
             root_domain: get_root_domain(host.0),
             host: host.0,
             config: (*CONFIG).clone(),
-            theme: get_theme(jar),
-            hires: get_bool_cookie(jar, "hires", false),
-            smallhead: get_bool_cookie(jar, "smallhead", false),
-            next
+            next,
+            settings,
         },
     ))
 }
@@ -99,9 +98,10 @@ async fn login(
     lang: Language,
     host: Host<'_>,
     useplain: UsePlain<'_>,
+    settings: CookieSettings<'_>,
 ) -> Result<IndexResponse, Status> {
     if let Some(db_user) = login_user(db, &user.username, &user.password, &ip.0).await {
-        if !get_bool_cookie(jar, "nooverride", false) {
+        if !settings.nooverride {
             if let Some(mirror_settings) = db_user.mirror_settings.as_ref() {
                 let decoded: HashMap<String, String> =
                     serde_json::from_str(&mirror_settings).unwrap_or_default();
@@ -186,11 +186,9 @@ async fn login(
                 root_domain: get_root_domain(host.0),
                 host: host.0,
                 config: (*CONFIG).clone(),
-                theme: get_theme(jar),
-                hires: get_bool_cookie(jar, "hires", false),
-                smallhead: get_bool_cookie(jar, "smallhead", false),
                 message: strings.get("invalid_info"),
                 next,
+                settings,
             },
         )))
     }

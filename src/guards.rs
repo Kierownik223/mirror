@@ -1,4 +1,5 @@
 use rocket::{
+    http::CookieJar,
     request::{FromRequest, Outcome},
     response::{self, Responder},
     Request, Response,
@@ -19,6 +20,128 @@ pub struct Settings<'r> {
     pub use_si: Option<&'r str>,
     pub audio_player: Option<&'r str>,
     pub video_player: Option<&'r str>,
+}
+
+#[derive(serde::Serialize)]
+pub struct CookieSettings<'r> {
+    pub theme: &'r str,
+    pub lang: &'r str,
+    pub hires: bool,
+    pub smallhead: bool,
+    pub plain: bool,
+    pub nooverride: bool,
+    pub viewers: bool,
+    pub dir_browser: bool,
+    pub use_si: bool,
+    pub audio_player: bool,
+    pub video_player: bool,
+}
+
+impl<'r> CookieSettings<'r> {
+    pub fn from_cookies(jar: &'r CookieJar<'_>) -> Self {
+        let mut theme = jar
+            .get("theme")
+            .map(|cookie| cookie.value())
+            .unwrap_or("default");
+
+        if !std::path::Path::new(&format!("files/static/styles/{}.css", &theme)).exists() {
+            theme = "default";
+        }
+
+        let lang = if let Some(cookie_lang) = jar.get("lang").map(|c| c.value()) {
+            cookie_lang
+        } else {
+            "en"
+        };
+
+        let hires = jar
+            .get("hires")
+            .map(|c| c.value() == "true")
+            .unwrap_or(false);
+
+        let smallhead = jar
+            .get("smallhead")
+            .map(|c| c.value() == "true")
+            .unwrap_or(false);
+
+        let plain = jar
+            .get("plain")
+            .map(|c| c.value() == "true")
+            .unwrap_or(false);
+
+        let nooverride = jar
+            .get("nooverride")
+            .map(|c| c.value() == "true")
+            .unwrap_or(false);
+
+        let viewers = jar
+            .get("viewers")
+            .map(|c| c.value() == "true")
+            .unwrap_or(true);
+
+        let dir_browser = jar
+            .get("dir_browser")
+            .map(|c| c.value() == "true")
+            .unwrap_or(true);
+
+        let use_si = jar
+            .get("use_si")
+            .map(|c| c.value() == "true")
+            .unwrap_or(true);
+
+        let audio_player = jar
+            .get("audio_player")
+            .map(|c| c.value() == "true")
+            .unwrap_or(true);
+
+        let video_player = jar
+            .get("video_player")
+            .map(|c| c.value() == "true")
+            .unwrap_or(true);
+
+        Self {
+            theme: theme,
+            lang: lang,
+            hires,
+            smallhead,
+            plain,
+            nooverride,
+            viewers,
+            dir_browser,
+            use_si,
+            audio_player,
+            video_player,
+        }
+    }
+}
+
+impl Default for CookieSettings<'_> {
+    fn default() -> Self {
+        CookieSettings {
+            theme: "default",
+            lang: "en",
+            hires: false,
+            smallhead: false,
+            plain: false,
+            nooverride: false,
+            viewers: true,
+            dir_browser: true,
+            use_si: true,
+            audio_player: true,
+            video_player: true,
+        }
+    }
+}
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for CookieSettings<'r> {
+    type Error = ();
+
+    async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
+        let settings = CookieSettings::from_cookies(request.cookies());
+
+        rocket::outcome::Outcome::Success(settings)
+    }
 }
 
 pub struct HeaderFile(pub String, pub String);

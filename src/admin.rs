@@ -7,8 +7,9 @@ use rocket_dyn_templates::{context, Template};
 
 use crate::{
     config::CONFIG,
+    guards::CookieSettings,
     jwt::JWT,
-    utils::{format_size, get_bool_cookie, get_root_domain, get_theme},
+    utils::{format_size, get_root_domain},
     Disk, Host, IndexResponse, Language, TranslationStore, UsePlain,
 };
 
@@ -20,6 +21,7 @@ fn sysinfo(
     host: Host<'_>,
     useplain: UsePlain<'_>,
     token: Result<JWT, Status>,
+    settings: CookieSettings<'_>,
 ) -> Result<IndexResponse, Status> {
     let token = token?;
 
@@ -35,7 +37,7 @@ fn sysinfo(
 
         jar.add(local_jwt_cookie);
     }
-    
+
     if !::sysinfo::IS_SUPPORTED_SYSTEM {
         return Err(Status::NotFound);
     }
@@ -46,8 +48,6 @@ fn sysinfo(
     if perms != 0 {
         return Err(Status::Forbidden);
     }
-
-    let use_si = get_bool_cookie(jar, "use_si", true);
 
     let strings = translations.get_translation(&lang.0);
 
@@ -60,8 +60,8 @@ fn sysinfo(
                 fs: x.file_system().to_str().unwrap_or("unknown").to_string(),
                 used_space,
                 total_space: x.total_space(),
-                used_space_readable: format_size(used_space, use_si),
-                total_space_readable: format_size(x.total_space(), use_si),
+                used_space_readable: format_size(used_space, settings.use_si),
+                total_space_readable: format_size(x.total_space(), settings.use_si),
                 mount_point: x.mount_point().display().to_string(),
             }
         })
@@ -80,18 +80,15 @@ fn sysinfo(
             root_domain: get_root_domain(host.0),
             host: host.0,
             config: (*CONFIG).clone(),
-            theme: get_theme(jar),
             is_logged_in: true,
-            hires: get_bool_cookie(jar, "hires", false),
             admin: perms == 0,
-            smallhead: get_bool_cookie(jar, "smallhead", false),
             username,
             system: System::new_all(),
             hostname: System::host_name(),
             sys_name: System::name(),
             sys_ver: System::kernel_version(),
             disks,
-            use_si: get_bool_cookie(jar, "use_si", true),
+            settings,
         },
     )));
 }
@@ -104,6 +101,7 @@ fn admin(
     host: Host<'_>,
     useplain: UsePlain<'_>,
     token: Result<JWT, Status>,
+    settings: CookieSettings<'_>,
 ) -> Result<IndexResponse, Status> {
     let token = token?;
 
@@ -138,12 +136,10 @@ fn admin(
             root_domain: get_root_domain(host.0),
             host: host.0,
             config: (*CONFIG).clone(),
-            theme: get_theme(jar),
             is_logged_in: true,
-            hires: get_bool_cookie(jar, "hires", false),
-            smallhead: get_bool_cookie(jar, "smallhead", false),
             username: username,
             admin: perms == 0,
+            settings,
         },
     )));
 }

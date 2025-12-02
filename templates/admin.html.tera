@@ -4,13 +4,13 @@
 <a href="/">MARMAK Mirror</a>/<a href="/admin/">{{ strings.admin }}</a>/<br>
 {{ strings.welcome }}, {{ username }}!
 <br>
-<a href="/upload"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">{{ strings.uploader }}</span></a>
-<a href="/admin/sysinfo"><span><img src="/static/images/icons/{% if hires %}hires/{% endif %}config.png" class="icon">{{ strings.sysinfo }}</span></a>
+<a href="/upload"><span><img src="/static/images/icons/{% if settings.hires %}hires/{% endif %}folder.png" class="icon">{{ strings.uploader }}</span></a>
+<a href="/admin/sysinfo"><span><img src="/static/images/icons/{% if settings.hires %}hires/{% endif %}config.png" class="icon">{{ strings.sysinfo }}</span></a>
 {% if config.enable_direct %}
-<a href="http://account.{{ root_domain }}"><span><img src="/static/images/icons/ui/{% if hires %}hires/{% endif %}settings.png" class="icon">{{ strings.manage_account }}</span></a>
+<a href="http://account.{{ root_domain }}"><span><img src="/static/images/icons/ui/{% if settings.hires %}hires/{% endif %}settings.png" class="icon">{{ strings.manage_account }}</span></a>
 {% endif %}
 <br>
-<b><img src="/static/images/icons/ui/{% if hires %}hires/{% endif %}drive.png" class="icon">{{ strings.disk_usage }}:</b><br>
+<b><img src="/static/images/icons/ui/{% if settings.hires %}hires/{% endif %}drive.png" class="icon">{{ strings.disk_usage }}:</b><br>
 <div id="disks">
 Loading...
 </div>
