@@ -1417,6 +1417,13 @@ async fn unprocessable_entry(_status: Status, req: &Request<'_>) -> Cached<(Stat
         .succeeded()
         .unwrap_or_default();
 
+    let (is_logged_in, admin) = req
+        .guard::<Result<JWT, Status>>()
+        .await
+        .succeeded()
+        .map(|f| if let Ok(jwt) = f { (true, jwt.claims.perms == 0) } else { (false, false) })
+        .unwrap();
+
     let strings = translations.get_translation(settings.lang);
 
     let host = if let Some(host) = req.host() {
@@ -1441,8 +1448,8 @@ async fn unprocessable_entry(_status: Status, req: &Request<'_>) -> Cached<(Stat
                     root_domain: get_root_domain(&host),
                     host,
                     config: (*CONFIG).clone(),
-                    is_logged_in: false,
-                    admin: false,
+                    is_logged_in,
+                    admin,
                     settings,
                 },
             ),
@@ -1466,6 +1473,13 @@ async fn default(status: Status, req: &Request<'_>) -> Cached<Template> {
         .succeeded()
         .unwrap_or_default();
 
+    let (is_logged_in, admin) = req
+        .guard::<Result<JWT, Status>>()
+        .await
+        .succeeded()
+        .map(|f| if let Ok(jwt) = f { (true, jwt.claims.perms == 0) } else { (false, false) })
+        .unwrap();
+
     let strings = translations.get_translation(settings.lang);
 
     let host = if let Some(host) = req.host() {
@@ -1488,8 +1502,8 @@ async fn default(status: Status, req: &Request<'_>) -> Cached<Template> {
                 root_domain: get_root_domain(&host),
                 host,
                 config: (*CONFIG).clone(),
-                is_logged_in: false,
-                admin: false,
+                is_logged_in,
+                admin,
                 settings,
             },
         ),
