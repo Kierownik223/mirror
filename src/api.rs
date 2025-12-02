@@ -330,7 +330,11 @@ async fn delete<'a>(file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
 
 #[get("/sysinfo?<use_si>")]
 fn sysinfo(token: Result<JWT, Status>, use_si: Option<&str>, jar: &CookieJar<'_>) -> ApiResult {
-    let _token = token?;
+    let token = token?;
+
+    if token.claims.perms != 0 {
+        return Err(Status::Forbidden);
+    }
 
     let mut sys = System::new_all();
 

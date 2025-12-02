@@ -17,7 +17,7 @@ rocket_dyn_templates = { version = "0.2", features = ["tera"] }
 rocket_db_pools = { version = "0.2", features = ["sqlx_mysql"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-sysinfo = "0.36"
+sysinfo = { version = "0.37", features = ["serde"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "time"] }
 toml = "0.9"
 urlencoding = "2"

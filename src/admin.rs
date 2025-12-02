@@ -35,6 +35,10 @@ fn sysinfo(
 
         jar.add(local_jwt_cookie);
     }
+    
+    if !::sysinfo::IS_SUPPORTED_SYSTEM {
+        return Err(Status::NotFound);
+    }
 
     let username = token.claims.sub;
     let perms = token.claims.perms;
@@ -46,17 +50,6 @@ fn sysinfo(
     let use_si = get_bool_cookie(jar, "use_si", true);
 
     let strings = translations.get_translation(&lang.0);
-
-    let mut sys = System::new_all();
-
-    sys.refresh_all();
-
-    let total_mem = sys.total_memory();
-    let used_mem = sys.used_memory();
-
-    let sys_name = System::name().unwrap_or(String::from("MARMAK Mirror"));
-    let sys_ver = System::kernel_version().unwrap_or(String::from("21.3.7"));
-    let hostname = System::host_name().unwrap_or(String::from("mirror"));
 
     let disks: Vec<Disk> = Disks::new_with_refreshed_list()
         .iter()
@@ -92,15 +85,13 @@ fn sysinfo(
             hires: get_bool_cookie(jar, "hires", false),
             admin: perms == 0,
             smallhead: get_bool_cookie(jar, "smallhead", false),
-            username: username,
-            total_mem: total_mem,
-            total_mem_readable: format_size(total_mem, use_si),
-            used_mem: used_mem,
-            used_mem_readable: format_size(used_mem, use_si),
-            sys_name: sys_name,
-            sys_ver: sys_ver,
-            hostname: hostname,
-            disks: disks
+            username,
+            system: System::new_all(),
+            hostname: System::host_name(),
+            sys_name: System::name(),
+            sys_ver: System::kernel_version(),
+            disks,
+            use_si: get_bool_cookie(jar, "use_si", true),
         },
     )));
 }
