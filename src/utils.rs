@@ -13,7 +13,7 @@ use rocket::{
     http::{Cookie, CookieJar, SameSite, Status},
     time::{Duration, OffsetDateTime},
 };
-use tera::{to_value, try_get_value, Value};
+use rocket_dyn_templates::tera::{to_value, try_get_value, Value};
 use tokio::sync::RwLock;
 use zip::write::SimpleFileOptions;
 
@@ -412,7 +412,7 @@ pub fn format_size(bytes: u64, use_si: bool) -> String {
 pub fn format_size_filter(
     value: &Value,
     args: &HashMap<String, Value>,
-) -> Result<Value, tera::Error> {
+) -> Result<Value, rocket_dyn_templates::tera::Error> {
     let num = try_get_value!("format_size", "value", u64, value);
 
     let use_si = match args.get("use_si") {
