@@ -580,7 +580,7 @@ async fn index(
                     album: "N/A",
                     genre: "N/A",
                     track: None::<u16>,
-                    cover: false,
+                    poster: format!("/poster{}", audiopath),
                     settings: &settings,
                 },
             );
@@ -601,10 +601,22 @@ async fn index(
                 let year = tag.year();
                 let track = tag.track_number();
 
-                let mut cover = false;
+                let mut poster = format!("/poster{}", audiopath);
+                
+                if Path::new(&format!("files/{}", audiopath)).parent().unwrap_or(&Path::new("/")).join("cover.png").exists() {
+                    poster = Path::new(audiopath).parent().unwrap_or(&Path::new("/")).join("cover.png").display().to_string();
+                }
 
-                if let Some(_picture) = tag.album_cover() {
-                    cover = true;
+                if Path::new(&format!("files/{}", audiopath)).parent().unwrap_or(&Path::new("/")).join("cover.jpg").exists() {
+                    poster = Path::new(audiopath).parent().unwrap_or(&Path::new("/")).join("cover.jpg").display().to_string();
+                }
+
+                if Path::new(&format!("files/{}", audiopath)).parent().unwrap_or(&Path::new("/")).join("folder.png").exists() {
+                    poster = Path::new(audiopath).parent().unwrap_or(&Path::new("/")).join("folder.png").display().to_string();
+                }
+
+                if Path::new(&format!("files/{}", audiopath)).parent().unwrap_or(&Path::new("/")).join("folder.jpg").exists() {
+                    poster = Path::new(audiopath).parent().unwrap_or(&Path::new("/")).join("folder.jpg").display().to_string();
                 }
 
                 Ok(IndexResponse::Template(Template::render(
@@ -626,7 +638,7 @@ async fn index(
                         album,
                         genre,
                         track,
-                        cover,
+                        poster,
                         settings,
                     },
                 )))

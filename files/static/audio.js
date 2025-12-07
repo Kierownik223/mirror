@@ -40,7 +40,7 @@ function fetchJSON(url, callback) {
     xhr.send();
 }
 
-function updatePageMetadata(meta, newPath) {
+function updatePageMetadata(meta, newPath, coverFile) {
     if (meta.track) {
         meta.track += '.';
     }
@@ -52,7 +52,11 @@ function updatePageMetadata(meta, newPath) {
     if (trackEl) trackEl.textContent = meta.track || '';
 
     if (coverEl) {
-        coverEl.src = '/poster' + newPath;
+        if (coverFile) {
+            coverEl.src = folderPath + '/' + encodeURIComponent(coverFile);
+        } else {
+            coverEl.src = '/poster' + newPath;
+        }
         coverEl.alt = meta.album || 'N/A';
         coverEl.style.display = '';
     }
@@ -63,7 +67,11 @@ function updatePageMetadata(meta, newPath) {
                 title: meta.title,
                 artist: meta.artist,
                 album: meta.album,
-                artwork: [{ src: '/poster' + newPath }]
+                artwork: [{
+                    src: coverFile
+                        ? folderPath + '/' + encodeURIComponent(coverFile)
+                        : '/poster' + newPath
+                }]
             });
         } catch (e) {
             alert(e);
@@ -93,10 +101,17 @@ fetchJSON('/api/listing' + folderPath, function (err, files) {
         return;
     }
 
+    var coverFile = null;
+
     for (var i = 0; i < files.length; i++) {
-        var name = files[i].name.toLowerCase();
-        if (name.match(/\.(mp3|m4a|m4b|flac|wav)$/)) {
+        var lower = files[i].name.toLowerCase();
+
+        if (lower.match(/\.(mp3|m4a|m4b|flac|wav)$/)) {
             fileNames.push(files[i].name);
+        }
+
+        if (lower === "cover.jpg" || lower === "cover.png" || lower === "folder.jpg" || lower === "folder.png") {
+            coverFile = files[i].name;
         }
     }
 
@@ -121,7 +136,7 @@ fetchJSON('/api/listing' + folderPath, function (err, files) {
 
         fetchJSON('/api' + newPath, function (err, meta) {
             if (!err && meta) {
-                updatePageMetadata(meta, newPath);
+                updatePageMetadata(meta, newPath, coverFile);
             }
         });
     }
