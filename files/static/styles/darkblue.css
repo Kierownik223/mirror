@@ -5,6 +5,7 @@ body {
     background: #04424f;
     color: white;
     font-family: 'Open Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-y: scroll;
 }
 
 a {

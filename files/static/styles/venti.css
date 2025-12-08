@@ -23,6 +23,8 @@ body {
     background-size: cover;
     background-attachment: fixed;
     background-color: #7d7d89;
+
+    overflow-y: scroll;
 }
 
 a {

@@ -5,6 +5,7 @@ body {
     background-color: antiquewhite;
     color: black;
     font-family: 'Open Sans', sans-serif;
+    overflow-y: scroll;
 }
 
 a {

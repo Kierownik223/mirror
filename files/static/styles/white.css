@@ -6,6 +6,7 @@ body {
     color: #000;
     font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 16px;
+    overflow-y: scroll;
 }
 
 a {
