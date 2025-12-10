@@ -8,6 +8,7 @@ var coverEl = document.getElementById('cover');
 var trackEl = document.getElementById('track');
 var previous = document.getElementById('previous');
 var next = document.getElementById('next');
+var autoplay = document.getElementById('autoplay');
 
 function fetchJSON(url, callback) {
     var xhr;
@@ -116,9 +117,11 @@ fetchJSON('/api/listing' + folderPath, function (err, files) {
     }
 
     audio.addEventListener('ended', function () {
-        if (currentIndex < fileNames.length - 1) {
-            currentIndex++;
-            loadTrack(currentIndex);
+        if (autoplay.checked) {
+            if (currentIndex < fileNames.length - 1) {
+                currentIndex++;
+                loadTrack(currentIndex);
+            }
         }
     });
 
