@@ -125,6 +125,17 @@ fetchJSON('/api/listing' + folderPath, function (err, files) {
     currentIndex = fileNames.indexOf(currentFile);
     if (currentIndex === -1) currentIndex = 0;
 
+    if (currentIndex == fileNames.length - 1) {
+        next.style.display = "none";
+    } else {
+        next.style.display = "inline";
+    }
+    if (currentIndex == 0) {
+        previous.style.display = "none";
+    } else {
+        previous.style.display = "inline";
+    }
+
     function loadTrack(index) {
         if (index < 0 || index >= fileNames.length) return;
 
@@ -142,6 +153,16 @@ fetchJSON('/api/listing' + folderPath, function (err, files) {
     }
 
     previous.onclick = function () {
+        if (currentIndex - 1 == fileNames.length) {
+            next.style.display = "none";
+        } else {
+            next.style.display = "inline";
+        }
+        if (currentIndex - 1 == 0) {
+            previous.style.display = "none";
+        } else {
+            previous.style.display = "inline";
+        }
         if (currentIndex > 0) {
             currentIndex--;
             loadTrack(currentIndex);
@@ -149,6 +170,16 @@ fetchJSON('/api/listing' + folderPath, function (err, files) {
     };
 
     next.onclick = function () {
+        if (currentIndex + 1 == fileNames.length - 1) {
+            next.style.display = "none";
+        } else {
+            next.style.display = "inline";
+        }
+        if (currentIndex + 1 == 0) {
+            previous.style.display = "none";
+        } else {
+            previous.style.display = "inline";
+        }
         if (currentIndex < fileNames.length - 1) {
             currentIndex++;
             loadTrack(currentIndex);
@@ -158,6 +189,16 @@ fetchJSON('/api/listing' + folderPath, function (err, files) {
     if (navigator.mediaSession) {
         try {
             navigator.mediaSession.setActionHandler('previoustrack', function () {
+                if (currentIndex - 1 == fileNames.length) {
+                    next.style.display = "none";
+                } else {
+                    next.style.display = "inline";
+                }
+                if (currentIndex - 1 == 0) {
+                    previous.style.display = "none";
+                } else {
+                    previous.style.display = "inline";
+                }
                 if (currentIndex > 0) {
                     currentIndex--;
                     loadTrack(currentIndex);
@@ -165,6 +206,16 @@ fetchJSON('/api/listing' + folderPath, function (err, files) {
             });
 
             navigator.mediaSession.setActionHandler('nexttrack', function () {
+                if (currentIndex + 1 == fileNames.length - 1) {
+                    next.style.display = "none";
+                } else {
+                    next.style.display = "inline";
+                }
+                if (currentIndex + 1 == 0) {
+                    previous.style.display = "none";
+                } else {
+                    previous.style.display = "inline";
+                }
                 if (currentIndex < fileNames.length - 1) {
                     currentIndex++;
                     loadTrack(currentIndex);
