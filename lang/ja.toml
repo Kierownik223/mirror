@@ -112,6 +112,9 @@ album = "アルバム"
 year = "年"
 genre = "ジャンル"
 album_cover = "アルバムカバー"
+previous = "前へ"
+next = "次へ"
+autoplay = "自動再生"
 
 # File deletion
 

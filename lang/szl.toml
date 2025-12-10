@@ -112,6 +112,9 @@ album = "Album"
 year = "Rok"
 genre = "Rodzaj"
 album_cover = "Ôkładka albumu"
+previous = "Piyrwyjszy"
+next = "Dalśy"
+autoplay = "Autopłej"
 
 # File deletion
 

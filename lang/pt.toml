@@ -112,7 +112,9 @@ album = "Álbum"
 year = "Ano"
 genre = "Gênero"
 album_cover = "Capa do álbum"
-no_audio = "Seu navegador não suporta elemento de áudio."
+previous = "Anterior"
+next = "Próximo"
+autoplay = "Reprodução automática"
 
 # File deletion
 
@@ -135,6 +137,7 @@ error_404 = "Não foi possível localizar o recurso solicitado. Verifique o URL 
 error_50x = "Ocorreu um erro interno no servidor. Por favor, informe-nos."
 error_403 = "No momento, você não tem acesso a este recurso. Faça login como um usuário com privilégios mais altos."
 no_details = "Não há detalhes disponíveis!"
+no_audio = "Seu navegador não suporta elemento de áudio."
 no_video = "Seu navegador não suporta elemento de vídeo."
 upload_parse_error = "Enviado, mas a resposta não pôde ser analisada."
 upload_failed_status = "Falhou com status"

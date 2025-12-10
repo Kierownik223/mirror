@@ -112,6 +112,9 @@ album = "Альбом"
 year = "Год"
 genre = "Жанр"
 album_cover = "Обложка альбома"
+previous = "Предыдущий"
+next = "Следующий"
+autoplay = "Автовоспроизведение"
 
 # File deletion
 

@@ -112,6 +112,9 @@ album = "Album"
 year = "Rok"
 genre = "Žáner"
 album_cover = "Obal albumu"
+previous = "Predchádzajúce"
+next = "Ďalšie"
+autoplay = "Automatické prehrávanie"
 
 # File deletion
 
