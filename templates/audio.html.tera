@@ -70,7 +70,7 @@
             title: '{{ audiotitle }}',
             artist: '{{ artist }}',
             album: '{{ album }}',
-            artwork: [{src: '/poster{{ path }}'}],
+            artwork: [{src: '{{ poster }}'}],
         });
     }
 </script>
