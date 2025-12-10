@@ -595,7 +595,7 @@ async fn index(
                     .map(|s| s.to_string())
                     .unwrap_or(get_name_from_path(&path));
 
-                let artist = tag.artist().map(|s| s.to_string());
+                let artist = tag.artist().map(|s| s.replace("\x00", "/"));
                 let album = tag.album_title().map(|s| s.to_string());
                 let genre = tag.genre().map(|s| get_genre(s).unwrap_or(s.to_string()));
                 let year = tag.year();
