@@ -50,7 +50,7 @@
         <a href="./"><img class="icon" src="/static/images/icons/{% if settings.hires %}hires/{% endif %}folder.png">./</a>
     </div>
     <audio id="audio" src="/file{{ path | urlencode }}" controls style="width: 100%;" poster="{{ poster | urlencode }}">{{ strings.no_audio }}</audio>
-    <a href="#" id="prev">Prev</a> <a href="#" id="next">Next</a> <br>
+    <a href="#" id="previous">&lt; {{ strings.previous }}</a> <a href="#" id="next">{{ strings.next }} &gt;</a> <br>
     <span id="artist">{% if artist %}{{ artist }}{% else %}N/A{% endif %}</span> - <b style="font-size: 24px;"><span id="track">{% if track %}{{ track }}.{% endif %}</span> <span id="title">{{ audiotitle }}</span></b>
     <div style="display: flex; align-items: center; justify-content: space-between;">
         <div style="flex: 1;">

@@ -6,7 +6,7 @@ var yearEl = document.getElementById('year');
 var genreEl = document.getElementById('genre');
 var coverEl = document.getElementById('cover');
 var trackEl = document.getElementById('track');
-var prev = document.getElementById('prev');
+var previous = document.getElementById('previous');
 var next = document.getElementById('next');
 
 function fetchJSON(url, callback) {
@@ -141,7 +141,7 @@ fetchJSON('/api/listing' + folderPath, function (err, files) {
         });
     }
 
-    prev.onclick = function () {
+    previous.onclick = function () {
         if (currentIndex > 0) {
             currentIndex--;
             loadTrack(currentIndex);
