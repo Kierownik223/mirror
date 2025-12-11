@@ -6,6 +6,8 @@ var yearEl = document.getElementById('year');
 var genreEl = document.getElementById('genre');
 var coverEl = document.getElementById('cover');
 var trackEl = document.getElementById('track');
+var downloadEl = document.getElementById('download');
+var breadcrumbsEl = document.getElementsByClassName('breadcrumbs')[0];
 var previous = document.getElementById('previous');
 var next = document.getElementById('next');
 var autoplay = document.getElementById('autoplay');
@@ -51,6 +53,9 @@ function updatePageMetadata(meta, newPath, coverFile) {
     if (yearEl) yearEl.textContent = meta.year || 'N/A';
     if (genreEl) genreEl.textContent = meta.genre || 'N/A';
     if (trackEl) trackEl.textContent = meta.track || '';
+    if (downloadEl) downloadEl.href = newPath;
+    if (breadcrumbsEl) breadcrumbsEl.outerHTML = createBreadcrumbs(decodeURIComponent(newPath)).outerHTML || breadcrumbsEl;
+    breadcrumbsEl = document.getElementsByClassName('breadcrumbs')[0];
 
     if (coverEl) {
         if (coverFile) {
