@@ -602,21 +602,61 @@ async fn index(
                 let track = tag.track_number();
 
                 let mut poster = format!("/poster{}", audiopath);
-                
-                if Path::new(&format!("files/{}", audiopath)).parent().unwrap_or(&Path::new("/")).join("cover.png").exists() {
-                    poster = Path::new(audiopath).parent().unwrap_or(&Path::new("/")).join("cover.png").display().to_string();
+
+                if Path::new(&format!("files/{}", audiopath))
+                    .parent()
+                    .unwrap_or(&Path::new("/"))
+                    .join("cover.png")
+                    .exists()
+                {
+                    poster = Path::new(audiopath)
+                        .parent()
+                        .unwrap_or(&Path::new("/"))
+                        .join("cover.png")
+                        .display()
+                        .to_string();
                 }
 
-                if Path::new(&format!("files/{}", audiopath)).parent().unwrap_or(&Path::new("/")).join("cover.jpg").exists() {
-                    poster = Path::new(audiopath).parent().unwrap_or(&Path::new("/")).join("cover.jpg").display().to_string();
+                if Path::new(&format!("files/{}", audiopath))
+                    .parent()
+                    .unwrap_or(&Path::new("/"))
+                    .join("cover.jpg")
+                    .exists()
+                {
+                    poster = Path::new(audiopath)
+                        .parent()
+                        .unwrap_or(&Path::new("/"))
+                        .join("cover.jpg")
+                        .display()
+                        .to_string();
                 }
 
-                if Path::new(&format!("files/{}", audiopath)).parent().unwrap_or(&Path::new("/")).join("folder.png").exists() {
-                    poster = Path::new(audiopath).parent().unwrap_or(&Path::new("/")).join("folder.png").display().to_string();
+                if Path::new(&format!("files/{}", audiopath))
+                    .parent()
+                    .unwrap_or(&Path::new("/"))
+                    .join("folder.png")
+                    .exists()
+                {
+                    poster = Path::new(audiopath)
+                        .parent()
+                        .unwrap_or(&Path::new("/"))
+                        .join("folder.png")
+                        .display()
+                        .to_string();
                 }
 
-                if Path::new(&format!("files/{}", audiopath)).parent().unwrap_or(&Path::new("/")).join("folder.jpg").exists() {
-                    poster = Path::new(audiopath).parent().unwrap_or(&Path::new("/")).join("folder.jpg").display().to_string();
+                if Path::new(&format!("files/{}", audiopath))
+                    .parent()
+                    .unwrap_or(&Path::new("/"))
+                    .join("folder.jpg")
+                    .exists()
+                {
+                    poster = Path::new(audiopath)
+                        .parent()
+                        .unwrap_or(&Path::new("/"))
+                        .join("folder.jpg")
+                        .display()
+                        .to_string();
                 }
 
                 Ok(IndexResponse::Template(Template::render(
@@ -1433,7 +1473,13 @@ async fn unprocessable_entry(_status: Status, req: &Request<'_>) -> Cached<(Stat
         .guard::<Result<JWT, Status>>()
         .await
         .succeeded()
-        .map(|f| if let Ok(jwt) = f { (true, jwt.claims.perms == 0) } else { (false, false) })
+        .map(|f| {
+            if let Ok(jwt) = f {
+                (true, jwt.claims.perms == 0)
+            } else {
+                (false, false)
+            }
+        })
         .unwrap();
 
     let strings = translations.get_translation(settings.lang);
@@ -1489,7 +1535,13 @@ async fn default(status: Status, req: &Request<'_>) -> Cached<Template> {
         .guard::<Result<JWT, Status>>()
         .await
         .succeeded()
-        .map(|f| if let Ok(jwt) = f { (true, jwt.claims.perms == 0) } else { (false, false) })
+        .map(|f| {
+            if let Ok(jwt) = f {
+                (true, jwt.claims.perms == 0)
+            } else {
+                (false, false)
+            }
+        })
         .unwrap();
 
     let strings = translations.get_translation(settings.lang);
