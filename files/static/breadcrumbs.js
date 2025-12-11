@@ -24,7 +24,7 @@ function createBreadcrumbs(path) {
                 var span2 = document.createElement('span');
                 var a = document.createElement('a');
 
-                a.href = encodeURIComponent(subpath) + '/';
+                a.href = subpath + '/';
                 a.innerText = segment;
                 span2.appendChild(a);
 
