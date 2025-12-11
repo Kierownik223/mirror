@@ -1,0 +1,166 @@
+@import url('/static/fonts/Roboto.css');
+
+body {
+    margin: 0;
+    background-image: url('/static/images/silksong/silksong.png');
+    background-position: center;
+    background-size: cover;
+    background-attachment: fixed;
+    background-color: #000;
+    color: #ff1e00;
+    font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-y: scroll;
+}
+
+a {
+    color: #ff1e00;
+    transition: all ease-in-out .1s;
+}
+
+a:hover {
+    color: #ff3e00;
+}
+
+a span {
+    white-space: pre;
+}
+
+a h1 span .icon {
+    content: url('/static/images/silksong/hornet.png');
+}
+
+.container {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 10px;
+}
+
+.header {
+    padding: 10px;
+    border-bottom: 1px solid #ff1e00;
+    text-align: center;
+}
+
+.icon {
+    width: 1em;
+    height: 1em;
+    margin: 2px 4px -2px 0px;
+}
+
+.fullwidth {
+    width: 100%;
+}
+
+.header h1 {
+    margin: 10px 0;
+}
+
+div.line {
+    border-bottom: 1px solid #181A1B;
+    width: 100%;
+}
+
+.mark {
+    background-color: #eeff00;
+}
+
+.footer {
+    border-top: 1px solid #181A1B;
+    padding-top: 10px;
+    text-align: center;
+}
+
+.footer:after {
+    content: "Theme by Spaniel";
+    display: block;
+}
+
+table {
+    width: 100%;
+    overflow-wrap: anywhere;
+}
+
+th {
+    text-align: center;
+}
+
+input.text,
+input.submit,
+select,
+button {
+	padding: 10px;
+	font-size: 16px;
+	border: 1px solid #181A1B;
+	margin: 5px 0;
+    background: #430000;
+    color: #ff1e00;
+    box-sizing: border-box;
+    width: 100%;
+    border-radius: 4px;
+    transition: all ease-in-out .1s;
+}
+
+button:hover {
+    background: #181A1B;
+    color: #ff3e00;
+    transform: scale(0.98);
+}
+
+progress {
+    width: 100%;
+    color: #181A1B;
+    accent-color: #181A1B;
+}
+
+form {
+    margin-top: 10px;
+}
+
+label input {
+    width: auto;
+}
+
+.dialog-content {
+    background: #430000;
+    border: 1px solid #181A1B;
+    margin: 10% auto;
+    padding: 20px;
+    width: 50%;
+    text-align: center;
+    border-radius: 4px;
+}
+
+iframe {
+	border: none;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.seg {
+    opacity: 0;
+    font-size: 0.1px;
+}
+
+.markdown img {
+	max-width: 100%;
+}
+
+.actions {
+    float: right;
+}
+
+@media only screen and (max-width: 640px) {
+    .hide {
+        display: none;
+    }
+    
+    .dialog-content {
+        width: auto !important;
+    }
+}
+
+@media only screen and (max-width: 300px) {
+    .hide-more {
+        display: none;
+    }
+}
