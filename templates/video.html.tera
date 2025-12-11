@@ -53,7 +53,7 @@
                 {% endfilter %}
             </span>
         </span>
-        <div style="float: right;"><a href="/file{{ path | urlencode }}" download><span><img class="icon" src="/static/images/icons/{% if settings.hires %}hires/{% endif %}favicon.png">{{ strings.download }}</span></a></div><br>
+        <div class="actions"><a href="/file{{ path | urlencode }}" id="download" download><span><img class="icon" src="/static/images/icons/{% if settings.hires %}hires/{% endif %}favicon.png">{{ strings.download }}</span></a></div><br>
         <a href="./"><img class="icon" src="/static/images/icons/{% if settings.hires %}hires/{% endif %}folder.png">./</a>
     </div>
     <video src="/file{{ path | urlencode }}" controls style="height: 60vh; width: 100%;" poster="{{ poster | urlencode }}">{{ strings.no_video }}</video>

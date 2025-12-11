@@ -1,7 +1,9 @@
 {% extends "base" %}
 
 {% block content %}
-<a href="/">MARMAK Mirror</a>/<a href="/admin/">{{ strings.admin }}</a>/<br>
+<div class="controls">
+    <a href="/">MARMAK Mirror</a>/<a href="/admin/">{{ strings.admin }}</a>/
+</div>
 {{ strings.welcome }}, {{ username }}!
 <br>
 <a href="/upload"><span><img src="/static/images/icons/{% if settings.hires %}hires/{% endif %}folder.png" class="icon">{{ strings.uploader }}</span></a>

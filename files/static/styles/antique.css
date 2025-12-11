@@ -108,6 +108,10 @@ iframe {
     font-size: 0px;
 }
 
+.actions {
+    float: right;
+}
+
 @media only screen and (max-width: 640px) {
     .hide {
         display: none;

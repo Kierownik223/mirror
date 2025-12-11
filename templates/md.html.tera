@@ -25,7 +25,7 @@
             {% endfilter %}
         </span>
     </span>
-    <div style="float: right;"><a href="?download" download><span><img class="icon" src="/static/images/icons/{% if settings.hires %}hires/{% endif %}favicon.png">{{ strings.download }}</span></a>
+    <div class="actions"><a href="?download" id="download" download><span><img class="icon" src="/static/images/icons/{% if settings.hires %}hires/{% endif %}favicon.png">{{ strings.download }}</span></a>
         <a href="#" onclick="window.print()"><span><img class="icon" src="/static/images/icons/ui/{% if settings.hires %}hires/{% endif %}print.png">{{ strings.print }}</span></a></div><br>
     <a href="./"><img class="icon" src="/static/images/icons/{% if settings.hires %}hires/{% endif %}folder.png">./</a>
 </div>

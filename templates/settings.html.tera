@@ -1,7 +1,9 @@
 {% extends "base" %}
 
 {% block content %}
-<a href="/">MARMAK Mirror</a>/<a href="/settings">{{ strings.settings }}</a>/<br>
+<div class="controls">
+    <a href="/">MARMAK Mirror</a>/<a href="/settings">{{ strings.settings }}</a>
+    <div class="actions"><a href="/settings/reset"><span><img src="/static/images/icons/ui/{% if settings.hires %}hires/{% endif %}settings.png" class="icon">{{ strings.reset_settings }}</span></a></div><br></div>
 {% if config.enable_login and is_logged_in %}
 {{ strings.welcome }}, {{ username }}!
 <br>
@@ -84,6 +86,5 @@
     <center>
         <button type="submit" class="submit"><span><img src="/static/images/icons/ui/{% if settings.hires %}hires/{% endif %}settings.png" class="icon">{{ strings.save_settings }}</span></button>
     </center>
-    <a href="/settings/reset"><span><img src="/static/images/icons/ui/{% if settings.hires %}hires/{% endif %}settings.png" class="icon">{{ strings.reset_settings }}</span></a>
 </form>
 {% endblock content %}

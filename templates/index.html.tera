@@ -15,7 +15,7 @@
         {% endfor %}
     {% endif %}
     {% if admin and path != "/" or private %}
-    <div style="float: right;">
+    <div class="actions">
         <a href="/upload?path={{ path }}"><span><img class="icon" src="/static/images/icons/{% if settings.hires %}hires/{% endif %}favicon.png">{{ strings.uploader }}</span></a>
     </div>
     {% endif %}
@@ -85,7 +85,7 @@
 {% if is_logged_in %}
     <script src="/static/polyfills.js"></script>
     <script src="/scripts/index.js?lang={{ lang }}&hires={{ settings.hires }}"></script>
-    {% if path != "/" and admin or private %}
+    {% if admin and path != "/" or private %}
     <script src="/scripts/indexuploader.js?lang={{ lang }}&hires={{ settings.hires }}"></script>
     {% endif %}
     {% if config.enable_zip_downloads %}
