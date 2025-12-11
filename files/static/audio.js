@@ -118,6 +118,16 @@ fetchJSON('/api/listing' + folderPath, function (err, files) {
 
     audio.addEventListener('ended', function () {
         if (autoplay.checked) {
+            if (currentIndex + 1 == fileNames.length - 1) {
+                next.style.display = "none";
+            } else {
+                next.style.display = "inline";
+            }
+            if (currentIndex + 1 == 0) {
+                previous.style.display = "none";
+            } else {
+                previous.style.display = "inline";
+            }
             if (currentIndex < fileNames.length - 1) {
                 currentIndex++;
                 loadTrack(currentIndex);
