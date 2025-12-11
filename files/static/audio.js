@@ -53,7 +53,7 @@ function updatePageMetadata(meta, newPath, coverFile) {
     if (yearEl) yearEl.textContent = meta.year || 'N/A';
     if (genreEl) genreEl.textContent = meta.genre || 'N/A';
     if (trackEl) trackEl.textContent = meta.track || '';
-    if (downloadEl) downloadEl.href = newPath;
+    if (downloadEl) downloadEl.href = '/' + newPath;
     if (breadcrumbsEl) breadcrumbsEl.outerHTML = createBreadcrumbs(decodeURIComponent(newPath)).outerHTML || breadcrumbsEl;
     breadcrumbsEl = document.getElementsByClassName('breadcrumbs')[0];
 
