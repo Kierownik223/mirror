@@ -50,7 +50,11 @@
         <a href="./"><img class="icon" src="/static/images/icons/{% if settings.hires %}hires/{% endif %}folder.png">./</a>
     </div>
     <audio id="audio" src="/file{{ path | urlencode }}" controls style="width: 100%;" poster="{{ poster | urlencode }}">{{ strings.no_audio }}</audio>
-    <div><a href="#" id="previous">&lt; {{ strings.previous }}</a> <a href="#" id="next">{{ strings.next }} &gt;</a> <label for="autoplay" style="float: right;"><input type="checkbox" name="autoplay" id="autoplay" checked>{{ strings.autoplay }}</label><br></div>
+    <div>
+        <a href="#" id="previous" style="float: left;">&lt; {{ strings.previous }}</a>
+        <a href="#" id="next" style="float: right;">{{ strings.next }} &gt;</a>
+        <br>
+    </div>
     <span id="artist">{% if artist %}{{ artist }}{% else %}N/A{% endif %}</span> - <b style="font-size: 24px;"><span id="track">{% if track %}{{ track }}.{% endif %}</span> <span id="title">{{ audiotitle }}</span></b>
     <div style="display: flex; align-items: center; justify-content: space-between;">
         <div style="flex: 1;">
@@ -60,6 +64,7 @@
         </div>
         <img id="cover" src="{{ poster | urlencode }}" alt="{{ strings.album_cover }}" style="width: 30%; max-height: 100%;">
     </div>
+    <label for="autoplay"><input type="checkbox" name="autoplay" id="autoplay" checked>{{ strings.autoplay }}</label><br>
 {% endblock content %}
 
 {% block scripts %}
