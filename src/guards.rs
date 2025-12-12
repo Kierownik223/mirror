@@ -25,6 +25,7 @@ pub struct Settings<'r> {
 #[derive(serde::Serialize)]
 pub struct CookieSettings<'r> {
     pub theme: &'r str,
+    pub js_present: bool,
     pub lang: &'r str,
     pub hires: bool,
     pub smallhead: bool,
@@ -101,6 +102,7 @@ impl<'r> CookieSettings<'r> {
 
         Self {
             theme: theme,
+            js_present: std::path::Path::new(&format!("files/static/styles/{}.js", &theme)).exists(),
             lang: lang,
             hires,
             smallhead,
@@ -119,6 +121,7 @@ impl Default for CookieSettings<'_> {
     fn default() -> Self {
         CookieSettings {
             theme: "default",
+            js_present: false,
             lang: "en",
             hires: false,
             smallhead: false,
