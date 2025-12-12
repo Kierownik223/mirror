@@ -32,7 +32,7 @@
     {% endblock head %}
     <link rel="stylesheet" href="/static/styles/{{ settings.theme }}.css">
     {% if settings.js_present %}
-    <link rel="stylesheet" href="/static/styles/{{ settings.theme }}.js">
+    <script src="/static/styles/{{ settings.theme }}.js"></script>
     {% endif %}
     <!--[if lt IE 7]>
     <style>
