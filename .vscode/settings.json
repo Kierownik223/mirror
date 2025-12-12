@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "*.html": "twig"
+    },
+    "emmet.includeLanguages": {
+        "twig": "html"
+    },
+    "[twig]": {
+        "editor.defaultFormatter": "mblode.twig-language-2"
+    }
+}

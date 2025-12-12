@@ -30,6 +30,7 @@
         <option value="darkblue"{% if settings.theme=="darkblue" %} selected{% endif %}>{{ strings.theme_darkblue }}</option>
         <option value="greenish"{% if settings.theme=="greenish" %} selected{% endif %}>{{ strings.theme_greenish }}</option>
         <option value="antique"{% if settings.theme=="antique" %} selected{% endif %}>{{ strings.theme_antique }}</option>
+        <option value="greatness"{% if settings.theme=="greatness" %} selected{% endif %}>great </option>
         <option value="oled"{% if settings.theme=="oled" %} selected{% endif %}>OLED</option>
         <option value="oledmatrix"{% if settings.theme=="oledmatrix" %} selected{% endif %}>OLED Matrix</option>
         <option value="white"{% if settings.theme=="white" %} selected{% endif %}>#fff</option>
