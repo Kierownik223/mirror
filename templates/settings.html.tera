@@ -35,6 +35,7 @@
         <option value="white"{% if settings.theme=="white" %} selected{% endif %}>#fff</option>
         {% if theme == "venti" %}<option value="venti" selected>Venti by Olek47</option>{% endif %}
         <option value="silksong"{% if settings.theme=="silksong" %} selected{% endif %}>Silksong by Spaniel</option>
+        <option value="greatness"{% if settings.theme=="greatness" %} selected{% endif %}>Zoteness by maksydab</option>
     </select>
     <br>
     <label for="hires"><img src="/static/images/icons/ui/{% if settings.hires %}hires/{% endif %}floppy.png" class="icon">{{ strings.hires }}</label>
