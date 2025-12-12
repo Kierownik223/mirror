@@ -77,16 +77,23 @@ select,
 button {
 	padding: 10px;
 	font-size: 16px;
-	border: 1px solid #181A1B;
+	border: 1px solid #ffffff;
 	margin: 5px 0;
-    background: #000;
-    color: #fff;
+    background: #efc00400;
+    color: #ffffff;
     box-sizing: border-box;
     width: 100%;
     border-radius: 4px;
     transition: all ease-in-out .1s;
-}
 
+}
+select option {
+  margin: 40px;
+  background-color: rgb(0, 0, 0);
+  color: #fff;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+  
+}
 button:hover {
     background: #EFBF04;
     color: #fff;
