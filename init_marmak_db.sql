@@ -9,7 +9,7 @@ CREATE TABLE `users` (
 	`verification_token` varchar(255) DEFAULT NULL,
 	PRIMARY KEY (`username`),
 	UNIQUE KEY `username` (`username`)
-)
+);
 
 CREATE TABLE `logins` (
 	`id` int(11) NOT NULL AUTO_INCREMENT,
