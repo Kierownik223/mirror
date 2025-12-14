@@ -98,15 +98,18 @@ table {
 }
 
 table a {
-    display: block;
     text-decoration: none;
 }
 
-table td:last-child > a {
+tbody a {
+    display: block;
+}
+
+tbody td:last-child > a {
     display: inline;
 }
 
-table tr:hover {
+tr:hover {
     background-color: rgb(0 0 0 / 20%);
 }
 

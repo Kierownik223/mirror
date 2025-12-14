@@ -89,9 +89,10 @@ button:hover {
 }
 
 table {
-	width: 100%;
-	margin-bottom: 4px;
-	border-radius: 8px;
+    width: 100%;
+    margin-bottom: 4px;
+    border-radius: 8px;
+    border-collapse: collapse;
 }
 
 td {
@@ -138,7 +139,7 @@ progress {
 
 .dialog-content {
     background: #000;
-	border: 1px solid #32a852;
+    border: 1px solid #32a852;
     margin: 10% auto;
     padding: 20px;
     width: 50%;
@@ -147,7 +148,7 @@ progress {
 }
 
 iframe {
-	border: none;
+    border: none;
     box-sizing: border-box;
     width: 100%;
 }
@@ -163,7 +164,7 @@ td input {
 }
 
 .markdown img {
-	max-width: 100%;
+    max-width: 100%;
 }
 
 .actions {

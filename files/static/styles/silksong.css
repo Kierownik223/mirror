@@ -70,7 +70,7 @@ div.line {
     text-align: center;
 }
 
-.footer:after {
+.footer::after {
     content: "Theme by Spaniel";
     display: block;
 }
