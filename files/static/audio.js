@@ -1,16 +1,16 @@
-var audio = document.getElementById('audio');
-var titleEl = document.getElementById('title');
-var artistEl = document.getElementById('artist');
-var albumEl = document.getElementById('album');
-var yearEl = document.getElementById('year');
-var genreEl = document.getElementById('genre');
-var coverEl = document.getElementById('cover');
-var trackEl = document.getElementById('track');
-var downloadEl = document.getElementById('download');
-var breadcrumbsEl = document.getElementsByClassName('breadcrumbs')[0];
-var previous = document.getElementById('previous');
-var next = document.getElementById('next');
-var autoplay = document.getElementById('autoplay');
+var audio = document.getElementById("audio");
+var titleEl = document.getElementById("title");
+var artistEl = document.getElementById("artist");
+var albumEl = document.getElementById("album");
+var yearEl = document.getElementById("year");
+var genreEl = document.getElementById("genre");
+var coverEl = document.getElementById("cover");
+var trackEl = document.getElementById("track");
+var downloadEl = document.getElementById("download");
+var breadcrumbsEl = document.getElementsByClassName("breadcrumbs")[0];
+var previous = document.getElementById("previous");
+var next = document.getElementById("next");
+var autoplay = document.getElementById("autoplay");
 
 function fetchJSON(url, callback) {
     var xhr;
@@ -45,26 +45,31 @@ function fetchJSON(url, callback) {
 
 function updatePageMetadata(meta, newPath, coverFile) {
     if (meta.track) {
-        meta.track += '.';
+        meta.track += ".";
     }
-    if (artistEl) artistEl.textContent = meta.artist || 'N/A';
-    if (titleEl) titleEl.textContent = meta.title || decodeURIComponent(newPath.split('/').pop());
-    if (albumEl) albumEl.textContent = meta.album || 'N/A';
-    if (yearEl) yearEl.textContent = meta.year || 'N/A';
-    if (genreEl) genreEl.textContent = meta.genre || 'N/A';
-    if (trackEl) trackEl.textContent = meta.track || '';
-    if (downloadEl) downloadEl.href = '/file' + newPath;
-    if (breadcrumbsEl) breadcrumbsEl.outerHTML = createBreadcrumbs(decodeURIComponent(newPath)).outerHTML || breadcrumbsEl;
-    breadcrumbsEl = document.getElementsByClassName('breadcrumbs')[0];
+    if (artistEl) artistEl.textContent = meta.artist || "N/A";
+    if (titleEl)
+        titleEl.textContent =
+            meta.title || decodeURIComponent(newPath.split("/").pop());
+    if (albumEl) albumEl.textContent = meta.album || "N/A";
+    if (yearEl) yearEl.textContent = meta.year || "N/A";
+    if (genreEl) genreEl.textContent = meta.genre || "N/A";
+    if (trackEl) trackEl.textContent = meta.track || "";
+    if (downloadEl) downloadEl.href = "/file" + newPath;
+    if (breadcrumbsEl)
+        breadcrumbsEl.outerHTML =
+            createBreadcrumbs(decodeURIComponent(newPath)).outerHTML ||
+            breadcrumbsEl;
+    breadcrumbsEl = document.getElementsByClassName("breadcrumbs")[0];
 
     if (coverEl) {
         if (coverFile) {
-            coverEl.src = folderPath + '/' + encodeURIComponent(coverFile);
+            coverEl.src = folderPath + "/" + encodeURIComponent(coverFile);
         } else {
-            coverEl.src = '/poster' + newPath;
+            coverEl.src = "/poster" + newPath;
         }
-        coverEl.alt = meta.album || 'N/A';
-        coverEl.style.display = '';
+        coverEl.alt = meta.album || "N/A";
+        coverEl.style.display = "";
     }
 
     if (window.navigator && navigator.mediaSession) {
@@ -73,25 +78,29 @@ function updatePageMetadata(meta, newPath, coverFile) {
                 title: meta.title,
                 artist: meta.artist,
                 album: meta.album,
-                artwork: [{
-                    src: coverFile
-                        ? folderPath + '/' + encodeURIComponent(coverFile)
-                        : '/poster' + newPath
-                }]
+                artwork: [
+                    {
+                        src: coverFile
+                            ? folderPath + "/" + encodeURIComponent(coverFile)
+                            : "/poster" + newPath,
+                    },
+                ],
             });
         } catch (e) {
             alert(e);
         }
     }
-    
+
     if (meta.title) {
-        meta.title += ' - MARMAK Mirror';
+        meta.title += " - MARMAK Mirror";
     }
 
-    document.title = meta.title || decodeURIComponent(newPath.split('/').pop()) + ' - MARMAK Mirror';
+    document.title =
+        meta.title ||
+        decodeURIComponent(newPath.split("/").pop()) + " - MARMAK Mirror";
 
     if (window.history && history.pushState) {
-        history.pushState(null, '', newPath);
+        history.pushState(null, "", newPath);
     }
 }
 
@@ -101,7 +110,7 @@ var folderPath = decodeURIComponent(pathname.join("/"));
 var fileNames = [];
 var currentIndex = 0;
 
-fetchJSON('/api/listing' + folderPath, function (err, files) {
+fetchJSON("/api/listing" + folderPath, function (err, files) {
     if (err) {
         console.error("Failed to fetch file list", err);
         return;
@@ -116,12 +125,17 @@ fetchJSON('/api/listing' + folderPath, function (err, files) {
             fileNames.push(files[i].name);
         }
 
-        if (lower === "cover.jpg" || lower === "cover.png" || lower === "folder.jpg" || lower === "folder.png") {
+        if (
+            lower === "cover.jpg" ||
+            lower === "cover.png" ||
+            lower === "folder.jpg" ||
+            lower === "folder.png"
+        ) {
             coverFile = files[i].name;
         }
     }
 
-    audio.addEventListener('ended', function () {
+    audio.addEventListener("ended", function () {
         if (autoplay.checked) {
             if (currentIndex + 1 == fileNames.length - 1) {
                 next.style.display = "none";
@@ -158,12 +172,12 @@ fetchJSON('/api/listing' + folderPath, function (err, files) {
         if (index < 0 || index >= fileNames.length) return;
 
         var targetFile = fileNames[index];
-        var newPath = folderPath + '/' + encodeURIComponent(targetFile);
+        var newPath = folderPath + "/" + encodeURIComponent(targetFile);
 
-        audio.src = '/file' + newPath;
+        audio.src = "/file" + newPath;
         audio.play();
 
-        fetchJSON('/api' + newPath, function (err, meta) {
+        fetchJSON("/api" + newPath, function (err, meta) {
             if (!err && meta) {
                 updatePageMetadata(meta, newPath, coverFile);
             }
@@ -206,24 +220,27 @@ fetchJSON('/api/listing' + folderPath, function (err, files) {
 
     if (navigator.mediaSession) {
         try {
-            navigator.mediaSession.setActionHandler('previoustrack', function () {
-                if (currentIndex - 1 == fileNames.length) {
-                    next.style.display = "none";
-                } else {
-                    next.style.display = "inline";
-                }
-                if (currentIndex - 1 == 0) {
-                    previous.style.display = "none";
-                } else {
-                    previous.style.display = "inline";
-                }
-                if (currentIndex > 0) {
-                    currentIndex--;
-                    loadTrack(currentIndex);
-                }
-            });
+            navigator.mediaSession.setActionHandler(
+                "previoustrack",
+                function () {
+                    if (currentIndex - 1 == fileNames.length) {
+                        next.style.display = "none";
+                    } else {
+                        next.style.display = "inline";
+                    }
+                    if (currentIndex - 1 == 0) {
+                        previous.style.display = "none";
+                    } else {
+                        previous.style.display = "inline";
+                    }
+                    if (currentIndex > 0) {
+                        currentIndex--;
+                        loadTrack(currentIndex);
+                    }
+                },
+            );
 
-            navigator.mediaSession.setActionHandler('nexttrack', function () {
+            navigator.mediaSession.setActionHandler("nexttrack", function () {
                 if (currentIndex + 1 == fileNames.length - 1) {
                     next.style.display = "none";
                 } else {

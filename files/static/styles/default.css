@@ -1,16 +1,16 @@
-@import url('/static/fonts/Roboto.css');
+@import url("/static/fonts/Roboto.css");
 
 body {
     margin: 0;
-    background-color: #181A1B;
+    background-color: #181a1b;
     color: white;
-    font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: "Roboto", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     overflow-y: scroll;
 }
 
 a {
     color: white;
-    transition: all ease-in-out .1s;
+    transition: all ease-in-out 0.1s;
 }
 
 a:hover {
@@ -79,16 +79,16 @@ input.text,
 input.submit,
 select,
 button {
-	padding: 10px;
-	font-size: 16px;
-	border: 1px solid #303436;
-	margin: 5px 0;
-    background: #181A1B;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #303436;
+    margin: 5px 0;
+    background: #181a1b;
     color: #fff;
     box-sizing: border-box;
     width: 100%;
     border-radius: 4px;
-    transition: all ease-in-out .1s;
+    transition: all ease-in-out 0.1s;
 }
 
 button:hover {
@@ -112,8 +112,8 @@ label input {
 }
 
 .dialog-content {
-    background: #181A1B;
-	border: 1px solid #303436;
+    background: #181a1b;
+    border: 1px solid #303436;
     margin: 10% auto;
     padding: 20px;
     width: 50%;
@@ -122,7 +122,7 @@ label input {
 }
 
 iframe {
-	border: none;
+    border: none;
     box-sizing: border-box;
     margin: 1px;
     width: 100%;
@@ -134,7 +134,7 @@ iframe {
 }
 
 .markdown img {
-	max-width: 100%;
+    max-width: 100%;
 }
 
 .actions {
@@ -145,7 +145,7 @@ iframe {
     .hide {
         display: none;
     }
-    
+
     .dialog-content {
         width: auto !important;
     }

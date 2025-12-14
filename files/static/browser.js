@@ -15,7 +15,9 @@ function selectPath() {
     var iframeDoc;
 
     try {
-        iframeDoc = iframe.contentWindow ? iframe.contentWindow.document : iframe.document;
+        iframeDoc = iframe.contentWindow
+            ? iframe.contentWindow.document
+            : iframe.document;
     } catch (e) {
         alert("Unable to access iframe content.");
         return;

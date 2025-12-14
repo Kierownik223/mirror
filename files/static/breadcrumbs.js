@@ -1,12 +1,12 @@
 function createBreadcrumbs(path) {
-    var container = document.createElement('span');
-    container.className = 'breadcrumbs';
-    container.id = 'breadcrumbs';
+    var container = document.createElement("span");
+    container.className = "breadcrumbs";
+    container.id = "breadcrumbs";
 
-    container.appendChild(document.createTextNode('/'));
+    container.appendChild(document.createTextNode("/"));
 
     if (path && path !== "/") {
-        var segments = path.split('/');
+        var segments = path.split("/");
         var numSegments = segments.length;
 
         for (var i = 0; i < numSegments; i++) {
@@ -14,21 +14,21 @@ function createBreadcrumbs(path) {
             if (segment === "") continue;
 
             var subpathArr = segments.slice(0, i + 1);
-            var subpath = subpathArr.join('/');
+            var subpath = subpathArr.join("/");
 
             if (i === numSegments - 1) {
-                var span = document.createElement('span');
+                var span = document.createElement("span");
                 span.innerText = segment;
                 container.appendChild(span);
             } else {
-                var span2 = document.createElement('span');
-                var a = document.createElement('a');
+                var span2 = document.createElement("span");
+                var a = document.createElement("a");
 
-                a.href = subpath + '/';
+                a.href = subpath + "/";
                 a.innerText = segment;
                 span2.appendChild(a);
 
-                span2.appendChild(document.createTextNode('/'));
+                span2.appendChild(document.createTextNode("/"));
 
                 container.appendChild(span2);
             }

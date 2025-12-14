@@ -1,16 +1,16 @@
-@import url('/static/fonts/Roboto.css');
+@import url("/static/fonts/Roboto.css");
 
 body {
     margin: 0;
     background-color: #000;
     color: white;
-    font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: "Roboto", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     overflow-y: scroll;
 }
 
 a {
     color: white;
-    transition: all ease-in-out .1s;
+    transition: all ease-in-out 0.1s;
 }
 
 a:hover {
@@ -29,7 +29,7 @@ a span {
 
 .header {
     padding: 10px;
-    border-bottom: 1px solid #181A1B;
+    border-bottom: 1px solid #181a1b;
     text-align: center;
 }
 
@@ -48,7 +48,7 @@ a span {
 }
 
 div.line {
-    border-bottom: 1px solid #181A1B;
+    border-bottom: 1px solid #181a1b;
     width: 100%;
 }
 
@@ -57,7 +57,7 @@ div.line {
 }
 
 .footer {
-    border-top: 1px solid #181A1B;
+    border-top: 1px solid #181a1b;
     padding-top: 10px;
     text-align: center;
 }
@@ -75,28 +75,28 @@ input.text,
 input.submit,
 select,
 button {
-	padding: 10px;
-	font-size: 16px;
-	border: 1px solid #181A1B;
-	margin: 5px 0;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #181a1b;
+    margin: 5px 0;
     background: #000;
     color: #fff;
     box-sizing: border-box;
     width: 100%;
     border-radius: 4px;
-    transition: all ease-in-out .1s;
+    transition: all ease-in-out 0.1s;
 }
 
 button:hover {
-    background: #181A1B;
+    background: #181a1b;
     color: #fff;
     transform: scale(0.98);
 }
 
 progress {
     width: 100%;
-    color: #181A1B;
-    accent-color: #181A1B;
+    color: #181a1b;
+    accent-color: #181a1b;
 }
 
 form {
@@ -109,7 +109,7 @@ label input {
 
 .dialog-content {
     background: black;
-    border: 1px solid #181A1B;
+    border: 1px solid #181a1b;
     margin: 10% auto;
     padding: 20px;
     width: 50%;
@@ -118,7 +118,7 @@ label input {
 }
 
 iframe {
-	border: none;
+    border: none;
     box-sizing: border-box;
     width: 100%;
 }
@@ -129,7 +129,7 @@ iframe {
 }
 
 .markdown img {
-	max-width: 100%;
+    max-width: 100%;
 }
 
 .actions {
@@ -140,7 +140,7 @@ iframe {
     .hide {
         display: none;
     }
-    
+
     .dialog-content {
         width: auto !important;
     }

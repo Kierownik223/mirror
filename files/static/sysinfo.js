@@ -37,8 +37,14 @@
                     try {
                         var data = JSON.parse(xhr.responseText);
 
-                        setText(document.getElementById("used_mem_readable"), data.used_mem_readable);
-                        setText(document.getElementById("total_mem_readable"), data.total_mem_readable);
+                        setText(
+                            document.getElementById("used_mem_readable"),
+                            data.used_mem_readable,
+                        );
+                        setText(
+                            document.getElementById("total_mem_readable"),
+                            data.total_mem_readable,
+                        );
 
                         var memUsage = document.getElementById("mem_usage");
                         if (memUsage) {
@@ -55,9 +61,25 @@
                                 var div = document.createElement("div");
                                 disksContainer.appendChild(div);
                                 try {
-                                    div.innerHTML = '<label for="usage">' + disk.mount_point + ': ' + disk.used_space_readable + "/" + disk.total_space_readable + '</label><progress style="width:100%; box-sizing:border-box;" class="disk_usage" max="' + disk.total_space + '" value="' + disk.used_space + '"></progress>';
+                                    div.innerHTML =
+                                        '<label for="usage">' +
+                                        disk.mount_point +
+                                        ": " +
+                                        disk.used_space_readable +
+                                        "/" +
+                                        disk.total_space_readable +
+                                        '</label><progress style="width:100%; box-sizing:border-box;" class="disk_usage" max="' +
+                                        disk.total_space +
+                                        '" value="' +
+                                        disk.used_space +
+                                        '"></progress>';
                                 } catch (e) {
-                                    div.innerHTML = disk.mount_point + ': ' + disk.used_space_readable + "/" + disk.total_space_readable;
+                                    div.innerHTML =
+                                        disk.mount_point +
+                                        ": " +
+                                        disk.used_space_readable +
+                                        "/" +
+                                        disk.total_space_readable;
                                 }
                             }
                         }
@@ -81,7 +103,10 @@
         setInterval(updateInfo, 2500);
     }
 
-    if (document.readyState === "complete" || document.readyState === "interactive") {
+    if (
+        document.readyState === "complete" ||
+        document.readyState === "interactive"
+    ) {
         setTimeout(init, 0);
     } else if (document.addEventListener) {
         document.addEventListener("DOMContentLoaded", init, false);

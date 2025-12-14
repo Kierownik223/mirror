@@ -1,10 +1,10 @@
-@import url('/static/fonts/OpenSans.css');
+@import url("/static/fonts/OpenSans.css");
 
 body {
     margin: 10px;
     background-color: antiquewhite;
     color: black;
-    font-family: 'Open Sans', sans-serif;
+    font-family: "Open Sans", sans-serif;
     overflow-y: scroll;
 }
 
@@ -57,10 +57,10 @@ input.text,
 input.submit,
 select,
 button {
-	padding: 10px;
-	font-size: 16px;
-	border: 1px solid #fff;
-	margin: 5px 0;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #fff;
+    margin: 5px 0;
     background: antiquewhite;
     border: 1px solid black;
     color: black;
@@ -98,7 +98,7 @@ label input {
 }
 
 iframe {
-	border: none;
+    border: none;
     box-sizing: border-box;
     width: 100%;
 }
@@ -116,7 +116,7 @@ iframe {
     .hide {
         display: none;
     }
-    
+
     .dialog-content {
         width: auto !important;
     }

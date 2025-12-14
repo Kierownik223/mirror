@@ -1,8 +1,8 @@
 @font-face {
-	font-family: 'Roboto';
-	font-style: normal;
-	font-weight: 400;
-	font-stretch: 100%;
-	font-display: swap;
-	src: url('Roboto.ttf');
+    font-family: "Roboto";
+    font-style: normal;
+    font-weight: 400;
+    font-stretch: 100%;
+    font-display: swap;
+    src: url("Roboto.ttf");
 }

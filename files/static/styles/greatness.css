@@ -1,20 +1,20 @@
-@import url('/static/fonts/Roboto.css');
+@import url("/static/fonts/Roboto.css");
 
 body {
     margin: 0;
     background-color: #000;
     color: white;
-    font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: "Roboto", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     overflow-y: scroll;
 }
 
 a {
     color: white;
-    transition: all ease-in-out .1s;
+    transition: all ease-in-out 0.1s;
 }
 
 a:hover {
-    color: #EFBF04;
+    color: #efbf04;
 }
 
 a span {
@@ -75,34 +75,32 @@ input.text,
 input.submit,
 select,
 button {
-	padding: 10px;
-	font-size: 16px;
-	border: 1px solid #ffffff;
-	margin: 5px 0;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ffffff;
+    margin: 5px 0;
     background: #efc00400;
     color: #ffffff;
     box-sizing: border-box;
     width: 100%;
     border-radius: 4px;
-    transition: all ease-in-out .1s;
-
+    transition: all ease-in-out 0.1s;
 }
 select option {
-  margin: 40px;
-  background-color: rgb(0, 0, 0);
-  color: #fff;
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
-  
+    margin: 40px;
+    background-color: rgb(0, 0, 0);
+    color: #fff;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
 }
 button:hover {
-    background: #EFBF04;
+    background: #efbf04;
     color: #fff;
     transform: scale(0.98);
 }
 
 progress {
     width: 100%;
-    color: #EFBF04;
+    color: #efbf04;
     accent-color: #ebca48;
 }
 
@@ -116,7 +114,7 @@ label input {
 
 .dialog-content {
     background: #e4d9af;
-    border: 1px solid #EFBF04;
+    border: 1px solid #efbf04;
     margin: 10% auto;
     padding: 20px;
     width: 50%;
@@ -125,7 +123,7 @@ label input {
 }
 
 iframe {
-	border: none;
+    border: none;
     box-sizing: border-box;
     width: 100%;
 }
@@ -136,7 +134,7 @@ iframe {
 }
 
 .markdown img {
-	max-width: 100%;
+    max-width: 100%;
 }
 
 .actions {
@@ -147,7 +145,7 @@ iframe {
     .hide {
         display: none;
     }
-    
+
     .dialog-content {
         width: auto !important;
     }

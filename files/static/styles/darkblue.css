@@ -1,10 +1,10 @@
-@import url('/static/fonts/OpenSans.css');
+@import url("/static/fonts/OpenSans.css");
 
 body {
     margin: 0;
     background: #04424f;
     color: white;
-    font-family: 'Open Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: "Open Sans", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     overflow-y: scroll;
 }
 
@@ -81,10 +81,10 @@ input.text,
 input.submit,
 select,
 button {
-	padding: 10px;
-	font-size: 16px;
-	border: 1px solid #fff;
-	margin: 5px 0;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #fff;
+    margin: 5px 0;
     background: #04424f;
     color: #fff;
     box-sizing: border-box;
@@ -106,7 +106,7 @@ label input {
 
 .dialog-content {
     background: #04424f;
-	border: 1px solid #fff;
+    border: 1px solid #fff;
     margin: 10% auto;
     padding: 20px;
     width: 50%;
@@ -114,7 +114,7 @@ label input {
 }
 
 iframe {
-	border: none;
+    border: none;
     box-sizing: border-box;
     width: 100%;
 }
@@ -125,7 +125,7 @@ iframe {
 }
 
 .markdown img {
-	max-width: 100%;
+    max-width: 100%;
 }
 
 .actions {
@@ -136,7 +136,7 @@ iframe {
     .hide {
         display: none;
     }
-    
+
     .dialog-content {
         width: auto !important;
     }

@@ -1,10 +1,10 @@
-@import url('/static/fonts/Rubik.css');
+@import url("/static/fonts/Rubik.css");
 
 body {
     margin: 0;
     background: #000000;
     color: white;
-    font-family: 'Rubik', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: "Rubik", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     font-size: 16px;
     color-scheme: dark;
     overflow-y: scroll;
@@ -37,7 +37,7 @@ body {
 a {
     color: #32a852;
     text-decoration: none;
-    transition: all ease-in-out .1s;
+    transition: all ease-in-out 0.1s;
 }
 
 a:hover {
@@ -73,7 +73,7 @@ button {
     padding: 10px 15px;
     border-radius: 4px;
     cursor: pointer;
-    transition: all .1s ease-in-out;
+    transition: all 0.1s ease-in-out;
     width: 100%;
     margin: auto;
     display: block;
@@ -175,7 +175,7 @@ td input {
     .hide {
         display: none;
     }
-    
+
     .dialog-content {
         width: auto !important;
     }

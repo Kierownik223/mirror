@@ -1,20 +1,20 @@
-@import url('/static/fonts/Roboto.css');
+@import url("/static/fonts/Roboto.css");
 
 body {
     margin: 0;
-    background-image: url('/static/images/silksong/silksong.png');
+    background-image: url("/static/images/silksong/silksong.png");
     background-position: center;
     background-size: cover;
     background-attachment: fixed;
     background-color: #000;
     color: #ff1e00;
-    font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: "Roboto", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     overflow-y: scroll;
 }
 
 a {
     color: #ff1e00;
-    transition: all ease-in-out .1s;
+    transition: all ease-in-out 0.1s;
 }
 
 a:hover {
@@ -26,7 +26,7 @@ a span {
 }
 
 a h1 span .icon {
-    content: url('/static/images/silksong/hornet.png');
+    content: url("/static/images/silksong/hornet.png");
 }
 
 .container {
@@ -56,7 +56,7 @@ a h1 span .icon {
 }
 
 div.line {
-    border-bottom: 1px solid #181A1B;
+    border-bottom: 1px solid #181a1b;
     width: 100%;
 }
 
@@ -65,7 +65,7 @@ div.line {
 }
 
 .footer {
-    border-top: 1px solid #181A1B;
+    border-top: 1px solid #181a1b;
     padding-top: 10px;
     text-align: center;
 }
@@ -88,28 +88,28 @@ input.text,
 input.submit,
 select,
 button {
-	padding: 10px;
-	font-size: 16px;
-	border: 1px solid #181A1B;
-	margin: 5px 0;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #181a1b;
+    margin: 5px 0;
     background: #430000;
     color: #ff1e00;
     box-sizing: border-box;
     width: 100%;
     border-radius: 4px;
-    transition: all ease-in-out .1s;
+    transition: all ease-in-out 0.1s;
 }
 
 button:hover {
-    background: #181A1B;
+    background: #181a1b;
     color: #ff3e00;
     transform: scale(0.98);
 }
 
 progress {
     width: 100%;
-    color: #181A1B;
-    accent-color: #181A1B;
+    color: #181a1b;
+    accent-color: #181a1b;
 }
 
 form {
@@ -122,7 +122,7 @@ label input {
 
 .dialog-content {
     background: #430000;
-    border: 1px solid #181A1B;
+    border: 1px solid #181a1b;
     margin: 10% auto;
     padding: 20px;
     width: 50%;
@@ -131,7 +131,7 @@ label input {
 }
 
 iframe {
-	border: none;
+    border: none;
     box-sizing: border-box;
     width: 100%;
 }
@@ -142,7 +142,7 @@ iframe {
 }
 
 .markdown img {
-	max-width: 100%;
+    max-width: 100%;
 }
 
 .actions {
@@ -153,7 +153,7 @@ iframe {
     .hide {
         display: none;
     }
-    
+
     .dialog-content {
         width: auto !important;
     }

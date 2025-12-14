@@ -16,9 +16,18 @@ document.addEventListener("DOMContentLoaded", () => {
     video.style.pointerEvents = "none";
     document.body.appendChild(video);
 
-    const soundextensions = [".mp3", ".wav", ".ogg", ".flac", ".m4a",".mp4",".mkv",".webm"];
+    const soundextensions = [
+        ".mp3",
+        ".wav",
+        ".ogg",
+        ".flac",
+        ".m4a",
+        ".mp4",
+        ".mkv",
+        ".webm",
+    ];
     const url = window.location.href;
-    const hassoundfile = soundextensions.some(ext => url.includes(ext));
+    const hassoundfile = soundextensions.some((ext) => url.includes(ext));
 
     if (!hassoundfile) {
         const audio = document.createElement("audio");
@@ -29,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.appendChild(audio);
 
         const playaudio = () => {
-            audio.play().catch(() => { });
+            audio.play().catch(() => {});
             document.removeEventListener("click", playaudio);
             document.removeEventListener("keydown", playaudio);
             document.removeEventListener("touchstart", playaudio);
