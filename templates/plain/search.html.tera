@@ -24,7 +24,3 @@
     </tbody>
 </table>
 {% endblock content %}
-
-{% block scripts %}
-    <script src="/scripts/search.js?lang={{ lang }}&hires={{ settings.hires }}"></script>
-{% endblock scripts %}
