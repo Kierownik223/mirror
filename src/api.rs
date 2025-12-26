@@ -155,14 +155,12 @@ async fn search(q: Option<&str>, sizes: &State<FileSizes>, token: Result<JWT, St
             .map(|x| SearchFile {
                 name: get_name_from_path(&Path::new(&x.file).to_path_buf()),
                 full_path: get_virtual_path(&x.file),
-                icon: get_icon(&get_name_from_path(&Path::new(&x.file).to_path_buf())),
+                icon: if Path::new(&x.file).is_dir() { "folder".into() } else { get_icon(&get_name_from_path(&Path::new(&x.file).to_path_buf())) },
                 size: x.size,
             })
             .collect();
 
-        results.retain(|x| !CONFIG.hidden_files.contains(&x.name));
-        results.retain(|x| !is_hidden_path_str(&x.full_path, perms));
-        results.retain(|x| !x.full_path.starts_with("/private/"));
+        results.retain(|x| !CONFIG.hidden_files.contains(&x.name) || !is_hidden_path_str(&x.full_path, perms) || !x.full_path.starts_with("/private/"));
         results.retain(|x| x.name.contains(q));
 
         Ok(ApiResponse::SearchResults(Json(results)))
