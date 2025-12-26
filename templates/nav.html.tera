@@ -2,6 +2,7 @@
     <a href="/">{% if not settings.smallhead %}<h1>{% endif %}<span><img class="icon" src="/static/images/icons/{% if settings.hires %}hires/{% endif %}favicon.png">MARMAK Mirror</span>{% if not smallhead %}</h1>{% endif %}</a>
     {% if not smallhead %}<a href="/"><span><img class="icon" src="/static/images/icons/ui/{% if settings.hires %}hires/{% endif %}home.png">{{ strings.home }}</span></a>{% endif %}
     <a href="/settings"><span><img class="icon" src="/static/images/icons/ui/{% if settings.hires %}hires/{% endif %}settings.png">{{ strings.settings }}</span></a>
+    <a href="/search"><span><img class="icon" src="/static/images/icons/ui/{% if settings.hires %}hires/{% endif %}search.png">{{ strings.search_engine }}</span></a>
     {% if config.enable_marmak_link %}<a href="http://{{ root_domain }}"><span><img class="icon" src="/static/images/icons/ui/{% if settings.hires %}hires/{% endif %}marmak.png">MARMAK</span></a>{% endif %}
     {% if config.enable_login %}
     {% if not is_logged_in %}

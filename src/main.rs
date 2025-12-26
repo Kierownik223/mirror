@@ -28,7 +28,7 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::config::CONFIG;
+use crate::{api::SearchFile, config::CONFIG, utils::{get_icon, get_virtual_path, is_hidden_path_str}};
 use crate::db::{add_download, FileDb};
 use crate::guards::{CookieSettings, FullUri, HeaderFile, Host, Settings, UsePlain, UseViewers};
 use crate::i18n::{Language, TranslationStore};
@@ -1454,6 +1454,126 @@ async fn upload(
     }
 }
 
+#[get("/search?<q>")]
+async fn search(
+    q: Option<&str>,
+    sizes: &State<FileSizes>, 
+    jar: &CookieJar<'_>,
+    translations: &rocket::State<TranslationStore>,
+    lang: Language,
+    host: Host<'_>,
+    useplain: UsePlain<'_>,
+    token: Result<JWT, Status>,
+    settings: CookieSettings<'_>,
+) -> IndexResult {
+    let jwt = token.clone().unwrap_or_default();
+
+    if let Some(t) = jwt.token {
+        let mut jwt_cookie = Cookie::new("matoken", t.to_string());
+        jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
+        jwt_cookie.set_same_site(SameSite::Lax);
+
+        jar.add(jwt_cookie);
+
+        let mut local_jwt_cookie = Cookie::new("token", t.to_string());
+        local_jwt_cookie.set_same_site(SameSite::Lax);
+
+        jar.add(local_jwt_cookie);
+    }
+
+    let username = jwt.claims.sub;
+    let perms = jwt.claims.perms;
+
+    let strings = translations.get_translation(&lang.0);
+
+    if let Some(q) = q {
+        if q.len() < 3 {
+            return Ok(IndexResponse::Template(Template::render(
+                if *useplain.0 {
+                    "plain/search"
+                } else {
+                    "search"
+                },
+                context! {
+                    title: strings.get("search_engine").unwrap_or(&("search_engine".into())),
+                    lang,
+                    strings,
+                    root_domain: get_root_domain(host.0),
+                    host: host.0,
+                    config: (*CONFIG).clone(),
+                    theme: get_theme(jar),
+                    is_logged_in: token.is_ok(),
+                    username,
+                    admin: perms == 0,
+                    message: strings.get("search_query_too_short").unwrap_or(&("search_query_too_short".into())),
+                    settings,
+                },
+            )));
+        }
+
+        let mut results: Vec<SearchFile> = sizes
+            .read()
+            .await
+            .iter()
+            .map(|x| SearchFile {
+                name: get_name_from_path(&Path::new(&x.file).to_path_buf()),
+                full_path: get_virtual_path(&x.file),
+                icon: if Path::new(&x.file).is_dir() { "folder".into() } else { get_icon(&get_name_from_path(&Path::new(&x.file).to_path_buf())) },
+                size: x.size,
+            })
+            .collect();
+
+        results.retain(|x| !CONFIG.hidden_files.contains(&x.name));
+        results.retain(|x| !is_hidden_path_str(&x.full_path, Some(perms)));
+        results.retain(|x| !x.full_path.starts_with("/private/"));
+        results.retain(|x| x.name.to_lowercase().contains(&q.to_lowercase()));
+
+        return Ok(IndexResponse::Template(Template::render(
+            if *useplain.0 {
+                "plain/search"
+            } else {
+                "search"
+            },
+            context! {
+                title: strings.get("search_engine").unwrap_or(&("search_engine".into())),
+                lang,
+                strings,
+                root_domain: get_root_domain(host.0),
+                host: host.0,
+                config: (*CONFIG).clone(),
+                theme: get_theme(jar),
+                is_logged_in: token.is_ok(),
+                username,
+                admin: perms == 0,
+                results,
+                query: q,
+                settings,
+            },
+        )));
+    } else {
+        return Ok(IndexResponse::Template(Template::render(
+            if *useplain.0 {
+                "plain/search"
+            } else {
+                "search"
+            },
+            context! {
+                title: strings.get("search_engine").unwrap_or(&("search_engine".into())),
+                lang,
+                strings,
+                root_domain: get_root_domain(host.0),
+                host: host.0,
+                config: (*CONFIG).clone(),
+                theme: get_theme(jar),
+                is_logged_in: token.is_ok(),
+                username,
+                admin: perms == 0,
+                settings,
+            },
+        )));
+    }
+}
+
 #[catch(422)]
 async fn unprocessable_entry(_status: Status, req: &Request<'_>) -> Cached<(Status, Template)> {
     let translations = req.guard::<&State<TranslationStore>>().await.unwrap();
@@ -1654,7 +1774,8 @@ async fn rocket() -> _ {
                 sitemap,
                 uploader,
                 upload,
-                scripts
+                scripts,
+                search,
             ],
         );
 

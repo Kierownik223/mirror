@@ -1,0 +1,30 @@
+{% extends "plain/base" %}
+
+{% block content %}
+<div id="uploadResults"></div>
+<div class="breadcrumb">
+    <a href="/">MARMAK Mirror</a>/<a href="/search">{{ strings.search_engine }}</a>
+</div>
+<form method="get">
+    {% if message %}
+    <p class="message">{{ message }}</p>
+    {% endif %}
+    <label for="search">{{ strings.search_criterion }}:</label>
+    <br>
+    <input type="search" name="q" id="query" class="text" placeholder="{{ strings.search_placeholder }}"{% if query %} value="{{ query }}"{% endif %}>
+    <input type="submit" value="{{ strings.search }}">
+</form>
+<table>
+    <tbody>
+        {% if results %}
+        {% for r in results %}
+        <a href="{{ r.full_path | urlencode }}">{{ r.name }}</a><br>
+        {% endfor %}
+        {% endif %}
+    </tbody>
+</table>
+{% endblock content %}
+
+{% block scripts %}
+    <script src="/scripts/search.js?lang={{ lang }}&hires={{ settings.hires }}"></script>
+{% endblock scripts %}

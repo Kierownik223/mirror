@@ -74,10 +74,10 @@ struct RenameRequest {
 
 #[derive(serde::Serialize, PartialOrd, serde::Deserialize)]
 pub struct SearchFile {
-    name: String,
-    full_path: String,
-    icon: String,
-    size: u64,
+    pub name: String,
+    pub full_path: String,
+    pub icon: String,
+    pub size: u64,
 }
 
 impl Eq for SearchFile {}
