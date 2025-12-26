@@ -467,3 +467,47 @@ pub fn get_extension_from_path(path: &PathBuf) -> String {
         .unwrap_or_default()
         .to_string()
 }
+
+pub fn get_virtual_path(path: &str) -> String {
+    Path::new(&path.replace("files/", "/"))
+        .display()
+        .to_string()
+}
+
+pub fn is_hidden_path(path: &Path, perms: Option<i32>) -> bool {
+    let mut current = Some(path);
+
+    while let Some(p) = current {
+        if CONFIG
+            .hidden_files
+            .contains(&p.display().to_string().replace("/", ""))
+        {
+            if let Some(perms) = perms {
+                return perms != 0;
+            } else {
+                return true;
+            }
+        }
+        current = p.parent();
+    }
+
+    false
+}
+
+pub fn is_hidden_path_str(path: &str, perms: Option<i32>) -> bool {
+    is_hidden_path(Path::new(path), perms)
+}
+
+pub fn get_icon(file_name: &str) -> String {
+    let ext = get_extension_from_filename(file_name)
+        .unwrap_or_else(|| "")
+        .to_lowercase();
+
+    let mut icon = ext.as_str();
+
+    if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
+        icon = "default";
+    }
+
+    icon.to_string()
+}

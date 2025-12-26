@@ -28,8 +28,9 @@ use crate::{
     responders::{ApiResponse, ApiResult},
     utils::{
         add_path_to_zip, format_size, get_extension_from_filename, get_extension_from_path,
-        get_genre, get_name_from_path, get_real_path, get_real_path_with_perms, is_restricted,
-        map_io_error_to_status, read_dirs_async,
+        get_genre, get_icon, get_name_from_path, get_real_path, get_real_path_with_perms,
+        get_virtual_path, is_hidden_path_str, is_restricted, map_io_error_to_status,
+        read_dirs_async,
     },
     Disk, FileSizes, Host, MirrorFile, Sysinfo,
 };
@@ -71,6 +72,28 @@ struct RenameRequest {
     name: String,
 }
 
+#[derive(serde::Serialize, PartialOrd, serde::Deserialize)]
+pub struct SearchFile {
+    name: String,
+    full_path: String,
+    icon: String,
+    size: u64,
+}
+
+impl Eq for SearchFile {}
+
+impl PartialEq for SearchFile {
+    fn eq(&self, other: &Self) -> bool {
+        (&self.name) == (&other.name)
+    }
+}
+
+impl Ord for SearchFile {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.name.cmp(&other.name)
+    }
+}
+
 #[get("/listing/<file..>")]
 async fn listing(file: PathBuf, sizes: &State<FileSizes>, token: Result<JWT, Status>) -> ApiResult {
     let username = match token.as_ref() {
@@ -106,6 +129,51 @@ async fn listing(file: PathBuf, sizes: &State<FileSizes>, token: Result<JWT, Sta
     dir_list.append(&mut file_list);
 
     Ok(ApiResponse::Files(Json(dir_list)))
+}
+
+#[get("/search?<q>")]
+async fn search(q: Option<&str>, sizes: &State<FileSizes>, token: Result<JWT, Status>) -> ApiResult {
+    let perms = match token.as_ref() {
+        Ok(token) => Some(token.claims.perms),
+        Err(_) => None,
+    };
+
+    if let Some(q) = q {
+        if q.len() < 3 {
+            return Ok(ApiResponse::MessageStatus((
+                Status::BadRequest,
+                Json(ApiInfoResponse {
+                    message: "Search query must be 3 characters or longer!".into(),
+                }),
+            )));
+        }
+
+        let mut results: Vec<SearchFile> = sizes
+            .read()
+            .await
+            .iter()
+            .map(|x| SearchFile {
+                name: get_name_from_path(&Path::new(&x.file).to_path_buf()),
+                full_path: get_virtual_path(&x.file),
+                icon: get_icon(&get_name_from_path(&Path::new(&x.file).to_path_buf())),
+                size: x.size,
+            })
+            .collect();
+
+        results.retain(|x| !CONFIG.hidden_files.contains(&x.name));
+        results.retain(|x| !is_hidden_path_str(&x.full_path, perms));
+        results.retain(|x| !x.full_path.starts_with("/private/"));
+        results.retain(|x| x.name.contains(q));
+
+        Ok(ApiResponse::SearchResults(Json(results)))
+    } else {
+        return Ok(ApiResponse::MessageStatus((
+            Status::BadRequest,
+            Json(ApiInfoResponse {
+                message: "Search query must not be empty!".into(),
+            }),
+        )));
+    }
 }
 
 #[get("/<file..>", rank = 1)]
@@ -547,7 +615,7 @@ pub fn build_api() -> AdHoc {
         rocket = rocket
             .mount(
                 "/api",
-                routes![index, listing, sysinfo, upload, delete, rename,],
+                routes![index, listing, sysinfo, upload, delete, rename, search,],
             )
             .register("/api", catchers![default]);
 

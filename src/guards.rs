@@ -102,7 +102,8 @@ impl<'r> CookieSettings<'r> {
 
         Self {
             theme: theme,
-            js_present: std::path::Path::new(&format!("files/static/styles/{}.js", &theme)).exists(),
+            js_present: std::path::Path::new(&format!("files/static/styles/{}.js", &theme))
+                .exists(),
             lang: lang,
             hires,
             smallhead,
