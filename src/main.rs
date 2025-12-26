@@ -1524,9 +1524,9 @@ async fn search(
             .collect();
 
         results.retain(|x| !CONFIG.hidden_files.contains(&x.name));
-        results.retain(|x| !is_hidden_path_str(&x.full_path, Some(perms)));
-        results.retain(|x| !x.full_path.starts_with("/private/"));
         results.retain(|x| x.name.to_lowercase().contains(&q.to_lowercase()));
+        results.retain(|x| !is_hidden_path_str(&x.full_path, if token.is_ok() { Some(perms) } else { None }));
+        results.retain(|x| !x.full_path.starts_with("/private/"));
 
         return Ok(IndexResponse::Template(Template::render(
             if *useplain.0 {

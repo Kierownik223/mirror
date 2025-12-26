@@ -161,9 +161,9 @@ async fn search(q: Option<&str>, sizes: &State<FileSizes>, token: Result<JWT, St
             .collect();
 
         results.retain(|x| !CONFIG.hidden_files.contains(&x.name));
+        results.retain(|x| x.name.contains(q));
         results.retain(|x| !is_hidden_path_str(&x.full_path, perms));
         results.retain(|x| !x.full_path.starts_with("/private/"));
-        results.retain(|x| x.name.contains(q));
 
         Ok(ApiResponse::SearchResults(Json(results)))
     } else {
