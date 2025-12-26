@@ -128,6 +128,14 @@ shorten = "Encurtar"
 error_shortening = "Ocorreu um erro ao encurtar o URL."
 shortening_ratelimit = "Você encurtou muitos links. Tente novamente daqui a uma hora."
 
+# Search
+
+search = "Pesquisar"
+search_engine = "Mecanismo de busca"
+search_criterion = "Frase de pesquisa"
+search_placeholder = "Pesquise algo!"
+search_query_too_short = "A consulta de pesquisa deve ter pelo menos 3 caracteres!"
+
 # Errors
 
 error = "Erro"

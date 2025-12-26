@@ -128,6 +128,14 @@ shorten = "Сократить"
 error_shortening = "Произошла ошибка при сокращении URL."
 shortening_ratelimit = "Вы сократили слишком много ссылок. Попробуйте снова через час."
 
+# Search
+
+search = "Поиск"
+search_engine = "Поисковая система"
+search_criterion = "Поисковая фраза"
+search_placeholder = "Найдите что-нибудь!"
+search_query_too_short = "Поисковый запрос должен содержать не менее 3 символов!"
+
 # Errors
 
 error = "Ошибка"

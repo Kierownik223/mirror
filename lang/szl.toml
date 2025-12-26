@@ -128,6 +128,14 @@ shorten = "Skrůcić"
 error_shortening = "Při skrůcaniu URL trefiła sie feler."
 shortening_ratelimit = "Skrůcił żeś za moc linkōw. Sprōbuj za godzina."
 
+# Search
+
+search = "Szukej"
+search_engine = "Szukejōcy"
+search_criterion = "Szukejōco fraza"
+search_placeholder = "Poszukej czegoś!"
+search_query_too_short = "Szukejōcy tekst musi mieć aby 3 znaki abo wiyncyj!"
+
 # Errors
 
 error = "Feler"

@@ -128,6 +128,14 @@ shorten = "Skrátiť"
 error_shortening = "Pri skracovaní URL došlo k chybe."
 shortening_ratelimit = "Skrátili ste príliš veľa odkazov. Skúste to znova o hodinu."
 
+# Search
+
+search = "Hľadať"
+search_engine = "Vyhľadávač"
+search_criterion = "Vyhľadávacia fráza"
+search_placeholder = "Vyhľadajte niečo!"
+search_query_too_short = "Vyhľadávací dopyt musí mať aspoň 3 znaky!"
+
 # Errors
 
 error = "Chyba"

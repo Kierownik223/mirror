@@ -128,6 +128,14 @@ shorten = "Shorten"
 error_shortening = "An error occurred while shortening the URL."
 shortening_ratelimit = "You have shortened too many links. Please try again after an hour."
 
+# Search
+
+search = "Search"
+search_engine = "Search"
+search_criterion = "Search phrase"
+search_placeholder = "Search something!"
+search_query_too_short = "Search query must be 3 characters or longer!"
+
 # Errors
 
 error = "Error"
