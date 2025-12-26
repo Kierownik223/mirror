@@ -4,7 +4,7 @@
 <a href="/">MARMAK Mirror</a>/<a href="/account/login">{{ strings.log_in }}</a><br>
 {{ strings.log_in_with_marmak }}
 <form method="post">
-    {% if message != "" %}
+    {% if message %}
     <p class="message">{{ message }}</p>
     {% endif %}
     <label for="username">{{ strings.username }}:</label><br>
