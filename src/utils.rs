@@ -480,7 +480,7 @@ pub fn is_hidden_path(path: &Path, perms: Option<i32>) -> bool {
     while let Some(p) = current {
         if CONFIG
             .hidden_files
-            .contains(&p.display().to_string().replace("/", ""))
+            .contains(&get_name_from_path(&p.to_path_buf()))
         {
             if let Some(perms) = perms {
                 return perms != 0;
