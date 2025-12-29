@@ -51,6 +51,7 @@ pub struct UploadFile {
     url: Option<String>,
     error: Option<String>,
     icon: Option<String>,
+    size: Option<u64>,
 }
 
 #[derive(serde::Serialize)]
@@ -546,6 +547,7 @@ async fn upload(
                     url: Some(format!("http://{}/{}/{}", host.0, user_path, file_name)),
                     icon: Some(icon.to_string()),
                     error: None,
+                    size: Some(file.metadata().unwrap().len()),
                 });
             } else {
                 eprintln!("A file was uploaded without a name, skipping.");
@@ -671,6 +673,7 @@ async fn upload_chunked(
         url: Some(format!("http://{}/{}/{}", host.0, user_path, file_name)),
         icon: Some(icon),
         error: None,
+        size: Some(final_file.metadata().unwrap().len()),
     }])))
 }
 
