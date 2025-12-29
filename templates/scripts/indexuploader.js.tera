@@ -1,3 +1,5 @@
+var CHUNK_SIZE = 90 * 1024 * 1024;
+
 function uploadViaAPI(files, path) {
     if (!files || !files.length) {
         alert("{{ strings.select_files }}");
@@ -5,6 +7,7 @@ function uploadViaAPI(files, path) {
     }
 
     var resultsDiv = document.getElementById('uploadResults');
+    resultsDiv.innerHTML = "";
 
     for (var i = 0; i < files.length; i++) {
         (function (file) {
@@ -27,105 +30,241 @@ function uploadViaAPI(files, path) {
 
             resultsDiv.appendChild(container);
 
-            var formData = new FormData();
-            formData.append("files", file);
-            formData.append("path", path || "/private/");
+            (async function () {
+                try {
+                    if (file.size > CHUNK_SIZE) {
+                        await uploadFileInChunks(file, path, {
+                            progressBar: progressBar,
+                            info: info,
+                            label: label,
+                        });
+                    } else {
+                        var formData = new FormData();
+                        formData.append("files", file);
+                        formData.append("path", path);
 
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "/api/upload", true);
+                        var xhr = new XMLHttpRequest();
+                        xhr.open("POST", "/api/upload", true);
 
-            var startTime = new Date().getTime();
+                        var startTime = new Date().getTime();
 
-            xhr.upload.onprogress = function (e) {
-                if (e.lengthComputable) {
-                    var percent = (e.loaded / e.total) * 100;
-                    var elapsed = (new Date().getTime() - startTime) / 1000;
-                    var speed = e.loaded / elapsed;
+                        xhr.upload.onprogress = function (e) {
+                            if (e.lengthComputable) {
+                                var percent = (e.loaded / e.total) * 100;
+                                var elapsed = (new Date().getTime() - startTime) / 1000;
+                                var speed = e.loaded / elapsed;
 
-                    progressBar.value = percent;
+                                progressBar.value = percent;
 
-                    info.textContent =
-                        percent.toFixed(1) + "% - " + formatBytes(e.loaded) + " / " + formatBytes(e.total) +
-                        " @ " + formatBytes(speed) + "/s";
-                }
-            };
+                                info.textContent =
+                                    percent.toFixed(1) + "% - " + formatBytes(e.loaded) + " / " + formatBytes(e.total) +
+                                    " @ " + formatBytes(speed) + "/s";
+                            }
+                        };
 
-            xhr.onload = function () {
-                progressBar.style.display = "none";
-                container.style.display = "none";
+                        xhr.onload = function () {
+                            progressBar.style.display = "none";
+                            info.style.display = "none";
+                            label.style.display = "none";
 
-                if (xhr.status === 200) {
-                    try {
-                        var response = JSON.parse(xhr.responseText);
-                        var result = response[0];
+                            if (xhr.status === 200) {
+                                try {
+                                    var response = JSON.parse(xhr.responseText);
+                                    var result = response[0];
 
-                        if (!result || result.url == null) {
-                            alert("{{ strings.upload_error }} " + (result && result.error ? result.error : ""));
-                            return;
+                                    if (!result || result.url == null) {
+                                        alert("{{ strings.upload_error }} " + (result && result.error ? result.error : ""));
+                                        return;
+                                    }
+
+                                    var tableBody = document.querySelector("table tbody");
+                                    if (tableBody) {
+                                        var row = document.createElement("tr");
+
+                                        var tdCheck = document.createElement("td");
+                                        var cb = document.createElement("input");
+                                        cb.type = "checkbox";
+                                        cb.className = "delete-checkbox";
+                                        cb.value = result.name;
+                                        tdCheck.appendChild(cb);
+                                        row.appendChild(tdCheck);
+
+                                        var tdName = document.createElement("td");
+                                        var a = document.createElement("a");
+                                        a.href = result.url;
+                                        a.innerHTML = '<img src="/static/images/icons/{% if hires %}hires/{% endif %}' + result.icon + '.png" class="icon">' + result.name;
+                                        tdName.appendChild(a);
+                                        row.appendChild(tdName);
+
+                                        var tdSize = document.createElement("td");
+                                        tdSize.textContent = result.size || "---";
+                                        row.appendChild(tdSize);
+
+                                        var tdType = document.createElement("td");
+                                        tdType.textContent = "{{ strings.file }}";
+                                        row.appendChild(tdType);
+
+                                        var tdDelete = document.createElement("td");
+                                        var delLink = document.createElement("a");
+                                        delLink.style.cursor = "pointer";
+                                        delLink.textContent = "{{ strings.delete }}";
+                                        delLink.onclick = function () {
+                                            deleteFile(this, result.name, true);
+                                        };
+                                        tdDelete.appendChild(delLink);
+                                        row.appendChild(tdDelete);
+
+                                        tableBody.appendChild(row);
+                                    }
+                                } catch (e) {
+                                    alert(file.name + " {{ strings.upload_parse_error }}");
+                                }
+                            } else {
+                                alert(file.name + " {{ strings.upload_failed_status }} " + xhr.status);
+                            }
+                        };
+
+                        xhr.onerror = function () {
+                            progressBar.style.display = "none";
+                            info.style.display = "none";
+                            label.style.display = "none";
+                            alert(file.name + " {{ strings.upload_failed_network }}");
+                        };
+
+                        try {
+                            xhr.send(formData);
+                        } catch (e) {
+                            label.textContent = file.name + " {{ strings.upload_error }}";
                         }
-
-                        info.remove();
-
-                        var tableBody = document.querySelector("table tbody");
-                        if (tableBody) {
-                            var row = document.createElement("tr");
-
-                            var tdCheck = document.createElement("td");
-                            var cb = document.createElement("input");
-                            cb.type = "checkbox";
-                            cb.className = "delete-checkbox";
-                            cb.value = result.name;
-                            tdCheck.appendChild(cb);
-                            row.appendChild(tdCheck);
-
-                            var tdName = document.createElement("td");
-                            var a = document.createElement("a");
-                            a.href = result.url;
-                            a.innerHTML = '<img src="/static/images/icons/{% if hires %}hires/{% endif %}' + result.icon + '.png" class="icon">' + result.name;
-                            tdName.appendChild(a);
-                            row.appendChild(tdName);
-
-                            var tdSize = document.createElement("td");
-                            tdSize.textContent = result.size || "—";
-                            row.appendChild(tdSize);
-
-                            var tdType = document.createElement("td");
-                            tdType.textContent = "{{ strings.file }}";
-                            row.appendChild(tdType);
-
-                            var tdDelete = document.createElement("td");
-                            var delLink = document.createElement("a");
-                            delLink.style.cursor = "pointer";
-                            delLink.textContent = "{{ strings.delete }}";
-                            delLink.onclick = function () {
-                                deleteFile(this, result.name, true);
-                            };
-                            tdDelete.appendChild(delLink);
-                            row.appendChild(tdDelete);
-
-                            tableBody.appendChild(row);
-                        }
-                    } catch (e) {
-                        alert(file.name + " {{ strings.upload_parse_error }}");
                     }
-                } else {
-                    alert(file.name + " {{ strings.upload_failed_status }} " + xhr.status);
+                } catch (err) {
+                    progressBar.style.display = "none";
+                    info.style.display = "none";
+                    label.style.display = "none";
+                    label.textContent = file.name + " {{ strings.upload_error }}";
                 }
-            };
-
-            xhr.onerror = function () {
-                progressBar.style.display = "none";
-                info.style.display = "none";
-                alert(file.name + " {{ strings.upload_failed_network }}");
-            };
-
-            try {
-                xhr.send(formData);
-            } catch (e) {
-                label.textContent = file.name + " {{ strings.upload_error }}";
-            }
+            })();
         })(files[i]);
     }
+}
+
+async function uploadFileInChunks(file, path, ui) {
+    var totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+    var fileId = Date.now() + "_" + Math.random().toString(36).slice(2);
+
+    var uploadedBytes = 0;
+    var startTime = Date.now();
+
+    var responseText;
+
+    for (var i = 0; i < totalChunks; i++) {
+        var start = i * CHUNK_SIZE;
+        var end = Math.min(start + CHUNK_SIZE, file.size);
+        var chunk = file.slice(start, end);
+
+        var formData = new FormData();
+        formData.append("file", chunk);
+        formData.append("path", path);
+        formData.append("fileid", fileId);
+        formData.append("filename", file.name);
+        formData.append("chunkindex", i);
+        formData.append("totalchunks", totalChunks);
+
+        responseText = await uploadChunk({
+            formData: formData,
+            onProgress: function (e) {
+                if (e.lengthComputable) {
+                    var chunkLoaded = e.loaded;
+                    var totalLoaded = uploadedBytes + chunkLoaded;
+                    var percent = (totalLoaded / file.size) * 100;
+
+                    var elapsed = (Date.now() - startTime) / 1000;
+                    var speed = totalLoaded / elapsed;
+
+                    ui.progressBar.value = percent;
+                    ui.info.textContent =
+                        percent.toFixed(1) + "% - " +
+                        formatBytes(totalLoaded) + " / " +
+                        formatBytes(file.size) + " @ " +
+                        formatBytes(speed) + "/s";
+                }
+            }
+        });
+
+        uploadedBytes += (end - start);
+    }
+
+    var response = JSON.parse(responseText);
+    var result = response[0];
+
+    var tableBody = document.querySelector("table tbody");
+    if (tableBody) {
+        var row = document.createElement("tr");
+
+        var tdCheck = document.createElement("td");
+        var cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.className = "delete-checkbox";
+        cb.value = result.name;
+        tdCheck.appendChild(cb);
+        row.appendChild(tdCheck);
+
+        var tdName = document.createElement("td");
+        var a = document.createElement("a");
+        a.href = result.url;
+        a.innerHTML = '<img src="/static/images/icons/{% if hires %}hires/{% endif %}' + result.icon + '.png" class="icon">' + result.name;
+        tdName.appendChild(a);
+        row.appendChild(tdName);
+
+        var tdSize = document.createElement("td");
+        tdSize.textContent = result.size || "---";
+        row.appendChild(tdSize);
+
+        var tdType = document.createElement("td");
+        tdType.textContent = "{{ strings.file }}";
+        row.appendChild(tdType);
+
+        var tdDelete = document.createElement("td");
+        var delLink = document.createElement("a");
+        delLink.style.cursor = "pointer";
+        delLink.textContent = "{{ strings.delete }}";
+        delLink.onclick = function () {
+            deleteFile(this, result.name, true);
+        };
+        tdDelete.appendChild(delLink);
+        row.appendChild(tdDelete);
+
+        tableBody.appendChild(row);
+    }
+
+    ui.progressBar.style.display = "none";
+    ui.info.style.display = "none";
+    ui.label.style.display = "none";
+
+    return true;
+}
+
+function uploadChunk(options) {
+    return new Promise(function (resolve, reject) {
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/api/upload_chunked", true);
+
+        xhr.upload.onprogress = options.onProgress || null;
+
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                resolve(xhr.responseText);
+            } else {
+                reject(xhr.status);
+            }
+        };
+
+        xhr.onerror = function () {
+            reject("network");
+        };
+
+        xhr.send(options.formData);
+    });
 }
 
 function formatBytes(bytes) {
