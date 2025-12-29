@@ -132,7 +132,11 @@ async fn listing(file: PathBuf, sizes: &State<FileSizes>, token: Result<JWT, Sta
 }
 
 #[get("/search?<q>")]
-async fn search(q: Option<&str>, sizes: &State<FileSizes>, token: Result<JWT, Status>) -> ApiResult {
+async fn search(
+    q: Option<&str>,
+    sizes: &State<FileSizes>,
+    token: Result<JWT, Status>,
+) -> ApiResult {
     let perms = match token.as_ref() {
         Ok(token) => Some(token.claims.perms),
         Err(_) => None,
@@ -155,7 +159,11 @@ async fn search(q: Option<&str>, sizes: &State<FileSizes>, token: Result<JWT, St
             .map(|x| SearchFile {
                 name: get_name_from_path(&Path::new(&x.file).to_path_buf()),
                 full_path: get_virtual_path(&x.file),
-                icon: if Path::new(&x.file).is_dir() { "folder".into() } else { get_icon(&get_name_from_path(&Path::new(&x.file).to_path_buf())) },
+                icon: if Path::new(&x.file).is_dir() {
+                    "folder".into()
+                } else {
+                    get_icon(&get_name_from_path(&Path::new(&x.file).to_path_buf()))
+                },
                 size: x.size,
             })
             .collect();
@@ -551,6 +559,121 @@ async fn upload(
     }
 }
 
+#[post("/upload_chunked?<path>", data = "<data>")]
+async fn upload_chunked(
+    path: Option<&str>,
+    content_type: &ContentType,
+    data: Data<'_>,
+    host: Host<'_>,
+    token: Result<JWT, Status>,
+) -> ApiResult {
+    let token = token?;
+    let username = token.claims.sub;
+    let perms = token.claims.perms;
+
+    let options = MultipartFormDataOptions::with_multipart_form_data_fields(vec![
+        MultipartFormDataField::file("file").size_limit(u64::from(100.megabytes())),
+        MultipartFormDataField::text("path"),
+        MultipartFormDataField::text("fileid"),
+        MultipartFormDataField::text("filename"),
+        MultipartFormDataField::text("chunkindex"),
+        MultipartFormDataField::text("totalchunks"),
+    ]);
+
+    let form_data = MultipartFormData::parse(content_type, data, options)
+        .await
+        .map_err(|_| Status::BadRequest)?;
+
+    let mut user_path = form_data
+        .texts
+        .get("path")
+        .and_then(|paths| paths.first().map(|p| p.text.trim_matches('/').to_string()))
+        .unwrap_or("uploads".to_string());
+
+    if user_path.is_empty() {
+        user_path = "uploads".to_string();
+    }
+
+    if let Some(query_path) = path {
+        user_path = query_path.trim_matches('/').to_string();
+    }
+
+    let is_private = user_path.starts_with("private");
+    if !is_private && perms != 0 {
+        return Err(Status::Forbidden);
+    }
+
+    let base_path = if is_private {
+        format!(
+            "files/private/{}/{}",
+            username,
+            user_path.trim_start_matches("private")
+        )
+    } else {
+        format!("files/{}", user_path)
+    };
+
+    let file_id = &form_data.texts["fileid"][0].text;
+    let file_name = &form_data.texts["filename"][0].text;
+    let chunk_index: usize = form_data.texts["chunkindex"][0]
+        .text
+        .parse()
+        .map_err(|_| Status::BadRequest)?;
+    let total_chunks: usize = form_data.texts["totalchunks"][0]
+        .text
+        .parse()
+        .map_err(|_| Status::BadRequest)?;
+
+    let chunk_dir = format!(".chunks/{}/{}", username, file_id);
+    std::fs::create_dir_all(&chunk_dir).map_err(map_io_error_to_status)?;
+
+    let chunk_path = format!("{}/{:05}.part", chunk_dir, chunk_index);
+
+    let file_field = &form_data.files["file"][0];
+    let mut src = std::fs::File::open(&file_field.path).map_err(map_io_error_to_status)?;
+    let mut dst = std::fs::File::create(&chunk_path).map_err(map_io_error_to_status)?;
+
+    std::io::copy(&mut src, &mut dst).map_err(map_io_error_to_status)?;
+
+    let received_chunks = std::fs::read_dir(&chunk_dir)
+        .map_err(map_io_error_to_status)?
+        .count();
+
+    if received_chunks < total_chunks {
+        return Ok(ApiResponse::UploadFiles(Json(Vec::new())));
+    }
+
+    std::fs::create_dir_all(&base_path).map_err(map_io_error_to_status)?;
+
+    let final_path = format!("{}/{}", base_path, file_name);
+    let mut final_file = std::fs::File::create(&final_path).map_err(map_io_error_to_status)?;
+
+    for i in 0..total_chunks {
+        let part_path = format!("{}/{:05}.part", chunk_dir, i);
+        let mut part = std::fs::File::open(&part_path).map_err(map_io_error_to_status)?;
+        std::io::copy(&mut part, &mut final_file).map_err(map_io_error_to_status)?;
+    }
+
+    std::fs::remove_dir_all(&chunk_dir).map_err(map_io_error_to_status)?;
+
+    let ext = get_extension_from_filename(file_name)
+        .unwrap_or("")
+        .to_lowercase();
+
+    let icon = if Path::new(&format!("files/static/images/icons/{}.png", ext)).exists() {
+        ext
+    } else {
+        "default".into()
+    };
+
+    Ok(ApiResponse::UploadFiles(Json(vec![UploadFile {
+        name: file_name.clone(),
+        url: Some(format!("http://{}/{}/{}", host.0, user_path, file_name)),
+        icon: Some(icon),
+        error: None,
+    }])))
+}
+
 #[post("/zip", data = "<data>")]
 async fn download_zip(
     content_type: &ContentType,
@@ -615,7 +738,16 @@ pub fn build_api() -> AdHoc {
         rocket = rocket
             .mount(
                 "/api",
-                routes![index, listing, sysinfo, upload, delete, rename, search,],
+                routes![
+                    index,
+                    listing,
+                    sysinfo,
+                    upload,
+                    delete,
+                    rename,
+                    search,
+                    upload_chunked,
+                ],
             )
             .register("/api", catchers![default]);
 
