@@ -86,6 +86,11 @@
     <script src="/static/polyfills.js"></script>
     <script src="/scripts/index.js?lang={{ lang }}&hires={{ settings.hires }}"></script>
     {% if admin and path != "/" or private %}
+    {% if settings.use_si %}
+    <script src="/static/formatbytessi.js"></script>
+    {% else %}
+    <script src="/static/formatbytes.js"></script>
+    {% endif %}
     <script src="/scripts/upload.js?lang={{ lang }}&hires={{ settings.hires }}"></script>
     <script src="/scripts/indexuploader.js?lang={{ lang }}&hires={{ settings.hires }}"></script>
     {% endif %}
