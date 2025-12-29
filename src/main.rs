@@ -28,7 +28,6 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::{api::SearchFile, config::CONFIG, utils::{get_icon, get_virtual_path, is_hidden_path_str}};
 use crate::db::{add_download, FileDb};
 use crate::guards::{CookieSettings, FullUri, HeaderFile, Host, Settings, UsePlain, UseViewers};
 use crate::i18n::{Language, TranslationStore};
@@ -38,6 +37,11 @@ use crate::utils::{
     format_size_filter, get_cache_control, get_extension_from_path, get_genre, get_name_from_path,
     get_real_path, get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output,
     read_dirs_async,
+};
+use crate::{
+    api::SearchFile,
+    config::CONFIG,
+    utils::{get_icon, get_virtual_path, is_hidden_path_str},
 };
 
 mod account;
@@ -1457,7 +1461,7 @@ async fn upload(
 #[get("/search?<q>")]
 async fn search(
     q: Option<&str>,
-    sizes: &State<FileSizes>, 
+    sizes: &State<FileSizes>,
     jar: &CookieJar<'_>,
     translations: &rocket::State<TranslationStore>,
     lang: Language,
@@ -1518,14 +1522,20 @@ async fn search(
             .map(|x| SearchFile {
                 name: get_name_from_path(&Path::new(&x.file).to_path_buf()),
                 full_path: get_virtual_path(&x.file),
-                icon: if Path::new(&x.file).is_dir() { "folder".into() } else { get_icon(&get_name_from_path(&Path::new(&x.file).to_path_buf())) },
+                icon: if Path::new(&x.file).is_dir() {
+                    "folder".into()
+                } else {
+                    get_icon(&get_name_from_path(&Path::new(&x.file).to_path_buf()))
+                },
                 size: x.size,
             })
             .collect();
 
         results.retain(|x| !CONFIG.hidden_files.contains(&x.name));
         results.retain(|x| x.name.to_lowercase().contains(&q.to_lowercase()));
-        results.retain(|x| !is_hidden_path_str(&x.full_path, if token.is_ok() { Some(perms) } else { None }));
+        results.retain(|x| {
+            !is_hidden_path_str(&x.full_path, if token.is_ok() { Some(perms) } else { None })
+        });
         results.retain(|x| !x.full_path.starts_with("/private/"));
 
         return Ok(IndexResponse::Template(Template::render(

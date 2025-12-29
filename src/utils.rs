@@ -488,7 +488,15 @@ pub fn is_hidden_path(path: &Path, perms: Option<i32>) -> bool {
                 return true;
             }
         }
-        if Path::new("files/").join(p.join("RESTRICTED").display().to_string().replacen("/", "", 1)).exists() {
+        if Path::new("files/")
+            .join(
+                p.join("RESTRICTED")
+                    .display()
+                    .to_string()
+                    .replacen("/", "", 1),
+            )
+            .exists()
+        {
             return !perms.is_some();
         }
         current = p.parent();
