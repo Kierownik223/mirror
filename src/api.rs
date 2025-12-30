@@ -65,6 +65,14 @@ pub struct MusicFile {
     cover: bool,
 }
 
+#[derive(serde::Serialize)]
+pub struct UploadLimits {
+    perms: i32,
+    upload_limit: u64,
+    private_folder_quota: u64,
+    private_folder_usage: u64,
+}
+
 #[derive(serde::Deserialize)]
 struct FileList(Vec<String>);
 
@@ -587,6 +595,34 @@ async fn upload(
     }
 }
 
+#[get("/upload")]
+async fn upload_info(
+    token: Result<JWT, Status>,
+    sizes: &State<FileSizes>,
+) -> ApiResult {
+    let token = token?;
+
+    let upload_limit = *(CONFIG.max_upload_sizes.get(&token.claims.perms.to_string()).unwrap_or(&0_u64));
+    let private_folder_quota = *(CONFIG.private_folder_quotas.get(&token.claims.perms.to_string()).unwrap_or(&1_u64));
+
+    let private_folder_usage = sizes.read().await
+        .iter()
+        .find(|entry| {
+            entry.file.strip_suffix("/").unwrap_or_default().to_string() == format!("files/private/{}", &token.claims.sub)
+        })
+        .map(|entry| entry.size)
+        .unwrap_or(0);
+
+    Ok(ApiResponse::UploadLimits(Json(
+        UploadLimits {
+            perms: token.claims.perms,
+            upload_limit,
+            private_folder_quota,
+            private_folder_usage
+        }
+    )))
+}
+
 #[post("/upload_chunked?<path>", data = "<data>")]
 async fn upload_chunked(
     path: Option<&str>,
@@ -812,6 +848,7 @@ pub fn build_api() -> AdHoc {
                     rename,
                     search,
                     upload_chunked,
+                    upload_info,
                 ],
             )
             .register("/api", catchers![default]);

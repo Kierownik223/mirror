@@ -8,9 +8,7 @@ use rocket::{
 use rocket_dyn_templates::Template;
 
 use crate::{
-    api::{ApiInfoResponse, MusicFile, SearchFile, UploadFile},
-    guards::HeaderFile,
-    MirrorFile, Sysinfo,
+    MirrorFile, Sysinfo, api::{ApiInfoResponse, MusicFile, SearchFile, UploadFile, UploadLimits}, guards::HeaderFile
 };
 
 pub struct Cached<R> {
@@ -66,6 +64,7 @@ pub enum ApiResponse {
     Sysinfo(Json<Sysinfo>),
     UploadFiles(Json<Vec<UploadFile>>),
     SearchResults(Json<Vec<SearchFile>>),
+    UploadLimits(Json<UploadLimits>),
 }
 
 pub type ApiResult = Result<ApiResponse, Status>;
@@ -111,6 +110,11 @@ impl<'r> Responder<'r, 'r> for ApiResponse {
             }
             ApiResponse::SearchResults(s) => {
                 let mut res = s.respond_to(req)?;
+                res.set_raw_header("Cache-Control", "no-cache");
+                Ok(res)
+            }
+            ApiResponse::UploadLimits(l) => {
+                let mut res = l.respond_to(req)?;
                 res.set_raw_header("Cache-Control", "no-cache");
                 Ok(res)
             }
