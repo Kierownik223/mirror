@@ -1,0 +1,6 @@
+{% extends "base" %}
+
+{% block content %}
+<a href="/">MARMAK Mirror</a>/HTTP 404<br>
+{{ strings.not_enough_space }}
+{% endblock content %}

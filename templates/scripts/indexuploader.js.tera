@@ -91,6 +91,8 @@ function uploadViaAPI(files, path) {
                         }).catch(function(err) {
                             if (err === 413) {
                                 alert(file.name + " {{ strings.file_too_big }}");
+                            } else if (err === 507) {
+                                alert("{{ strings.not_enough_space }}");
                             } else {
                                 label.textContent = file.name + " {{ strings.upload_error }}";
                             }
@@ -179,6 +181,8 @@ function uploadViaAPI(files, path) {
                                 } catch (e) {
                                     alert(file.name + " {{ strings.upload_parse_error }}");
                                 }
+                            } else if (xhr.status === 507) {
+                                alert("{{ strings.not_enough_space }}");
                             } else {
                                 alert(file.name + " {{ strings.upload_failed_status }} " + xhr.status);
                             }
