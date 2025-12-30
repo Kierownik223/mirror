@@ -778,12 +778,7 @@ async fn index(
                 .iter()
                 .find(|entry| {
                     entry.file.strip_suffix("/").unwrap_or_default().to_string()
-                        == path
-                            .display()
-                            .to_string()
-                            .strip_suffix("/")
-                            .unwrap_or_default()
-                            .to_string()
+                        == format!("files/private/{}", &username)
                 })
                 .map(|entry| entry.size)
                 .unwrap_or(0);
