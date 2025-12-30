@@ -365,7 +365,11 @@ async fn rename(
 }
 
 #[delete("/<file..>")]
-async fn delete<'a>(file: PathBuf, token: Result<JWT, Status>, sizes: &State<FileSizes>,) -> ApiResult {
+async fn delete<'a>(
+    file: PathBuf,
+    token: Result<JWT, Status>,
+    sizes: &State<FileSizes>,
+) -> ApiResult {
     let token = token?;
 
     let username = token.claims.sub;
