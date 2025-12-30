@@ -89,6 +89,11 @@ function uploadViaAPI(files, path) {
                                 tableBody.appendChild(row);
                             }
                         }).catch(function(err) {
+                            if (err === 413) {
+                                alert(file.name + " {{ strings.file_too_big }}");
+                            } else {
+                                label.textContent = file.name + " {{ strings.upload_error }}";
+                            }
                             progressBar.style.display = "none";
                             info.style.display = "none";
                             label.textContent = file.name + " {{ strings.upload_error }}";

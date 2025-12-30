@@ -76,9 +76,13 @@ function uploadViaAPI() {
 
                             return true;
                         }).catch(function(err) {
+                            if (err === 413) {
+                                label.textContent = file.name + " {{ strings.file_too_big }}";
+                            } else {
+                                label.textContent = file.name + " {{ strings.upload_error }}";
+                            }
                             progressBar.style.display = "none";
                             info.style.display = "none";
-                            label.textContent = file.name + " {{ strings.upload_error }}";
                         });
                     } else {
                         var formData = new FormData();
