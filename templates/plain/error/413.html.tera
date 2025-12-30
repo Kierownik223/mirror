@@ -1,0 +1,7 @@
+{% extends "plain/base" %}
+
+{% block content %}
+<a href="/">MARMAK Mirror</a>/HTTP 413<br>
+<hr>
+{{ strings.file_too_big }}
+{% endblock content %}
