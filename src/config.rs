@@ -30,8 +30,8 @@ pub struct Config {
 
 impl Config {
     pub fn load() -> Self {
-        let config_str = fs::read_to_string("config.toml").unwrap();
-        toml::from_str(&config_str).unwrap()
+        let config_str = fs::read_to_string("config.toml").unwrap_or_default();
+        toml::from_str(&config_str).unwrap_or_default()
     }
 }
 
