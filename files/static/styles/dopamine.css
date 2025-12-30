@@ -1,0 +1,260 @@
+@import url("/static/fonts/Rubik.css");
+
+body {
+    margin: 0;
+    background: #000000;
+    color: white;
+    font-family: "Rubik", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 16px;
+    color-scheme: dark;
+    overflow-y: scroll;
+}
+
+.icon {
+    width: 1em;
+    height: 1em;
+    margin: 2px 4px -2px 0px;
+}
+
+.header {
+    margin: 10px 0;
+    color:#fff;
+    text-align: center;
+}
+
+.header h1 {
+    
+    margin: 10px 0;
+}
+.header a {
+    color:#ffffff;
+}
+.header a:hover {
+    color:#90aee6;
+}
+.main {
+    width: 90vw;
+    max-width: 800px;
+    margin: 10px auto;
+    padding-top: 10px;
+    box-sizing: border-box;
+    border-top: 1px solid #303030;
+}
+
+a {
+    color: #3265a8;
+    text-decoration: none;
+    transition: all ease-in-out 0.1s;
+}
+
+a:hover {
+    color: #0e4a99;
+}
+
+a span {
+    white-space: pre;
+}
+
+input,
+select,
+button {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 10px auto;
+    padding: 10px;
+    border: 1px solid #303030;
+    border-radius: 4px;
+    background: #000;
+    color: #fff;
+}
+
+input[type="radio"],
+input[type="checkbox"] {
+    width: auto;
+    box-sizing: content-box;
+}
+.dp-sbdiv{
+    position: absolute;
+    top:0;
+    left:0;
+    width:195px;
+    min-height: calc(100% - 5px);
+    height:auto;
+    background-color: #000;
+    padding: 10px;
+    transition: top 0.3s ease, left 0.3s ease;
+    border-right: #ffffff2d solid 1px;
+    padding-right: 20px;
+}
+.dp-sbdivhid{
+    left:-165px;
+    color:#00000000;
+    border:none;
+    background-color: #00000000;
+}
+button {
+    color: white;
+    font-size: 16px;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.1s ease-in-out;
+    width: 100%;
+    margin: auto;
+    display: block;
+    text-align: center;
+    background-color: #000;
+    box-sizing: border-box;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #2a7a38;
+    transform: scale(0.98);
+}
+
+table {
+    width: 100%;
+    margin-bottom: 4px;
+    border-radius: 8px;
+    border-collapse: collapse;
+}
+
+td {
+    color: #aaaaaa;
+}
+
+td:first-child {
+    color: #32a852;
+}
+
+tr a {
+    display: block;
+    overflow-wrap: anywhere;
+}
+
+tr:hover {
+    background-color: #21252a;
+}
+
+tbody tr td:last-child {
+    text-align: right;
+}
+
+tbody tr td:last-child a {
+    display: inline;
+}
+
+.footer {
+    width: 90vw;
+    max-width: 800px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    text-align: center;
+    color: #aaaaaa;
+    border-top: 1px solid #303030;
+    padding: 10px;
+}
+
+progress {
+    width: 100%;
+    color: #32a852;
+    accent-color: #32a852;
+}
+
+.dialog-content {
+    background: #000;
+    border: 1px solid #32a852;
+    margin: 10% auto;
+    padding: 20px;
+    width: 50%;
+    text-align: center;
+    border-radius: 8px;
+}
+
+iframe {
+    border: none;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+td input {
+    margin: auto;
+    width: auto;
+}
+
+.seg {
+    opacity: 0;
+    font-size: 0.1px;
+}
+
+.markdown img {
+    max-width: 100%;
+}
+
+.actions {
+    float: right;
+}
+
+@media only screen and (max-width: 640px) {
+    .hide {
+        display: none;
+    }
+
+    .dialog-content {
+        width: auto !important;
+    }
+}
+
+@media only screen and (max-width: 300px) {
+    .hide-more {
+        display: none;
+    }
+}
+#dp-sb-cat ul {
+    list-style: none;
+    padding-left: 20px;
+    margin: 0;  
+    text-overflow: ellipsis; 
+    white-space: nowrap; 
+}
+#dp-sb-cat li {
+    list-style-type: none;
+}
+#dp-sb-cat li {
+    cursor: pointer;
+    user-select: none;
+    margin: 2px 0;
+}
+
+#dp-sb-cat li.folder::before {
+    content: "📁 ";
+}
+#dp-sb-cat li.folder.open::before {
+    content: "📂 "!important; 
+}
+#dp-sb-cat li.file::before {
+    content: "📄 ";
+}
+#dp-sb-cat li.img::before {
+    content: "📷 ";
+}
+#dp-sb-cat li.anm::before {
+    content: "🎬 ";
+}
+#dp-sb-cat li.shp::before {
+    content: "💩 ";
+}
+#dp-sb-cat li.snd::before {
+    content: "🔊 ";
+}
+#dp-sb-cat li.zpi::before {
+    content: "🤐 ";
+}
+#dp-sb-cat li ul {
+    display: none;
+}
+
+#dp-sb-cat li.open > ul {
+    display: block;
+}
