@@ -81,7 +81,6 @@ select_folder = "Ôbier folder"
 browse = "Szukej"
 select_files = "Ôbier pliki."
 uploading = "Wgrywanie"
-file_too_big = "przekracza maksymalny dozwolony rozmiar pliku."
 
 # Account
 
@@ -156,6 +155,8 @@ error_deleting = "Feler przi kasowaniy pliku."
 directory_not_empty = "Ten folder niy je pusty!"
 upload_not_supported = "Tyn przeglōndorz niy wspiyro ładowanio z JavaScriptym."
 private_folder = "Zaloguj się, aby dostać się do prywatnego folderu!"
+file_too_big = "przekracza maksymalny dozwolony rozmiar pliku."
+not_enough_space = "Masz za mało miejsca aby wrzucić ten plik. Usuń kilka plików i spróbuj ponownie."
 
 # Generic UI strings
 

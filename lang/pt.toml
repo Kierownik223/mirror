@@ -81,7 +81,6 @@ select_folder = "Selecionar pasta"
 browse = "Pesquisar"
 select_files = "Selecione arquivos."
 uploading = "Enviando"
-file_too_big = "excede o tamanho máximo permitido para upload."
 
 # Account
 
@@ -156,6 +155,8 @@ error_deleting = "Ocorreu um erro ao tentar deletar o arquivo:"
 directory_not_empty = "Este diretório não está vazio!"
 upload_not_supported = "O carregamento por JavaScript não é suportado por este navegador."
 private_folder = "Faça login para acessar a pasta privada!"
+file_too_big = "excede o tamanho máximo permitido para upload."
+not_enough_space = "Você não tem espaço suficiente para enviar este arquivo. Exclua alguns arquivos e tente enviar novamente."
 
 # Generic UI strings
 

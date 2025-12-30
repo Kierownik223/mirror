@@ -81,7 +81,6 @@ select_folder = "Ordner auswählen"
 browse = "Durchsuchen"
 select_files = "Dateien auswählen."
 uploading = "Hochladen"
-file_too_big = "überschreitet die maximal zulässige Upload-Größe."
 
 # Account
 
@@ -156,6 +155,8 @@ error_deleting = "Fehler beim Löschen der Datei aufgetreten."
 directory_not_empty = "Dieses Verzeichnis ist nicht leer!"
 upload_not_supported = "Der JavaScript-Uploader wird von diesem Browser nicht unterstützt."
 private_folder = "Melden Sie sich an, um auf den privaten Ordner zuzugreifen!"
+file_too_big = "überschreitet die maximal zulässige Upload-Größe."
+not_enough_space = "Sie haben nicht genügend Speicherplatz, um diese Datei hochzuladen. Bitte löschen Sie einige Dateien und versuchen Sie erneut, die Datei hochzuladen."
 
 # Generic UI strings
 

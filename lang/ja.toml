@@ -81,7 +81,6 @@ select_folder = "フォルダーを選択"
 browse = "参照"
 select_files = "アップロードするファイルを選択してください。"
 uploading = "アップロード中"
-file_too_big = "最大許容アップロードサイズを超えています。"
 
 # Account
 
@@ -156,6 +155,8 @@ error_deleting = "ファイルの削除中にエラーが発生しました。"
 directory_not_empty = "このディレクトリは空ではありません！"
 upload_not_supported = "このブラウザではJavaScriptアップローダーがサポートされていません。"
 private_folder = "プライベートフォルダにアクセスするにはログインしてください！"
+file_too_big = "最大許容アップロードサイズを超えています。"
+not_enough_space = "このファイルをアップロードするには十分な空き容量がありません。いくつかのファイルを削除してから、再度アップロードをお試しください。"
 
 # Generic UI strings
 

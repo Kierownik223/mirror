@@ -81,7 +81,6 @@ select_folder = "Vyberte složku"
 browse = "Procházet"
 select_files = "Vyberte soubory."
 uploading = "Nahrávání"
-file_too_big = "překračuje maximální povolenou velikost nahrávaného souboru."
 
 # Account
 
@@ -156,6 +155,8 @@ error_deleting = "Při mazání souboru došlo k chybě."
 directory_not_empty = "Tento adresář není prázdný!"
 upload_not_supported = "JavaScript nahrávání není v tomto prohlížeči podporováno."
 private_folder = "Přihlaste se pro přístup k soukromé složce!"
+file_too_big = "překračuje maximální povolenou velikost nahrávaného souboru."
+not_enough_space = "Nemáte dostatek místa pro nahrání tohoto souboru. Odstraňte některé soubory a zkuste nahrát znovu."
 
 # Generic UI strings
 

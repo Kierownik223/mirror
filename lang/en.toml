@@ -81,7 +81,6 @@ select_folder = "Select a folder"
 browse = "Browse"
 select_files = "Select files"
 uploading = "Uploading"
-file_too_big = "exceeds the maximum allowed upload size."
 
 # Account
 
@@ -156,6 +155,8 @@ error_deleting = "An error occurred while deleting the file."
 directory_not_empty = "This directory is not empty!"
 upload_not_supported = "The JavaScript uploader is not supported by this browser."
 private_folder = "Log in to access private folder!"
+file_too_big = "exceeds the maximum allowed upload size."
+not_enough_space = "You don't have enough space to upload this file. Please delete some files and try to upload again."
 
 # Generic UI strings
 

@@ -81,7 +81,6 @@ select_folder = "Wybierz katalog"
 browse = "Przeglądaj"
 select_files = "Wybierz pliki"
 uploading = "Wrzucanie"
-file_too_big = "przekracza maksymalny dozwolony rozmiar pliku."
 
 # Account
 
@@ -156,6 +155,8 @@ error_deleting = "Podczas usuwania pliku wystąpił błąd."
 directory_not_empty = "Ten katalog nie jest pusty!"
 upload_not_supported = "Wrzucarka JavaScript nie jest wspierana przez tę przeglądarkę."
 private_folder = "Zaloguj się, aby uzyskać dostęp do prywatnego folderu!"
+file_too_big = "przekracza maksymalny dozwolony rozmiar pliku."
+not_enough_space = "Masz za mało miejsca aby wrzucić ten plik. Usuń kilka plików i spróbuj ponownie."
 
 # Generic UI strings
 

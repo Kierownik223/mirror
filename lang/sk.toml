@@ -81,7 +81,6 @@ select_folder = "Vybrať priečinok"
 browse = "Prehliadať"
 select_files = "Vyberte súbory."
 uploading = "Nahráva sa"
-file_too_big = "prekračuje maximálnu povolenú veľkosť nahratia."
 
 # Account
 
@@ -156,6 +155,8 @@ error_deleting = "Pri mazaní súboru došlo k chybe."
 directory_not_empty = "Tento priečinok nie je prázdny!"
 upload_not_supported = "Tento prehliadač nepodporuje nahrávanie cez JavaScript."
 private_folder = "Prihláste sa na prístup do súkromnej složky!"
+file_too_big = "prekračuje maximálnu povolenú veľkosť nahratia."
+not_enough_space = "Nemáte dostatok miesta na nahratie tohto súboru. Odstráňte niektoré súbory a skúste nahrať znovu."
 
 # Generic UI strings
 
