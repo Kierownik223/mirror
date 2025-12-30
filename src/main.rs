@@ -104,9 +104,9 @@ struct Sysinfo {
 type FileSizes = Arc<RwLock<Vec<FileEntry>>>;
 
 #[derive(Debug, Serialize, Clone)]
-struct FileEntry {
-    size: u64,
-    file: String,
+pub struct FileEntry {
+    pub size: u64,
+    pub file: String,
 }
 
 #[get("/poster/<file..>")]
@@ -772,14 +772,25 @@ async fn index(
                 .await
                 .map_err(map_io_error_to_status)?;
 
-            let folder_usage = sizes.read().await
+            let folder_usage = sizes
+                .read()
+                .await
                 .iter()
                 .find(|entry| {
-                    entry.file.strip_suffix("/").unwrap_or_default().to_string() == path.display().to_string().strip_suffix("/").unwrap_or_default().to_string()
+                    entry.file.strip_suffix("/").unwrap_or_default().to_string()
+                        == path
+                            .display()
+                            .to_string()
+                            .strip_suffix("/")
+                            .unwrap_or_default()
+                            .to_string()
                 })
                 .map(|entry| entry.size)
                 .unwrap_or(0);
-            let folder_quota = CONFIG.private_folder_quotas.get(&jwt.claims.perms.to_string()).unwrap_or(&1_u64);
+            let folder_quota = CONFIG
+                .private_folder_quotas
+                .get(&jwt.claims.perms.to_string())
+                .unwrap_or(&1_u64);
 
             dirs.sort();
             files.sort();
@@ -1372,12 +1383,18 @@ async fn upload(
         format!("files/{}", user_path)
     };
 
-    let folder_quota = *(CONFIG.private_folder_quotas.get(&token.claims.perms.to_string()).unwrap_or(&1_u64));
+    let folder_quota = *(CONFIG
+        .private_folder_quotas
+        .get(&token.claims.perms.to_string())
+        .unwrap_or(&1_u64));
 
-    let folder_usage = sizes.read().await
+    let folder_usage = sizes
+        .read()
+        .await
         .iter()
         .find(|entry| {
-            entry.file.strip_suffix("/").unwrap_or_default().to_string() == format!("files/private/{}", &username)
+            entry.file.strip_suffix("/").unwrap_or_default().to_string()
+                == format!("files/private/{}", &username)
         })
         .map(|entry| entry.size)
         .unwrap_or(0);
@@ -1467,6 +1484,11 @@ async fn upload(
         }
 
         let strings = translations.get_translation(&lang.0);
+
+        {
+            let mut state_lock = sizes.write().await;
+            *state_lock = refresh_file_sizes().await;
+        }
 
         return Ok(IndexResponse::Template(Template::render(
             if *useplain.0 {
@@ -1750,45 +1772,49 @@ fn forbidden(req: &Request) -> Redirect {
 
 async fn calculate_sizes(state: FileSizes) {
     loop {
-        let mut file_sizes = Vec::new();
-        let mut dir_sizes: HashMap<String, u64> = HashMap::new();
-
-        for entry in WalkDir::new("files").into_iter().filter_map(Result::ok) {
-            let path = entry.path().to_path_buf();
-            if let Ok(metadata) = fs::metadata(&path) {
-                let size = metadata.len();
-                let path_str = path.display().to_string();
-
-                if metadata.is_file() {
-                    file_sizes.push(FileEntry {
-                        size,
-                        file: path_str,
-                    });
-
-                    let mut current = path.as_path();
-                    while let Some(parent) = current.parent() {
-                        let parent_str = parent.display().to_string();
-                        *dir_sizes.entry(parent_str).or_insert(0) += size;
-                        current = parent;
-                    }
-                }
-            }
-        }
-
-        let mut all_entries = file_sizes;
-
-        all_entries.extend(dir_sizes.into_iter().map(|(dir, size)| FileEntry {
-            size,
-            file: format!("{}/", dir),
-        }));
-
         {
             let mut state_lock = state.write().await;
-            *state_lock = all_entries;
+            *state_lock = refresh_file_sizes().await;
         }
 
         sleep(tokio::time::Duration::from_secs(60)).await;
     }
+}
+
+pub async fn refresh_file_sizes() -> Vec<FileEntry> {
+    let mut file_sizes = Vec::new();
+    let mut dir_sizes: HashMap<String, u64> = HashMap::new();
+
+    for entry in WalkDir::new("files").into_iter().filter_map(Result::ok) {
+        let path = entry.path().to_path_buf();
+        if let Ok(metadata) = fs::metadata(&path) {
+            let size = metadata.len();
+            let path_str = path.display().to_string();
+
+            if metadata.is_file() {
+                file_sizes.push(FileEntry {
+                    size,
+                    file: path_str,
+                });
+
+                let mut current = path.as_path();
+                while let Some(parent) = current.parent() {
+                    let parent_str = parent.display().to_string();
+                    *dir_sizes.entry(parent_str).or_insert(0) += size;
+                    current = parent;
+                }
+            }
+        }
+    }
+
+    let mut all_entries: Vec<FileEntry> = file_sizes;
+
+    all_entries.extend(dir_sizes.into_iter().map(|(dir, size)| FileEntry {
+        size,
+        file: format!("{}/", dir),
+    }));
+
+    all_entries
 }
 
 #[launch]

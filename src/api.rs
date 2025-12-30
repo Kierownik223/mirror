@@ -24,7 +24,7 @@ use crate::{
     config::CONFIG,
     db::{get_downloads, FileDb},
     jwt::JWT,
-    read_files,
+    read_files, refresh_file_sizes,
     responders::{ApiResponse, ApiResult},
     utils::{
         add_path_to_zip, format_size, get_extension_from_filename, get_extension_from_path,
@@ -365,7 +365,7 @@ async fn rename(
 }
 
 #[delete("/<file..>")]
-async fn delete<'a>(file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
+async fn delete<'a>(file: PathBuf, token: Result<JWT, Status>, sizes: &State<FileSizes>,) -> ApiResult {
     let token = token?;
 
     let username = token.claims.sub;
@@ -403,7 +403,13 @@ async fn delete<'a>(file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
     }
 
     return match remove_file(path) {
-        Ok(_) => Err(Status::NoContent),
+        Ok(_) => {
+            {
+                let mut state_lock = sizes.write().await;
+                *state_lock = refresh_file_sizes().await;
+            }
+            Err(Status::NoContent)
+        }
         Err(e) => Ok(ApiResponse::MessageStatus((
             Status::InternalServerError,
             Json(ApiInfoResponse {
@@ -528,12 +534,18 @@ async fn upload(
         format!("files/{}", user_path)
     };
 
-    let folder_quota = *(CONFIG.private_folder_quotas.get(&token.claims.perms.to_string()).unwrap_or(&1_u64));
+    let folder_quota = *(CONFIG
+        .private_folder_quotas
+        .get(&token.claims.perms.to_string())
+        .unwrap_or(&1_u64));
 
-    let folder_usage = sizes.read().await
+    let folder_usage = sizes
+        .read()
+        .await
         .iter()
         .find(|entry| {
-            entry.file.strip_suffix("/").unwrap_or_default().to_string() == format!("files/private/{}", &username)
+            entry.file.strip_suffix("/").unwrap_or_default().to_string()
+                == format!("files/private/{}", &username)
         })
         .map(|entry| entry.size)
         .unwrap_or(0);
@@ -576,6 +588,11 @@ async fn upload(
                     icon = "default";
                 }
 
+                {
+                    let mut state_lock = sizes.write().await;
+                    *state_lock = refresh_file_sizes().await;
+                }
+
                 uploaded_files.push(UploadFile {
                     name: file_name.to_string(),
                     url: Some(format!("http://{}/{}/{}", host.0, user_path, file_name)),
@@ -596,31 +613,35 @@ async fn upload(
 }
 
 #[get("/upload")]
-async fn upload_info(
-    token: Result<JWT, Status>,
-    sizes: &State<FileSizes>,
-) -> ApiResult {
+async fn upload_info(token: Result<JWT, Status>, sizes: &State<FileSizes>) -> ApiResult {
     let token = token?;
 
-    let upload_limit = *(CONFIG.max_upload_sizes.get(&token.claims.perms.to_string()).unwrap_or(&0_u64));
-    let private_folder_quota = *(CONFIG.private_folder_quotas.get(&token.claims.perms.to_string()).unwrap_or(&1_u64));
+    let upload_limit = *(CONFIG
+        .max_upload_sizes
+        .get(&token.claims.perms.to_string())
+        .unwrap_or(&0_u64));
+    let private_folder_quota = *(CONFIG
+        .private_folder_quotas
+        .get(&token.claims.perms.to_string())
+        .unwrap_or(&1_u64));
 
-    let private_folder_usage = sizes.read().await
+    let private_folder_usage = sizes
+        .read()
+        .await
         .iter()
         .find(|entry| {
-            entry.file.strip_suffix("/").unwrap_or_default().to_string() == format!("files/private/{}", &token.claims.sub)
+            entry.file.strip_suffix("/").unwrap_or_default().to_string()
+                == format!("files/private/{}", &token.claims.sub)
         })
         .map(|entry| entry.size)
         .unwrap_or(0);
 
-    Ok(ApiResponse::UploadLimits(Json(
-        UploadLimits {
-            perms: token.claims.perms,
-            upload_limit,
-            private_folder_quota,
-            private_folder_usage
-        }
-    )))
+    Ok(ApiResponse::UploadLimits(Json(UploadLimits {
+        perms: token.claims.perms,
+        upload_limit,
+        private_folder_quota,
+        private_folder_usage,
+    })))
 }
 
 #[post("/upload_chunked?<path>", data = "<data>")]
@@ -698,12 +719,18 @@ async fn upload_chunked(
         return Err(Status::PayloadTooLarge);
     }
 
-    let folder_quota = *(CONFIG.private_folder_quotas.get(&token.claims.perms.to_string()).unwrap_or(&1_u64));
+    let folder_quota = *(CONFIG
+        .private_folder_quotas
+        .get(&token.claims.perms.to_string())
+        .unwrap_or(&1_u64));
 
-    let folder_usage = sizes.read().await
+    let folder_usage = sizes
+        .read()
+        .await
         .iter()
         .find(|entry| {
-            entry.file.strip_suffix("/").unwrap_or_default().to_string() == format!("files/private/{}", &username)
+            entry.file.strip_suffix("/").unwrap_or_default().to_string()
+                == format!("files/private/{}", &username)
         })
         .map(|entry| entry.size)
         .unwrap_or(0);
@@ -765,6 +792,11 @@ async fn upload_chunked(
     } else {
         "default".into()
     };
+
+    {
+        let mut state_lock = sizes.write().await;
+        *state_lock = refresh_file_sizes().await;
+    }
 
     Ok(ApiResponse::UploadFiles(Json(vec![UploadFile {
         name: file_name.clone(),
