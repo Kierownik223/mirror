@@ -1,7 +1,6 @@
 use audiotags::{MimeType, Tag};
 use db::{get_user, Db};
 use rocket::{
-    data::ToByteUnit,
     http::{ContentType, Cookie, CookieJar, SameSite, Status},
     response::{content::RawHtml, Redirect},
     time::{Duration, OffsetDateTime},
@@ -1315,10 +1314,15 @@ async fn upload(
     let username = token.claims.sub;
     let perms = token.claims.perms;
 
+    let max_size = CONFIG
+        .max_upload_sizes
+        .get(&token.claims.perms.to_string())
+        .unwrap_or(&(104857600 as u64));
+
     let options = MultipartFormDataOptions::with_multipart_form_data_fields(vec![
         MultipartFormDataField::file("files")
             .repetition(Repetition::infinite())
-            .size_limit(u64::from(100.megabytes())),
+            .size_limit(*max_size),
         MultipartFormDataField::text("path"),
     ]);
 

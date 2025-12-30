@@ -1,6 +1,7 @@
-use std::fs;
+use std::{collections::HashMap, fs};
 
 use once_cell::sync::Lazy;
+use rocket::data::ToByteUnit;
 use serde::{Deserialize, Serialize};
 
 pub static CONFIG: Lazy<Config> = Lazy::new(Config::load);
@@ -24,12 +25,13 @@ pub struct Config {
     pub jwt_secret: String,
     pub linkshortener: bool,
     pub linkshortener_url: String,
+    pub max_upload_sizes: HashMap<String, u64>,
 }
 
 impl Config {
     pub fn load() -> Self {
-        let config_str = fs::read_to_string("config.toml").unwrap_or_default();
-        toml::from_str(&config_str).unwrap_or_default()
+        let config_str = fs::read_to_string("config.toml").unwrap();
+        toml::from_str(&config_str).unwrap()
     }
 }
 
@@ -73,6 +75,11 @@ impl Default for Config {
             jwt_secret: String::new(),
             linkshortener: true,
             linkshortener_url: "https://short.marmak.net.pl/api/url".into(),
+            max_upload_sizes: HashMap::from([
+                ("0".into(), 5.gigabytes().as_u64()),
+                ("1".into(), 500.megabytes().as_u64()),
+                ("2".into(), 5.gigabytes().as_u64()),
+            ]),
         }
     }
 }

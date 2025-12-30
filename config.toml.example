@@ -32,3 +32,8 @@ jwt_secret = "secure-secret-key-thats-definitely-not-it"
 linkshortener = true
 # LinkShortener API URL
 linkshortener_url = "https://short.marmak.net.pl/api/url"
+# Maximum file sizes for a singular upload
+[max_upload_sizes]
+"0" = 5000000000 # Administrators (5GB)
+"1" = 500000000 # Regular users (500MB)
+"2" = 1000000000 # "Extra Storage" users (1GB)

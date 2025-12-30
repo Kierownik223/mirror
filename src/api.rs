@@ -470,10 +470,15 @@ async fn upload(
     let username = token.claims.sub;
     let perms = token.claims.perms;
 
+    let max_size = CONFIG
+        .max_upload_sizes
+        .get(&token.claims.perms.to_string())
+        .unwrap_or(&(104857600 as u64));
+
     let options = MultipartFormDataOptions::with_multipart_form_data_fields(vec![
         MultipartFormDataField::file("files")
             .repetition(Repetition::infinite())
-            .size_limit(u64::from(1.gigabytes())),
+            .size_limit(*max_size),
         MultipartFormDataField::text("path"),
     ]);
 
@@ -626,6 +631,15 @@ async fn upload_chunked(
         .parse()
         .map_err(|_| Status::BadRequest)?;
 
+    let max_size = CONFIG
+        .max_upload_sizes
+        .get(&token.claims.perms.to_string())
+        .unwrap_or(&(104857600 as u64));
+
+    if (total_chunks as u64) * 94371840 > *max_size {
+        return Err(Status::PayloadTooLarge);
+    }
+
     let chunk_dir = format!(".chunks/{}/{}", username, file_id);
     std::fs::create_dir_all(&chunk_dir).map_err(map_io_error_to_status)?;
 
@@ -649,11 +663,23 @@ async fn upload_chunked(
 
     let final_path = format!("{}/{}", base_path, file_name);
     let mut final_file = std::fs::File::create(&final_path).map_err(map_io_error_to_status)?;
+    let mut final_size: u64 = 0;
 
     for i in 0..total_chunks {
         let part_path = format!("{}/{:05}.part", chunk_dir, i);
         let mut part = std::fs::File::open(&part_path).map_err(map_io_error_to_status)?;
-        std::io::copy(&mut part, &mut final_file).map_err(map_io_error_to_status)?;
+
+        let bytes_copied =
+            std::io::copy(&mut part, &mut final_file).map_err(map_io_error_to_status)?;
+
+        final_size += bytes_copied;
+
+        if final_size > *max_size {
+            drop(final_file);
+            let _ = std::fs::remove_file(&final_path);
+            let _ = std::fs::remove_dir_all(&chunk_dir);
+            return Err(Status::PayloadTooLarge);
+        }
     }
 
     std::fs::remove_dir_all(&chunk_dir).map_err(map_io_error_to_status)?;
