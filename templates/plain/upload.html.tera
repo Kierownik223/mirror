@@ -36,7 +36,9 @@
     <input type="hidden" id="path" name="path" value="/private/">
     {% endif %}
 
-    {{ strings.max_size }}<br><br>
+    {% set max_size_readable = max_size | format_size(use_si=settings.use_si) %}
+
+    {{ strings.max_size | replace(from="100MB", to=max_size_readable) }}<br><br>
 
     <center>
         <input type="submit" value="{{ strings.upload }}">

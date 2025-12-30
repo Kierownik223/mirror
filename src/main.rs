@@ -1278,6 +1278,7 @@ fn uploader(
             admin: perms == 0,
             path: path.unwrap_or_default(),
             uploadedfiles: vec![MirrorFile { name: "".to_string(), ext: "".to_string(), icon: "default".to_string(), size: 0, downloads: None }],
+            max_size: CONFIG.max_upload_sizes.get(&token.claims.perms.to_string()).unwrap_or(&(104857600 as u64)),
             settings,
         },
     )));
@@ -1454,6 +1455,7 @@ async fn upload(
                 admin: perms == 0,
                 path: path.unwrap_or_default(),
                 uploadedfiles: uploaded_files,
+                max_size,
                 settings,
             },
         )));
