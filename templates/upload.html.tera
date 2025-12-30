@@ -53,9 +53,8 @@
     <img class="icon" src="/static/images/icons/{% if settings.hires %}hires/{% endif %}md.png">{{ strings.max_size | replace(from="100MB", to=max_size_readable) }}<br><br>
 
     <center>
-        <button type="submit"><span><img src="/static/images/icons/{% if settings.hires %}hires/{% endif %}favicon.png" class="icon">{{ strings.upload }}</span></button>
-
-        <button type="button" onclick="uploadViaAPI()"><span><img src="/static/images/icons/{% if settings.hires %}hires/{% endif %}favicon.png" class="icon">{{ strings.upload }} (JavaScript)</span></button>
+        <button type="button" onclick="uploadViaAPI()"><span><img src="/static/images/icons/{% if settings.hires %}hires/{% endif %}favicon.png" class="icon">{{ strings.upload }}</span></button>
+        <button type="submit"><span><img src="/static/images/icons/{% if settings.hires %}hires/{% endif %}favicon.png" class="icon">{{ strings.upload }} (&lt;100MB)</span></button>
     </center>
 </form>
 {% endblock content %}
