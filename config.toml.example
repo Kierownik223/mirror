@@ -37,3 +37,8 @@ linkshortener_url = "https://short.marmak.net.pl/api/url"
 "0" = 5000000000 # Administrators (5GB)
 "1" = 500000000 # Regular users (500MB)
 "2" = 1000000000 # "Extra Storage" users (1GB)
+# Private folder quotas (don't allow storing more than this)
+[private_folder_quotas]
+"0" = 0 # Administrators (Unlimited)
+"1" = 2000000000 # Regular users (2GB)
+"2" = 50000000000 # "Extra Storage" users (50GB)

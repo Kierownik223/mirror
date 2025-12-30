@@ -464,6 +464,7 @@ async fn upload(
     host: Host<'_>,
     path: Option<String>,
     token: Result<JWT, Status>,
+    sizes: &State<FileSizes>,
 ) -> ApiResult {
     let token = token?;
 
@@ -519,6 +520,20 @@ async fn upload(
         format!("files/{}", user_path)
     };
 
+    let folder_quota = *(CONFIG.private_folder_quotas.get(&token.claims.perms.to_string()).unwrap_or(&1_u64));
+
+    let folder_usage = sizes.read().await
+        .iter()
+        .find(|entry| {
+            entry.file.strip_suffix("/").unwrap_or_default().to_string() == format!("files/private/{}", &username)
+        })
+        .map(|entry| entry.size)
+        .unwrap_or(0);
+
+    if folder_quota != 0 && folder_usage >= folder_quota {
+        return Err(Status::InsufficientStorage);
+    }
+
     let mut uploaded_files: Vec<UploadFile> = Vec::new();
 
     if let Some(file_fields) = form_data.files.get("files") {
@@ -533,6 +548,12 @@ async fn upload(
                     std::fs::File::create(&upload_path).map_err(map_io_error_to_status)?;
                 let mut temp_file =
                     std::fs::File::open(&file_field.path).map_err(map_io_error_to_status)?;
+
+                let size = temp_file.metadata().map_err(map_io_error_to_status)?.len();
+
+                if folder_quota != 0 && folder_usage + size >= folder_quota {
+                    return Err(Status::InsufficientStorage);
+                }
 
                 let mut buffer = Vec::new();
                 let _ = temp_file.read_to_end(&mut buffer);
@@ -573,6 +594,7 @@ async fn upload_chunked(
     data: Data<'_>,
     host: Host<'_>,
     token: Result<JWT, Status>,
+    sizes: &State<FileSizes>,
 ) -> ApiResult {
     let token = token?;
     let username = token.claims.sub;
@@ -638,6 +660,20 @@ async fn upload_chunked(
 
     if (total_chunks as u64) * 94371840 > *max_size {
         return Err(Status::PayloadTooLarge);
+    }
+
+    let folder_quota = *(CONFIG.private_folder_quotas.get(&token.claims.perms.to_string()).unwrap_or(&1_u64));
+
+    let folder_usage = sizes.read().await
+        .iter()
+        .find(|entry| {
+            entry.file.strip_suffix("/").unwrap_or_default().to_string() == format!("files/private/{}", &username)
+        })
+        .map(|entry| entry.size)
+        .unwrap_or(0);
+
+    if folder_quota != 0 && folder_usage + ((total_chunks as u64) * 94371840) >= folder_quota {
+        return Err(Status::InsufficientStorage);
     }
 
     let chunk_dir = format!(".chunks/{}/{}", username, file_id);

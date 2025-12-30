@@ -772,6 +772,15 @@ async fn index(
                 .await
                 .map_err(map_io_error_to_status)?;
 
+            let folder_usage = sizes.read().await
+                .iter()
+                .find(|entry| {
+                    entry.file.strip_suffix("/").unwrap_or_default().to_string() == path.display().to_string().strip_suffix("/").unwrap_or_default().to_string()
+                })
+                .map(|entry| entry.size)
+                .unwrap_or(0);
+            let folder_quota = CONFIG.private_folder_quotas.get(&jwt.claims.perms.to_string()).unwrap_or(&1_u64);
+
             dirs.sort();
             files.sort();
 
@@ -828,6 +837,8 @@ async fn index(
                     markdown,
                     private: is_private,
                     settings,
+                    folder_quota,
+                    folder_usage,
                 },
             )))
         }
@@ -1296,6 +1307,7 @@ async fn upload(
     token: Result<JWT, Status>,
     path: Option<&str>,
     settings: CookieSettings<'_>,
+    sizes: &State<FileSizes>,
 ) -> Result<IndexResponse, Status> {
     let token = token?;
 
@@ -1360,6 +1372,20 @@ async fn upload(
         format!("files/{}", user_path)
     };
 
+    let folder_quota = *(CONFIG.private_folder_quotas.get(&token.claims.perms.to_string()).unwrap_or(&1_u64));
+
+    let folder_usage = sizes.read().await
+        .iter()
+        .find(|entry| {
+            entry.file.strip_suffix("/").unwrap_or_default().to_string() == format!("files/private/{}", &username)
+        })
+        .map(|entry| entry.size)
+        .unwrap_or(0);
+
+    if folder_quota != 0 && folder_usage >= folder_quota {
+        return Err(Status::InsufficientStorage);
+    }
+
     let mut uploaded_files: Vec<MirrorFile> = Vec::new();
 
     if let Some(file_fields) = form_data.files.get("files") {
@@ -1373,6 +1399,12 @@ async fn upload(
                 match std::fs::File::create(&upload_path) {
                     Ok(mut file) => {
                         if let Ok(mut temp_file) = std::fs::File::open(&file_field.path) {
+                            let size = temp_file.metadata().map_err(map_io_error_to_status)?.len();
+
+                            if folder_quota != 0 && folder_usage + size >= folder_quota {
+                                return Err(Status::InsufficientStorage);
+                            }
+
                             let mut buffer = Vec::new();
                             let _ = temp_file.read_to_end(&mut buffer);
 

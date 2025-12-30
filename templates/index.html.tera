@@ -1,6 +1,14 @@
 {% extends "base" %}
 
 {% block content %}
+{% if folder_quota %}
+{% if folder_quota != 0 %}
+<div>
+    <label for="usage">{{ strings.usage }}: {{ folder_usage | format_size(use_si=settings.use_si) }}/{{ folder_quota | format_size(use_si=settings.use_si) }}</label>
+    <progress style="width:100%;box-sizing:border-box;" class="disk_usage" max="{{ folder_quota }}" value="{{ folder_usage }}"></progress>
+</div>
+{% endif %}
+{% endif %}
 <div id="uploadResults"></div>
 <div class="breadcrumb">
     <span><a href="/">MARMAK Mirror</a>/</span><span class="seg"> </span>

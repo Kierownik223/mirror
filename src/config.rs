@@ -26,6 +26,7 @@ pub struct Config {
     pub linkshortener: bool,
     pub linkshortener_url: String,
     pub max_upload_sizes: HashMap<String, u64>,
+    pub private_folder_quotas: HashMap<String, u64>,
 }
 
 impl Config {
@@ -79,6 +80,11 @@ impl Default for Config {
                 ("0".into(), 5.gigabytes().as_u64()),
                 ("1".into(), 500.megabytes().as_u64()),
                 ("2".into(), 5.gigabytes().as_u64()),
+            ]),
+            private_folder_quotas: HashMap::from([
+                ("0".into(), 0_u64),
+                ("1".into(), 2.gigabytes().as_u64()),
+                ("2".into(), 50.gigabytes().as_u64()),
             ]),
         }
     }
