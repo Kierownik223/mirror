@@ -207,6 +207,34 @@ function deleteFile(element, filePath, message, onComplete) {
                             row.outerHTML = "";
                         }
                     }
+                    
+                    var progressBar = document.getElementById('usage');
+
+                    if (progressBar) {
+                        try {
+                            xhr.open("GET", "/api/upload", true);
+                        } catch (e) {}
+
+                        xhr.onreadystatechange = function () {
+                            if (xhr.readyState == 4) {
+                                if (xhr.status == 200) {
+                                    try {
+                                        var response = JSON.parse(xhr.responseText);
+
+                                        progressBar.value = response.private_folder_usage;
+                                        progressBar.max = response.private_folder_quota;
+
+                                        document.getElementById('folder_usage').innerText = formatBytes(response.private_folder_usage);
+                                        document.getElementById('folder_quota').innerText = formatBytes(response.private_folder_quota);
+                                    } catch (e) {}
+                                }
+                            }
+                        };
+
+                        try {
+                            xhr.send();
+                        } catch (e) {}
+                    }
 
                     if (message) {
                         alert(decodeURIComponent(path) + " {{ strings.delete_success }}");

@@ -4,8 +4,8 @@
 {% if folder_quota %}
 {% if folder_quota != 0 %}
 <div>
-    <label for="usage">{{ strings.usage }}: {{ folder_usage | format_size(use_si=settings.use_si) }}/{{ folder_quota | format_size(use_si=settings.use_si) }}</label>
-    <progress style="width:100%;box-sizing:border-box;" class="disk_usage" max="{{ folder_quota }}" value="{{ folder_usage }}"></progress>
+    <label for="usage">{{ strings.usage }}: <label id="folder_usage">{{ folder_usage | format_size(use_si=settings.use_si) }}</label>/<label id="folder_quota">{{ folder_quota | format_size(use_si=settings.use_si) }}</label>
+    <progress style="width:100%;box-sizing:border-box;" class="disk_usage" max="{{ folder_quota }}" value="{{ folder_usage }}" name="usage" id="usage"></progress>
 </div>
 {% endif %}
 {% endif %}
