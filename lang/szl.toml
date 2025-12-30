@@ -81,6 +81,7 @@ select_folder = "Ôbier folder"
 browse = "Szukej"
 select_files = "Ôbier pliki."
 uploading = "Wgrywanie"
+file_too_big = "przekracza maksymalny dozwolony rozmiar pliku."
 
 # Account
 

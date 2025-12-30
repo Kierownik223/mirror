@@ -81,6 +81,7 @@ select_folder = "Vyberte složku"
 browse = "Procházet"
 select_files = "Vyberte soubory."
 uploading = "Nahrávání"
+file_too_big = "překračuje maximální povolenou velikost nahrávaného souboru."
 
 # Account
 

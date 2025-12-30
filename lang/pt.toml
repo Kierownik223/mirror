@@ -81,6 +81,7 @@ select_folder = "Selecionar pasta"
 browse = "Pesquisar"
 select_files = "Selecione arquivos."
 uploading = "Enviando"
+file_too_big = "excede o tamanho máximo permitido para upload."
 
 # Account
 

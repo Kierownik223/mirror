@@ -81,6 +81,7 @@ select_folder = "Vybrať priečinok"
 browse = "Prehliadať"
 select_files = "Vyberte súbory."
 uploading = "Nahráva sa"
+file_too_big = "prekračuje maximálnu povolenú veľkosť nahratia."
 
 # Account
 

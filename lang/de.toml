@@ -81,6 +81,7 @@ select_folder = "Ordner auswählen"
 browse = "Durchsuchen"
 select_files = "Dateien auswählen."
 uploading = "Hochladen"
+file_too_big = "überschreitet die maximal zulässige Upload-Größe."
 
 # Account
 

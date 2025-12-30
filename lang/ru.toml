@@ -81,6 +81,7 @@ select_folder = "Выбрать папку"
 browse = "Обзор"
 select_files = "Выберите файлы."
 uploading = "Загрузка"
+file_too_big = "превышает максимально допустимый размер загрузки."
 
 # Account
 

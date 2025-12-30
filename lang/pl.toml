@@ -81,6 +81,7 @@ select_folder = "Wybierz katalog"
 browse = "Przeglądaj"
 select_files = "Wybierz pliki"
 uploading = "Wrzucanie"
+file_too_big = "przekracza maksymalny dozwolony rozmiar pliku."
 
 # Account
 

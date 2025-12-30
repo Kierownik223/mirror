@@ -81,6 +81,7 @@ select_folder = "フォルダーを選択"
 browse = "参照"
 select_files = "アップロードするファイルを選択してください。"
 uploading = "アップロード中"
+file_too_big = "最大許容アップロードサイズを超えています。"
 
 # Account
 

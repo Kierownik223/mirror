@@ -81,6 +81,7 @@ select_folder = "Select a folder"
 browse = "Browse"
 select_files = "Select files"
 uploading = "Uploading"
+file_too_big = "exceeds the maximum allowed upload size."
 
 # Account
 
