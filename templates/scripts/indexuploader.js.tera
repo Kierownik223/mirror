@@ -87,6 +87,35 @@ function uploadViaAPI(files, path) {
                                 row.appendChild(tdDelete);
 
                                 tableBody.appendChild(row);
+                            }                                    
+                            
+                            var usageProgressBar = document.getElementById('usage');
+
+                            if (usageProgressBar) {
+                                var xhr = new XMLHttpRequest();
+                                try {
+                                    xhr.open("GET", "/api/upload", true);
+                                } catch (e) {}
+
+                                xhr.onreadystatechange = function () {
+                                    if (xhr.readyState == 4) {
+                                        if (xhr.status == 200) {
+                                            try {
+                                                var response = JSON.parse(xhr.responseText);
+
+                                                usageProgressBar.value = response.private_folder_usage;
+                                                usageProgressBar.max = response.private_folder_quota;
+
+                                                document.getElementById('folder_usage').innerText = formatBytes(response.private_folder_usage);
+                                                document.getElementById('folder_quota').innerText = formatBytes(response.private_folder_quota);
+                                            } catch (e) {}
+                                        }
+                                    }
+                                };
+
+                                try {
+                                    xhr.send();
+                                } catch (e) {}
                             }
                         }).catch(function(err) {
                             if (err === 413) {
@@ -94,11 +123,11 @@ function uploadViaAPI(files, path) {
                             } else if (err === 507) {
                                 alert("{{ strings.not_enough_space }}");
                             } else {
-                                label.textContent = file.name + " {{ strings.upload_error }}";
+                                alert(file.name + " {{ strings.upload_error }}");
                             }
                             progressBar.style.display = "none";
                             info.style.display = "none";
-                            label.textContent = file.name + " {{ strings.upload_error }}";
+                            label.style.display =  "none";
                         });
                     } else {
                         var formData = new FormData();
@@ -179,9 +208,9 @@ function uploadViaAPI(files, path) {
                                         tableBody.appendChild(row);
                                     }
 
-                                    var progressBar = document.getElementById('usage');
+                                    var usageProgressBar = document.getElementById('usage');
 
-                                    if (progressBar) {
+                                    if (usageProgressBar) {
                                         try {
                                             xhr.open("GET", "/api/upload", true);
                                         } catch (e) {}
@@ -192,8 +221,8 @@ function uploadViaAPI(files, path) {
                                                     try {
                                                         var response = JSON.parse(xhr.responseText);
 
-                                                        progressBar.value = response.private_folder_usage;
-                                                        progressBar.max = response.private_folder_quota;
+                                                        usageProgressBar.value = response.private_folder_usage;
+                                                        usageProgressBar.max = response.private_folder_quota;
 
                                                         document.getElementById('folder_usage').innerText = formatBytes(response.private_folder_usage);
                                                         document.getElementById('folder_quota').innerText = formatBytes(response.private_folder_quota);
