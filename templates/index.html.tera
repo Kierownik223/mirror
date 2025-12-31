@@ -24,6 +24,7 @@
     {% endif %}
     {% if admin and path != "/" or private %}
     <div class="actions">
+        <a href="javascript:;" onclick="createFolder()"><span><img class="icon" src="/static/images/icons/{% if settings.hires %}hires/{% endif %}folder.png">{{ strings.create_folder }}</span></a>
         <a href="/upload?path={{ path }}"><span><img class="icon" src="/static/images/icons/{% if settings.hires %}hires/{% endif %}favicon.png">{{ strings.uploader }}</span></a>
     </div>
     {% endif %}
