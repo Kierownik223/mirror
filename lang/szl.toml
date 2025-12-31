@@ -65,6 +65,8 @@ rename = "Przemiynić"
 rename_success = "Przemiyniynte z powodzeniem!"
 new_name = "Nowy mjano"
 error_renaming = "Pojawiou sie feler przi przemiynianiu"
+create_folder = "Nowy folder"
+folder_create_success = "Folder z plikami porzōndnie utworzony!"
 
 # Uploader
 
@@ -157,6 +159,7 @@ upload_not_supported = "Tyn przeglōndorz niy wspiyro ładowanio z JavaScriptym.
 private_folder = "Zaloguj się, aby dostać się do prywatnego folderu!"
 file_too_big = "przekracza maksymalny dozwolony rozmiar pliku."
 not_enough_space = "Masz za mało miejsca aby wrzucić ten plik. Usuń kilka plików i spróbuj ponownie."
+error_creating_folder = "Feler przi tworzeniu folderu."
 
 # Generic UI strings
 

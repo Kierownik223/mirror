@@ -65,6 +65,8 @@ rename = "Přejmenovat"
 rename_success = "Úspěšně přejmenováno!"
 new_name = "Nový název"
 error_renaming = "Při přejmenování došlo k chybě"
+create_folder = "Vytvořit složku"
+folder_create_success = "Složka byla úspěšně vytvořena!"
 
 # Uploader
 
@@ -157,6 +159,7 @@ upload_not_supported = "JavaScript nahrávání není v tomto prohlížeči podp
 private_folder = "Přihlaste se pro přístup k soukromé složce!"
 file_too_big = "překračuje maximální povolenou velikost nahrávaného souboru."
 not_enough_space = "Nemáte dostatek místa pro nahrání tohoto souboru. Odstraňte některé soubory a zkuste nahrát znovu."
+error_creating_folder = "Při vytváření složky došlo k chybě."
 
 # Generic UI strings
 

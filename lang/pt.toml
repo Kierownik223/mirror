@@ -65,6 +65,8 @@ rename = "Renomear"
 rename_success = "Renomeado com sucesso!"
 new_name = "Novo nome"
 error_renaming = "Ocorreu um erro ao renomear"
+create_folder = "Criar pasta”
+folder_create_success = "Pasta criada com sucesso!”
 
 # Uploader
 
@@ -157,6 +159,7 @@ upload_not_supported = "O carregamento por JavaScript não é suportado por este
 private_folder = "Faça login para acessar a pasta privada!"
 file_too_big = "excede o tamanho máximo permitido para upload."
 not_enough_space = "Você não tem espaço suficiente para enviar este arquivo. Exclua alguns arquivos e tente enviar novamente."
+error_creating_folder = "Ocorreu um erro ao criar a pasta."
 
 # Generic UI strings
 

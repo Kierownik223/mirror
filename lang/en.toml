@@ -65,6 +65,8 @@ rename = "Rename"
 rename_success = "Renamed successfully!"
 new_name = "New name"
 error_renaming = "An error occured while renaming"
+create_folder = "New folder"
+folder_create_success = "Folder created successfully!"
 
 # Uploader
 
@@ -157,6 +159,7 @@ upload_not_supported = "The JavaScript uploader is not supported by this browser
 private_folder = "Log in to access private folder!"
 file_too_big = "exceeds the maximum allowed upload size."
 not_enough_space = "You don't have enough space to upload this file. Please delete some files and try to upload again."
+error_creating_folder = "An error occurred while creating the folder."
 
 # Generic UI strings
 

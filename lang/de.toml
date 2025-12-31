@@ -65,6 +65,8 @@ rename = "Umbenennen"
 rename_success = "Erfolgreich umbenannt!"
 new_name = "Neuer Name"
 error_renaming = "Beim Umbenennen ist ein Fehler aufgetreten"
+create_folder = "Datein erstellen"
+folder_create_success = "Datein erfolgreich erstellt!"
 
 # Uploader
 
@@ -91,7 +93,7 @@ log_in_with_marmak = "Mit einem MARMAK-Konto anmelden&trade;"
 welcome = "Hallo"
 tip = "Tipp"
 settings_tip1 = "Wenn du deine aktuellen Einstellungen behalten möchtest, gehe zu"
-settings_tip2 = "und aktiviere „Einstellungen nicht überschreiben“."
+settings_tip2 = "und aktiviere "Einstellungen nicht überschreiben"."
 login_to_continue = "Melden Sie sich an, um fortzufahren zu"
 remember_me = "Merke mich für 30 Tage"
 
@@ -157,6 +159,7 @@ upload_not_supported = "Der JavaScript-Uploader wird von diesem Browser nicht un
 private_folder = "Melden Sie sich an, um auf den privaten Ordner zuzugreifen!"
 file_too_big = "überschreitet die maximal zulässige Upload-Größe."
 not_enough_space = "Sie haben nicht genügend Speicherplatz, um diese Datei hochzuladen. Bitte löschen Sie einige Dateien und versuchen Sie erneut, die Datei hochzuladen."
+error_creating_folder = "Beim Erstellen des Ordners ist ein Fehler aufgetreten."
 
 # Generic UI strings
 

@@ -65,6 +65,8 @@ rename = "Zmień nazwę"
 rename_success = "Nazwa zmieniona pomyślnie!"
 new_name = "Nowa nazwa"
 error_renaming = "Podczas zmieniania nazwy wystąpił błąd"
+create_folder = "Utwórz folder"
+folder_create_success = "Folder utworzony pomyślnie!"
 
 # Uploader
 
@@ -157,6 +159,7 @@ upload_not_supported = "Wrzucarka JavaScript nie jest wspierana przez tę przegl
 private_folder = "Zaloguj się, aby uzyskać dostęp do prywatnego folderu!"
 file_too_big = "przekracza maksymalny dozwolony rozmiar pliku."
 not_enough_space = "Masz za mało miejsca aby wrzucić ten plik. Usuń kilka plików i spróbuj ponownie."
+error_creating_folder = "Podczas tworzenia folderu wystąpił błąd."
 
 # Generic UI strings
 

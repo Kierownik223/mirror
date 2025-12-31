@@ -65,6 +65,8 @@ rename = "名前を変更"
 rename_success = "正常に名前が変更されました！"
 new_name = "新しい名前"
 error_renaming = "名前の変更中にエラーが発生しました"
+create_folder = "フォルダを作成"
+folder_create_success = "フォルダが正常に作成されました！"
 
 # Uploader
 
@@ -157,6 +159,7 @@ upload_not_supported = "このブラウザではJavaScriptアップローダー�
 private_folder = "プライベートフォルダにアクセスするにはログインしてください！"
 file_too_big = "最大許容アップロードサイズを超えています。"
 not_enough_space = "このファイルをアップロードするには十分な空き容量がありません。いくつかのファイルを削除してから、再度アップロードをお試しください。"
+error_creating_folder = "フォルダの作成中にエラーが発生しました。"
 
 # Generic UI strings
 

@@ -65,6 +65,8 @@ rename = "Premenovať"
 rename_success = "Úspešne premenované!"
 new_name = "Nový názov"
 error_renaming = "Pri premenovaní došlo k chybe"
+create_folder = "Vytvoriť priečinok"
+folder_create_success = "Priečinok bol úspešne vytvorený!"
 
 # Uploader
 
@@ -157,6 +159,7 @@ upload_not_supported = "Tento prehliadač nepodporuje nahrávanie cez JavaScript
 private_folder = "Prihláste sa na prístup do súkromnej složky!"
 file_too_big = "prekračuje maximálnu povolenú veľkosť nahratia."
 not_enough_space = "Nemáte dostatok miesta na nahratie tohto súboru. Odstráňte niektoré súbory a skúste nahrať znovu."
+error_creating_folder = "Pri vytváraní priečinka došlo k chybe."
 
 # Generic UI strings
 
