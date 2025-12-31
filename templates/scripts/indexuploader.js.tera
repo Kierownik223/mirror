@@ -80,17 +80,13 @@ function uploadViaAPI(files, path) {
                                 var renLink = document.createElement("a");
                                 renLink.style.cursor = "pointer";
                                 renLink.textContent = "{{ strings.rename }}";
-                                renLink.onclick = function () {
-                                    renameFile(renLink, result.name, true);
-                                };
+                                renLink.setAttribute("onclick", 'renameFile(this, "' + result.name + '")')
                                 tdDelete.appendChild(renLink);
                                 tdDelete.innerHTML += " ";
                                 var delLink = document.createElement("a");
                                 delLink.style.cursor = "pointer";
                                 delLink.textContent = "{{ strings.delete }}";
-                                delLink.onclick = function () {
-                                    deleteFile(this, result.name, true);
-                                };
+                                delLink.setAttribute("onclick", 'deleteFile(this, "' + result.name + '")')
                                 tdDelete.appendChild(delLink);
                                 row.appendChild(tdDelete);
 
@@ -207,17 +203,13 @@ function uploadViaAPI(files, path) {
                                         var renLink = document.createElement("a");
                                         renLink.style.cursor = "pointer";
                                         renLink.textContent = "{{ strings.rename }}";
-                                        renLink.onclick = function () {
-                                            renameFile(renLink, result.name, true);
-                                        };
+                                        renLink.setAttribute("onclick", 'renameFile(this, "' + result.name + '")')
                                         tdDelete.appendChild(renLink);
                                         tdDelete.innerHTML += " ";
                                         var delLink = document.createElement("a");
                                         delLink.style.cursor = "pointer";
                                         delLink.textContent = "{{ strings.delete }}";
-                                        delLink.onclick = function () {
-                                            deleteFile(this, result.name, true);
-                                        };
+                                        delLink.setAttribute("onclick", 'deleteFile(this, "' + result.name + '")')
                                         tdDelete.appendChild(delLink);
                                         row.appendChild(tdDelete);
 
