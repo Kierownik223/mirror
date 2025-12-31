@@ -355,6 +355,10 @@ async fn rename(
         icon = "default".into();
     }
 
+    if md.is_dir() {
+        icon = "folder".into()
+    }
+
     Ok(ApiResponse::File(Json(MirrorFile {
         name: get_name_from_path(&new_path),
         ext: get_extension_from_path(&new_path),
