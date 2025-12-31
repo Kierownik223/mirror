@@ -93,7 +93,7 @@ log_in_with_marmak = "Přihlásit se pomocí účtu MARMAK&trade;"
 welcome = "Ahoj"
 tip = "Tip"
 settings_tip1 = "Chcete-li zachovat aktuální nastavení, přejděte na"
-settings_tip2 = "a povolte \"Nepřepisovat nastavení\"."
+settings_tip2 = "a povolte „Nepřepisovat nastavení“."
 login_to_continue = "Přihlaste se, abyste mohli pokračovat na"
 remember_me = "Zapamatovat si mě na 30 dní"
 
