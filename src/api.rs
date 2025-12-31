@@ -442,9 +442,7 @@ async fn create_folder<'a>(
 
     if !path.exists() && !name_req.is_some() {
         return match create_dir(path) {
-            Ok(_) => {
-                Err(Status::Created)
-            }
+            Ok(_) => Err(Status::Created),
             Err(e) => Ok(ApiResponse::MessageStatus((
                 match e.kind() {
                     ErrorKind::NotFound => Status::NotFound,
@@ -459,9 +457,7 @@ async fn create_folder<'a>(
         };
     } else if let Some(name) = name_req {
         return match create_dir(path.join(&name.name)) {
-            Ok(_) => {
-                Err(Status::Created)
-            }
+            Ok(_) => Err(Status::Created),
             Err(e) => Ok(ApiResponse::MessageStatus((
                 match e.kind() {
                     ErrorKind::NotFound => Status::NotFound,
