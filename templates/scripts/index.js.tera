@@ -66,7 +66,6 @@ function renameFile(element, filePath) {
         pathname = window.location.pathname;
     }
     var path = pathname + encodeURIComponent(filePath);
-    var confirmMsg = "{{ strings.delete_confirmation }} " + decodeURIComponent(path) + "?";
 
     var newName = prompt("{{ strings.new_name }}:", filePath);
 
@@ -81,7 +80,7 @@ function renameFile(element, filePath) {
         try {
             xhr = new ActiveXObject("Microsoft.XMLHTTP");
         } catch (e) {
-            alert("{{ strings.error_deleting }}");
+            alert("{{ strings.error_renaming }}");
             return;
         }
     }
@@ -114,16 +113,30 @@ function renameFile(element, filePath) {
                             var link = td.querySelector("a");
 
                             if (link) {
-                                link.setAttribute("href", "../" + response.name);
+                                var isFolder = cells[3].innerText == "{{ strings.folder }}";
+                                if (isFolder) {
+                                    link.setAttribute("href", response.name + "/");
 
-                                link.innerHTML = "";
+                                    link.innerHTML = "";
 
-                                var img = document.createElement("img");
-                                img.src = "/static/images/icons/{% if hires %}hires/{% endif %}" + response.icon + ".png";
-                                img.className = "icon";
+                                    var img = document.createElement("img");
+                                    img.src = "/static/images/icons/{% if hires %}hires/{% endif %}folder.png";
+                                    img.className = "icon";
 
-                                link.appendChild(img);
-                                link.appendChild(document.createTextNode(response.name));
+                                    link.appendChild(img);
+                                    link.appendChild(document.createTextNode(response.name + "/"));
+                                } else {
+                                    link.setAttribute("href", response.name);
+
+                                    link.innerHTML = "";
+
+                                    var img = document.createElement("img");
+                                    img.src = "/static/images/icons/{% if hires %}hires/{% endif %}" + response.icon + ".png";
+                                    img.className = "icon";
+
+                                    link.appendChild(img);
+                                    link.appendChild(document.createTextNode(response.name));
+                                }
                             }
                         }
                     }
@@ -148,7 +161,7 @@ function renameFile(element, filePath) {
     try {
         xhr.send("{\"name\":\"" + newName + "\"}");
     } catch (e) {
-        alert("{{ strings.error_deleting }}");
+        alert("{{ strings.error_renaming }}");
         if (onComplete) onComplete();
     }
 }
@@ -239,7 +252,7 @@ function createFolder() {
                     var errorResponse = JSON.parse(xhr.responseText);
                     alert("{{ strings.error_occured }} " + errorResponse.message);
                 } catch (e) {
-                    alert("{{ strings.error_occured }}");
+                    alert("{{ strings.error_creating_folder }}");
                 }
             }
         }
@@ -248,7 +261,7 @@ function createFolder() {
     try {
         xhr.send("{\"name\":\"" + newName + "\"}");
     } catch (e) {
-        alert("{{ strings.error_deleting }}");
+        alert("{{ strings.error_creating_folder }}");
     }
 }
 
