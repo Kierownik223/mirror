@@ -1,6 +1,6 @@
 use std::{
-    fs::{self, remove_dir, remove_file},
-    io::{Cursor, Read, Write},
+    fs::{self, create_dir, remove_dir, remove_file},
+    io::{Cursor, ErrorKind, Read, Write},
     ops::Deref,
     path::{Path, PathBuf},
 };
@@ -77,7 +77,7 @@ pub struct UploadLimits {
 struct FileList(Vec<String>);
 
 #[derive(serde::Deserialize)]
-struct RenameRequest {
+struct NameRequest {
     name: String,
 }
 
@@ -328,7 +328,7 @@ async fn file(file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
 #[patch("/<file..>", data = "<rename_req>")]
 async fn rename(
     file: PathBuf,
-    rename_req: Json<RenameRequest>,
+    rename_req: Json<NameRequest>,
     token: Result<JWT, Status>,
 ) -> ApiResult {
     let token = token?;
@@ -421,6 +421,58 @@ async fn delete<'a>(
             }),
         ))),
     };
+}
+
+#[put("/<file..>", data = "<name_req>")]
+async fn create_folder<'a>(
+    file: PathBuf,
+    token: Result<JWT, Status>,
+    name_req: Option<Json<NameRequest>>,
+) -> ApiResult {
+    let token = token?;
+
+    let username = token.claims.sub;
+    let perms = token.claims.perms;
+
+    let path = get_real_path_with_perms(&file, username, perms)?.0;
+
+    if !path.exists() && !name_req.is_some() {
+        return match create_dir(path) {
+            Ok(_) => {
+                Err(Status::Created)
+            }
+            Err(e) => Ok(ApiResponse::MessageStatus((
+                match e.kind() {
+                    ErrorKind::NotFound => Status::NotFound,
+                    ErrorKind::PermissionDenied => Status::Forbidden,
+                    ErrorKind::StorageFull => Status::InsufficientStorage,
+                    _ => Status::InternalServerError,
+                },
+                Json(ApiInfoResponse {
+                    message: e.to_string(),
+                }),
+            ))),
+        };
+    } else if let Some(name) = name_req {
+        return match create_dir(path.join(&name.name)) {
+            Ok(_) => {
+                Err(Status::Created)
+            }
+            Err(e) => Ok(ApiResponse::MessageStatus((
+                match e.kind() {
+                    ErrorKind::NotFound => Status::NotFound,
+                    ErrorKind::PermissionDenied => Status::Forbidden,
+                    ErrorKind::StorageFull => Status::InsufficientStorage,
+                    _ => Status::InternalServerError,
+                },
+                Json(ApiInfoResponse {
+                    message: e.to_string(),
+                }),
+            ))),
+        };
+    } else {
+        Err(Status::BadRequest)
+    }
 }
 
 #[get("/sysinfo?<use_si>")]
@@ -885,6 +937,7 @@ pub fn build_api() -> AdHoc {
                     search,
                     upload_chunked,
                     upload_info,
+                    create_folder,
                 ],
             )
             .register("/api", catchers![default]);
