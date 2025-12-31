@@ -229,11 +229,19 @@ function createFolder() {
                         row.appendChild(tdType);
 
                         var tdDelete = document.createElement("td");
+                        var renLink = document.createElement("a");
+                        renLink.style.cursor = "pointer";
+                        renLink.textContent = "{{ strings.rename }}";
+                        renLink.onclick = function () {
+                            renameFile(renLink, newName, true);
+                        };
+                        tdDelete.appendChild(renLink);
+                        tdDelete.innerHTML += " ";
                         var delLink = document.createElement("a");
                         delLink.style.cursor = "pointer";
                         delLink.textContent = "{{ strings.delete }}";
                         delLink.onclick = function () {
-                            deleteFile(this, newName, true);
+                            deleteFile(delLink, newName, true);
                         };
                         tdDelete.appendChild(delLink);
                         row.appendChild(tdDelete);

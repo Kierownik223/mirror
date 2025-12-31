@@ -77,6 +77,14 @@ function uploadViaAPI(files, path) {
                                 row.appendChild(tdType);
 
                                 var tdDelete = document.createElement("td");
+                                var renLink = document.createElement("a");
+                                renLink.style.cursor = "pointer";
+                                renLink.textContent = "{{ strings.rename }}";
+                                renLink.onclick = function () {
+                                    renameFile(renLink, result.name, true);
+                                };
+                                tdDelete.appendChild(renLink);
+                                tdDelete.innerHTML += " ";
                                 var delLink = document.createElement("a");
                                 delLink.style.cursor = "pointer";
                                 delLink.textContent = "{{ strings.delete }}";
@@ -196,6 +204,14 @@ function uploadViaAPI(files, path) {
                                         row.appendChild(tdType);
 
                                         var tdDelete = document.createElement("td");
+                                        var renLink = document.createElement("a");
+                                        renLink.style.cursor = "pointer";
+                                        renLink.textContent = "{{ strings.rename }}";
+                                        renLink.onclick = function () {
+                                            renameFile(renLink, result.name, true);
+                                        };
+                                        tdDelete.appendChild(renLink);
+                                        tdDelete.innerHTML += " ";
                                         var delLink = document.createElement("a");
                                         delLink.style.cursor = "pointer";
                                         delLink.textContent = "{{ strings.delete }}";
