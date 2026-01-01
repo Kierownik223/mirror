@@ -1,5 +1,5 @@
 use std::{
-    fs::{self, create_dir, remove_dir, remove_file},
+    fs::{self, create_dir, remove_dir, remove_dir_all, remove_file},
     io::{Cursor, ErrorKind, Read, Write},
     ops::Deref,
     path::{Path, PathBuf},
@@ -368,11 +368,12 @@ async fn rename(
     })))
 }
 
-#[delete("/<file..>")]
+#[delete("/<file..>?<recurse>")]
 async fn delete<'a>(
     file: PathBuf,
     token: Result<JWT, Status>,
     sizes: &State<FileSizes>,
+    recurse: Option<bool>,
 ) -> ApiResult {
     let token = token?;
 
@@ -383,6 +384,26 @@ async fn delete<'a>(
 
     if !path.exists() {
         return Err(Status::NotFound);
+    }
+
+    if let Some(recurse) = recurse {
+        if recurse && path.display().to_string().starts_with(format!("files/private/").as_str()) {
+            return match remove_dir_all(path) {
+                Ok(_) => {
+                    {
+                        let mut state_lock = sizes.write().await;
+                        *state_lock = refresh_file_sizes().await;
+                    }
+                    Err(Status::NoContent)
+                }
+                Err(e) => Ok(ApiResponse::MessageStatus((
+                    Status::InternalServerError,
+                    Json(ApiInfoResponse {
+                        message: e.to_string(),
+                    }),
+                ))),
+            };
+        }
     }
 
     if path.is_dir() {
