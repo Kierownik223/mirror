@@ -27,6 +27,7 @@
     <img src="/static/images/icons/ui/{% if settings.hires %}hires/{% endif %}theme.png" class="icon">{{ strings.change_theme }}<br>
     <select name="theme">
         <option value="default"{% if settings.theme=="default" %} selected{% endif %}>{{ strings.theme_default }}</option>
+        <option value="defaultmobile"{% if settings.theme=="defaultmobile" %} selected{% endif %}>{{ strings.theme_default }} (Mobile)</option>
         <option value="darkblue"{% if settings.theme=="darkblue" %} selected{% endif %}>{{ strings.theme_darkblue }}</option>
         <option value="greenish"{% if settings.theme=="greenish" %} selected{% endif %}>{{ strings.theme_greenish }}</option>
         <option value="antique"{% if settings.theme=="antique" %} selected{% endif %}>{{ strings.theme_antique }}</option>
