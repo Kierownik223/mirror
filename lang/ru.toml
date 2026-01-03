@@ -78,6 +78,7 @@ upload_error = "Произошла ошибка при загрузке файл
 uploader_title = "Файловый загрузчик MARMAK"
 target_dir = "Целевая директория:"
 target_placeholder = "Оставьте пустым для /uploads/"
+target_placeholder_private = "Оставьте пустым для /private/"
 max_size = "Максимальный размер файла — 100MB."
 select_folder = "Выбрать папку"
 browse = "Обзор"
