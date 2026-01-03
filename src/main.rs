@@ -1642,6 +1642,23 @@ async fn search(
     }
 }
 
+#[get("/strings?<lang>")]
+#[cfg(test)]
+async fn strings(
+    lang: Option<&str>,
+    translations: &rocket::State<crate::TranslationStore>,
+) -> Result<rocket_dyn_templates::Template, Status> {
+    let lang = lang.unwrap_or("en");
+    let strings = translations.get_translation(&lang);
+
+    Ok(rocket_dyn_templates::Template::render(
+        "test/strings",
+        rocket_dyn_templates::context! {
+            strings
+        },
+    ))
+}
+
 #[catch(422)]
 async fn unprocessable_entry(_status: Status, req: &Request<'_>) -> Cached<(Status, Template)> {
     let translations = req.guard::<&State<TranslationStore>>().await.unwrap();
@@ -1815,6 +1832,21 @@ pub async fn refresh_file_sizes() -> Vec<FileEntry> {
     all_entries
 }
 
+#[cfg(test)]
+fn mount_extra_routes(rocket: rocket::Rocket<rocket::Build>) -> rocket::Rocket<rocket::Build> {
+    rocket
+        .mount("/test",
+        routes![
+            strings,
+        ]
+    )
+}
+
+#[cfg(not(test))]
+fn mount_extra_routes(rocket: rocket::Rocket<rocket::Build>) -> rocket::Rocket<rocket::Build> {
+    rocket
+}
+
 #[launch]
 #[tokio::main]
 async fn rocket() -> _ {
@@ -1848,7 +1880,7 @@ async fn rocket() -> _ {
                 upload,
                 scripts,
                 search,
-            ],
+            ]
         );
 
     if CONFIG.enable_login {
@@ -1870,6 +1902,8 @@ async fn rocket() -> _ {
     if CONFIG.enable_api {
         rocket = rocket.attach(api::build_api());
     }
+
+    rocket = mount_extra_routes(rocket);
 
     rocket
 }

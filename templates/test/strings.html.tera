@@ -1,0 +1,3 @@
+{% for key, value in strings %}
+<code>{{ key }}</code>: {{ value }} <br>
+{% endfor %}
