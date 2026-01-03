@@ -24,17 +24,13 @@
         <input type="file" name="files" id="file" multiple required>
     </center>
 
-    {% if admin %}
     <label for="path">
         {{ strings.target_dir }}:
     </label>
     <center>
-        <input type="text" id="path" name="path" placeholder="{{ strings.target_placeholder }}" value="{{ path }}">
+        <input type="text" id="path" name="path" placeholder="{% if admin %}{{ strings.target_placeholder }}{% else %}{{ strings.target_placeholder_private }}{% endif %}" value="{{ path }}">
     </center>
     <br>
-    {% else %}
-    <input type="hidden" id="path" name="path" value="/private/">
-    {% endif %}
 
     <center>
         <input type="submit" value="{{ strings.upload }} (&lt;100MB)">

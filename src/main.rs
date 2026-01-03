@@ -1134,7 +1134,7 @@ async fn iframe(
     token: Result<JWT, Status>,
     settings: CookieSettings<'_>,
 ) -> Result<IndexResponse, Status> {
-    let username = if let Ok(token) = token.as_ref() {
+    let (username, perms) = if let Ok(token) = token.as_ref() {
         if let Some(t) = &token.token {
             let mut jwt_cookie = Cookie::new("matoken", t.to_string());
             jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
@@ -1148,9 +1148,9 @@ async fn iframe(
             jar.add(local_jwt_cookie);
         }
 
-        &token.claims.sub
+        (&token.claims.sub, token.claims.perms)
     } else {
-        &"Nobody".into()
+        (&"Nobody".into(), 1)
     };
 
     let path = get_real_path(&file, username.to_string())?.0;
@@ -1159,14 +1159,17 @@ async fn iframe(
         return Err(Status::Unauthorized);
     }
 
-    let path = get_real_path(&file, username.to_string())?
-        .0
+    let path = path
         .display()
         .to_string();
 
     let mut dirs = read_dirs(&path).map_err(map_io_error_to_status)?;
 
     dirs.retain(|x| !CONFIG.hidden_files.contains(&x.name));
+
+    if perms != 0 && !path.starts_with("files/private/") {
+        dirs.retain(|f| f.name == "private");
+    }
 
     dirs.sort();
 

@@ -31,22 +31,18 @@
         <input type="file" name="files" id="file" class="text" multiple required>
     </center>
 
-    {% if admin %}
     <label for="path">
         <img class="icon" src="/static/images/icons/{% if settings.hires %}hires/{% endif %}folder.png">{{ strings.target_dir }}:
     </label>
     <center>
         <div class="textbox-container">
-            <input type="text" id="path" name="path" class="text" placeholder="{{ strings.target_placeholder }}" value="{{ path }}">
+            <input type="text" id="path" name="path" class="text" placeholder="{% if admin %}{{ strings.target_placeholder }}{% else %}{{ strings.target_placeholder_private }}{% endif %}" value="{{ path }}">
         </div>
         {% if settings.dir_browser %}
         <button type="button" onclick="openDialog()"><span><img src="/static/images/icons/{% if settings.hires %}hires/{% endif %}folder.png" class="icon">{{ strings.browse }}</span></button>
         {% endif %}
     </center>
     <br>
-    {% else %}
-    <input type="hidden" id="path" name="path" value="/private/">
-    {% endif %}
 
     {% set max_size_readable = max_size | format_size(use_si=settings.use_si) %}
 
