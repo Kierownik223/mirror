@@ -1,22 +1,13 @@
 window.addEventListener('DOMContentLoaded', function () {
-    const allDivs = document.querySelectorAll('div');
-
-    allDivs.forEach(div => {
-
-        if (div.classList.contains('msth')) {
-
-        }
-    });
     var sidebardiv = document.createElement("div");
     sidebardiv.setAttribute('class', 'dp-sbdiv dp-sbdivhid');
     document.querySelectorAll('img').forEach(img => {
-        if (img.src.includes('/static/images/icons/favicon.png')) {
+        if (img.src.includes('/static/images/icons/favicon.png') || img.src.includes('/static/images/icons/hires/favicon.png')) {
             img.remove();
         }
     });
 
-    //dp-sbdiv dp-sbdivhid
-    var dpcat
+    var dpcat;
     var xhr = typeof XMLHttpRequest != 'undefined' ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
     xhr.open('get', '/static/styles/dopaminesidebar.html', true);
     xhr.onreadystatechange = function () {
@@ -28,7 +19,7 @@ window.addEventListener('DOMContentLoaded', function () {
         })
         dpcat = sidebardiv.querySelector("#dp-sb-cat")
         function createTree(container, foldername) {
-            fetch(`https://dl.marmak.net.pl/api/listing${foldername}`)
+            fetch(`/api/listing${foldername}`, { credentials: "same-origin" })
                 .then(res => res.json())
                 .then(data => {
                     const ul = document.createElement('ul');
@@ -50,7 +41,7 @@ window.addEventListener('DOMContentLoaded', function () {
                                 }
                             });
                         }
-                        else if (["png", "jpeg", "jpg","svg"].includes(item.ext)) {
+                        else if (["png", "jpeg", "jpg", "svg"].includes(item.ext)) {
                             li.className = 'img';
                             li.addEventListener('click', function (e) {
                                 e.stopPropagation();
@@ -62,7 +53,7 @@ window.addEventListener('DOMContentLoaded', function () {
                                     createTree(li, foldername + item.name + '/');
                                 }
                             });
-                        }else if (["gif", "mp4", "3gp"].includes(item.ext)) {
+                        } else if (["gif", "mp4", "3gp"].includes(item.ext)) {
                             li.className = 'anm';
                             li.addEventListener('click', function (e) {
                                 e.stopPropagation();
@@ -74,7 +65,7 @@ window.addEventListener('DOMContentLoaded', function () {
                                     createTree(li, foldername + item.name + '/');
                                 }
                             });
-                        }else if (["php", "webp", "java", "jar"].includes(item.ext)) {
+                        } else if (["php", "webp", "java", "jar"].includes(item.ext)) {
                             li.className = 'shp';
                             li.addEventListener('click', function (e) {
                                 e.stopPropagation();
@@ -86,7 +77,7 @@ window.addEventListener('DOMContentLoaded', function () {
                                     createTree(li, foldername + item.name + '/');
                                 }
                             });
-                        }else if (["mp3","wav","m4a"].includes(item.ext)) {
+                        } else if (["mp3", "wav", "m4a"].includes(item.ext)) {
                             li.className = 'snd';
                             li.addEventListener('click', function (e) {
                                 e.stopPropagation();
@@ -98,7 +89,7 @@ window.addEventListener('DOMContentLoaded', function () {
                                     createTree(li, foldername + item.name + '/');
                                 }
                             });
-                        }else if (["zip","7z"].includes(item.ext)) {
+                        } else if (["zip", "7z"].includes(item.ext)) {
                             li.className = 'zpi';
                             li.addEventListener('click', function (e) {
                                 e.stopPropagation();
@@ -110,7 +101,7 @@ window.addEventListener('DOMContentLoaded', function () {
                                     createTree(li, foldername + item.name + '/');
                                 }
                             });
-                        }else {
+                        } else {
                             li.className = 'file';
                             li.addEventListener('click', function (e) {
                                 e.stopPropagation();
@@ -131,9 +122,4 @@ window.addEventListener('DOMContentLoaded', function () {
     xhr.send();
     sidebardiv.setAttribute("id", "sidebardp")
     this.document.body.appendChild(sidebardiv)
-    console.log('Class replacement complete!');
-
-
-
-
 });
