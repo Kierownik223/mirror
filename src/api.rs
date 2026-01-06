@@ -182,6 +182,15 @@ async fn search(
         results.retain(|x| !is_hidden_path_str(&x.full_path, perms));
         results.retain(|x| !x.full_path.starts_with("/private/"));
 
+        if results.len() == 0 {
+            return Ok(ApiResponse::MessageStatus((
+                Status::NotFound,
+                Json(ApiInfoResponse {
+                    message: "No results found!".into(),
+                }),
+            )));
+        }
+
         Ok(ApiResponse::SearchResults(Json(results)))
     } else {
         return Ok(ApiResponse::MessageStatus((

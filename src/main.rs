@@ -1596,6 +1596,30 @@ async fn search(
         });
         results.retain(|x| !x.full_path.starts_with("/private/"));
 
+        if results.len() == 0 {
+            return Ok(IndexResponse::Template(Template::render(
+                if *useplain.0 {
+                    "plain/search"
+                } else {
+                    "search"
+                },
+                context! {
+                    title: strings.get("search_engine").unwrap_or(&("search_engine".into())),
+                    lang,
+                    strings,
+                    root_domain: get_root_domain(host.0),
+                    host: host.0,
+                    config: (*CONFIG).clone(),
+                    theme: get_theme(jar),
+                    is_logged_in: token.is_ok(),
+                    username,
+                    admin: perms == 0,
+                    message: strings.get("search_no_results").unwrap_or(&("search_no_results".into())),
+                    settings,
+                },
+            )))
+        }
+
         return Ok(IndexResponse::Template(Template::render(
             if *useplain.0 {
                 "plain/search"
