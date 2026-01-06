@@ -138,6 +138,7 @@ search_engine = "検索エンジン"
 search_criterion = "検索フレーズ"
 search_placeholder = "何かを検索してください！"
 search_query_too_short = "検索クエリは3文字以上である必要があります！"
+search_no_results = "検索結果がありません."
 
 # Errors
 

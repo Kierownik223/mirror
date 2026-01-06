@@ -138,6 +138,7 @@ search_engine = "Поисковая система"
 search_criterion = "Поисковая фраза"
 search_placeholder = "Найдите что-нибудь!"
 search_query_too_short = "Поисковый запрос должен содержать не менее 3 символов!"
+search_no_results = "Нет результатов поиска."
 
 # Errors
 

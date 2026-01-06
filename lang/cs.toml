@@ -138,6 +138,7 @@ search_engine = "Vyhledávání"
 search_criterion = "Vyhledávací fráze"
 search_placeholder = "Vyhledejte něco!"
 search_query_too_short = "Vyhledávací dotaz musí mít alespoň 3 znaky!"
+search_no_results = "Žádné výsledky vyhledávání."
 
 # Errors
 

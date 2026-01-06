@@ -138,6 +138,7 @@ search_engine = "Szukejōcy"
 search_criterion = "Szukejōco fraza"
 search_placeholder = "Poszukej czegoś!"
 search_query_too_short = "Szukejōcy tekst musi mieć aby 3 znaki abo wiyncyj!"
+search_no_results = "Brak wyników wyszukiwania."
 
 # Errors
 

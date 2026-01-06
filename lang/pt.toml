@@ -138,6 +138,7 @@ search_engine = "Mecanismo de busca"
 search_criterion = "Frase de pesquisa"
 search_placeholder = "Pesquise algo!"
 search_query_too_short = "A consulta de pesquisa deve ter pelo menos 3 caracteres!"
+search_no_results = "Nenhum resultado encontrado."
 
 # Errors
 

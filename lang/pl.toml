@@ -138,6 +138,7 @@ search_engine = "Wyszukiwarka"
 search_criterion = "Fraza wyszukiwania"
 search_placeholder = "Wyszukaj coś!"
 search_query_too_short = "Fraza wyszukiwania musi mieć conajmniej 3 znaki!"
+search_no_results = "Brak wyników wyszukiwania."
 
 # Errors
 

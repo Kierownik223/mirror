@@ -138,6 +138,7 @@ search_engine = "Suchmaschine"
 search_criterion = "Suchbegriff"
 search_placeholder = "Suchen Sie etwas!"
 search_query_too_short = "Die Suchanfrage muss mindestens 3 Zeichen lang sein!"
+search_no_results = "Keine Suchergebnisse."
 
 # Errors
 
