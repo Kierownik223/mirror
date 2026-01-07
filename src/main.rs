@@ -1159,9 +1159,7 @@ async fn iframe(
         return Err(Status::Unauthorized);
     }
 
-    let path = path
-        .display()
-        .to_string();
+    let path = path.display().to_string();
 
     let mut dirs = read_dirs(&path).map_err(map_io_error_to_status)?;
 
@@ -1617,7 +1615,7 @@ async fn search(
                     message: strings.get("search_no_results").unwrap_or(&("search_no_results".into())),
                     settings,
                 },
-            )))
+            )));
         }
 
         return Ok(IndexResponse::Template(Template::render(
@@ -1858,12 +1856,7 @@ pub async fn refresh_file_sizes() -> Vec<FileEntry> {
 
 #[cfg(test)]
 fn mount_extra_routes(rocket: rocket::Rocket<rocket::Build>) -> rocket::Rocket<rocket::Build> {
-    rocket
-        .mount("/test",
-        routes![
-            strings,
-        ]
-    )
+    rocket.mount("/test", routes![strings,])
 }
 
 #[cfg(not(test))]
@@ -1904,7 +1897,7 @@ async fn rocket() -> _ {
                 upload,
                 scripts,
                 search,
-            ]
+            ],
         );
 
     if CONFIG.enable_login {

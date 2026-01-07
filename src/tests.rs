@@ -78,12 +78,16 @@ fn delete() {
 
 #[test]
 fn strings() {
-    let languages: Vec<(String, String)> = crate::TranslationStore::new().available_languages().to_vec();
+    let languages: Vec<(String, String)> = crate::TranslationStore::new()
+        .available_languages()
+        .to_vec();
     let language_codes: Vec<&str> = languages.iter().map(|l| l.0.as_str()).collect();
 
     for lang in language_codes {
         let client = Client::tracked(rocket()).expect("valid rocket instance");
-        let response = client.get(format!("/test/strings?lang={}", lang)).dispatch();
+        let response = client
+            .get(format!("/test/strings?lang={}", lang))
+            .dispatch();
         assert_eq!(response.status(), Status::Ok)
     }
 }

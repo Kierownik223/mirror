@@ -8,7 +8,9 @@ function shorten(element, url) {
             xhr = new ActiveXObject("Microsoft.XMLHTTP");
         } catch (e) {
             alert("{{ strings.error_shortening }}");
-            element.onclick = function () { shorten(element, url); };
+            element.onclick = function () {
+                shorten(element, url);
+            };
             return;
         }
     }
@@ -18,7 +20,9 @@ function shorten(element, url) {
         xhr.setRequestHeader("Content-Type", "application/json");
     } catch (e) {
         alert("{{ strings.error_shortening }}");
-        element.onclick = function () { shorten(element, url); };
+        element.onclick = function () {
+            shorten(element, url);
+        };
         return;
     }
 
@@ -29,14 +33,25 @@ function shorten(element, url) {
                     var response = JSON.parse(xhr.responseText);
                     element.innerText = response.link;
                     element.href = response.link;
-                    element.onclick = function (e) { e.preventDefault(); try { navigator.clipboard.writeText(response.link); } catch (e) { window.clipboardData.setData('Text', response.link); } };
+                    element.onclick = function (e) {
+                        e.preventDefault();
+                        try {
+                            navigator.clipboard.writeText(response.link);
+                        } catch (e) {
+                            window.clipboardData.setData("Text", response.link);
+                        }
+                    };
                 } else {
                     alert(JSON.parse(xhr.responseText).url);
-                    element.onclick = function () { shorten(element, url); };
+                    element.onclick = function () {
+                        shorten(element, url);
+                    };
                 }
             } else if (xhr.status == 419) {
                 alert("{{ strings.shortening_ratelimit }}");
-                element.onclick = function () { shorten(element, url); };
+                element.onclick = function () {
+                    shorten(element, url);
+                };
                 return;
             } else {
                 alert("{{ strings.error_shortening }}");
@@ -46,9 +61,11 @@ function shorten(element, url) {
     };
 
     try {
-        xhr.send("{\"url\":\"" + url + "\"}");
+        xhr.send('{"url":"' + url + '"}');
     } catch (e) {
         alert("{{ strings.error_shortening }}");
-        element.onclick = function () { shorten(element, url); };
+        element.onclick = function () {
+            shorten(element, url);
+        };
     }
 }

@@ -1,5 +1,5 @@
 function uploadFileInChunks(file, path, ui) {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
         var totalChunks = Math.ceil(file.size / CHUNK_SIZE);
         var fileId = Date.now() + "_" + Math.random().toString(36).slice(2);
 
@@ -38,19 +38,25 @@ function uploadFileInChunks(file, path, ui) {
 
                         ui.progressBar.value = percent;
                         ui.info.textContent =
-                            percent.toFixed(1) + "% - " +
-                            formatBytes(totalLoaded) + " / " +
-                            formatBytes(file.size) + " @ " +
-                            formatBytes(speed) + "/s";
+                            percent.toFixed(1) +
+                            "% - " +
+                            formatBytes(totalLoaded) +
+                            " / " +
+                            formatBytes(file.size) +
+                            " @ " +
+                            formatBytes(speed) +
+                            "/s";
                     }
-                }
-            }).then(function(response) {
-                responseText = response;
-                uploadedBytes += (end - start);
-                uploadNextChunk(i + 1);
-            }).catch(function(err) {
-                reject(err);
-            });
+                },
+            })
+                .then(function (response) {
+                    responseText = response;
+                    uploadedBytes += end - start;
+                    uploadNextChunk(i + 1);
+                })
+                .catch(function (err) {
+                    reject(err);
+                });
         };
 
         uploadNextChunk(0);

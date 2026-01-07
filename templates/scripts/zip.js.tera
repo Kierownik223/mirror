@@ -8,7 +8,11 @@ function downloadAsZip() {
 
     for (var i = 0; i < inputs.length; i++) {
         var input = inputs[i];
-        if (input.type === "checkbox" && hasClass(input, "delete-checkbox") && input.checked) {
+        if (
+            input.type === "checkbox" &&
+            hasClass(input, "delete-checkbox") &&
+            input.checked
+        ) {
             filePathList.push(pathname + input.value);
         }
     }
@@ -37,7 +41,7 @@ function downloadAsZip() {
             if (window.navigator && window.navigator.msSaveOrOpenBlob) {
                 window.navigator.msSaveOrOpenBlob(blob, "download.zip");
             } else {
-                var link = document.createElement('a');
+                var link = document.createElement("a");
                 var url = window.URL.createObjectURL(blob);
                 link.href = url;
                 link.download = "download.zip";
@@ -46,7 +50,9 @@ function downloadAsZip() {
             }
 
             download_link.innerText = "{{ strings.download_zip }} (BETA)";
-            download_link.onclick = function () { downloadAsZip(); };
+            download_link.onclick = function () {
+                downloadAsZip();
+            };
         } else {
             alert("{{ strings.error }}");
         }

@@ -396,7 +396,12 @@ async fn delete<'a>(
     }
 
     if let Some(recurse) = recurse {
-        if recurse && path.display().to_string().starts_with(format!("files/private/").as_str()) {
+        if recurse
+            && path
+                .display()
+                .to_string()
+                .starts_with(format!("files/private/").as_str())
+        {
             return match remove_dir_all(path) {
                 Ok(_) => {
                     {

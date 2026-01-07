@@ -1,8 +1,8 @@
 var CHUNK_SIZE = 90 * 1024 * 1024;
 
 function uploadViaAPI() {
-    var input = document.getElementById('file');
-    var path_input = document.getElementById('path');
+    var input = document.getElementById("file");
+    var path_input = document.getElementById("path");
 
     var hasFormData = typeof window.FormData !== "undefined";
     var hasFiles = input && typeof input.files !== "undefined";
@@ -20,7 +20,7 @@ function uploadViaAPI() {
         return;
     }
 
-    var resultsDiv = document.getElementById('uploadResults');
+    var resultsDiv = document.getElementById("uploadResults");
     resultsDiv.innerHTML = "";
 
     for (var i = 0; i < files.length; i++) {
@@ -39,7 +39,8 @@ function uploadViaAPI() {
 
             var info = document.createElement("div");
             info.style.fontSize = "small";
-            info.textContent = "0% - 0 B / " + formatBytes(file.size) + " @ 0 KB/s";
+            info.textContent =
+                "0% - 0 B / " + formatBytes(file.size) + " @ 0 KB/s";
             container.appendChild(info);
 
             resultsDiv.appendChild(container);
@@ -50,42 +51,67 @@ function uploadViaAPI() {
                         uploadFileInChunks(file, path, {
                             progressBar: progressBar,
                             info: info,
-                            label: label
-                        }).then(function(responseText) {
-                            progressBar.style.display = "none";
-                            info.style.display = "none";
-                            var response = JSON.parse(responseText);
-                            var result = response[0];
+                            label: label,
+                        })
+                            .then(function (responseText) {
+                                progressBar.style.display = "none";
+                                info.style.display = "none";
+                                var response = JSON.parse(responseText);
+                                var result = response[0];
 
-                            if (!result || result.url == null) {
-                                ui.label.textContent = "{{ strings.upload_error }} " + (result && result.error ? result.error : "");
-                                return;
-                            }
+                                if (!result || result.url == null) {
+                                    ui.label.textContent =
+                                        "{{ strings.upload_error }} " +
+                                        (result && result.error
+                                            ? result.error
+                                            : "");
+                                    return;
+                                }
 
-                            var iconPath = '/static/images/icons/{% if hires %}hires/{% endif %}' + result.icon + '.png';
+                                var iconPath =
+                                    "/static/images/icons/{% if hires %}hires/{% endif %}" +
+                                    result.icon +
+                                    ".png";
 
-                            var a = document.createElement('a');
-                            a.href = result.url;
-                            var filePath = a.pathname;
+                                var a = document.createElement("a");
+                                a.href = result.url;
+                                var filePath = a.pathname;
 
-                            if (!filePath.startsWith("/")) {
-                                filePath = "/" + filePath;
-                            }
+                                if (!filePath.startsWith("/")) {
+                                    filePath = "/" + filePath;
+                                }
 
-                            label.innerHTML = '<a href="' + result.url + '"><span><img src="' + iconPath + '" class="icon">' + result.name + '</span></a> {{ strings.upload_success }} <a style="cursor: pointer;" onclick="deleteFile(this, \'' + filePath + '\')">{{ strings.delete }}</a>{% if config.linkshortener %} <a style="cursor: pointer;" onclick="shorten(this, \'http://{{ host }}' + filePath + '\')">{{ strings.shorten }}</a><br>{% endif %}';
+                                label.innerHTML =
+                                    '<a href="' +
+                                    result.url +
+                                    '"><span><img src="' +
+                                    iconPath +
+                                    '" class="icon">' +
+                                    result.name +
+                                    '</span></a> {{ strings.upload_success }} <a style="cursor: pointer;" onclick="deleteFile(this, \'' +
+                                    filePath +
+                                    '\')">{{ strings.delete }}</a>{% if config.linkshortener %} <a style="cursor: pointer;" onclick="shorten(this, \'http://{{ host }}' +
+                                    filePath +
+                                    "')\">{{ strings.shorten }}</a><br>{% endif %}";
 
-                            return true;
-                        }).catch(function(err) {
-                            if (err === 413) {
-                                label.textContent = file.name + " {{ strings.file_too_big }}";
-                            } else if (err === 507) {
-                                label.textContent = "{{ strings.not_enough_space }}";
-                            } else {
-                                label.textContent = file.name + " {{ strings.upload_error }}";
-                            }
-                            progressBar.style.display = "none";
-                            info.style.display = "none";
-                        });
+                                return true;
+                            })
+                            .catch(function (err) {
+                                if (err === 413) {
+                                    label.textContent =
+                                        file.name +
+                                        " {{ strings.file_too_big }}";
+                                } else if (err === 507) {
+                                    label.textContent =
+                                        "{{ strings.not_enough_space }}";
+                                } else {
+                                    label.textContent =
+                                        file.name +
+                                        " {{ strings.upload_error }}";
+                                }
+                                progressBar.style.display = "none";
+                                info.style.display = "none";
+                            });
                     } else {
                         var formData = new FormData();
                         formData.append("files", file);
@@ -99,14 +125,21 @@ function uploadViaAPI() {
                         xhr.upload.onprogress = function (e) {
                             if (e.lengthComputable) {
                                 var percent = (e.loaded / e.total) * 100;
-                                var elapsed = (new Date().getTime() - startTime) / 1000;
+                                var elapsed =
+                                    (new Date().getTime() - startTime) / 1000;
                                 var speed = e.loaded / elapsed;
 
                                 progressBar.value = percent;
 
                                 info.textContent =
-                                    percent.toFixed(1) + "% - " + formatBytes(e.loaded) + " / " + formatBytes(e.total) +
-                                    " @ " + formatBytes(speed) + "/s";
+                                    percent.toFixed(1) +
+                                    "% - " +
+                                    formatBytes(e.loaded) +
+                                    " / " +
+                                    formatBytes(e.total) +
+                                    " @ " +
+                                    formatBytes(speed) +
+                                    "/s";
                             }
                         };
 
@@ -120,13 +153,20 @@ function uploadViaAPI() {
                                     var result = response[0];
 
                                     if (!result || result.url == null) {
-                                        label.textContent = "{{ strings.upload_error }} " + (result && result.error ? result.error : "");
+                                        label.textContent =
+                                            "{{ strings.upload_error }} " +
+                                            (result && result.error
+                                                ? result.error
+                                                : "");
                                         return;
                                     }
 
-                                    var iconPath = '/static/images/icons/{% if hires %}hires/{% endif %}' + result.icon + '.png';
+                                    var iconPath =
+                                        "/static/images/icons/{% if hires %}hires/{% endif %}" +
+                                        result.icon +
+                                        ".png";
 
-                                    var a = document.createElement('a');
+                                    var a = document.createElement("a");
                                     a.href = result.url;
                                     var filePath = a.pathname;
 
@@ -134,33 +174,53 @@ function uploadViaAPI() {
                                         filePath = "/" + filePath;
                                     }
 
-                                    label.innerHTML = '<a href="' + result.url + '"><span><img src="' + iconPath + '" class="icon">' + result.name + '</span></a> {{ strings.upload_success }} <a style="cursor: pointer;" onclick="deleteFile(this, \'' + filePath + '\')">{{ strings.delete }}</a>{% if config.linkshortener %} <a style="cursor: pointer;" onclick="shorten(this, \'http://{{ host }}' + filePath + '\')">{{ strings.shorten }}</a><br>{% endif %}';
+                                    label.innerHTML =
+                                        '<a href="' +
+                                        result.url +
+                                        '"><span><img src="' +
+                                        iconPath +
+                                        '" class="icon">' +
+                                        result.name +
+                                        '</span></a> {{ strings.upload_success }} <a style="cursor: pointer;" onclick="deleteFile(this, \'' +
+                                        filePath +
+                                        '\')">{{ strings.delete }}</a>{% if config.linkshortener %} <a style="cursor: pointer;" onclick="shorten(this, \'http://{{ host }}' +
+                                        filePath +
+                                        "')\">{{ strings.shorten }}</a><br>{% endif %}";
                                 } catch (e) {
-                                    label.textContent = file.name + " {{ strings.upload_parse_error }}";
+                                    label.textContent =
+                                        file.name +
+                                        " {{ strings.upload_parse_error }}";
                                 }
                             } else if (xhr.status === 507) {
                                 alert("{{ strings.not_enough_space }}");
                             } else {
-                                label.textContent = file.name + " {{ strings.upload_failed_status }} " + xhr.status;
+                                label.textContent =
+                                    file.name +
+                                    " {{ strings.upload_failed_status }} " +
+                                    xhr.status;
                             }
                         };
 
                         xhr.onerror = function () {
                             progressBar.style.display = "none";
                             info.style.display = "none";
-                            label.textContent = file.name + " {{ strings.upload_failed_network }}";
+                            label.textContent =
+                                file.name +
+                                " {{ strings.upload_failed_network }}";
                         };
 
                         try {
                             xhr.send(formData);
                         } catch (e) {
-                            label.textContent = file.name + " {{ strings.upload_error }}";
+                            label.textContent =
+                                file.name + " {{ strings.upload_error }}";
                         }
                     }
                 } catch (err) {
                     progressBar.style.display = "none";
                     info.style.display = "none";
-                    label.textContent = file.name + " {{ strings.upload_error }}";
+                    label.textContent =
+                        file.name + " {{ strings.upload_error }}";
                 }
             })();
         })(files[i]);
@@ -168,9 +228,15 @@ function uploadViaAPI() {
 }
 
 function deleteFile(element, filePath) {
-    var path = "/" + filePath.replace(/^\/+/, '');
+    var path = "/" + filePath.replace(/^\/+/, "");
 
-    if (!confirm("{{ strings.delete_confirmation }} " + decodeURIComponent(path) + "?")) {
+    if (
+        !confirm(
+            "{{ strings.delete_confirmation }} " +
+                decodeURIComponent(path) +
+                "?",
+        )
+    ) {
         return;
     }
 
@@ -184,13 +250,17 @@ function deleteFile(element, filePath) {
                 if (row && row.parentNode) {
                     row.parentNode.removeChild(row);
                 }
-                alert(decodeURIComponent(path) + " {{ strings.delete_success }}");
+                alert(
+                    decodeURIComponent(path) + " {{ strings.delete_success }}",
+                );
             } else if (xhr.status === 409) {
                 alert("{{ strings.directory_not_empty }}");
             } else {
                 try {
                     var errorResponse = JSON.parse(xhr.responseText);
-                    alert("{{ strings.error_occured }} " + errorResponse.message);
+                    alert(
+                        "{{ strings.error_occured }} " + errorResponse.message,
+                    );
                 } catch (e) {
                     alert("{{ strings.error_occured }}");
                 }

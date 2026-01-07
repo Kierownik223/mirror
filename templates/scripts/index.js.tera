@@ -1,14 +1,19 @@
 function toggleAllCheckboxes(master) {
     var inputs = document.getElementsByTagName("input");
     for (var i = 0; i < inputs.length; i++) {
-        if (inputs[i].type === "checkbox" && hasClass(inputs[i], "delete-checkbox")) {
+        if (
+            inputs[i].type === "checkbox" &&
+            hasClass(inputs[i], "delete-checkbox")
+        ) {
             inputs[i].checked = master.checked;
         }
     }
 }
 
 function hasClass(el, cls) {
-    return el.className && (" " + el.className + " ").indexOf(" " + cls + " ") > -1;
+    return (
+        el.className && (" " + el.className + " ").indexOf(" " + cls + " ") > -1
+    );
 }
 
 function deleteSelected() {
@@ -22,11 +27,19 @@ function deleteSelected() {
 
     for (var i = 0; i < inputs.length; i++) {
         var input = inputs[i];
-        if (input.type === "checkbox" && hasClass(input, "delete-checkbox") && input.checked) {
+        if (
+            input.type === "checkbox" &&
+            hasClass(input, "delete-checkbox") &&
+            input.checked
+        ) {
             filePathList[filePathList.length] = input.value;
 
             var row = input;
-            while (row && row.nodeType === 1 && String(row.tagName).toLowerCase() !== "tr") {
+            while (
+                row &&
+                row.nodeType === 1 &&
+                String(row.tagName).toLowerCase() !== "tr"
+            ) {
                 row = row.parentNode;
             }
 
@@ -38,7 +51,8 @@ function deleteSelected() {
         return;
     }
 
-    var i, confirmMsg = "{{ strings.delete_confirmation }}\n";
+    var i,
+        confirmMsg = "{{ strings.delete_confirmation }}\n";
     for (i = 0; i < filePathList.length; i++) {
         confirmMsg += filePathList[i] + "\n";
     }
@@ -98,11 +112,13 @@ function renameFile(element, filePath) {
                 try {
                     var response = JSON.parse(xhr.responseText);
 
-                    element.onclick = function () { renameFile(element, response.name) };
+                    element.onclick = function () {
+                        renameFile(element, response.name);
+                    };
 
                     var row = element;
                     while (row && row.nodeType === 1) {
-                        if (String(row.tagName).toLowerCase() === 'tr') break;
+                        if (String(row.tagName).toLowerCase() === "tr") break;
                         row = row.parentNode;
                     }
 
@@ -113,29 +129,44 @@ function renameFile(element, filePath) {
                             var link = td.querySelector("a");
 
                             if (link) {
-                                var isFolder = cells[3].innerText == "{{ strings.folder }}";
+                                var isFolder =
+                                    cells[3].innerText ==
+                                    "{{ strings.folder }}";
                                 if (isFolder) {
-                                    link.setAttribute("href", response.name + "/");
+                                    link.setAttribute(
+                                        "href",
+                                        response.name + "/",
+                                    );
 
                                     link.innerHTML = "";
 
                                     var img = document.createElement("img");
-                                    img.src = "/static/images/icons/{% if hires %}hires/{% endif %}folder.png";
+                                    img.src =
+                                        "/static/images/icons/{% if hires %}hires/{% endif %}folder.png";
                                     img.className = "icon";
 
                                     link.appendChild(img);
-                                    link.appendChild(document.createTextNode(response.name + "/"));
+                                    link.appendChild(
+                                        document.createTextNode(
+                                            response.name + "/",
+                                        ),
+                                    );
                                 } else {
                                     link.setAttribute("href", response.name);
 
                                     link.innerHTML = "";
 
                                     var img = document.createElement("img");
-                                    img.src = "/static/images/icons/{% if hires %}hires/{% endif %}" + response.icon + ".png";
+                                    img.src =
+                                        "/static/images/icons/{% if hires %}hires/{% endif %}" +
+                                        response.icon +
+                                        ".png";
                                     img.className = "icon";
 
                                     link.appendChild(img);
-                                    link.appendChild(document.createTextNode(response.name));
+                                    link.appendChild(
+                                        document.createTextNode(response.name),
+                                    );
                                 }
                             }
                         }
@@ -150,7 +181,9 @@ function renameFile(element, filePath) {
             } else {
                 try {
                     var errorResponse = JSON.parse(xhr.responseText);
-                    alert("{{ strings.error_occured }} " + errorResponse.message);
+                    alert(
+                        "{{ strings.error_occured }} " + errorResponse.message,
+                    );
                 } catch (e) {
                     alert("{{ strings.error_occured }}");
                 }
@@ -159,7 +192,7 @@ function renameFile(element, filePath) {
     };
 
     try {
-        xhr.send("{\"name\":\"" + newName + "\"}");
+        xhr.send('{"name":"' + newName + '"}');
     } catch (e) {
         alert("{{ strings.error_renaming }}");
         if (onComplete) onComplete();
@@ -216,7 +249,10 @@ function createFolder() {
                         var tdName = document.createElement("td");
                         var a = document.createElement("a");
                         a.href = newName + "/";
-                        a.innerHTML = '<img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">' + newName + "/";
+                        a.innerHTML =
+                            '<img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">' +
+                            newName +
+                            "/";
                         tdName.appendChild(a);
                         row.appendChild(tdName);
 
@@ -232,13 +268,19 @@ function createFolder() {
                         var renLink = document.createElement("a");
                         renLink.style.cursor = "pointer";
                         renLink.textContent = "{{ strings.rename }}";
-                        renLink.setAttribute("onclick", 'renameFile(this, "' + newName + '")')
+                        renLink.setAttribute(
+                            "onclick",
+                            'renameFile(this, "' + newName + '")',
+                        );
                         tdDelete.appendChild(renLink);
                         tdDelete.innerHTML += " ";
                         var delLink = document.createElement("a");
                         delLink.style.cursor = "pointer";
                         delLink.textContent = "{{ strings.delete }}";
-                        delLink.setAttribute("onclick", 'deleteFile(this, "' + newName + '")')
+                        delLink.setAttribute(
+                            "onclick",
+                            'deleteFile(this, "' + newName + '")',
+                        );
                         tdDelete.appendChild(delLink);
                         row.appendChild(tdDelete);
 
@@ -254,7 +296,9 @@ function createFolder() {
             } else {
                 try {
                     var errorResponse = JSON.parse(xhr.responseText);
-                    alert("{{ strings.error_occured }} " + errorResponse.message);
+                    alert(
+                        "{{ strings.error_occured }} " + errorResponse.message,
+                    );
                 } catch (e) {
                     alert("{{ strings.error_creating_folder }}");
                 }
@@ -263,7 +307,7 @@ function createFolder() {
     };
 
     try {
-        xhr.send("{\"name\":\"" + newName + "\"}");
+        xhr.send('{"name":"' + newName + '"}');
     } catch (e) {
         alert("{{ strings.error_creating_folder }}");
     }
@@ -274,12 +318,13 @@ function deleteFile(element, filePath, message, onComplete) {
     if (window.location && typeof window.location.pathname === "string") {
         pathname = window.location.pathname;
     }
-    if (typeof encodeURIComponent === 'undefined') {
+    if (typeof encodeURIComponent === "undefined") {
         var path = pathname + escape(filePath);
     } else {
         var path = pathname + encodeURIComponent(filePath);
     }
-    var confirmMsg = "{{ strings.delete_confirmation }} " + decodeURIComponent(path) + "?";
+    var confirmMsg =
+        "{{ strings.delete_confirmation }} " + decodeURIComponent(path) + "?";
 
     if (message) {
         if (!confirm(confirmMsg)) {
@@ -312,7 +357,7 @@ function deleteFile(element, filePath, message, onComplete) {
                 try {
                     var row = element;
                     while (row && row.nodeType === 1) {
-                        if (String(row.tagName).toLowerCase() === 'tr') break;
+                        if (String(row.tagName).toLowerCase() === "tr") break;
                         row = row.parentNode;
                     }
 
@@ -323,8 +368,8 @@ function deleteFile(element, filePath, message, onComplete) {
                             row.outerHTML = "";
                         }
                     }
-                    
-                    var progressBar = document.getElementById('usage');
+
+                    var progressBar = document.getElementById("usage");
 
                     if (progressBar) {
                         try {
@@ -335,13 +380,25 @@ function deleteFile(element, filePath, message, onComplete) {
                             if (xhr.readyState == 4) {
                                 if (xhr.status == 200) {
                                     try {
-                                        var response = JSON.parse(xhr.responseText);
+                                        var response = JSON.parse(
+                                            xhr.responseText,
+                                        );
 
-                                        progressBar.value = response.private_folder_usage;
-                                        progressBar.max = response.private_folder_quota;
+                                        progressBar.value =
+                                            response.private_folder_usage;
+                                        progressBar.max =
+                                            response.private_folder_quota;
 
-                                        document.getElementById('folder_usage').innerText = formatBytes(response.private_folder_usage);
-                                        document.getElementById('folder_quota').innerText = formatBytes(response.private_folder_quota);
+                                        document.getElementById(
+                                            "folder_usage",
+                                        ).innerText = formatBytes(
+                                            response.private_folder_usage,
+                                        );
+                                        document.getElementById(
+                                            "folder_quota",
+                                        ).innerText = formatBytes(
+                                            response.private_folder_quota,
+                                        );
                                     } catch (e) {}
                                 }
                             }
@@ -353,7 +410,10 @@ function deleteFile(element, filePath, message, onComplete) {
                     }
 
                     if (message) {
-                        alert(decodeURIComponent(path) + " {{ strings.delete_success }}");
+                        alert(
+                            decodeURIComponent(path) +
+                                " {{ strings.delete_success }}",
+                        );
                     }
                 } catch (e) {
                     alert("{{ strings.error_occured }} " + (e.message || ""));
@@ -365,7 +425,9 @@ function deleteFile(element, filePath, message, onComplete) {
             } else {
                 try {
                     var errorResponse = JSON.parse(xhr.responseText);
-                    alert("{{ strings.error_occured }} " + errorResponse.message);
+                    alert(
+                        "{{ strings.error_occured }} " + errorResponse.message,
+                    );
                 } catch (e) {
                     alert("{{ strings.error_occured }}");
                 }

@@ -36,27 +36,29 @@ if (!String.prototype.startsWith) {
  */
 
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-        typeof define === 'function' && define.amd ? define(factory) :
-            (global.ES6Promise = factory());
-}(this, (function () {
-    'use strict';
+    typeof exports === "object" && typeof module !== "undefined"
+        ? (module.exports = factory())
+        : typeof define === "function" && define.amd
+          ? define(factory)
+          : (global.ES6Promise = factory());
+})(this, function () {
+    "use strict";
 
     function objectOrFunction(x) {
         var type = typeof x;
-        return x !== null && (type === 'object' || type === 'function');
+        return x !== null && (type === "object" || type === "function");
     }
 
     function isFunction(x) {
-        return typeof x === 'function';
+        return typeof x === "function";
     }
-    
+
     var _isArray = void 0;
     if (Array.isArray) {
         _isArray = Array.isArray;
     } else {
         _isArray = function (x) {
-            return Object.prototype.toString.call(x) === '[object Array]';
+            return Object.prototype.toString.call(x) === "[object Array]";
         };
     }
 
@@ -87,12 +89,19 @@ if (!String.prototype.startsWith) {
         asap = asapFn;
     }
 
-    var browserWindow = typeof window !== 'undefined' ? window : undefined;
+    var browserWindow = typeof window !== "undefined" ? window : undefined;
     var browserGlobal = browserWindow || {};
-    var BrowserMutationObserver = browserGlobal.MutationObserver || browserGlobal.WebKitMutationObserver;
-    var isNode = typeof self === 'undefined' && typeof process !== 'undefined' && {}.toString.call(process) === '[object process]';
+    var BrowserMutationObserver =
+        browserGlobal.MutationObserver || browserGlobal.WebKitMutationObserver;
+    var isNode =
+        typeof self === "undefined" &&
+        typeof process !== "undefined" &&
+        {}.toString.call(process) === "[object process]";
 
-    var isWorker = typeof Uint8ClampedArray !== 'undefined' && typeof importScripts !== 'undefined' && typeof MessageChannel !== 'undefined';
+    var isWorker =
+        typeof Uint8ClampedArray !== "undefined" &&
+        typeof importScripts !== "undefined" &&
+        typeof MessageChannel !== "undefined";
 
     function useNextTick() {
         return function () {
@@ -101,7 +110,7 @@ if (!String.prototype.startsWith) {
     }
 
     function useVertxTimer() {
-        if (typeof vertxNext !== 'undefined') {
+        if (typeof vertxNext !== "undefined") {
             return function () {
                 vertxNext(flush);
             };
@@ -113,7 +122,7 @@ if (!String.prototype.startsWith) {
     function useMutationObserver() {
         var iterations = 0;
         var observer = new BrowserMutationObserver(flush);
-        var node = document.createTextNode('');
+        var node = document.createTextNode("");
         observer.observe(node, { characterData: true });
 
         return function () {
@@ -153,7 +162,7 @@ if (!String.prototype.startsWith) {
 
     function attemptVertx() {
         try {
-            var vertx = Function('return this')().require('vertx');
+            var vertx = Function("return this")().require("vertx");
             vertxNext = vertx.runOnLoop || vertx.runOnContext;
             return useVertxTimer();
         } catch (e) {
@@ -168,7 +177,7 @@ if (!String.prototype.startsWith) {
         scheduleFlush = useMutationObserver();
     } else if (isWorker) {
         scheduleFlush = useMessageChannel();
-    } else if (browserWindow === undefined && typeof require === 'function') {
+    } else if (browserWindow === undefined && typeof require === "function") {
         scheduleFlush = attemptVertx();
     } else {
         scheduleFlush = useSetTimeout();
@@ -185,7 +194,6 @@ if (!String.prototype.startsWith) {
 
         var _state = parent._state;
 
-
         if (_state) {
             var callback = arguments[_state - 1];
             asap(function () {
@@ -201,7 +209,11 @@ if (!String.prototype.startsWith) {
     function resolve$1(object) {
         var Constructor = this;
 
-        if (object && typeof object === 'object' && object.constructor === Constructor) {
+        if (
+            object &&
+            typeof object === "object" &&
+            object.constructor === Constructor
+        ) {
             return object;
         }
 
@@ -212,7 +224,7 @@ if (!String.prototype.startsWith) {
 
     var PROMISE_ID = Math.random().toString(36).substring(2);
 
-    function noop() { }
+    function noop() {}
 
     var PENDING = void 0;
     var FULFILLED = 1;
@@ -223,7 +235,9 @@ if (!String.prototype.startsWith) {
     }
 
     function cannotReturnOwn() {
-        return new TypeError('A promises callback cannot return that same promise.');
+        return new TypeError(
+            "A promises callback cannot return that same promise.",
+        );
     }
 
     function tryThen(then$$1, value, fulfillmentHandler, rejectionHandler) {
@@ -237,24 +251,30 @@ if (!String.prototype.startsWith) {
     function handleForeignThenable(promise, thenable, then$$1) {
         asap(function (promise) {
             var sealed = false;
-            var error = tryThen(then$$1, thenable, function (value) {
-                if (sealed) {
-                    return;
-                }
-                sealed = true;
-                if (thenable !== value) {
-                    resolve(promise, value);
-                } else {
-                    fulfill(promise, value);
-                }
-            }, function (reason) {
-                if (sealed) {
-                    return;
-                }
-                sealed = true;
+            var error = tryThen(
+                then$$1,
+                thenable,
+                function (value) {
+                    if (sealed) {
+                        return;
+                    }
+                    sealed = true;
+                    if (thenable !== value) {
+                        resolve(promise, value);
+                    } else {
+                        fulfill(promise, value);
+                    }
+                },
+                function (reason) {
+                    if (sealed) {
+                        return;
+                    }
+                    sealed = true;
 
-                reject(promise, reason);
-            }, 'Settle: ' + (promise._label || ' unknown promise'));
+                    reject(promise, reason);
+                },
+                "Settle: " + (promise._label || " unknown promise"),
+            );
 
             if (!sealed && error) {
                 sealed = true;
@@ -269,16 +289,25 @@ if (!String.prototype.startsWith) {
         } else if (thenable._state === REJECTED) {
             reject(promise, thenable._result);
         } else {
-            subscribe(thenable, undefined, function (value) {
-                return resolve(promise, value);
-            }, function (reason) {
-                return reject(promise, reason);
-            });
+            subscribe(
+                thenable,
+                undefined,
+                function (value) {
+                    return resolve(promise, value);
+                },
+                function (reason) {
+                    return reject(promise, reason);
+                },
+            );
         }
     }
 
     function handleMaybeThenable(promise, maybeThenable, then$$1) {
-        if (maybeThenable.constructor === promise.constructor && then$$1 === then && maybeThenable.constructor.resolve === resolve$1) {
+        if (
+            maybeThenable.constructor === promise.constructor &&
+            then$$1 === then &&
+            maybeThenable.constructor.resolve === resolve$1
+        ) {
             handleOwnThenable(promise, maybeThenable);
         } else {
             if (then$$1 === undefined) {
@@ -342,7 +371,6 @@ if (!String.prototype.startsWith) {
     function subscribe(parent, child, onFulfillment, onRejection) {
         var _subscribers = parent._subscribers;
         var length = _subscribers.length;
-
 
         parent._onerror = null;
 
@@ -418,11 +446,14 @@ if (!String.prototype.startsWith) {
 
     function initializePromise(promise, resolver) {
         try {
-            resolver(function resolvePromise(value) {
-                resolve(promise, value);
-            }, function rejectPromise(reason) {
-                reject(promise, reason);
-            });
+            resolver(
+                function resolvePromise(value) {
+                    resolve(promise, value);
+                },
+                function rejectPromise(reason) {
+                    reject(promise, reason);
+                },
+            );
         } catch (e) {
             reject(promise, e);
         }
@@ -441,10 +472,10 @@ if (!String.prototype.startsWith) {
     }
 
     function validationError() {
-        return new Error('Array Methods must be provided an Array');
+        return new Error("Array Methods must be provided an Array");
     }
 
-    var Enumerator = function () {
+    var Enumerator = (function () {
         function Enumerator(Constructor, input) {
             this._instanceConstructor = Constructor;
             this.promise = new Constructor(noop);
@@ -483,7 +514,6 @@ if (!String.prototype.startsWith) {
             var c = this._instanceConstructor;
             var resolve$$1 = c.resolve;
 
-
             if (resolve$$1 === resolve$1) {
                 var _then = void 0;
                 var error = void 0;
@@ -497,7 +527,7 @@ if (!String.prototype.startsWith) {
 
                 if (_then === then && entry._state !== PENDING) {
                     this._settledAt(entry._state, i, entry._result);
-                } else if (typeof _then !== 'function') {
+                } else if (typeof _then !== "function") {
                     this._remaining--;
                     this._result[i] = entry;
                 } else if (c === Promise$2) {
@@ -509,9 +539,12 @@ if (!String.prototype.startsWith) {
                     }
                     this._willSettleAt(promise, i);
                 } else {
-                    this._willSettleAt(new c(function (resolve$$1) {
-                        return resolve$$1(entry);
-                    }), i);
+                    this._willSettleAt(
+                        new c(function (resolve$$1) {
+                            return resolve$$1(entry);
+                        }),
+                        i,
+                    );
                 }
             } else {
                 this._willSettleAt(resolve$$1(entry), i);
@@ -520,7 +553,6 @@ if (!String.prototype.startsWith) {
 
         Enumerator.prototype._settledAt = function _settledAt(state, i, value) {
             var promise = this.promise;
-
 
             if (promise._state === PENDING) {
                 this._remaining--;
@@ -537,18 +569,26 @@ if (!String.prototype.startsWith) {
             }
         };
 
-        Enumerator.prototype._willSettleAt = function _willSettleAt(promise, i) {
+        Enumerator.prototype._willSettleAt = function _willSettleAt(
+            promise,
+            i,
+        ) {
             var enumerator = this;
 
-            subscribe(promise, undefined, function (value) {
-                return enumerator._settledAt(FULFILLED, i, value);
-            }, function (reason) {
-                return enumerator._settledAt(REJECTED, i, reason);
-            });
+            subscribe(
+                promise,
+                undefined,
+                function (value) {
+                    return enumerator._settledAt(FULFILLED, i, value);
+                },
+                function (reason) {
+                    return enumerator._settledAt(REJECTED, i, reason);
+                },
+            );
         };
 
         return Enumerator;
-    }();
+    })();
 
     function all(entries) {
         return new Enumerator(this, entries).promise;
@@ -559,7 +599,7 @@ if (!String.prototype.startsWith) {
 
         if (!isArray(entries)) {
             return new Constructor(function (_, reject) {
-                return reject(new TypeError('You must pass an array to race.'));
+                return reject(new TypeError("You must pass an array to race."));
             });
         } else {
             return new Constructor(function (resolve, reject) {
@@ -579,22 +619,28 @@ if (!String.prototype.startsWith) {
     }
 
     function needsResolver() {
-        throw new TypeError('You must pass a resolver function as the first argument to the promise constructor');
+        throw new TypeError(
+            "You must pass a resolver function as the first argument to the promise constructor",
+        );
     }
 
     function needsNew() {
-        throw new TypeError("Failed to construct 'Promise': Please use the 'new' operator, this object constructor cannot be called as a function.");
+        throw new TypeError(
+            "Failed to construct 'Promise': Please use the 'new' operator, this object constructor cannot be called as a function.",
+        );
     }
 
-    var Promise$2 = function () {
+    var Promise$2 = (function () {
         function Promise(resolver) {
             this[PROMISE_ID] = nextId();
             this._result = this._state = undefined;
             this._subscribers = [];
 
             if (noop !== resolver) {
-                typeof resolver !== 'function' && needsResolver();
-                this instanceof Promise ? initializePromise(this, resolver) : needsNew();
+                typeof resolver !== "function" && needsResolver();
+                this instanceof Promise
+                    ? initializePromise(this, resolver)
+                    : needsNew();
             }
         }
 
@@ -607,22 +653,29 @@ if (!String.prototype.startsWith) {
             var constructor = promise.constructor;
 
             if (isFunction(callback)) {
-                return promise.then(function (value) {
-                    return constructor.resolve(callback()).then(function () {
-                        return value;
-                    });
-                }, function (reason) {
-                    return constructor.resolve(callback()).then(function () {
-                        throw reason;
-                    });
-                });
+                return promise.then(
+                    function (value) {
+                        return constructor
+                            .resolve(callback())
+                            .then(function () {
+                                return value;
+                            });
+                    },
+                    function (reason) {
+                        return constructor
+                            .resolve(callback())
+                            .then(function () {
+                                throw reason;
+                            });
+                    },
+                );
             }
 
             return promise.then(callback, callback);
         };
 
         return Promise;
-    }();
+    })();
 
     Promise$2.prototype.then = then;
     Promise$2.all = all;
@@ -636,15 +689,17 @@ if (!String.prototype.startsWith) {
     function polyfill() {
         var local = void 0;
 
-        if (typeof global !== 'undefined') {
+        if (typeof global !== "undefined") {
             local = global;
-        } else if (typeof self !== 'undefined') {
+        } else if (typeof self !== "undefined") {
             local = self;
         } else {
             try {
-                local = Function('return this')();
+                local = Function("return this")();
             } catch (e) {
-                throw new Error('polyfill failed because global object is unavailable in this environment');
+                throw new Error(
+                    "polyfill failed because global object is unavailable in this environment",
+                );
             }
         }
 
@@ -654,10 +709,9 @@ if (!String.prototype.startsWith) {
             var promiseToString = null;
             try {
                 promiseToString = Object.prototype.toString.call(P.resolve());
-            } catch (e) {
-            }
+            } catch (e) {}
 
-            if (promiseToString === '[object Promise]' && !P.cast) {
+            if (promiseToString === "[object Promise]" && !P.cast) {
                 return;
             }
         }
@@ -671,5 +725,4 @@ if (!String.prototype.startsWith) {
     Promise$2.polyfill();
 
     return Promise$2;
-
-})));
+});
