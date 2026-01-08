@@ -24,8 +24,8 @@
     {% endif %}
     {% if admin and path != "/" or private %}
     <div class="actions">
-        <a href="javascript:;" onclick="createFolder()"><span><img class="icon" src="/static/images/icons/{% if settings.hires %}hires/{% endif %}folder.png">{{ strings.create_folder }}</span></a>
-        <a href="/upload?path={{ path }}"><span><img class="icon" src="/static/images/icons/{% if settings.hires %}hires/{% endif %}favicon.png">{{ strings.uploader }}</span></a>
+        <a href="javascript:;" onclick="createFolder()"><span>{{ macros::icon(name="folder", hires=settings.hires) }}{{ strings.create_folder }}</span></a>
+        <a href="/upload?path={{ path }}"><span>{{ macros::icon(name="folder", hires=settings.hires) }}{{ strings.uploader }}</span></a>
     </div>
     {% endif %}
 </div>
@@ -49,7 +49,7 @@
         {% if path != "/" %}
         <tr>
             {% if is_logged_in and config.enable_zip_downloads or admin or private %}<td></td>{% endif %}
-            <td><a href="../"><img src="/static/images/icons/{% if settings.hires %}hires/{% endif %}folder.png" class="icon">../</a></td>
+            <td><a href="../">{{ macros::icon(name="folder", hires=settings.hires) }}>../</a></td>
             <td class="hide-more">---</td>
             <td class="hide">{{ strings.folder }}</td>
             {% if admin or private %}<td></td>{% endif %}
@@ -61,7 +61,7 @@
             {% if is_logged_in and config.enable_zip_downloads or admin or private %}
             <td><input type="checkbox" class="delete-checkbox" value="{{ s.name | addslashes }}"></td>
             {% endif %}
-            <td><a href="{{ s.name | urlencode }}/"><img src="/static/images/icons/{% if settings.hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}/</a></td>
+            <td><a href="{{ s.name | urlencode }}/">{{ macros::icon(name=s.icon, hires=settings.hires) }}{{ s.name }}/</a></td>
             <td class="hide-more">{{ s.size | format_size(use_si=settings.use_si) }}</td>
             <td class="hide">{{ strings.folder }}</td>
             {% if admin or private %}
@@ -74,7 +74,7 @@
             {% if is_logged_in and config.enable_zip_downloads or admin or private %}
             <td><input type="checkbox" class="delete-checkbox" value="{{ s.name | addslashes }}"></td>
             {% endif %}
-            <td><a href="{{ s.name | urlencode }}"><img src="/static/images/icons/{% if settings.hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}</a></td>
+            <td><a href="{{ s.name | urlencode }}">{{ macros::icon(name=s.icon, hires=settings.hires) }}{{ s.name }}</a></td>
             <td class="hide-more">{{ s.size | format_size(use_si=settings.use_si) }}</td>
             <td class="hide">{{ strings.file }}</td>
             {% if admin or private %}
@@ -85,7 +85,7 @@
     </tbody>
 </table>
 {% if markdown != "" %}
-<p><span><img class="icon" src="/static/images/icons/{% if settings.hires %}hires/{% endif %}md.png">README.md</span></p>
+<p><span>{{ macros::icon(name="md", hires=settings.hires) }}README.md</span></p>
 {{ markdown }}
 {% endif %}
 {% endblock content %}

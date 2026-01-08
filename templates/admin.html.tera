@@ -6,13 +6,13 @@
 </div>
 {{ strings.welcome }}, {{ username }}!
 <br>
-<a href="/upload"><span><img src="/static/images/icons/{% if settings.hires %}hires/{% endif %}folder.png" class="icon">{{ strings.uploader }}</span></a>
-<a href="/admin/sysinfo"><span><img src="/static/images/icons/{% if settings.hires %}hires/{% endif %}config.png" class="icon">{{ strings.sysinfo }}</span></a>
+<a href="/upload"><span>{{ macros::icon(name="folder", hires=settings.hires) }}{{ strings.uploader }}</span></a>
+<a href="/admin/sysinfo"><span>{{ macros::icon(name="config", hires=settings.hires) }}{{ strings.sysinfo }}</span></a>
 {% if config.enable_direct %}
-<a href="http://account.{{ root_domain }}"><span><img src="/static/images/icons/ui/{% if settings.hires %}hires/{% endif %}settings.png" class="icon">{{ strings.manage_account }}</span></a>
+<a href="http://account.{{ root_domain }}"><span>{{ macros::icon(name="ui/settings", hires=settings.hires) }}{{ strings.manage_account }}</span></a>
 {% endif %}
 <br>
-<b><img src="/static/images/icons/ui/{% if settings.hires %}hires/{% endif %}drive.png" class="icon">{{ strings.disk_usage }}:</b><br>
+<b>{{ macros::icon(name="ui/drive", hires=settings.hires) }}{{ strings.disk_usage }}:</b><br>
 <div id="disks">
 Loading...
 </div>

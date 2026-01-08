@@ -1,3 +1,4 @@
+{% import "_macros" as macros %}
 <!DOCTYPE html>
 <html lang="{{ lang }}">
 <head>

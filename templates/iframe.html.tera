@@ -1,3 +1,4 @@
+{% import "_macros" as macros %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -13,7 +14,7 @@
         <tbody>
             {% if path != "" %}
             <tr>
-                <td><a href="../"><img src="/static/images/icons/{% if settings.hires %}hires/{% endif %}folder.png" class="icon">../</a></td>
+                <td><a href="../">{{ macros::icon(name="folder", hires=settings.hires) }}../</a></td>
                 <td>---</td>
                 <td>Directory</td>
             </tr>
@@ -21,7 +22,7 @@
 
             {% for s in dirs %}
             <tr>
-                <td><a href="{{ s.name }}/"><img src="/static/images/icons/{% if settings.hires %}hires/{% endif %}{{ s.icon }}.png" class="icon">{{ s.name }}/</a></td>
+                <td><a href="{{ s.name }}/">{{ macros::icon(name=s.icon, hires=settings.hires) }}{{ s.name }}/</a></td>
                 <td>---</td>
                 <td>Directory</td>
             </tr>

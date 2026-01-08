@@ -12,7 +12,7 @@
     <label for="search">{{ strings.search_criterion }}:</label>
     <input type="search" name="q" id="query" class="text" placeholder="{{ strings.search_placeholder }}"{% if query %} value="{{ query }}"{% endif %}>
     <center>
-        <button type="submit"><span><img class="icon" src="/static/images/icons/ui/{% if settings.hires %}hires/{% endif %}search.png">{{ strings.search }}</span></button>
+        <button type="submit"><span>{{ macros::icon(name="ui/search", hires=settings.hires) }}{{ strings.search }}</span></button>
     </center>
 </form>
 <table>
@@ -20,7 +20,7 @@
         {% if results %}
         {% for r in results %}
         <tr>
-            <td><a href="{{ r.full_path | urlencode }}"><img src="/static/images/icons/{% if settings.hires %}hires/{% endif %}{{ r.icon }}.png" class="icon">{{ r.name }}</a></td>
+            <td><a href="{{ r.full_path | urlencode }}">{{ macros::icon(name=r.icon, hires=settings.hires) }}{{ r.name }}</a></td>
             <td class="hide-more">{{ r.size | format_size(use_si=settings.use_si) }}</td>
             <td class="hide">{% if r.icon == "folder" %}{{ strings.folder }}{% else %}{{ strings.file }}{% endif %}</td>
         </tr>

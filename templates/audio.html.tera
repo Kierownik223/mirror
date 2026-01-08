@@ -46,8 +46,8 @@
                 {% endfilter %}
             </span>
         </span>
-        <div class="actions"><span><a href="/file{{ path }}" id="download" download><img class="icon" src="/static/images/icons/{% if settings.hires %}hires/{% endif %}favicon.png">{{ strings.download }}</span></a></div><br>
-        <a href="./"><img class="icon" src="/static/images/icons/{% if settings.hires %}hires/{% endif %}folder.png">./</a>
+        <div class="actions"><span><a href="/file{{ path }}" id="download" download>{{ macros::icon(name="favicon", hires=settings.hires) }}{{ strings.download }}</span></a></div><br>
+        <a href="./">{{ macros::icon(name="folder", hires=settings.hires) }}./</a>
     </div>
     <audio id="audio" src="/file{{ path }}" controls style="width: 100%;" poster="{{ poster }}">{{ strings.no_audio }}</audio>
     <div>

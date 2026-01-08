@@ -1,0 +1,3 @@
+{%- macro icon(name, hires=false) -%}
+<img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ name }}.png" class="icon">
+{%- endmacro icon -%}
