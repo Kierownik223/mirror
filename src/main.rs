@@ -496,7 +496,7 @@ async fn index(
             )))
         }
         "mp4" | "mkv" | "webm" => {
-            if !*viewers.0 || !settings.video_player {
+            if !settings.video_player {
                 return open_file(path, "private").await;
             }
 
@@ -557,7 +557,7 @@ async fn index(
             )))
         }
         "mp3" | "m4a" | "m4b" | "flac" | "wav" => {
-            if !*viewers.0 || !settings.audio_player {
+            if !settings.audio_player {
                 return open_file(path, "private").await;
             }
 
