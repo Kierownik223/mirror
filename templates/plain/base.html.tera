@@ -1,3 +1,4 @@
+{% import "_macros" as macros %}
 {% filter spaceless %}<!DOCTYPE html>
 <html lang="{{ lang }}">
 
