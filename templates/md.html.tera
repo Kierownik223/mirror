@@ -3,7 +3,6 @@
 {% block content %}
 <link rel="stylesheet" href="/static/print.css">
 <div class="controls">
-    {% filter spaceless %}
     <span class="title">
         {{ strings.reading_markdown }} <span class="breadcrumbs">
             {{ macros::breadcrumbs(path=path) }}

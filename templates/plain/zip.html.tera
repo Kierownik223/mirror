@@ -2,7 +2,6 @@
 
 {% block content %}
 <div>
-    {% filter spaceless %}
     <span>
         {{ strings.viewing_zip }} <span>
             {{ macros::breadcrumbs(path=path) }}

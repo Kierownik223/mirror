@@ -31,7 +31,6 @@
 
 {% block content %}
     <div class="controls">
-        {% filter spaceless %}
         <span class="title">
             {{ strings.watching }} <span class="breadcrumbs">
                 {{ macros::breadcrumbs(path=path) }}

@@ -2,7 +2,6 @@
 
 {% block content %}
 <div>
-    {% filter spaceless %}
     <span class="title">
         {{ strings.watching }} <span class="breadcrumbs">
             {{ macros::breadcrumbs(path=path) }}

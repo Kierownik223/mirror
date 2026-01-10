@@ -2,7 +2,6 @@
 
 {% block content %}
 <div class="controls">
-    {% filter spaceless %}
     <div class="title">
         {{ strings.file_details }} <span class="breadcrumbs">
             {{ macros::breadcrumbs(path=path) }}

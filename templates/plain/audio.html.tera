@@ -1,7 +1,6 @@
 {% extends "plain/base" %}
 
 {% block content %}
-{% filter spaceless %}
 <span class="title">
     {{ strings.listening }} <span class="breadcrumbs">
         {{ macros::breadcrumbs(path=path) }}
