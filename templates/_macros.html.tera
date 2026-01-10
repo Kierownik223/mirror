@@ -1,3 +1,38 @@
 {%- macro icon(name, hires=false) -%}
 <img src="/static/images/icons/{% if hires %}hires/{% endif %}{{ name }}.png" class="icon">
 {%- endmacro icon -%}
+{%- macro breadcrumbs_folder(path) -%}
+    {%- filter spaceless -%}
+    <span>/</span><span class="seg"> </span>
+    {%- if path != "/" -%}
+        {% set segments = path | split(pat="/") %}
+        {% for i in range(end=segments | length) %}
+            {% set subpath = segments | slice(start=0, end=i+1) %}
+            {% set url = subpath | join(sep="/") %}
+            {%- if url != "" -%}
+                <span><a href="{{ url | urlencode }}/">{{ segments[i] }}</a>/</span><span class="seg"> </span>
+            {%- endif -%}
+        {%- endfor -%}
+    {%- endif -%}
+    {%- endfilter -%}
+{%- endmacro icon -%}
+{%- macro breadcrumbs(path) -%}
+    {%- filter spaceless -%}
+    <span>/</span><span class="seg"> </span>
+    {% if path != "/" %}
+        {% set segments = path | split(pat="/") %}
+        {% set num_segments = segments | length %}
+        {% for i in range(end=num_segments) %}
+            {% set subpath = segments | slice(start=0, end=i+1) %}
+            {% set url = subpath | join(sep="/") %}
+            {% if url != "" %}
+                {%- if i == num_segments - 1 -%}
+                    <span>{{ segments[i] }}</span>
+                {%- else -%}
+                    <span><a href="{{ url | urlencode }}/">{{ segments[i] }}</a>/</span><span class="seg"> </span>
+                {%- endif -%}
+            {%- endif -%}
+        {%- endfor -%}
+    {%- endif -%}
+    {%- endfilter -%}
+{%- endmacro icon -%}

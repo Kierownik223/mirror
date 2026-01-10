@@ -11,17 +11,7 @@
 {% endif %}
 <div id="uploadResults"></div>
 <div class="breadcrumb">
-    <span><a href="/">MARMAK Mirror</a>/</span><span class="seg"> </span>
-    {% if path != "/" %}
-        {% set segments = path | split(pat="/") %}
-        {% for i in range(end=segments | length) %}
-            {% set subpath = segments | slice(start=0, end=i+1) %}
-            {% set url = subpath | join(sep="/") %}
-            {% if url != "" %}
-                <span><a href="{{ url | urlencode }}/">{{ segments[i] }}</a>/</span><span class="seg"> </span>
-            {% endif %}
-        {% endfor %}
-    {% endif %}
+    <span><a href="/">MARMAK Mirror</a></span>{{ macros::breadcrumbs_folder(path=path) }}
     {% if admin and path != "/" or private %}
     <div class="actions">
         <a href="javascript:;" onclick="createFolder()"><span>{{ macros::icon(name="folder", hires=settings.hires) }}{{ strings.create_folder }}</span></a>
@@ -49,7 +39,7 @@
         {% if path != "/" %}
         <tr>
             {% if is_logged_in and config.enable_zip_downloads or admin or private %}<td></td>{% endif %}
-            <td><a href="../">{{ macros::icon(name="folder", hires=settings.hires) }}>../</a></td>
+            <td><a href="../">{{ macros::icon(name="folder", hires=settings.hires) }}../</a></td>
             <td class="hide-more">---</td>
             <td class="hide">{{ strings.folder }}</td>
             {% if admin or private %}<td></td>{% endif %}
