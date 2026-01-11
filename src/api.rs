@@ -231,7 +231,7 @@ async fn file_with_downloads(
     let ext = get_extension_from_path(&path);
     let mut icon = get_extension_from_path(&path);
 
-    if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
+    if !Path::new(&format!("public/static/images/icons/{}.png", &icon)).exists() {
         icon = "default".into();
     }
 
@@ -294,7 +294,7 @@ async fn file(file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
 
     let mut icon = get_extension_from_path(&path);
 
-    if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
+    if !Path::new(&format!("public/static/images/icons/{}.png", &icon)).exists() {
         icon = "default".into();
     }
 
@@ -360,7 +360,7 @@ async fn rename(
 
     let mut icon = get_extension_from_path(&new_path);
 
-    if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
+    if !Path::new(&format!("public/static/images/icons/{}.png", &icon)).exists() {
         icon = "default".into();
     }
 
@@ -675,7 +675,7 @@ async fn upload(
                     .unwrap_or_else(|| "")
                     .to_lowercase();
                 let mut icon = ext.as_str();
-                if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
+                if !Path::new(&format!("public/static/images/icons/{}.png", &icon)).exists() {
                     icon = "default";
                 }
 
@@ -878,7 +878,7 @@ async fn upload_chunked(
         .unwrap_or("")
         .to_lowercase();
 
-    let icon = if Path::new(&format!("files/static/images/icons/{}.png", ext)).exists() {
+    let icon = if Path::new(&format!("public/static/images/icons/{}.png", ext)).exists() {
         ext
     } else {
         "default".into()

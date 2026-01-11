@@ -45,7 +45,7 @@ impl<'r> CookieSettings<'r> {
             .map(|cookie| cookie.value())
             .unwrap_or("default");
 
-        if !std::path::Path::new(&format!("files/static/styles/{}.css", &theme)).exists() {
+        if !std::path::Path::new(&format!("public/static/styles/{}.css", &theme)).exists() {
             theme = "default";
         }
 
@@ -102,7 +102,7 @@ impl<'r> CookieSettings<'r> {
 
         Self {
             theme: theme,
-            js_present: std::path::Path::new(&format!("files/static/styles/{}.js", &theme))
+            js_present: std::path::Path::new(&format!("public/static/styles/{}.js", &theme))
                 .exists(),
             lang: lang,
             hires,

@@ -139,7 +139,7 @@ async fn poster(
         if username == "Nobody" {
             if get_extension_from_path(&rest.to_path_buf()) == "mp3" {
                 return Ok(Err(open_file(
-                    Path::new(&"files/static/images/icons/256x256/mp3.png").to_path_buf(),
+                    Path::new(&"public/static/images/icons/256x256/mp3.png").to_path_buf(),
                     "private",
                 )
                 .await));
@@ -176,7 +176,7 @@ async fn poster(
             }));
         } else {
             return Ok(Err(open_file(
-                Path::new(&"files/static/images/icons/256x256/mp3.png").to_path_buf(),
+                Path::new(&"public/static/images/icons/256x256/mp3.png").to_path_buf(),
                 if is_private { "private" } else { "public" },
             )
             .await));
@@ -193,10 +193,10 @@ async fn poster(
         }
         .to_lowercase();
 
-        let mut icon = format!("files/static/images/icons/256x256/{}.png", ext);
+        let mut icon = format!("public/static/images/icons/256x256/{}.png", ext);
 
         if !Path::new(&(icon).to_string()).exists() {
-            icon = "files/static/images/icons/256x256/default.png".to_string();
+            icon = "public/static/images/icons/256x256/default.png".to_string();
         }
 
         Ok(Err(open_file(
@@ -340,6 +340,19 @@ async fn download(
     open_file(path, &get_cache_control(is_private)).await
 }
 
+#[get("/static/<file..>")]
+async fn static_files(
+    file: PathBuf,
+) -> Result<IndexResponse, Status> {
+    let path = Path::new("public/static").join(file);
+
+    if path.is_dir() || !path.exists() {
+        return Err(Status::NotFound);
+    }
+
+    open_file(path, &get_cache_control(false)).await
+}
+
 #[get("/<file..>", rank = 10)]
 async fn index(
     file: PathBuf,
@@ -354,6 +367,12 @@ async fn index(
     uri: FullUri,
     settings: CookieSettings<'_>,
 ) -> IndexResult {
+    if file.display().to_string() == "robots.txt" || file.display().to_string() == "favicon.ico" {
+        let path = Path::new("public").join(file);
+
+        return open_file(path, &get_cache_control(false)).await
+    }
+
     let jwt = token.clone().unwrap_or_default();
 
     if let Some(t) = jwt.token {
@@ -929,7 +948,7 @@ fn settings(
     let mut redir = false;
 
     if let Some(theme_opt) = opt.theme {
-        if Path::new(&format!("files/static/styles/{}.css", theme_opt)).exists() {
+        if Path::new(&format!("static/styles/{}.css", theme_opt)).exists() {
             jar.add(create_cookie("theme", &theme_opt));
             redir = true;
         } else {
@@ -1424,7 +1443,7 @@ async fn upload(
                             let _ = file.write_all(&buffer);
                             let mut icon =
                                 get_extension_from_path(&Path::new(&normalized_path).to_path_buf());
-                            if !Path::new(&format!("files/static/images/icons/{}.png", &icon))
+                            if !Path::new(&format!("public/static/images/icons/{}.png", &icon))
                                 .exists()
                             {
                                 icon = "default".to_string();
@@ -1897,6 +1916,7 @@ async fn rocket() -> _ {
                 upload,
                 scripts,
                 search,
+                static_files,
             ],
         );
 

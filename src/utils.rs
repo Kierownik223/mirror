@@ -136,7 +136,7 @@ pub fn read_files(path: &str) -> Result<Vec<MirrorFile>, Error> {
 
                 let mut icon = ext.as_str();
 
-                if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
+                if !Path::new(&format!("public/static/images/icons/{}.png", &icon)).exists() {
                     icon = "default";
                 }
                 let file: MirrorFile = MirrorFile {
@@ -171,7 +171,7 @@ pub fn get_theme<'a>(jar: &CookieJar<'_>) -> String {
         .map(|cookie| cookie.value())
         .unwrap_or("default");
 
-    if !Path::new(&format!("files/static/styles/{}.css", &theme)).exists() {
+    if !Path::new(&format!("public/static/styles/{}.css", &theme)).exists() {
         theme = "default";
     }
 
@@ -374,7 +374,7 @@ pub fn parse_7z_output(output: &str) -> Vec<MirrorFile> {
 
             let mut icon = ext.to_lowercase();
 
-            if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
+            if !Path::new(&format!("public/static/images/icons/{}.png", &icon)).exists() {
                 icon = "default".to_string();
             }
 
@@ -516,7 +516,7 @@ pub fn get_icon(file_name: &str) -> String {
 
     let mut icon = ext.as_str();
 
-    if !Path::new(&format!("files/static/images/icons/{}.png", &icon)).exists() {
+    if !Path::new(&format!("public/static/images/icons/{}.png", &icon)).exists() {
         icon = "default";
     }
 
