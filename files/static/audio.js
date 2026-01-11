@@ -137,7 +137,7 @@ fetchJSON("/api/listing" + folderPath, function (err, files) {
 
     audio.addEventListener("ended", function () {
         if (autoplay.checked) {
-            if (currentIndex + 1 == fileNames.length - 1) {
+            if (currentIndex + 1 >= fileNames.length - 1) {
                 next.style.display = "none";
             } else {
                 next.style.display = "inline";
@@ -237,7 +237,7 @@ fetchJSON("/api/listing" + folderPath, function (err, files) {
                         currentIndex--;
                         loadTrack(currentIndex);
                     }
-                },
+                }
             );
 
             navigator.mediaSession.setActionHandler("nexttrack", function () {
