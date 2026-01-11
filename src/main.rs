@@ -27,7 +27,7 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::db::{add_download, FileDb};
+use crate::{db::{FileDb, add_download}, utils::get_static_cache_control};
 use crate::guards::{CookieSettings, FullUri, HeaderFile, Host, Settings, UsePlain, UseViewers};
 use crate::i18n::{Language, TranslationStore};
 use crate::jwt::JWT;
@@ -350,7 +350,7 @@ async fn static_files(
         return Err(Status::NotFound);
     }
 
-    open_file(path, &get_cache_control(false)).await
+    open_file(path, &get_static_cache_control()).await
 }
 
 #[get("/<file..>", rank = 10)]
@@ -370,7 +370,7 @@ async fn index(
     if file.display().to_string() == "robots.txt" || file.display().to_string() == "favicon.ico" {
         let path = Path::new("public").join(file);
 
-        return open_file(path, &get_cache_control(false)).await
+        return open_file(path, &get_static_cache_control()).await
     }
 
     let jwt = token.clone().unwrap_or_default();

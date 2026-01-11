@@ -452,6 +452,14 @@ pub fn get_cache_control(is_private: bool) -> String {
     }
 }
 
+pub fn get_static_cache_control() -> String {
+    if CONFIG.static_max_age == 0 {
+        "public".into()
+    } else {
+        format!("public, max-age={}", CONFIG.static_max_age)
+    }
+}
+
 pub fn get_name_from_path(path: &PathBuf) -> String {
     path.file_name()
         .unwrap_or_default()
