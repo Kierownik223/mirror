@@ -27,7 +27,7 @@ enable_zip_downloads = false
 # Max-Age for Cache-Control header
 max_age = 86400
 # Max-Age for the Cache-Control header for static files
-max_age = 604800
+static_max_age = 604800
 # JSON Web Token secret key
 jwt_secret = "secure-secret-key-thats-definitely-not-it"
 # Enable LinkShortener integration
