@@ -9,7 +9,7 @@
 
 	handle @static {
 		# Change this path to reflect your configuration
-		root * /path/to/mirror/files
+		root * /path/to/mirror/public
 
 		header * Cache-Control "public, max-age=604800"
 		file_server
