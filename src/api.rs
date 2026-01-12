@@ -596,6 +596,13 @@ async fn upload(
         }
     };
 
+    if !Path::new("files/").exists() && !Path::new("files/").exists() {
+        let result = fs::create_dir("files/").map_err(map_io_error_to_status);
+        if let Err(error) = result {
+            return Err(error);
+        }
+    }
+
     let mut user_path = form_data
         .texts
         .get("path")
@@ -622,7 +629,15 @@ async fn upload(
             user_path.trim_start_matches("private")
         )
     } else {
-        format!("files/{}", user_path)
+        let path = format!("files/{}", user_path);
+        if !Path::new(&path).exists() {
+            let result = fs::create_dir_all(&path).map_err(map_io_error_to_status);
+            if let Err(error) = result {
+                return Err(error);
+            }
+        }
+
+        path
     };
 
     let folder_quota = *(CONFIG
