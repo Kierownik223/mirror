@@ -1,4 +1,5 @@
 use std::fs;
+use std::path::Path;
 
 use super::rocket;
 use rocket::http::{Header, Status};
@@ -56,6 +57,9 @@ Content-Disposition: form-data; name=\"path\"\r\n\r\n\
 
 #[test]
 fn rename() {
+    if !Path::new("files/").exists() {
+        let _ = fs::create_dir("files/");
+    }
     let _ = fs::File::create("files/rename.txt").expect("Failed to create file");
     let client = Client::tracked(rocket()).expect("valid rocket instance");
     let data = "{\"name\":\"file.txt\"}";
@@ -68,6 +72,9 @@ fn rename() {
 
 #[test]
 fn delete() {
+    if !Path::new("files/").exists() {
+        let _ = fs::create_dir("files/");
+    }
     let _ = fs::File::create("files/delete.txt").expect("Failed to create file");
 
     let client = Client::tracked(rocket()).expect("valid rocket instance");
