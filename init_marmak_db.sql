@@ -29,6 +29,6 @@ CREATE TABLE `sessions` (
 	`name` varchar(255) DEFAULT NULL,
 	`api_key` tinyint(1) DEFAULT 0,
 	PRIMARY KEY (`id`),
-	KEY `account` (`user`),
-	CONSTRAINT `account` FOREIGN KEY (`user`) REFERENCES `users` (`username`) ON DELETE CASCADE ON UPDATE CASCADE
+	KEY `owner` (`user`),
+	CONSTRAINT `owner` FOREIGN KEY (`user`) REFERENCES `users` (`username`) ON DELETE CASCADE ON UPDATE CASCADE
 );
