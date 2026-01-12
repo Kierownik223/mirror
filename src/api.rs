@@ -629,16 +629,15 @@ async fn upload(
             user_path.trim_start_matches("private")
         )
     } else {
-        let path = format!("files/{}", user_path);
-        if !Path::new(&path).exists() {
-            let result = fs::create_dir_all(&path).map_err(map_io_error_to_status);
-            if let Err(error) = result {
-                return Err(error);
-            }
-        }
-
-        path
+        format!("files/{}", user_path)
     };
+
+    if !Path::new(&base_path).exists() {
+        let result = fs::create_dir_all(&base_path).map_err(map_io_error_to_status);
+        if let Err(error) = result {
+            return Err(error);
+        }
+    }
 
     let folder_quota = *(CONFIG
         .private_folder_quotas
