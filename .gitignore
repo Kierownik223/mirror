@@ -1,5 +1,4 @@
 target/
-private.key
-public.key
+files/
 config.toml
 Rocket.toml
