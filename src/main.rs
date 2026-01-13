@@ -949,7 +949,7 @@ fn settings(
     let mut redir = false;
 
     if let Some(theme_opt) = opt.theme {
-        if Path::new(&format!("static/styles/{}.css", theme_opt)).exists() {
+        if Path::new(&format!("public/static/styles/{}.css", theme_opt)).exists() {
             jar.add(create_cookie("theme", &theme_opt));
             redir = true;
         } else {
