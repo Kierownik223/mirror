@@ -12,7 +12,13 @@ use rocket_db_pools::Connection;
 use rocket_dyn_templates::{context, Template};
 
 use crate::{
-    Host, IndexResponse, Language, TranslationStore, UsePlain, config::CONFIG, db::{Db, add_rememberme_token, delete_session, login_user}, guards::{CookieSettings, XForwardedFor}, jwt::{JWT, create_jwt}, responders::IndexResult, utils::get_root_domain
+    config::CONFIG,
+    db::{add_rememberme_token, delete_session, login_user, Db},
+    guards::{CookieSettings, XForwardedFor},
+    jwt::{create_jwt, JWT},
+    responders::IndexResult,
+    utils::get_root_domain,
+    Host, IndexResponse, Language, TranslationStore, UsePlain,
 };
 
 #[derive(Debug, PartialEq, Eq, FromForm)]

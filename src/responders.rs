@@ -1,5 +1,9 @@
 use rocket::{
-    Request, fs::NamedFile, http::{ContentType, Status}, response::{self, Redirect, Responder}, serde::json::Json
+    fs::NamedFile,
+    http::{ContentType, Status},
+    response::{self, Redirect, Responder},
+    serde::json::Json,
+    Request,
 };
 use rocket_dyn_templates::Template;
 
@@ -47,7 +51,7 @@ impl<'r> Responder<'r, 'r> for IndexResponse {
                 let mut res = d.respond_to(req)?;
                 res.set_raw_header("Cache-Control", cache_control);
                 Ok(res)
-            },
+            }
             IndexResponse::HeaderFile(h) => h.respond_to(req),
             IndexResponse::NamedFile(f, cache_control) => {
                 let mut res = f.respond_to(req)?;

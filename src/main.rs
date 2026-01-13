@@ -27,7 +27,6 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::{db::{FileDb, add_download}, utils::get_static_cache_control};
 use crate::guards::{CookieSettings, FullUri, HeaderFile, Host, Settings, UsePlain, UseViewers};
 use crate::i18n::{Language, TranslationStore};
 use crate::jwt::JWT;
@@ -41,6 +40,10 @@ use crate::{
     api::SearchFile,
     config::CONFIG,
     utils::{get_icon, get_virtual_path, is_hidden_path_str},
+};
+use crate::{
+    db::{add_download, FileDb},
+    utils::get_static_cache_control,
 };
 
 mod account;
@@ -167,11 +170,17 @@ async fn poster(
                 MimeType::Jpeg => ("image", "jpeg"),
                 MimeType::Tiff => ("image", "tiff"),
             };
-            return Ok(IndexResponse::DirectFile((ContentType::new(mime_type.0, mime_type.1), picture.data.to_vec()), get_cache_control(is_private)))
+            return Ok(IndexResponse::DirectFile(
+                (
+                    ContentType::new(mime_type.0, mime_type.1),
+                    picture.data.to_vec(),
+                ),
+                get_cache_control(is_private),
+            ));
         } else {
             return open_file(
                 Path::new(&"public/static/images/icons/256x256/mp3.png").to_path_buf(),
-                &get_cache_control(is_private)
+                &get_cache_control(is_private),
             )
             .await;
         }
@@ -335,9 +344,7 @@ async fn download(
 }
 
 #[get("/static/<file..>")]
-async fn static_files(
-    file: PathBuf,
-) -> IndexResult {
+async fn static_files(file: PathBuf) -> IndexResult {
     let path = Path::new("public/static").join(file);
 
     if path.is_dir() || !path.exists() {
@@ -364,7 +371,7 @@ async fn index(
     if file.display().to_string() == "robots.txt" || file.display().to_string() == "favicon.ico" {
         let path = Path::new("public").join(file);
 
-        return open_file(path, &get_static_cache_control()).await
+        return open_file(path, &get_static_cache_control()).await;
     }
 
     let jwt = token.clone().unwrap_or_default();
