@@ -28,6 +28,10 @@ pub async fn login_user(
     .fetch_one(&mut **db)
     .await;
 
+    if username == "Nobody" {
+        return None;
+    }
+
     match query_result {
         Ok(row) => {
             let stored_hash = row.try_get::<String, _>("password").ok()?;
@@ -62,6 +66,10 @@ pub async fn get_user(mut db: Connection<Db>, username: &str) -> Option<MarmakUs
     .bind(username)
     .fetch_one(&mut **db)
     .await;
+
+    if username == "Nobody" {
+        return None;
+    }
 
     match query_result {
         Ok(row) => {
