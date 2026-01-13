@@ -12,6 +12,18 @@ var previous = document.getElementById("previous");
 var next = document.getElementById("next");
 var autoplay = document.getElementById("autoplay");
 
+var cookies = document.cookie.split(';');
+for (let cookie of cookies) {
+    cookie = cookie.trim();
+    if (cookie.startsWith("audiovolume=")) {
+        audio.volume = cookie.substring(12);
+    }
+}
+
+audio.addEventListener("volumechange", function () {
+    document.cookie = "audiovolume=" + audio.volume; 
+});
+
 function fetchJSON(url, callback) {
     var xhr;
     if (window.XMLHttpRequest) {
