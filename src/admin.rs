@@ -6,11 +6,7 @@ use rocket::{
 use rocket_dyn_templates::{context, Template};
 
 use crate::{
-    config::CONFIG,
-    guards::CookieSettings,
-    jwt::JWT,
-    utils::{format_size, get_root_domain},
-    Disk, Host, IndexResponse, Language, TranslationStore, UsePlain,
+    Disk, Host, IndexResponse, Language, TranslationStore, UsePlain, config::CONFIG, guards::CookieSettings, jwt::JWT, responders::IndexResult, utils::{format_size, get_root_domain}
 };
 
 #[get("/sysinfo")]
@@ -22,7 +18,7 @@ fn sysinfo(
     useplain: UsePlain<'_>,
     token: Result<JWT, Status>,
     settings: CookieSettings<'_>,
-) -> Result<IndexResponse, Status> {
+) -> IndexResult {
     let token = token?;
 
     if let Some(t) = token.token {
@@ -102,7 +98,7 @@ fn admin(
     useplain: UsePlain<'_>,
     token: Result<JWT, Status>,
     settings: CookieSettings<'_>,
-) -> Result<IndexResponse, Status> {
+) -> IndexResult {
     let token = token?;
 
     if let Some(t) = token.token {

@@ -115,7 +115,7 @@ async fn poster(
     token: Result<JWT, Status>,
     host: Host<'_>,
     jar: &CookieJar<'_>,
-) -> Result<Result<Cached<(ContentType, Vec<u8>)>, Result<IndexResponse, Status>>, Status> {
+) -> Result<Result<Cached<(ContentType, Vec<u8>)>, IndexResult>, Status> {
     let username = if let Ok(token) = token {
         if let Some(t) = token.token {
             let mut jwt_cookie = Cookie::new("matoken", t.to_string());
@@ -213,7 +213,7 @@ async fn file(
     token: Result<JWT, Status>,
     host: Host<'_>,
     jar: &CookieJar<'_>,
-) -> Result<IndexResponse, Status> {
+) -> IndexResult {
     let username = if let Ok(token) = token.as_ref() {
         if let Some(t) = &token.token {
             let mut jwt_cookie = Cookie::new("matoken", t.to_string());
@@ -249,7 +249,7 @@ async fn download_with_counter(
     token: Result<JWT, Status>,
     host: Host<'_>,
     jar: &CookieJar<'_>,
-) -> Result<IndexResponse, Status> {
+) -> IndexResult {
     let username = if let Ok(token) = token.as_ref() {
         if let Some(t) = &token.token {
             let mut jwt_cookie = Cookie::new("matoken", t.to_string());
@@ -311,7 +311,7 @@ async fn download(
     token: Result<JWT, Status>,
     host: Host<'_>,
     jar: &CookieJar<'_>,
-) -> Result<IndexResponse, Status> {
+) -> IndexResult {
     let username = if let Ok(token) = token.as_ref() {
         if let Some(t) = &token.token {
             let mut jwt_cookie = Cookie::new("matoken", t.to_string());
@@ -343,7 +343,7 @@ async fn download(
 #[get("/static/<file..>")]
 async fn static_files(
     file: PathBuf,
-) -> Result<IndexResponse, Status> {
+) -> IndexResult {
     let path = Path::new("public/static").join(file);
 
     if path.is_dir() || !path.exists() {
@@ -1152,7 +1152,7 @@ async fn iframe(
     host: Host<'_>,
     token: Result<JWT, Status>,
     settings: CookieSettings<'_>,
-) -> Result<IndexResponse, Status> {
+) -> IndexResult {
     let (username, perms) = if let Ok(token) = token.as_ref() {
         if let Some(t) = &token.token {
             let mut jwt_cookie = Cookie::new("matoken", t.to_string());
@@ -1276,7 +1276,7 @@ fn uploader(
     token: Result<JWT, Status>,
     path: Option<&str>,
     settings: CookieSettings<'_>,
-) -> Result<IndexResponse, Status> {
+) -> IndexResult {
     let token = token?;
 
     if let Some(t) = token.token {
@@ -1334,7 +1334,7 @@ async fn upload(
     path: Option<&str>,
     settings: CookieSettings<'_>,
     sizes: &State<FileSizes>,
-) -> Result<IndexResponse, Status> {
+) -> IndexResult {
     let token = token?;
 
     if let Some(t) = token.token {

@@ -12,12 +12,7 @@ use rocket_db_pools::Connection;
 use rocket_dyn_templates::{context, Template};
 
 use crate::{
-    config::CONFIG,
-    db::{add_rememberme_token, delete_session, login_user, Db},
-    guards::{CookieSettings, XForwardedFor},
-    jwt::{create_jwt, JWT},
-    utils::get_root_domain,
-    Host, IndexResponse, Language, TranslationStore, UsePlain,
+    Host, IndexResponse, Language, TranslationStore, UsePlain, config::CONFIG, db::{Db, add_rememberme_token, delete_session, login_user}, guards::{CookieSettings, XForwardedFor}, jwt::{JWT, create_jwt}, responders::IndexResult, utils::get_root_domain
 };
 
 #[derive(Debug, PartialEq, Eq, FromForm)]
@@ -99,7 +94,7 @@ async fn login(
     host: Host<'_>,
     useplain: UsePlain<'_>,
     settings: CookieSettings<'_>,
-) -> Result<IndexResponse, Status> {
+) -> IndexResult {
     if let Some(db_user) = login_user(db, &user.username, &user.password, &ip.0).await {
         if !settings.nooverride {
             if let Some(mirror_settings) = db_user.mirror_settings.as_ref() {
