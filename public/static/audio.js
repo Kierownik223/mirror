@@ -142,7 +142,7 @@ fetchJSON("/api/listing" + folderPath, function (err, files) {
             } else {
                 next.style.display = "inline";
             }
-            if (currentIndex + 1 == 0) {
+            if (currentIndex + 1 == 0 || fileNames.length == 1) {
                 previous.style.display = "none";
             } else {
                 previous.style.display = "inline";
