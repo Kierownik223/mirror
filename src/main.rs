@@ -115,7 +115,7 @@ async fn poster(
     token: Result<JWT, Status>,
     host: Host<'_>,
     jar: &CookieJar<'_>,
-) -> Result<Result<Cached<(ContentType, Vec<u8>)>, IndexResult>, Status> {
+) -> IndexResult {
     let username = if let Ok(token) = token {
         if let Some(t) = token.token {
             let mut jwt_cookie = Cookie::new("matoken", t.to_string());
@@ -138,11 +138,11 @@ async fn poster(
     let (path, is_private) = if let Ok(rest) = file.strip_prefix("private") {
         if username == "Nobody" {
             if get_extension_from_path(&rest.to_path_buf()) == "mp3" {
-                return Ok(Err(open_file(
+                return open_file(
                     Path::new(&"public/static/images/icons/256x256/mp3.png").to_path_buf(),
                     "private",
                 )
-                .await));
+                .await;
             }
             return Err(Status::Forbidden);
         }
@@ -167,19 +167,13 @@ async fn poster(
                 MimeType::Jpeg => ("image", "jpeg"),
                 MimeType::Tiff => ("image", "tiff"),
             };
-            return Ok(Ok(Cached {
-                response: (
-                    ContentType::new(mime_type.0, mime_type.1),
-                    picture.data.to_vec(),
-                ),
-                header: if is_private { "private" } else { "public" },
-            }));
+            return Ok(IndexResponse::DirectFile((ContentType::new(mime_type.0, mime_type.1), picture.data.to_vec()), get_cache_control(is_private)))
         } else {
-            return Ok(Err(open_file(
+            return open_file(
                 Path::new(&"public/static/images/icons/256x256/mp3.png").to_path_buf(),
-                if is_private { "private" } else { "public" },
+                &get_cache_control(is_private)
             )
-            .await));
+            .await;
         }
     } else {
         if !path.exists() {
@@ -199,11 +193,11 @@ async fn poster(
             icon = "public/static/images/icons/256x256/default.png".to_string();
         }
 
-        Ok(Err(open_file(
+        open_file(
             Path::new(&icon).to_path_buf(),
             if is_private { "private" } else { "public" },
         )
-        .await))
+        .await
     }
 }
 
