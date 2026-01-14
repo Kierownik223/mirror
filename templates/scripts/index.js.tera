@@ -122,6 +122,33 @@ function renameFile(element, filePath) {
                         row = row.parentNode;
                     }
 
+                    var tdDelete = document.createElement("td");
+                    var renLink = document.createElement("a");
+                    renLink.style.cursor = "pointer";
+                    renLink.textContent =
+                        "{{ strings.rename }}";
+                    renLink.setAttribute(
+                        "onclick",
+                        'renameFile(this, "' +
+                            response.name +
+                            '")',
+                    );
+                    tdDelete.appendChild(renLink);
+                    tdDelete.innerHTML += " ";
+                    var delLink = document.createElement("a");
+                    delLink.style.cursor = "pointer";
+                    delLink.textContent =
+                        "{{ strings.delete }}";
+                    delLink.setAttribute(
+                        "onclick",
+                        'deleteFile(this, "' +
+                            response.name +
+                            '", true)',
+                    );
+                    tdDelete.appendChild(delLink);
+
+                    element.parentNode.innerHTML = tdDelete.innerHTML;
+
                     if (row) {
                         var cells = row.getElementsByTagName("td");
                         if (cells.length > 0) {
