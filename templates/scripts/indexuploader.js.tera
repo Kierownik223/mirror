@@ -115,6 +115,29 @@ function uploadViaAPI(files, path) {
                                     tdDelete.appendChild(delLink);
                                     row.appendChild(tdDelete);
 
+                                    var rows = tableBody.querySelectorAll("tr");
+                                    var normalizedNew = result.name.toLowerCase();
+
+                                    for (var i = 0; i < rows.length; i++) {
+                                        var existingRow = rows[i];
+
+                                        if (!existingRow.cells || existingRow.cells.length < 2) {
+                                            continue;
+                                        }
+
+                                        var existingName = existingRow.cells[1].textContent;
+                                        if (!existingName) {
+                                            continue;
+                                        }
+
+                                        existingName = existingName.trim().toLowerCase();
+
+                                        if (normalizedNew.localeCompare(existingName) < 0) {
+                                            tableBody.insertBefore(row, existingRow);
+                                            return;
+                                        }
+                                    }
+
                                     tableBody.appendChild(row);
                                 }
 
@@ -296,6 +319,29 @@ function uploadViaAPI(files, path) {
                                         );
                                         tdDelete.appendChild(delLink);
                                         row.appendChild(tdDelete);
+
+                                        var rows = tableBody.querySelectorAll("tr");
+                                        var normalizedNew = result.name.toLowerCase();
+
+                                        for (var i = 0; i < rows.length; i++) {
+                                            var existingRow = rows[i];
+
+                                            if (!existingRow.cells || existingRow.cells.length < 2) {
+                                                continue;
+                                            }
+
+                                            var existingName = existingRow.cells[1].textContent;
+                                            if (!existingName) {
+                                                continue;
+                                            }
+
+                                            existingName = existingName.trim().toLowerCase();
+
+                                            if (normalizedNew.localeCompare(existingName) < 0) {
+                                                tableBody.insertBefore(row, existingRow);
+                                                return;
+                                            }
+                                        }
 
                                         tableBody.appendChild(row);
                                     }
