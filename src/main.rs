@@ -27,7 +27,7 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::guards::{Settings, FullUri, HeaderFile, Host, FormSettings};
+use crate::guards::{FormSettings, FullUri, HeaderFile, Host, Settings};
 use crate::i18n::{Language, TranslationStore};
 use crate::jwt::JWT;
 use crate::responders::{Cached, IndexResponse, IndexResult};
@@ -554,7 +554,11 @@ async fn index(
             }
 
             Ok(IndexResponse::Template(Template::render(
-                if settings.plain { "plain/video" } else { "video" },
+                if settings.plain {
+                    "plain/video"
+                } else {
+                    "video"
+                },
                 context! {
                     title: format!("{} {}", strings.get("watching").unwrap_or(&("watching".into())), Path::new("/").join(file.clone()).display().to_string().as_str()),
                     lang,
@@ -583,7 +587,11 @@ async fn index(
             let audiopath = audiopath.as_str();
 
             let generic_template = Template::render(
-                if settings.plain { "plain/audio" } else { "audio" },
+                if settings.plain {
+                    "plain/audio"
+                } else {
+                    "audio"
+                },
                 context! {
                     title: format!("{} {}", strings.get("listening").unwrap_or(&("listening".into())), Path::new("/").join(file.clone()).display().to_string().as_str()),
                     lang: &lang,
@@ -681,7 +689,11 @@ async fn index(
                 }
 
                 Ok(IndexResponse::Template(Template::render(
-                    if settings.plain { "plain/audio" } else { "audio" },
+                    if settings.plain {
+                        "plain/audio"
+                    } else {
+                        "audio"
+                    },
                     context! {
                         title: format!("{} {}", strings.get("listening").unwrap_or(&("listening".into())), Path::new("/").join(file.clone()).display().to_string().as_str()),
                         lang,
@@ -761,7 +773,11 @@ async fn index(
             }
 
             Ok(IndexResponse::Template(Template::render(
-                if settings.plain { "plain/index" } else { "index" },
+                if settings.plain {
+                    "plain/index"
+                } else {
+                    "index"
+                },
                 context! {
                     title: &path_str,
                     lang,
@@ -844,7 +860,11 @@ async fn index(
             .to_string();
 
             Ok(IndexResponse::Template(Template::render(
-                if settings.plain { "plain/index" } else { "index" },
+                if settings.plain {
+                    "plain/index"
+                } else {
+                    "index"
+                },
                 context! {
                     title: &path_str,
                     lang,

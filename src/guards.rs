@@ -144,7 +144,10 @@ impl<'r> FromRequest<'r> for Settings<'r> {
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         let mut settings = Settings::from_cookies(request.cookies());
 
-        settings.plain = match (request.cookies().get("plain").map(|c| c.value() == "true"), request.headers().get_one("User-Agent")) {
+        settings.plain = match (
+            request.cookies().get("plain").map(|c| c.value() == "true"),
+            request.headers().get_one("User-Agent"),
+        ) {
             (Some(value), _) => value,
 
             (None, Some(ua)) => {
@@ -156,8 +159,14 @@ impl<'r> FromRequest<'r> for Settings<'r> {
 
             (None, None) => true,
         };
-        
-        let is_media_player = match (request.cookies().get("viewers").map(|c| c.value() == "true"), request.headers().get_one("User-Agent")) {
+
+        let is_media_player = match (
+            request
+                .cookies()
+                .get("viewers")
+                .map(|c| c.value() == "true"),
+            request.headers().get_one("User-Agent"),
+        ) {
             (Some(value), _) => value,
 
             (None, Some(ua)) => {

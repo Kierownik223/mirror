@@ -72,7 +72,11 @@ fn login_page(
     let strings = translations.get_translation(&lang.0);
 
     IndexResponse::Template(Template::render(
-        if settings.plain { "plain/login" } else { "login" },
+        if settings.plain {
+            "plain/login"
+        } else {
+            "login"
+        },
         context! {
             title: strings.get("log_in"),
             lang,
@@ -177,7 +181,11 @@ async fn login(
         );
 
         Ok(IndexResponse::Template(Template::render(
-            if settings.plain { "plain/login" } else { "login" },
+            if settings.plain {
+                "plain/login"
+            } else {
+                "login"
+            },
             context! {
                 title: strings.get("log_in"),
                 lang,

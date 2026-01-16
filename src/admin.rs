@@ -127,7 +127,11 @@ fn admin(
     let strings = translations.get_translation(&lang.0);
 
     return Ok(IndexResponse::Template(Template::render(
-        if settings.plain { "plain/admin" } else { "admin" },
+        if settings.plain {
+            "plain/admin"
+        } else {
+            "admin"
+        },
         context! {
             title: strings.get("admin").unwrap_or(&("admin".into())),
             lang,
