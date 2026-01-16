@@ -27,7 +27,7 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::guards::{Settings, FullUri, HeaderFile, Host, FormSettings, UseViewers};
+use crate::guards::{Settings, FullUri, HeaderFile, Host, FormSettings};
 use crate::i18n::{Language, TranslationStore};
 use crate::jwt::JWT;
 use crate::responders::{Cached, IndexResponse, IndexResult};
@@ -361,7 +361,6 @@ async fn index(
     translations: &rocket::State<TranslationStore>,
     lang: Language,
     host: Host<'_>,
-    viewers: UseViewers<'_>,
     sizes: &State<FileSizes>,
     token: Result<JWT, Status>,
     uri: FullUri,
@@ -485,7 +484,7 @@ async fn index(
             )))
         }
         "7z" | "rar" | "zip" => {
-            if !*viewers.0 {
+            if !settings.viewers {
                 return open_file(path, "private").await;
             }
 

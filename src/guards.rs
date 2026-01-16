@@ -5,7 +5,7 @@ use rocket::{
     Request, Response,
 };
 
-use crate::{config::CONFIG, utils::get_bool_cookie};
+use crate::config::CONFIG;
 
 #[derive(FromForm, serde::Serialize)]
 pub struct FormSettings<'r> {
@@ -156,6 +156,25 @@ impl<'r> FromRequest<'r> for Settings<'r> {
 
             (None, None) => true,
         };
+        
+        let is_media_player = match (request.cookies().get("viewers").map(|c| c.value() == "true"), request.headers().get_one("User-Agent")) {
+            (Some(value), _) => value,
+
+            (None, Some(ua)) => {
+                ua.starts_with("Mozilla/1")
+                    || ua.starts_with("Mozilla/2")
+                    || ua.starts_with("Links")
+                    || ua.starts_with("Lynx")
+                    || ua.starts_with("Winamp")
+                    || ua.starts_with("VLC")
+            }
+
+            (None, None) => true,
+        };
+
+        settings.viewers = is_media_player;
+        settings.audio_player = is_media_player;
+        settings.video_player = is_media_player;
 
         rocket::outcome::Outcome::Success(settings)
     }
@@ -196,30 +215,6 @@ impl<'r> FromRequest<'r> for XForwardedFor<'r> {
                 Outcome::Success(XForwardedFor(ip))
             }
             None => Outcome::Success(XForwardedFor("(unknown)")),
-        }
-    }
-}
-
-pub struct UseViewers<'r>(pub &'r bool);
-
-#[rocket::async_trait]
-impl<'r> FromRequest<'r> for UseViewers<'r> {
-    type Error = ();
-
-    async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        match request.headers().get_one("User-Agent") {
-            Some(value) => {
-                if value.starts_with("Winamp") || value.starts_with("VLC") {
-                    return Outcome::Success(UseViewers(&false));
-                }
-
-                if get_bool_cookie(request.cookies(), "viewers", true) {
-                    return Outcome::Success(UseViewers(&true));
-                }
-
-                Outcome::Success(UseViewers(&false))
-            }
-            None => Outcome::Success(UseViewers(&true)),
         }
     }
 }
