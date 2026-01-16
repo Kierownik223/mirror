@@ -160,7 +160,7 @@ impl<'r> FromRequest<'r> for Settings<'r> {
             (None, None) => true,
         };
 
-        let is_media_player = match (
+        settings.viewers = match (
             request
                 .cookies()
                 .get("viewers")
@@ -170,20 +170,59 @@ impl<'r> FromRequest<'r> for Settings<'r> {
             (Some(value), _) => value,
 
             (None, Some(ua)) => {
-                ua.starts_with("Mozilla/1")
+                !(ua.starts_with("Mozilla/1")
                     || ua.starts_with("Mozilla/2")
                     || ua.starts_with("Links")
                     || ua.starts_with("Lynx")
                     || ua.starts_with("Winamp")
                     || ua.starts_with("VLC")
+                    || ua.starts_with("curl"))
             }
 
-            (None, None) => true,
+            (None, None) => false,
         };
+        settings.audio_player = match (
+            request
+                .cookies()
+                .get("audio_player")
+                .map(|c| c.value() == "true"),
+            request.headers().get_one("User-Agent"),
+        ) {
+            (Some(value), _) => value,
 
-        settings.viewers = is_media_player;
-        settings.audio_player = is_media_player;
-        settings.video_player = is_media_player;
+            (None, Some(ua)) => {
+                !(ua.starts_with("Mozilla/1")
+                    || ua.starts_with("Mozilla/2")
+                    || ua.starts_with("Links")
+                    || ua.starts_with("Lynx")
+                    || ua.starts_with("Winamp")
+                    || ua.starts_with("VLC")
+                    || ua.starts_with("curl"))
+            }
+
+            (None, None) => false,
+        };
+        settings.video_player = match (
+            request
+                .cookies()
+                .get("video_player")
+                .map(|c| c.value() == "true"),
+            request.headers().get_one("User-Agent"),
+        ) {
+            (Some(value), _) => value,
+
+            (None, Some(ua)) => {
+                !(ua.starts_with("Mozilla/1")
+                    || ua.starts_with("Mozilla/2")
+                    || ua.starts_with("Links")
+                    || ua.starts_with("Lynx")
+                    || ua.starts_with("Winamp")
+                    || ua.starts_with("VLC")
+                    || ua.starts_with("curl"))
+            }
+
+            (None, None) => false,
+        };
 
         rocket::outcome::Outcome::Success(settings)
     }
