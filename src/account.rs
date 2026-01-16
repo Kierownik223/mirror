@@ -18,7 +18,7 @@ use crate::{
     jwt::{create_jwt, JWT},
     responders::IndexResult,
     utils::get_root_domain,
-    Host, IndexResponse, Language, TranslationStore, UsePlain,
+    Host, IndexResponse, Language, TranslationStore,
 };
 
 #[derive(Debug, PartialEq, Eq, FromForm)]
@@ -43,7 +43,6 @@ fn login_page(
     translations: &rocket::State<TranslationStore>,
     lang: Language,
     host: Host<'_>,
-    useplain: UsePlain<'_>,
     next: Option<&str>,
     token: Result<JWT, Status>,
     settings: Settings<'_>,
@@ -73,7 +72,7 @@ fn login_page(
     let strings = translations.get_translation(&lang.0);
 
     IndexResponse::Template(Template::render(
-        if *useplain.0 { "plain/login" } else { "login" },
+        if settings.plain { "plain/login" } else { "login" },
         context! {
             title: strings.get("log_in"),
             lang,
@@ -98,7 +97,6 @@ async fn login(
     translations: &State<TranslationStore>,
     lang: Language,
     host: Host<'_>,
-    useplain: UsePlain<'_>,
     settings: Settings<'_>,
 ) -> IndexResult {
     if let Some(db_user) = login_user(db, &user.username, &user.password, &ip.0).await {
@@ -179,7 +177,7 @@ async fn login(
         );
 
         Ok(IndexResponse::Template(Template::render(
-            if *useplain.0 { "plain/login" } else { "login" },
+            if settings.plain { "plain/login" } else { "login" },
             context! {
                 title: strings.get("log_in"),
                 lang,

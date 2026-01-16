@@ -142,7 +142,20 @@ impl<'r> FromRequest<'r> for Settings<'r> {
     type Error = ();
 
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        let settings = Settings::from_cookies(request.cookies());
+        let mut settings = Settings::from_cookies(request.cookies());
+
+        settings.plain = match (request.cookies().get("plain").map(|c| c.value() == "true"), request.headers().get_one("User-Agent")) {
+            (Some(value), _) => value,
+
+            (None, Some(ua)) => {
+                ua.starts_with("Mozilla/1")
+                    || ua.starts_with("Mozilla/2")
+                    || ua.starts_with("Links")
+                    || ua.starts_with("Lynx")
+            }
+
+            (None, None) => true,
+        };
 
         rocket::outcome::Outcome::Success(settings)
     }
@@ -183,43 +196,6 @@ impl<'r> FromRequest<'r> for XForwardedFor<'r> {
                 Outcome::Success(XForwardedFor(ip))
             }
             None => Outcome::Success(XForwardedFor("(unknown)")),
-        }
-    }
-}
-pub struct UsePlain<'r>(pub &'r bool);
-
-#[rocket::async_trait]
-impl<'r> FromRequest<'r> for UsePlain<'r> {
-    type Error = ();
-
-    async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        match request.headers().get_one("User-Agent") {
-            Some(value) => {
-                if let Some(cookie) = request.cookies().get("plain") {
-                    return Outcome::Success(UsePlain(if cookie.value() == "true" {
-                        &true
-                    } else {
-                        &false
-                    }));
-                }
-
-                if value.starts_with("Mozilla/1") || value.starts_with("Mozilla/2") {
-                    return Outcome::Success(UsePlain(&true));
-                }
-
-                Outcome::Success(UsePlain(&false))
-            }
-            None => {
-                if let Some(cookie) = request.cookies().get("plain") {
-                    return Outcome::Success(UsePlain(if cookie.value() == "true" {
-                        &true
-                    } else {
-                        &false
-                    }));
-                }
-
-                Outcome::Success(UsePlain(&true))
-            }
         }
     }
 }

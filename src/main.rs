@@ -27,7 +27,7 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::guards::{Settings, FullUri, HeaderFile, Host, FormSettings, UsePlain, UseViewers};
+use crate::guards::{Settings, FullUri, HeaderFile, Host, FormSettings, UseViewers};
 use crate::i18n::{Language, TranslationStore};
 use crate::jwt::JWT;
 use crate::responders::{Cached, IndexResponse, IndexResult};
@@ -361,7 +361,6 @@ async fn index(
     translations: &rocket::State<TranslationStore>,
     lang: Language,
     host: Host<'_>,
-    useplain: UsePlain<'_>,
     viewers: UseViewers<'_>,
     sizes: &State<FileSizes>,
     token: Result<JWT, Status>,
@@ -405,7 +404,7 @@ async fn index(
     } else if let Err(e) = get_real_path(&file, username.clone()) {
         if e == Status::Forbidden {
             return Ok(IndexResponse::Template(Template::render(
-                if *useplain.0 {
+                if settings.plain {
                     "plain/error/private"
                 } else {
                     "error/private"
@@ -469,7 +468,7 @@ async fn index(
             });
             let markdown = markdown::to_html(&markdown_text);
             Ok(IndexResponse::Template(Template::render(
-                if *useplain.0 { "plain/md" } else { "md" },
+                if settings.plain { "plain/md" } else { "md" },
                 context! {
                     title: format!("{} {}", strings.get("reading_markdown").unwrap_or(&("reading_markdown".into())), Path::new("/").join(&file).display()),
                     lang,
@@ -498,7 +497,7 @@ async fn index(
             let files = parse_7z_output(&String::from_utf8(output.stdout).unwrap_or_default());
 
             Ok(IndexResponse::Template(Template::render(
-                if *useplain.0 { "plain/zip" } else { "zip" },
+                if settings.plain { "plain/zip" } else { "zip" },
                 context! {
                     title: format!("{} {}", strings.get("viewing_zip").unwrap_or(&("viewing_zip".into())), Path::new("/").join(&file).display()),
                     lang,
@@ -556,7 +555,7 @@ async fn index(
             }
 
             Ok(IndexResponse::Template(Template::render(
-                if *useplain.0 { "plain/video" } else { "video" },
+                if settings.plain { "plain/video" } else { "video" },
                 context! {
                     title: format!("{} {}", strings.get("watching").unwrap_or(&("watching".into())), Path::new("/").join(file.clone()).display().to_string().as_str()),
                     lang,
@@ -585,7 +584,7 @@ async fn index(
             let audiopath = audiopath.as_str();
 
             let generic_template = Template::render(
-                if *useplain.0 { "plain/audio" } else { "audio" },
+                if settings.plain { "plain/audio" } else { "audio" },
                 context! {
                     title: format!("{} {}", strings.get("listening").unwrap_or(&("listening".into())), Path::new("/").join(file.clone()).display().to_string().as_str()),
                     lang: &lang,
@@ -683,7 +682,7 @@ async fn index(
                 }
 
                 Ok(IndexResponse::Template(Template::render(
-                    if *useplain.0 { "plain/audio" } else { "audio" },
+                    if settings.plain { "plain/audio" } else { "audio" },
                     context! {
                         title: format!("{} {}", strings.get("listening").unwrap_or(&("listening".into())), Path::new("/").join(file.clone()).display().to_string().as_str()),
                         lang,
@@ -763,7 +762,7 @@ async fn index(
             }
 
             Ok(IndexResponse::Template(Template::render(
-                if *useplain.0 { "plain/index" } else { "index" },
+                if settings.plain { "plain/index" } else { "index" },
                 context! {
                     title: &path_str,
                     lang,
@@ -846,7 +845,7 @@ async fn index(
             .to_string();
 
             Ok(IndexResponse::Template(Template::render(
-                if *useplain.0 { "plain/index" } else { "index" },
+                if settings.plain { "plain/index" } else { "index" },
                 context! {
                     title: &path_str,
                     lang,
@@ -871,7 +870,7 @@ async fn index(
         _ => {
             if CONFIG.extensions.contains(&ext) {
                 Ok(IndexResponse::Template(Template::render(
-                    if *useplain.0 {
+                    if settings.plain {
                         "plain/details"
                     } else {
                         "details"
@@ -906,8 +905,8 @@ fn settings(
     lang: Language,
     translations: &State<TranslationStore>,
     host: Host<'_>,
-    useplain: UsePlain<'_>,
     token: Result<JWT, Status>,
+    settings: Settings<'_>,
 ) -> IndexResponse {
     let (username, perms) = if let Ok(token) = token.as_ref() {
         if let Some(t) = &token.token {
@@ -990,10 +989,8 @@ fn settings(
 
     let show_cookie_notice = jar.iter().next().is_none();
 
-    let settings = Settings::from_cookies(jar);
-
     return IndexResponse::Template(Template::render(
-        if *useplain.0 {
+        if settings.plain {
             "plain/settings"
         } else {
             "settings"
@@ -1009,7 +1006,7 @@ fn settings(
             is_logged_in: token.is_ok(),
             username,
             admin: *perms == 0,
-            plain: *useplain.0,
+            plain: settings.plain,
             settings,
             language_names,
             show_cookie_notice,
@@ -1273,7 +1270,6 @@ fn uploader(
     translations: &rocket::State<TranslationStore>,
     lang: Language,
     host: Host<'_>,
-    useplain: UsePlain<'_>,
     token: Result<JWT, Status>,
     path: Option<&str>,
     settings: Settings<'_>,
@@ -1299,7 +1295,7 @@ fn uploader(
     let strings = translations.get_translation(&lang.0);
 
     return Ok(IndexResponse::Template(Template::render(
-        if *useplain.0 {
+        if settings.plain {
             "plain/upload"
         } else {
             "upload"
@@ -1330,7 +1326,6 @@ async fn upload(
     translations: &rocket::State<TranslationStore>,
     lang: Language,
     host: Host<'_>,
-    useplain: UsePlain<'_>,
     token: Result<JWT, Status>,
     path: Option<&str>,
     settings: Settings<'_>,
@@ -1507,7 +1502,7 @@ async fn upload(
         }
 
         return Ok(IndexResponse::Template(Template::render(
-            if *useplain.0 {
+            if settings.plain {
                 "plain/upload"
             } else {
                 "upload"
@@ -1542,7 +1537,6 @@ async fn search(
     translations: &rocket::State<TranslationStore>,
     lang: Language,
     host: Host<'_>,
-    useplain: UsePlain<'_>,
     token: Result<JWT, Status>,
     settings: Settings<'_>,
 ) -> IndexResult {
@@ -1569,7 +1563,7 @@ async fn search(
     if let Some(q) = q {
         if q.len() < 3 {
             return Ok(IndexResponse::Template(Template::render(
-                if *useplain.0 {
+                if settings.plain {
                     "plain/search"
                 } else {
                     "search"
@@ -1616,7 +1610,7 @@ async fn search(
 
         if results.len() == 0 {
             return Ok(IndexResponse::Template(Template::render(
-                if *useplain.0 {
+                if settings.plain {
                     "plain/search"
                 } else {
                     "search"
@@ -1639,7 +1633,7 @@ async fn search(
         }
 
         return Ok(IndexResponse::Template(Template::render(
-            if *useplain.0 {
+            if settings.plain {
                 "plain/search"
             } else {
                 "search"
@@ -1662,7 +1656,7 @@ async fn search(
         )));
     } else {
         return Ok(IndexResponse::Template(Template::render(
-            if *useplain.0 {
+            if settings.plain {
                 "plain/search"
             } else {
                 "search"
@@ -1704,11 +1698,6 @@ async fn strings(
 #[catch(422)]
 async fn unprocessable_entry(_status: Status, req: &Request<'_>) -> Cached<(Status, Template)> {
     let translations = req.guard::<&State<TranslationStore>>().await.unwrap();
-    let useplain = req
-        .guard::<UsePlain<'_>>()
-        .await
-        .succeeded()
-        .unwrap_or(UsePlain(&false));
 
     let settings = req
         .guard::<Settings<'_>>()
@@ -1741,7 +1730,7 @@ async fn unprocessable_entry(_status: Status, req: &Request<'_>) -> Cached<(Stat
         response: (
             Status::BadRequest,
             Template::render(
-                if *useplain.0 {
+                if settings.plain {
                     "plain/error/400"
                 } else {
                     "error/400"
@@ -1766,11 +1755,6 @@ async fn unprocessable_entry(_status: Status, req: &Request<'_>) -> Cached<(Stat
 #[catch(default)]
 async fn default(status: Status, req: &Request<'_>) -> Cached<Template> {
     let translations = req.guard::<&State<TranslationStore>>().await.unwrap();
-    let useplain = req
-        .guard::<UsePlain<'_>>()
-        .await
-        .succeeded()
-        .unwrap_or(UsePlain(&false));
 
     let settings = req
         .guard::<Settings<'_>>()
@@ -1801,7 +1785,7 @@ async fn default(status: Status, req: &Request<'_>) -> Cached<Template> {
 
     Cached {
         response: Template::render(
-            if *useplain.0 {
+            if settings.plain {
                 format!("plain/error/{}", status.code)
             } else {
                 format!("error/{}", status.code)

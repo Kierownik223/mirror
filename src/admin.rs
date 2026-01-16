@@ -11,7 +11,7 @@ use crate::{
     jwt::JWT,
     responders::IndexResult,
     utils::{format_size, get_root_domain},
-    Disk, Host, IndexResponse, Language, TranslationStore, UsePlain,
+    Disk, Host, IndexResponse, Language, TranslationStore,
 };
 
 #[get("/sysinfo")]
@@ -20,7 +20,6 @@ fn sysinfo(
     translations: &rocket::State<TranslationStore>,
     lang: Language,
     host: Host<'_>,
-    useplain: UsePlain<'_>,
     token: Result<JWT, Status>,
     settings: Settings<'_>,
 ) -> IndexResult {
@@ -69,7 +68,7 @@ fn sysinfo(
         .collect();
 
     return Ok(IndexResponse::Template(Template::render(
-        if *useplain.0 {
+        if settings.plain {
             "plain/sysinfo"
         } else {
             "sysinfo"
@@ -100,7 +99,6 @@ fn admin(
     translations: &rocket::State<TranslationStore>,
     lang: Language,
     host: Host<'_>,
-    useplain: UsePlain<'_>,
     token: Result<JWT, Status>,
     settings: Settings<'_>,
 ) -> IndexResult {
@@ -129,7 +127,7 @@ fn admin(
     let strings = translations.get_translation(&lang.0);
 
     return Ok(IndexResponse::Template(Template::render(
-        if *useplain.0 { "plain/admin" } else { "admin" },
+        if settings.plain { "plain/admin" } else { "admin" },
         context! {
             title: strings.get("admin").unwrap_or(&("admin".into())),
             lang,
