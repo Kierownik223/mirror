@@ -7,7 +7,7 @@ use rocket_dyn_templates::{context, Template};
 
 use crate::{
     config::CONFIG,
-    guards::CookieSettings,
+    guards::Settings,
     jwt::JWT,
     responders::IndexResult,
     utils::{format_size, get_root_domain},
@@ -22,7 +22,7 @@ fn sysinfo(
     host: Host<'_>,
     useplain: UsePlain<'_>,
     token: Result<JWT, Status>,
-    settings: CookieSettings<'_>,
+    settings: Settings<'_>,
 ) -> IndexResult {
     let token = token?;
 
@@ -102,7 +102,7 @@ fn admin(
     host: Host<'_>,
     useplain: UsePlain<'_>,
     token: Result<JWT, Status>,
-    settings: CookieSettings<'_>,
+    settings: Settings<'_>,
 ) -> IndexResult {
     let token = token?;
 

@@ -14,7 +14,7 @@ use rocket_dyn_templates::{context, Template};
 use crate::{
     config::CONFIG,
     db::{add_rememberme_token, delete_session, login_user, Db},
-    guards::{CookieSettings, XForwardedFor},
+    guards::{Settings, XForwardedFor},
     jwt::{create_jwt, JWT},
     responders::IndexResult,
     utils::get_root_domain,
@@ -46,7 +46,7 @@ fn login_page(
     useplain: UsePlain<'_>,
     next: Option<&str>,
     token: Result<JWT, Status>,
-    settings: CookieSettings<'_>,
+    settings: Settings<'_>,
 ) -> IndexResponse {
     if let Ok(token) = token {
         if let Some(t) = token.token {
@@ -99,7 +99,7 @@ async fn login(
     lang: Language,
     host: Host<'_>,
     useplain: UsePlain<'_>,
-    settings: CookieSettings<'_>,
+    settings: Settings<'_>,
 ) -> IndexResult {
     if let Some(db_user) = login_user(db, &user.username, &user.password, &ip.0).await {
         if !settings.nooverride {

@@ -8,7 +8,7 @@ use rocket::{
 use crate::{config::CONFIG, utils::get_bool_cookie};
 
 #[derive(FromForm, serde::Serialize)]
-pub struct Settings<'r> {
+pub struct FormSettings<'r> {
     pub theme: Option<&'r str>,
     pub lang: Option<&'r str>,
     pub hires: Option<&'r str>,
@@ -23,7 +23,7 @@ pub struct Settings<'r> {
 }
 
 #[derive(serde::Serialize)]
-pub struct CookieSettings<'r> {
+pub struct Settings<'r> {
     pub theme: &'r str,
     pub js_present: bool,
     pub lang: &'r str,
@@ -38,7 +38,7 @@ pub struct CookieSettings<'r> {
     pub video_player: bool,
 }
 
-impl<'r> CookieSettings<'r> {
+impl<'r> Settings<'r> {
     pub fn from_cookies(jar: &'r CookieJar<'_>) -> Self {
         let mut theme = jar
             .get("theme")
@@ -118,9 +118,9 @@ impl<'r> CookieSettings<'r> {
     }
 }
 
-impl Default for CookieSettings<'_> {
+impl Default for Settings<'_> {
     fn default() -> Self {
-        CookieSettings {
+        Settings {
             theme: "default",
             js_present: false,
             lang: "en",
@@ -138,11 +138,11 @@ impl Default for CookieSettings<'_> {
 }
 
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for CookieSettings<'r> {
+impl<'r> FromRequest<'r> for Settings<'r> {
     type Error = ();
 
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        let settings = CookieSettings::from_cookies(request.cookies());
+        let settings = Settings::from_cookies(request.cookies());
 
         rocket::outcome::Outcome::Success(settings)
     }

@@ -27,7 +27,7 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::guards::{CookieSettings, FullUri, HeaderFile, Host, Settings, UsePlain, UseViewers};
+use crate::guards::{Settings, FullUri, HeaderFile, Host, FormSettings, UsePlain, UseViewers};
 use crate::i18n::{Language, TranslationStore};
 use crate::jwt::JWT;
 use crate::responders::{Cached, IndexResponse, IndexResult};
@@ -366,7 +366,7 @@ async fn index(
     sizes: &State<FileSizes>,
     token: Result<JWT, Status>,
     uri: FullUri,
-    settings: CookieSettings<'_>,
+    settings: Settings<'_>,
 ) -> IndexResult {
     if file.display().to_string() == "robots.txt" || file.display().to_string() == "favicon.ico" {
         let path = Path::new("public").join(file);
@@ -902,7 +902,7 @@ async fn index(
 #[get("/settings?<opt..>")]
 fn settings(
     jar: &CookieJar<'_>,
-    opt: Settings<'_>,
+    opt: FormSettings<'_>,
     lang: Language,
     translations: &State<TranslationStore>,
     host: Host<'_>,
@@ -990,7 +990,7 @@ fn settings(
 
     let show_cookie_notice = jar.iter().next().is_none();
 
-    let settings = CookieSettings::from_cookies(jar);
+    let settings = Settings::from_cookies(jar);
 
     return IndexResponse::Template(Template::render(
         if *useplain.0 {
@@ -1152,7 +1152,7 @@ async fn iframe(
     jar: &CookieJar<'_>,
     host: Host<'_>,
     token: Result<JWT, Status>,
-    settings: CookieSettings<'_>,
+    settings: Settings<'_>,
 ) -> IndexResult {
     let (username, perms) = if let Ok(token) = token.as_ref() {
         if let Some(t) = &token.token {
@@ -1276,7 +1276,7 @@ fn uploader(
     useplain: UsePlain<'_>,
     token: Result<JWT, Status>,
     path: Option<&str>,
-    settings: CookieSettings<'_>,
+    settings: Settings<'_>,
 ) -> IndexResult {
     let token = token?;
 
@@ -1333,7 +1333,7 @@ async fn upload(
     useplain: UsePlain<'_>,
     token: Result<JWT, Status>,
     path: Option<&str>,
-    settings: CookieSettings<'_>,
+    settings: Settings<'_>,
     sizes: &State<FileSizes>,
 ) -> IndexResult {
     let token = token?;
@@ -1544,7 +1544,7 @@ async fn search(
     host: Host<'_>,
     useplain: UsePlain<'_>,
     token: Result<JWT, Status>,
-    settings: CookieSettings<'_>,
+    settings: Settings<'_>,
 ) -> IndexResult {
     let jwt = token.clone().unwrap_or_default();
 
@@ -1711,7 +1711,7 @@ async fn unprocessable_entry(_status: Status, req: &Request<'_>) -> Cached<(Stat
         .unwrap_or(UsePlain(&false));
 
     let settings = req
-        .guard::<CookieSettings<'_>>()
+        .guard::<Settings<'_>>()
         .await
         .succeeded()
         .unwrap_or_default();
@@ -1773,7 +1773,7 @@ async fn default(status: Status, req: &Request<'_>) -> Cached<Template> {
         .unwrap_or(UsePlain(&false));
 
     let settings = req
-        .guard::<CookieSettings<'_>>()
+        .guard::<Settings<'_>>()
         .await
         .succeeded()
         .unwrap_or_default();
