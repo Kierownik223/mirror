@@ -21,7 +21,7 @@ for (var i = 0; i < cookies.length; i++) {
 }
 
 audio.addEventListener("volumechange", function () {
-    document.cookie = "audiovolume=" + audio.volume; 
+    document.cookie = "audiovolume=" + audio.volume + "; path=/"; 
 });
 
 function fetchJSON(url, callback) {
