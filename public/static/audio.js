@@ -13,10 +13,10 @@ var next = document.getElementById("next");
 var autoplay = document.getElementById("autoplay");
 
 var cookies = document.cookie.split(';');
-for (let cookie of cookies) {
-    cookie = cookie.trim();
-    if (cookie.startsWith("audiovolume=")) {
-        audio.volume = cookie.substring(12);
+for (var i = 0; i < cookies.length; i++) {
+    var cookie = cookies[i].replace(/^\s+/, '');
+    if (cookie.indexOf("audiovolume=") === 0) {
+        audio.volume = cookie.substring("audiovolume=".length);
     }
 }
 
