@@ -38,9 +38,9 @@
                                     '<label for="usage">' +
                                     disk.mount_point +
                                     ": " +
-                                    disk.used_space_readable +
+                                    formatBytes(disk.used_space) +
                                     "/" +
-                                    disk.total_space_readable +
+                                    formatBytes(disk.total_space) +
                                     '</label><progress style="width:100%; box-sizing:border-box;" class="disk_usage" max="' +
                                     disk.total_space +
                                     '" value="' +
@@ -50,9 +50,9 @@
                                 diskDiv.innerHTML =
                                     disk.mount_point +
                                     ": " +
-                                    disk.used_space_readable +
+                                    formatBytes(disk.used_space) +
                                     "/" +
-                                    disk.total_space_readable;
+                                    formatBytes(disk.total_space);
                             }
                         }
                     } catch (e) {

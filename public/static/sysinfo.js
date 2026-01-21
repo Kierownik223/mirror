@@ -39,11 +39,11 @@
 
                         setText(
                             document.getElementById("used_mem_readable"),
-                            data.used_mem_readable,
+                            formatBytes(data.used_mem),
                         );
                         setText(
                             document.getElementById("total_mem_readable"),
-                            data.total_mem_readable,
+                            formatBytes(data.total_mem),
                         );
 
                         var memUsage = document.getElementById("mem_usage");
@@ -65,9 +65,9 @@
                                         '<label for="usage">' +
                                         disk.mount_point +
                                         ": " +
-                                        disk.used_space_readable +
+                                        formatBytes(disk.used_space) +
                                         "/" +
-                                        disk.total_space_readable +
+                                        formatBytes(disk.total_space) +
                                         '</label><progress style="width:100%; box-sizing:border-box;" class="disk_usage" max="' +
                                         disk.total_space +
                                         '" value="' +
@@ -77,9 +77,9 @@
                                     div.innerHTML =
                                         disk.mount_point +
                                         ": " +
-                                        disk.used_space_readable +
+                                        formatBytes(disk.used_space) +
                                         "/" +
-                                        disk.total_space_readable;
+                                        formatBytes(disk.total_space);
                                 }
                             }
                         }
