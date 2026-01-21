@@ -90,17 +90,13 @@ struct Disk {
     fs: String,
     used_space: u64,
     total_space: u64,
-    used_space_readable: String,
-    total_space_readable: String,
     mount_point: String,
 }
 
 #[derive(serde::Serialize)]
 struct Sysinfo {
     total_mem: u64,
-    total_mem_readable: String,
     used_mem: u64,
-    used_mem_readable: String,
     disks: Vec<Disk>,
 }
 

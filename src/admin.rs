@@ -10,7 +10,7 @@ use crate::{
     guards::Settings,
     jwt::JWT,
     responders::IndexResult,
-    utils::{format_size, get_root_domain},
+    utils::get_root_domain,
     Disk, Host, IndexResponse, Language, TranslationStore,
 };
 
@@ -60,8 +60,6 @@ fn sysinfo(
                 fs: x.file_system().to_str().unwrap_or("unknown").to_string(),
                 used_space,
                 total_space: x.total_space(),
-                used_space_readable: format_size(used_space, settings.use_si),
-                total_space_readable: format_size(x.total_space(), settings.use_si),
                 mount_point: x.mount_point().display().to_string(),
             }
         })
