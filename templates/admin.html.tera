@@ -19,6 +19,11 @@ Loading...
 {% endblock content %}
 
 {% block scripts %}
+{% if settings.use_si %}
+<script src="/static/formatbytessi.js"></script>
+{% else %}
+<script src="/static/formatbytes.js"></script>
+{% endif %}
 <script src="/static/polyfills.js"></script>
 <script src="/static/admin.js"></script>
 {% endblock scripts %}
