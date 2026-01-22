@@ -10,7 +10,7 @@ use audiotags::Tag;
 use rocket::{
     data::ToByteUnit,
     fairing::AdHoc,
-    http::{ContentType, CookieJar, Status},
+    http::{ContentType, Status},
     serde::json::Json,
     Data, Request, State,
 };
@@ -27,7 +27,7 @@ use crate::{
     read_files, refresh_file_sizes,
     responders::{ApiResponse, ApiResult},
     utils::{
-        add_path_to_zip, format_size, get_extension_from_filename, get_extension_from_path,
+        add_path_to_zip, get_extension_from_filename, get_extension_from_path,
         get_genre, get_icon, get_name_from_path, get_real_path, get_real_path_with_perms,
         get_virtual_path, is_hidden_path_str, is_restricted, map_io_error_to_status,
         read_dirs_async,
@@ -510,8 +510,8 @@ async fn create_folder<'a>(
     }
 }
 
-#[get("/sysinfo?<use_si>")]
-fn sysinfo(token: Result<JWT, Status>, use_si: Option<&str>, jar: &CookieJar<'_>) -> ApiResult {
+#[get("/sysinfo")]
+fn sysinfo(token: Result<JWT, Status>) -> ApiResult {
     let token = token?;
 
     if token.claims.perms != 0 {
@@ -519,14 +519,6 @@ fn sysinfo(token: Result<JWT, Status>, use_si: Option<&str>, jar: &CookieJar<'_>
     }
 
     let mut sys = System::new_all();
-
-    let use_si = match use_si {
-        Some(u) => match u {
-            "false" => false,
-            _ => true,
-        },
-        None => crate::utils::get_bool_cookie(jar, "use_si", true),
-    };
 
     sys.refresh_specifics(RefreshKind::without_processes(RefreshKind::without_cpu(
         RefreshKind::everything(),
