@@ -12,13 +12,7 @@ use rocket_db_pools::Connection;
 use rocket_dyn_templates::{context, Template};
 
 use crate::{
-    config::CONFIG,
-    db::{add_rememberme_token, delete_session, login_user, Db},
-    guards::{Settings, XForwardedFor},
-    jwt::{create_jwt, JWT},
-    responders::IndexResult,
-    utils::get_root_domain,
-    Host, IndexResponse, Language, TranslationStore,
+    Host, IndexResponse, Language, TranslationStore, config::CONFIG, db::{Db, add_rememberme_token, delete_session, login_user}, guards::{Settings, XForwardedFor}, jwt::{JWT, create_jwt}, responders::IndexResult, utils::{add_token_cookie, get_root_domain}
 };
 
 #[derive(Debug, PartialEq, Eq, FromForm)]
@@ -48,18 +42,10 @@ fn login_page(
     settings: Settings<'_>,
 ) -> IndexResponse {
     if let Ok(token) = token {
-        if let Some(t) = token.token {
-            let mut jwt_cookie = Cookie::new("matoken", t.to_string());
-            jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
-            jwt_cookie.set_same_site(SameSite::Lax);
-
-            jar.add(jwt_cookie);
-
-            let mut local_jwt_cookie = Cookie::new("token", t.to_string());
-            local_jwt_cookie.set_same_site(SameSite::Lax);
-
-            jar.add(local_jwt_cookie);
+        if let Some(t) = &token.token {
+            add_token_cookie(&t, &host.0, jar);
         }
+        
         let perms = token.claims.perms;
 
         if perms == 0 {
@@ -143,16 +129,7 @@ async fn login(
 
         let jwt = create_jwt(&db_user).map_err(|_| Status::InternalServerError)?;
 
-        let mut jwt_cookie = Cookie::new("matoken", jwt.clone());
-        jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
-        jwt_cookie.set_same_site(SameSite::Lax);
-
-        jar.add(jwt_cookie);
-
-        let mut local_jwt_cookie = Cookie::new("token", jwt.clone());
-        local_jwt_cookie.set_same_site(SameSite::Lax);
-
-        jar.add(local_jwt_cookie);
+        add_token_cookie(&jwt, &host.0, jar);
 
         println!(
             "Login for user {} from {} succeeded",

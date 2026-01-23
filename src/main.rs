@@ -27,7 +27,7 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::guards::{FormSettings, FullUri, HeaderFile, Host, Settings};
+use crate::{guards::{FormSettings, FullUri, HeaderFile, Host, Settings}, utils::add_token_cookie};
 use crate::i18n::{Language, TranslationStore};
 use crate::jwt::JWT;
 use crate::responders::{Cached, IndexResponse, IndexResult};
@@ -117,16 +117,7 @@ async fn poster(
 ) -> IndexResult {
     let username = if let Ok(token) = token {
         if let Some(t) = token.token {
-            let mut jwt_cookie = Cookie::new("matoken", t.to_string());
-            jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
-            jwt_cookie.set_same_site(SameSite::Lax);
-
-            jar.add(jwt_cookie);
-
-            let mut local_jwt_cookie = Cookie::new("token", t.to_string());
-            local_jwt_cookie.set_same_site(SameSite::Lax);
-
-            jar.add(local_jwt_cookie);
+            add_token_cookie(&t, &host.0, jar);
         }
 
         token.claims.sub
@@ -215,16 +206,7 @@ async fn file(
 ) -> IndexResult {
     let username = if let Ok(token) = token.as_ref() {
         if let Some(t) = &token.token {
-            let mut jwt_cookie = Cookie::new("matoken", t.to_string());
-            jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
-            jwt_cookie.set_same_site(SameSite::Lax);
-
-            jar.add(jwt_cookie);
-
-            let mut local_jwt_cookie = Cookie::new("token", t.to_string());
-            local_jwt_cookie.set_same_site(SameSite::Lax);
-
-            jar.add(local_jwt_cookie);
+            add_token_cookie(&t, &host.0, jar);
         }
 
         &token.claims.sub
@@ -251,16 +233,7 @@ async fn download_with_counter(
 ) -> IndexResult {
     let username = if let Ok(token) = token.as_ref() {
         if let Some(t) = &token.token {
-            let mut jwt_cookie = Cookie::new("matoken", t.to_string());
-            jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
-            jwt_cookie.set_same_site(SameSite::Lax);
-
-            jar.add(jwt_cookie);
-
-            let mut local_jwt_cookie = Cookie::new("token", t.to_string());
-            local_jwt_cookie.set_same_site(SameSite::Lax);
-
-            jar.add(local_jwt_cookie);
+            add_token_cookie(&t, &host.0, jar);
         }
 
         &token.claims.sub
@@ -313,16 +286,7 @@ async fn download(
 ) -> IndexResult {
     let username = if let Ok(token) = token.as_ref() {
         if let Some(t) = &token.token {
-            let mut jwt_cookie = Cookie::new("matoken", t.to_string());
-            jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
-            jwt_cookie.set_same_site(SameSite::Lax);
-
-            jar.add(jwt_cookie);
-
-            let mut local_jwt_cookie = Cookie::new("token", t.to_string());
-            local_jwt_cookie.set_same_site(SameSite::Lax);
-
-            jar.add(local_jwt_cookie);
+            add_token_cookie(&t, &host.0, jar);
         }
 
         &token.claims.sub
@@ -371,16 +335,7 @@ async fn index(
     let jwt = token.clone().unwrap_or_default();
 
     if let Some(t) = jwt.token {
-        let mut jwt_cookie = Cookie::new("matoken", t.to_string());
-        jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
-        jwt_cookie.set_same_site(SameSite::Lax);
-
-        jar.add(jwt_cookie);
-
-        let mut local_jwt_cookie = Cookie::new("token", t.to_string());
-        local_jwt_cookie.set_same_site(SameSite::Lax);
-
-        jar.add(local_jwt_cookie);
+        add_token_cookie(&t, &host.0, jar);
     }
 
     let username = jwt.claims.sub;
@@ -925,16 +880,7 @@ fn settings(
 ) -> IndexResponse {
     let (username, perms) = if let Ok(token) = token.as_ref() {
         if let Some(t) = &token.token {
-            let mut jwt_cookie = Cookie::new("matoken", t.to_string());
-            jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
-            jwt_cookie.set_same_site(SameSite::Lax);
-
-            jar.add(jwt_cookie);
-
-            let mut local_jwt_cookie = Cookie::new("token", t.to_string());
-            local_jwt_cookie.set_same_site(SameSite::Lax);
-
-            jar.add(local_jwt_cookie);
+            add_token_cookie(&t, &host.0, jar);
         }
 
         (&token.claims.sub, &token.claims.perms)
@@ -1041,16 +987,7 @@ async fn fetch_settings(
     let token = token?;
 
     if let Some(t) = token.token {
-        let mut jwt_cookie = rocket::http::Cookie::new("matoken", t.to_string());
-        jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
-        jwt_cookie.set_same_site(rocket::http::SameSite::Lax);
-
-        jar.add(jwt_cookie);
-
-        let mut local_jwt_cookie = rocket::http::Cookie::new("token", t.to_string());
-        local_jwt_cookie.set_same_site(rocket::http::SameSite::Lax);
-
-        jar.add(local_jwt_cookie);
+        add_token_cookie(&t, &host.0, jar);
     }
 
     let strings = translations.get_translation(&lang.0);
@@ -1091,16 +1028,7 @@ async fn sync_settings(
     let token = token?;
 
     if let Some(t) = token.token {
-        let mut jwt_cookie = rocket::http::Cookie::new("matoken", t.to_string());
-        jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
-        jwt_cookie.set_same_site(rocket::http::SameSite::Lax);
-
-        jar.add(jwt_cookie);
-
-        let mut local_jwt_cookie = rocket::http::Cookie::new("token", t.to_string());
-        local_jwt_cookie.set_same_site(rocket::http::SameSite::Lax);
-
-        jar.add(local_jwt_cookie);
+        add_token_cookie(&t, &host.0, jar);
     }
 
     let strings = translations.get_translation(&lang.0);
@@ -1168,16 +1096,7 @@ async fn iframe(
 ) -> IndexResult {
     let (username, perms) = if let Ok(token) = token.as_ref() {
         if let Some(t) = &token.token {
-            let mut jwt_cookie = Cookie::new("matoken", t.to_string());
-            jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
-            jwt_cookie.set_same_site(SameSite::Lax);
-
-            jar.add(jwt_cookie);
-
-            let mut local_jwt_cookie = Cookie::new("token", t.to_string());
-            local_jwt_cookie.set_same_site(SameSite::Lax);
-
-            jar.add(local_jwt_cookie);
+            add_token_cookie(&t, &host.0, jar);
         }
 
         (&token.claims.sub, token.claims.perms)
@@ -1292,16 +1211,7 @@ fn uploader(
     let token = token?;
 
     if let Some(t) = token.token {
-        let mut jwt_cookie = rocket::http::Cookie::new("matoken", t.to_string());
-        jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
-        jwt_cookie.set_same_site(rocket::http::SameSite::Lax);
-
-        jar.add(jwt_cookie);
-
-        let mut local_jwt_cookie = rocket::http::Cookie::new("token", t.to_string());
-        local_jwt_cookie.set_same_site(rocket::http::SameSite::Lax);
-
-        jar.add(local_jwt_cookie);
+        add_token_cookie(&t, &host.0, jar);
     }
 
     let username = token.claims.sub;
@@ -1349,16 +1259,7 @@ async fn upload(
     let token = token?;
 
     if let Some(t) = token.token {
-        let mut jwt_cookie = rocket::http::Cookie::new("matoken", t.to_string());
-        jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
-        jwt_cookie.set_same_site(rocket::http::SameSite::Lax);
-
-        jar.add(jwt_cookie);
-
-        let mut local_jwt_cookie = rocket::http::Cookie::new("token", t.to_string());
-        local_jwt_cookie.set_same_site(rocket::http::SameSite::Lax);
-
-        jar.add(local_jwt_cookie);
+        add_token_cookie(&t, &host.0, jar);
     }
 
     let username = token.claims.sub;
@@ -1558,16 +1459,7 @@ async fn search(
     let jwt = token.clone().unwrap_or_default();
 
     if let Some(t) = jwt.token {
-        let mut jwt_cookie = Cookie::new("matoken", t.to_string());
-        jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
-        jwt_cookie.set_same_site(SameSite::Lax);
-
-        jar.add(jwt_cookie);
-
-        let mut local_jwt_cookie = Cookie::new("token", t.to_string());
-        local_jwt_cookie.set_same_site(SameSite::Lax);
-
-        jar.add(local_jwt_cookie);
+        add_token_cookie(&t, &host.0, jar);
     }
 
     let username = jwt.claims.sub;

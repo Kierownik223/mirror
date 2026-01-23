@@ -524,3 +524,18 @@ pub fn get_icon(file_name: &str) -> String {
 
     icon.to_string()
 }
+
+pub fn add_token_cookie<'a>(token: &str, host: &str, jar: &'a CookieJar<'_>) -> &'a CookieJar<'a> {
+    let mut jwt_cookie = Cookie::new("matoken", token.to_string());
+    jwt_cookie.set_domain(format!(".{}", get_root_domain(host)));
+    jwt_cookie.set_same_site(SameSite::Lax);
+
+    jar.add(jwt_cookie);
+
+    let mut local_jwt_cookie = Cookie::new("token", token.to_string());
+    local_jwt_cookie.set_same_site(SameSite::Lax);
+
+    jar.add(local_jwt_cookie);
+
+    jar
+}

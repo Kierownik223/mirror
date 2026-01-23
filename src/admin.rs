@@ -6,12 +6,7 @@ use rocket::{
 use rocket_dyn_templates::{context, Template};
 
 use crate::{
-    config::CONFIG,
-    guards::Settings,
-    jwt::JWT,
-    responders::IndexResult,
-    utils::get_root_domain,
-    Disk, Host, IndexResponse, Language, TranslationStore,
+    Disk, Host, IndexResponse, Language, TranslationStore, config::CONFIG, guards::Settings, jwt::JWT, responders::IndexResult, utils::{add_token_cookie, get_root_domain}
 };
 
 #[get("/sysinfo")]
@@ -26,16 +21,7 @@ fn sysinfo(
     let token = token?;
 
     if let Some(t) = token.token {
-        let mut jwt_cookie = rocket::http::Cookie::new("matoken", t.to_string());
-        jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
-        jwt_cookie.set_same_site(rocket::http::SameSite::Lax);
-
-        jar.add(jwt_cookie);
-
-        let mut local_jwt_cookie = rocket::http::Cookie::new("token", t.to_string());
-        local_jwt_cookie.set_same_site(rocket::http::SameSite::Lax);
-
-        jar.add(local_jwt_cookie);
+        add_token_cookie(&t, &host.0, jar);
     }
 
     if !::sysinfo::IS_SUPPORTED_SYSTEM {
@@ -103,16 +89,7 @@ fn admin(
     let token = token?;
 
     if let Some(t) = token.token {
-        let mut jwt_cookie = rocket::http::Cookie::new("matoken", t.to_string());
-        jwt_cookie.set_domain(format!(".{}", get_root_domain(host.0)));
-        jwt_cookie.set_same_site(rocket::http::SameSite::Lax);
-
-        jar.add(jwt_cookie);
-
-        let mut local_jwt_cookie = rocket::http::Cookie::new("token", t.to_string());
-        local_jwt_cookie.set_same_site(rocket::http::SameSite::Lax);
-
-        jar.add(local_jwt_cookie);
+        add_token_cookie(&t, &host.0, jar);
     }
 
     let username = token.claims.sub;
