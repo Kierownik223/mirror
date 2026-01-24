@@ -6,7 +6,12 @@ use rocket::{
 use rocket_dyn_templates::{context, Template};
 
 use crate::{
-    Disk, Host, IndexResponse, Language, TranslationStore, config::CONFIG, guards::Settings, jwt::JWT, responders::IndexResult, utils::{add_token_cookie, get_root_domain}
+    config::CONFIG,
+    guards::Settings,
+    jwt::JWT,
+    responders::IndexResult,
+    utils::{add_token_cookie, get_root_domain},
+    Disk, Host, IndexResponse, Language, TranslationStore,
 };
 
 #[get("/sysinfo")]

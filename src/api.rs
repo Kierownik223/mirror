@@ -27,10 +27,9 @@ use crate::{
     read_files, refresh_file_sizes,
     responders::{ApiResponse, ApiResult},
     utils::{
-        add_path_to_zip, get_extension_from_filename, get_extension_from_path,
-        get_genre, get_icon, get_name_from_path, get_real_path, get_real_path_with_perms,
-        get_virtual_path, is_hidden_path_str, is_restricted, map_io_error_to_status,
-        read_dirs_async,
+        add_path_to_zip, get_extension_from_filename, get_extension_from_path, get_genre, get_icon,
+        get_name_from_path, get_real_path, get_real_path_with_perms, get_virtual_path,
+        is_hidden_path_str, is_restricted, map_io_error_to_status, read_dirs_async,
     },
     Disk, FileSizes, Host, MirrorFile, Sysinfo,
 };

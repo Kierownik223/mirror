@@ -12,7 +12,13 @@ use rocket_db_pools::Connection;
 use rocket_dyn_templates::{context, Template};
 
 use crate::{
-    Host, IndexResponse, Language, TranslationStore, config::CONFIG, db::{Db, add_rememberme_token, delete_session, login_user}, guards::{Settings, XForwardedFor}, jwt::{JWT, create_jwt}, responders::IndexResult, utils::{add_token_cookie, get_root_domain}
+    config::CONFIG,
+    db::{add_rememberme_token, delete_session, login_user, Db},
+    guards::{Settings, XForwardedFor},
+    jwt::{create_jwt, JWT},
+    responders::IndexResult,
+    utils::{add_token_cookie, get_root_domain},
+    Host, IndexResponse, Language, TranslationStore,
 };
 
 #[derive(Debug, PartialEq, Eq, FromForm)]
@@ -45,7 +51,7 @@ fn login_page(
         if let Some(t) = &token.token {
             add_token_cookie(&t, &host.0, jar);
         }
-        
+
         let perms = token.claims.perms;
 
         if perms == 0 {

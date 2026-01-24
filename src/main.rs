@@ -27,7 +27,6 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::{guards::{FormSettings, FullUri, HeaderFile, Host, Settings}, utils::add_token_cookie};
 use crate::i18n::{Language, TranslationStore};
 use crate::jwt::JWT;
 use crate::responders::{Cached, IndexResponse, IndexResult};
@@ -44,6 +43,10 @@ use crate::{
 use crate::{
     db::{add_download, FileDb},
     utils::get_static_cache_control,
+};
+use crate::{
+    guards::{FormSettings, FullUri, HeaderFile, Host, Settings},
+    utils::add_token_cookie,
 };
 
 mod account;
@@ -326,7 +329,10 @@ async fn index(
     uri: FullUri,
     settings: Settings<'_>,
 ) -> IndexResult {
-    if !Path::new("files").join(&file).exists() && (&file.display().to_string() == "robots.txt" || &file.display().to_string() == "favicon.ico") {
+    if !Path::new("files").join(&file).exists()
+        && (&file.display().to_string() == "robots.txt"
+            || &file.display().to_string() == "favicon.ico")
+    {
         let path = Path::new("public").join(file);
 
         return open_file(path, &get_static_cache_control()).await;
