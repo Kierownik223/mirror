@@ -326,7 +326,7 @@ async fn index(
     uri: FullUri,
     settings: Settings<'_>,
 ) -> IndexResult {
-    if file.display().to_string() == "robots.txt" || file.display().to_string() == "favicon.ico" {
+    if !Path::new("files").join(&file).exists() && (&file.display().to_string() == "robots.txt" || &file.display().to_string() == "favicon.ico") {
         let path = Path::new("public").join(file);
 
         return open_file(path, &get_static_cache_control()).await;
