@@ -15,7 +15,7 @@
     {% if admin and path != "/" or private %}
     <div class="actions">
         <a href="javascript:;" onclick="createFolder()"><span>{{ macros::icon(name="folder", hires=settings.hires) }}{{ strings.create_folder }}</span></a>
-        <a href="/upload?path={{ path }}"><span>{{ macros::icon(name="folder", hires=settings.hires) }}{{ strings.uploader }}</span></a>
+        <a href="/upload?path={{ path }}"><span>{{ macros::icon(name="favicon", hires=settings.hires) }}{{ strings.uploader }}</span></a>
     </div>
     {% endif %}
 </div>
