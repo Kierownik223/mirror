@@ -39,14 +39,21 @@
         <div class="actions"><a href="/file{{ path | urlencode }}" id="download" download><span>{{ macros::icon(name="favicon", hires=settings.hires) }}{{ strings.download }}</span></a></div><br>
         <a href="./">{{ macros::icon(name="folder", hires=settings.hires) }}./</a>
     </div>
-    <video src="/file{{ path | urlencode }}" controls style="height: 60vh; width: 100%;" poster="{{ poster | urlencode }}">{{ strings.no_video }}</video>
-    {% if displaydetails %}
-    <b style="font-size: 24px;">{{ vidtitle }}</b>
-    {{ details }}
-    {% endif %}
+    <video id="video" src="/file{{ path | urlencode }}" controls style="height: 60vh; width: 100%;" poster="{{ poster | urlencode }}">{{ strings.no_video }}</video>
+    <div>
+        <a href="#" id="previous" style="float: left;">&lt; {{ strings.previous }}</a>
+        <a href="#" id="next" style="float: right;">{{ strings.next }} &gt;</a>
+        <br>
+    </div>
+    <b id="title" style="font-size: 24px;">{{ vidtitle }}</b>
+    <span id="description">{{ details }}</span>
+    <br>
+    <label for="autoplay"><input type="checkbox" name="autoplay" id="autoplay">{{ strings.autoplay }}</label><br>
 {% endblock content %}
 
 {% block scripts %}
+<script src="/static/breadcrumbs.js"></script>
+<script src="/static/video.js"></script>
 <script>
     if (window.navigator && navigator.mediaSession) {
         navigator.mediaSession.metadata = new MediaMetadata({
