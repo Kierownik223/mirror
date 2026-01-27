@@ -1,5 +1,6 @@
 var video = document.getElementById("video");
 var titleEl = document.getElementById("title");
+var descriptionEl = document.getElementById("description");
 var downloadEl = document.getElementById("download");
 var breadcrumbsEl = document.getElementsByClassName("breadcrumbs")[0];
 var previous = document.getElementById("previous");
@@ -53,6 +54,7 @@ function updatePageMetadata(meta, newPath) {
     if (titleEl)
         titleEl.textContent =
             meta.title || decodeURIComponent(newPath.split("/").pop());
+    if (descriptionEl) descriptionEl.textContent = meta.description || "";
     if (downloadEl) downloadEl.href = "/file" + newPath;
     if (breadcrumbsEl)
         breadcrumbsEl.outerHTML =
