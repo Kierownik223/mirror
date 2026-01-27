@@ -54,7 +54,7 @@ function updatePageMetadata(meta, newPath) {
     if (titleEl)
         titleEl.textContent =
             meta.title || decodeURIComponent(newPath.split("/").pop());
-    if (descriptionEl) descriptionEl.textContent = meta.description || "";
+    if (descriptionEl) descriptionEl.innerHTML = meta.description || "";
     if (downloadEl) downloadEl.href = "/file" + newPath;
     if (breadcrumbsEl)
         breadcrumbsEl.outerHTML =
