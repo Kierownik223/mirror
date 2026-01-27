@@ -17,7 +17,7 @@ use rocket_dyn_templates::tera::{to_value, try_get_value, Value};
 use tokio::sync::RwLock;
 use zip::write::SimpleFileOptions;
 
-use crate::{config::CONFIG, FileEntry, HeaderFile, IndexResponse, MirrorFile};
+use crate::{FileEntry, HeaderFile, IndexResponse, MirrorFile, api::VideoFile, config::CONFIG};
 
 pub fn read_dirs(path: &str) -> Result<Vec<MirrorFile>, Error> {
     let mut dir_list = Vec::new();
@@ -538,4 +538,31 @@ pub fn add_token_cookie<'a>(token: &str, host: &str, jar: &'a CookieJar<'_>) -> 
     jar.add(local_jwt_cookie);
 
     jar
+}
+
+pub fn get_video_metadata(path: &str) -> VideoFile {
+    let mdpath = format!("files/video/metadata{}.md", path.replace("video/", ""));
+    let mdpath = Path::new(mdpath.as_str());
+
+    let mut vidtitle = get_name_from_path(&Path::new(path).to_path_buf());
+
+    let details = if mdpath.exists() {
+        let markdown_text = fs::read_to_string(mdpath.display().to_string())
+            .unwrap_or_else(|err| err.to_string());
+        let mut lines = markdown_text.lines();
+
+        vidtitle = lines
+            .next()
+            .unwrap_or("")
+            .trim_start_matches('#')
+            .trim()
+            .to_string();
+        let markdown = lines.collect::<Vec<&str>>().join("\n");
+
+        Some(markdown::to_html(&markdown))
+    } else {
+        None
+    };
+    
+    VideoFile { title: vidtitle, description: details }
 }

@@ -21,17 +21,9 @@ use rocket_multipart_form_data::{
 use zip::write::SimpleFileOptions;
 
 use crate::{
-    config::CONFIG,
-    db::{get_downloads, FileDb},
-    jwt::JWT,
-    read_files, refresh_file_sizes,
-    responders::{ApiResponse, ApiResult},
-    utils::{
-        add_path_to_zip, get_extension_from_filename, get_extension_from_path, get_genre, get_icon,
-        get_name_from_path, get_real_path, get_real_path_with_perms, get_virtual_path,
-        is_hidden_path_str, is_restricted, map_io_error_to_status, read_dirs_async,
-    },
-    Disk, FileSizes, Host, MirrorFile, Sysinfo,
+    Disk, FileSizes, Host, MirrorFile, Sysinfo, config::CONFIG, db::{FileDb, get_downloads}, jwt::JWT, read_files, refresh_file_sizes, responders::{ApiResponse, ApiResult}, utils::{
+        add_path_to_zip, get_extension_from_filename, get_extension_from_path, get_genre, get_icon, get_name_from_path, get_real_path, get_real_path_with_perms, get_video_metadata, get_virtual_path, is_hidden_path_str, is_restricted, map_io_error_to_status, read_dirs_async
+    }
 };
 
 #[derive(serde::Serialize)]
@@ -66,8 +58,8 @@ pub struct MusicFile {
 
 #[derive(serde::Serialize)]
 pub struct VideoFile {
-    title: String,
-    description: Option<String>,
+    pub title: String,
+    pub description: Option<String>,
 }
 
 #[derive(serde::Serialize)]
@@ -364,34 +356,7 @@ async fn file(file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
 
     if ext == "mp4" || ext == "mkv" || ext == "webm" {
         let videopath = Path::new("/").join(file.clone()).display().to_string();
-        let videopath = videopath.as_str();
-
-        let mdpath = format!("files/video/metadata{}.md", videopath.replace("video/", ""));
-        let mdpath = Path::new(mdpath.as_str());
-
-        let vidtitle = path.file_name();
-        let vidtitle = vidtitle.unwrap_or_default().to_str();
-        let mut vidtitle = vidtitle.unwrap_or("title").to_string();
-
-        let details = if mdpath.exists() {
-            let markdown_text = fs::read_to_string(mdpath.display().to_string())
-                .unwrap_or_else(|err| err.to_string());
-            let mut lines = markdown_text.lines();
-
-            vidtitle = lines
-                .next()
-                .unwrap_or("")
-                .trim_start_matches('#')
-                .trim()
-                .to_string();
-            let markdown = lines.collect::<Vec<&str>>().join("\n");
-
-            Some(markdown::to_html(&markdown))
-        } else {
-            None
-        };
-
-        return Ok(ApiResponse::VideoFile(Json(VideoFile { title: vidtitle, description: details })));
+        return Ok(ApiResponse::VideoFile(Json(get_video_metadata(&videopath))));
     }
 
     Ok(ApiResponse::File(Json(MirrorFile {
