@@ -21,10 +21,10 @@
     <meta property="twitter:image" content="0" />
     <meta property="twitter:card" content="player" />
     <meta property="og:title" content="{{ vidtitle }}" />
-    <meta property="og:description" content="{{ details | striptags }}" />
+    <meta property="og:description" content="{% if details %}{{ details | striptags }}{% else %}{{ title }}{% endif %}" />
     <meta property="og:site_name" content="MARMAK Mirror" />
     <meta property="og:locale" content="{{ lang }}">
-    <meta name="description" content="{{ details | striptags }}">
+    <meta name="description" content="{% if details %}{{ details | striptags }}{% else %}{{ title }}{% endif %}">
 
     <title>{{ vidtitle }} - MARMAK Mirror</title>
 {% endblock head %}
@@ -46,7 +46,7 @@
         <br>
     </div>
     <b id="title" style="font-size: 24px;">{{ vidtitle }}</b>
-    <span id="description">{{ details }}</span>
+    <span id="description">{% if details %}{{ details }}{% endif %}</span>
     <br>
     <label for="autoplay"><input type="checkbox" name="autoplay" id="autoplay">{{ strings.autoplay }}</label><br>
 {% endblock content %}
