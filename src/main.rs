@@ -475,8 +475,6 @@ async fn index(
                 return open_file(path, "private").await;
             }
 
-            let displaydetails = true;
-
             let videopath = Path::new("/").join(file.clone()).display().to_string();
             let videopath = videopath.as_str();
 
@@ -529,7 +527,6 @@ async fn index(
                     is_logged_in: token.is_ok(),
                     username,
                     admin: perms == 0,
-                    displaydetails,
                     details,
                     settings,
                 },
