@@ -27,7 +27,7 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::i18n::{Language, TranslationStore};
+use crate::{i18n::{Language, TranslationStore}, utils::get_video_metadata};
 use crate::jwt::JWT;
 use crate::responders::{Cached, IndexResponse, IndexResult};
 use crate::utils::{
@@ -475,38 +475,9 @@ async fn index(
                 return open_file(path, "private").await;
             }
 
-            let videopath = Path::new("/").join(file.clone()).display().to_string();
-            let videopath = videopath.as_str();
-
-            let mdpath = format!("files/video/metadata{}.md", videopath.replace("video/", ""));
-            let mdpath = Path::new(mdpath.as_str());
-
-            let vidtitle = path.file_name();
-            let vidtitle = vidtitle.unwrap_or_default().to_str();
-            let mut vidtitle = vidtitle.unwrap_or("title").to_string();
-
-            let details: String;
-
-            if mdpath.exists() {
-                let markdown_text = fs::read_to_string(mdpath.display().to_string())
-                    .unwrap_or_else(|err| err.to_string());
-                let mut lines = markdown_text.lines();
-
-                vidtitle = lines
-                    .next()
-                    .unwrap_or("")
-                    .trim_start_matches('#')
-                    .trim()
-                    .to_string();
-                let markdown = lines.collect::<Vec<&str>>().join("\n");
-
-                details = markdown::to_html(&markdown);
-            } else {
-                details = strings
-                    .get("no_details")
-                    .unwrap_or(&("no_details".into()))
-                    .to_string();
-            }
+            let videopath = &Path::new("/").join(file.clone()).display().to_string();
+            
+            let metadata = get_video_metadata(&videopath);
 
             Ok(IndexResponse::Template(Template::render(
                 if settings.plain {
@@ -523,11 +494,11 @@ async fn index(
                     config: (*CONFIG).clone(),
                     path: videopath,
                     poster: format!("/images/videoposters{}.jpg", videopath.replace("video/", "")),
-                    vidtitle,
+                    vidtitle: metadata.title,
                     is_logged_in: token.is_ok(),
                     username,
                     admin: perms == 0,
-                    details,
+                    details: metadata.description,
                     settings,
                 },
             )))
