@@ -17,7 +17,7 @@ use rocket_dyn_templates::tera::{to_value, try_get_value, Value};
 use tokio::sync::RwLock;
 use zip::write::SimpleFileOptions;
 
-use crate::{FileEntry, HeaderFile, IndexResponse, MirrorFile, api::VideoFile, config::CONFIG};
+use crate::{api::VideoFile, config::CONFIG, FileEntry, HeaderFile, IndexResponse, MirrorFile};
 
 pub fn read_dirs(path: &str) -> Result<Vec<MirrorFile>, Error> {
     let mut dir_list = Vec::new();
@@ -547,8 +547,8 @@ pub fn get_video_metadata(path: &str) -> VideoFile {
     let mut vidtitle = get_name_from_path(&Path::new(path).to_path_buf());
 
     let details = if mdpath.exists() {
-        let markdown_text = fs::read_to_string(mdpath.display().to_string())
-            .unwrap_or_else(|err| err.to_string());
+        let markdown_text =
+            fs::read_to_string(mdpath.display().to_string()).unwrap_or_else(|err| err.to_string());
         let mut lines = markdown_text.lines();
 
         vidtitle = lines
@@ -563,8 +563,11 @@ pub fn get_video_metadata(path: &str) -> VideoFile {
     } else {
         None
     };
-    
-    VideoFile { title: vidtitle, description: details }
+
+    VideoFile {
+        title: vidtitle,
+        description: details,
+    }
 }
 
 pub fn parse_bool(input: &str) -> bool {

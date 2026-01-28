@@ -27,7 +27,6 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::{i18n::{Language, TranslationStore}, utils::get_video_metadata};
 use crate::jwt::JWT;
 use crate::responders::{Cached, IndexResponse, IndexResult};
 use crate::utils::{
@@ -47,6 +46,10 @@ use crate::{
 use crate::{
     guards::{FormSettings, FullUri, HeaderFile, Host, Settings},
     utils::add_token_cookie,
+};
+use crate::{
+    i18n::{Language, TranslationStore},
+    utils::get_video_metadata,
 };
 
 mod account;
@@ -476,7 +479,7 @@ async fn index(
             }
 
             let videopath = &Path::new("/").join(file.clone()).display().to_string();
-            
+
             let metadata = get_video_metadata(&videopath);
 
             Ok(IndexResponse::Template(Template::render(

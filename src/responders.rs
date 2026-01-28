@@ -8,7 +8,9 @@ use rocket::{
 use rocket_dyn_templates::Template;
 
 use crate::{
-    MirrorFile, Sysinfo, api::{ApiInfoResponse, MusicFile, SearchFile, UploadFile, UploadLimits, VideoFile}, guards::HeaderFile
+    api::{ApiInfoResponse, MusicFile, SearchFile, UploadFile, UploadLimits, VideoFile},
+    guards::HeaderFile,
+    MirrorFile, Sysinfo,
 };
 
 pub struct Cached<R> {
