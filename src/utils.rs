@@ -566,3 +566,11 @@ pub fn get_video_metadata(path: &str) -> VideoFile {
     
     VideoFile { title: vidtitle, description: details }
 }
+
+pub fn parse_bool(input: &str) -> bool {
+    match input.to_lowercase().as_str() {
+        "true" => true,
+        "false" => false,
+        _ => false,
+    }
+}

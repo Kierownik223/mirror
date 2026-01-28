@@ -1,8 +1,10 @@
-use std::{collections::HashMap, fs};
+use std::{collections::HashMap, env, fs};
 
 use once_cell::sync::Lazy;
 use rocket::data::ToByteUnit;
 use serde::{Deserialize, Serialize};
+
+use crate::utils::parse_bool;
 
 pub static CONFIG: Lazy<Config> = Lazy::new(Config::load);
 
@@ -40,7 +42,7 @@ impl Config {
 impl Default for Config {
     fn default() -> Self {
         Config {
-            extensions: vec![
+            extensions: serde_json::from_str(&env::var("MIRROR_EXTENSIONS").unwrap_or("[\"exe\",\"cab\",\"appx\",\"xap\",\"appxbundle\",\"zip\",\"7z\",\"apk\",\"rar\"]".into())).unwrap_or(vec![
                 "exe".into(),
                 "cab".into(),
                 "appx".into(),
@@ -50,8 +52,8 @@ impl Default for Config {
                 "7z".into(),
                 "apk".into(),
                 "rar".into(),
-            ],
-            hidden_files: vec![
+            ]),
+            hidden_files: serde_json::from_str(&env::var("MIRROR_HIDDEN_FILES").unwrap_or("[\"static\",\"uploads\",\"private\",\"robots.txt\",\"favicon.ico\",\"top\",\"RESTRICTED\",\"metadata\",\"HIDDEN\"]".into())).unwrap_or(vec![
                 "static".into(),
                 "uploads".into(),
                 "private".into(),
@@ -61,23 +63,23 @@ impl Default for Config {
                 "RESTRICTED".into(),
                 "metadata".into(),
                 "HIDDEN".into(),
-            ],
-            enable_login: false,
-            enable_api: true,
-            enable_marmak_link: true,
-            enable_direct: false,
-            instance_info: "My Mirror Instance!".into(),
-            x_sendfile_header: "X-Send-File".into(),
-            x_sendfile_prefix: String::new(),
-            standalone: true,
-            fallback_root_domain: "marmak.net.pl".into(),
-            enable_file_db: false,
-            enable_zip_downloads: false,
-            max_age: 86400,
-            static_max_age: 604800,
-            jwt_secret: String::new(),
-            linkshortener: true,
-            linkshortener_url: "https://short.marmak.net.pl/api/url".into(),
+            ]),
+            enable_login: parse_bool(&env::var("MIRROR_ENABLE_LOGIN").unwrap_or("false".into())),
+            enable_api: parse_bool(&env::var("MIRROR_ENABLE_API").unwrap_or("true".into())),
+            enable_marmak_link:  parse_bool(&env::var("MIRROR_ENABLE_MARMAK_LINK").unwrap_or("true".into())),
+            enable_direct: parse_bool(&env::var("MIRROR_ENABLE_DIRECT").unwrap_or("false".into())),
+            instance_info: env::var("MIRROR_INSTANCE_INFO").unwrap_or("My Mirror Instance!".into()),
+            x_sendfile_header: env::var("MIRROR_X_SENDFILE_HEADER").unwrap_or("X-Send-File".into()),
+            x_sendfile_prefix: env::var("MIRROR_X_SENDFILE_PREFIX").unwrap_or("".into()),
+            standalone: parse_bool(&env::var("MIRROR_STANDALONE").unwrap_or("false".into())),
+            fallback_root_domain: env::var("MIRROR_FALLBACK_ROOT_DOMAIN").unwrap_or("marmak.net.pl".into()),
+            enable_file_db: parse_bool(&env::var("MIRROR_ENABLE_FILE_DB").unwrap_or("false".into())),
+            enable_zip_downloads: parse_bool(&env::var("MIRROR_ENABLE_ZIP_DOWNLOADS").unwrap_or("false".into())),
+            max_age: env::var("MIRROR_MAX_AGE").unwrap_or("86400".into()).parse::<u64>().unwrap_or(86400),
+            static_max_age: env::var("MIRROR_STATIC_MAX_AGE").unwrap_or("604800".into()).parse::<u64>().unwrap_or(604800),
+            jwt_secret: env::var("MIRROR_JWT_SECRET").unwrap_or("".into()),
+            linkshortener: parse_bool(&env::var("MIRROR_LINKSHORTENER").unwrap_or("true".into())),
+            linkshortener_url: env::var("MIRROR_JWT_SECRET").unwrap_or("https://short.marmak.net.pl/api/url".into()),
             max_upload_sizes: HashMap::from([
                 ("0".into(), 5.gigabytes().as_u64()),
                 ("1".into(), 500.megabytes().as_u64()),
