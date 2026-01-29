@@ -27,7 +27,6 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::{db::get_file_by_id, jwt::JWT};
 use crate::responders::{Cached, IndexResponse, IndexResult};
 use crate::utils::{
     format_size_filter, get_cache_control, get_extension_from_path, get_genre, get_name_from_path,
@@ -39,6 +38,7 @@ use crate::{
     config::CONFIG,
     utils::{get_icon, get_virtual_path, is_hidden_path_str},
 };
+use crate::{db::get_file_by_id, jwt::JWT};
 use crate::{
     db::{add_download, FileDb},
     utils::get_static_cache_control,
@@ -249,7 +249,11 @@ async fn file_db(
 
     if !Path::new(&format!("files/{}", file.display().to_string())).exists() {
         if let Some(file) = get_file_by_id(db, &file.display().to_string()).await {
-            return open_file(Path::new(&format!("files/{}", file)).to_path_buf(), &get_cache_control(false)).await;
+            return open_file(
+                Path::new(&format!("files/{}", file)).to_path_buf(),
+                &get_cache_control(false),
+            )
+            .await;
         } else {
             return Err(Status::NotFound);
         }

@@ -181,7 +181,7 @@ pub async fn add_shared_file(mut db: Connection<FileDb>, path: &str) -> Option<S
     if let Ok(result) = sqlx::query("SELECT id FROM files WHERE path = ?")
         .bind(path)
         .fetch_one(&mut **db)
-        .await 
+        .await
     {
         return result.try_get::<String, _>("id").ok();
     }

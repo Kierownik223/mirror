@@ -21,12 +21,18 @@ use rocket_multipart_form_data::{
 use zip::write::SimpleFileOptions;
 
 use crate::{
-    Disk, FileSizes, Host, MirrorFile, Sysinfo, config::CONFIG, db::{FileDb, add_shared_file, get_downloads}, jwt::JWT, read_files, refresh_file_sizes, responders::{ApiResponse, ApiResult}, utils::{
+    config::CONFIG,
+    db::{add_shared_file, get_downloads, FileDb},
+    jwt::JWT,
+    read_files, refresh_file_sizes,
+    responders::{ApiResponse, ApiResult},
+    utils::{
         add_path_to_zip, get_extension_from_filename, get_extension_from_path, get_genre, get_icon,
         get_name_from_path, get_real_path, get_real_path_with_perms, get_video_metadata,
         get_virtual_path, is_hidden_path_str, is_restricted, map_io_error_to_status,
         read_dirs_async,
-    }
+    },
+    Disk, FileSizes, Host, MirrorFile, Sysinfo,
 };
 
 #[derive(serde::Serialize)]
@@ -503,11 +509,7 @@ async fn delete<'a>(
 }
 
 #[post("/<file..>")]
-async fn share(
-    db: Connection<FileDb>,
-    file: PathBuf,
-    token: Result<JWT, Status>,
-) -> ApiResult {
+async fn share(db: Connection<FileDb>, file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
     let token = token?;
 
     let username = token.claims.sub;
@@ -524,7 +526,10 @@ async fn share(
     println!("yusadyhsajhhsaida: {:?}", result);
 
     if let Some(id) = result {
-        Ok(ApiResponse::MessageStatus((Status::Created, Json(ApiInfoResponse { message: id }))))
+        Ok(ApiResponse::MessageStatus((
+            Status::Created,
+            Json(ApiInfoResponse { message: id }),
+        )))
     } else {
         Err(Status::InternalServerError)
     }
