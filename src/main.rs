@@ -247,7 +247,7 @@ async fn file_db(
         &"Nobody".into()
     };
 
-    if !Path::new(&format!("files{}", file.display().to_string())).exists() {
+    if !Path::new(&format!("files/{}", file.display().to_string())).exists() {
         if let Some(file) = get_file_by_id(db, &file.display().to_string()).await {
             return open_file(Path::new(&format!("files/{}", file)).to_path_buf(), &get_cache_control(false)).await;
         } else {
