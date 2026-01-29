@@ -153,6 +153,28 @@ pub async fn get_downloads(mut db: Connection<FileDb>, path: &str) -> Option<i32
     }
 }
 
+pub async fn get_file_by_id(mut db: Connection<FileDb>, path: &str) -> Option<String> {
+    let query_result = sqlx::query("SELECT path FROM files WHERE path = ? OR id = ?")
+        .bind(path)
+        .bind(path)
+        .fetch_one(&mut **db)
+        .await;
+
+    match query_result {
+        Ok(row) => {
+            if let Some(path) = row.try_get::<String, _>("path").ok() {
+                Some(path)
+            } else {
+                None
+            }
+        }
+        Err(error) => {
+            println!("Database error: {:?}", error);
+            None
+        }
+    }
+}
+
 pub async fn add_rememberme_token(mut db: Connection<Db>, username: &str) -> Option<String> {
     let token: String = rand::thread_rng()
         .sample_iter(&Alphanumeric)

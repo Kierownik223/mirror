@@ -27,7 +27,7 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::jwt::JWT;
+use crate::{db::get_file_by_id, jwt::JWT};
 use crate::responders::{Cached, IndexResponse, IndexResult};
 use crate::utils::{
     format_size_filter, get_cache_control, get_extension_from_path, get_genre, get_name_from_path,
@@ -219,6 +219,41 @@ async fn file(
     } else {
         &"Nobody".into()
     };
+
+    let (path, is_private) = get_real_path(&file, username.to_string())?;
+
+    if is_restricted(&path, token.is_ok()) {
+        return Err(Status::Unauthorized);
+    }
+
+    open_file(path, &get_cache_control(is_private)).await
+}
+
+#[get("/file/<file..>")]
+async fn file_db(
+    db: Connection<FileDb>,
+    file: PathBuf,
+    token: Result<JWT, Status>,
+    host: Host<'_>,
+    jar: &CookieJar<'_>,
+) -> IndexResult {
+    let username = if let Ok(token) = token.as_ref() {
+        if let Some(t) = &token.token {
+            add_token_cookie(&t, &host.0, jar);
+        }
+
+        &token.claims.sub
+    } else {
+        &"Nobody".into()
+    };
+
+    if !Path::new(&format!("files{}", file.display().to_string())).exists() {
+        if let Some(file) = get_file_by_id(db, &file.display().to_string()).await {
+            return open_file(Path::new(&format!("files/{}", file)).to_path_buf(), &get_cache_control(false)).await;
+        } else {
+            return Err(Status::NotFound);
+        }
+    }
 
     let (path, is_private) = get_real_path(&file, username.to_string())?;
 
@@ -1779,7 +1814,6 @@ async fn rocket() -> _ {
                 index,
                 iframe,
                 poster,
-                file,
                 sitemap,
                 uploader,
                 upload,
@@ -1800,9 +1834,9 @@ async fn rocket() -> _ {
     if CONFIG.enable_file_db {
         rocket = rocket
             .attach(FileDb::init())
-            .mount("/", routes![download_with_counter])
+            .mount("/", routes![download_with_counter, file_db])
     } else {
-        rocket = rocket.mount("/", routes![download])
+        rocket = rocket.mount("/", routes![download, file])
     }
 
     if CONFIG.enable_api {
