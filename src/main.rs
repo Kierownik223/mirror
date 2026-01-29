@@ -247,7 +247,9 @@ async fn file_db(
         &"Nobody".into()
     };
 
-    if !Path::new(&format!("files/{}", file.display().to_string())).exists() {
+    let (path, is_private) = get_real_path(&file, username.to_string())?;
+
+    if !path.exists() {
         if let Some(file) = get_file_by_id(db, &file.display().to_string()).await {
             return open_file(
                 Path::new(&format!("files/{}", file)).to_path_buf(),
@@ -258,8 +260,6 @@ async fn file_db(
             return Err(Status::NotFound);
         }
     }
-
-    let (path, is_private) = get_real_path(&file, username.to_string())?;
 
     if is_restricted(&path, token.is_ok()) {
         return Err(Status::Unauthorized);
