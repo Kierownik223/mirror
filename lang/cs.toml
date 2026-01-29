@@ -131,6 +131,11 @@ shorten = "Zkrátit"
 error_shortening = "Při zkracování URL došlo k chybě."
 shortening_ratelimit = "Zkrátili jste příliš mnoho odkazů. Zkuste to prosím znovu za hodinu."
 
+# File sharing
+
+share = "Sdílet"
+error_sharing = "Při sdílení souboru došlo k chybě."
+
 # Search
 
 search = "Hledat"

@@ -131,6 +131,11 @@ shorten = "短縮"
 error_shortening = "URLの短縮中にエラーが発生しました。"
 shortening_ratelimit = "短縮したリンクが多すぎます。1時間後にもう一度お試しください。"
 
+# File sharing
+
+share = "共有"
+error_sharing = "ファイルの共有中にエラーが発生しました。"
+
 # Search
 
 search = "検索"

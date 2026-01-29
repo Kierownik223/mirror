@@ -131,6 +131,11 @@ shorten = "Shorten"
 error_shortening = "An error occurred while shortening the URL."
 shortening_ratelimit = "You have shortened too many links. Please try again after an hour."
 
+# File sharing
+
+share = "Share"
+error_sharing = "An error occurred while sharing the file."
+
 # Search
 
 search = "Search"

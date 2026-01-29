@@ -131,6 +131,11 @@ shorten = "Skrůcić"
 error_shortening = "Při skrůcaniu URL trefiła sie feler."
 shortening_ratelimit = "Skrůcił żeś za moc linkōw. Sprōbuj za godzina."
 
+# File sharing
+
+share = "Udostępnij"
+error_sharing = "Při udostępnianiu pliku trefiła sie feler."
+
 # Search
 
 search = "Szukej"

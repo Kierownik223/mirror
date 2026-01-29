@@ -131,6 +131,11 @@ shorten = "Kürzen"
 error_shortening = "Beim Kürzen der URL ist ein Fehler aufgetreten."
 shortening_ratelimit = "Sie haben zu viele Links gekürzt. Bitte versuchen Sie es in einer Stunde erneut."
 
+# File sharing
+
+share = "Freigeben"
+error_sharing = "Beim Freigeben der Datei ist ein Fehler aufgetreten."
+
 # Search
 
 search = "Suchen"
