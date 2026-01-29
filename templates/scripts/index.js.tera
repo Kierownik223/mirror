@@ -470,3 +470,77 @@ function deleteFile(element, filePath, message, onComplete) {
         if (onComplete) onComplete();
     }
 }
+
+function share(element, filePath) {
+    var pathname = "/";
+    if (window.location && typeof window.location.pathname === "string") {
+        pathname = window.location.pathname;
+    }
+    if (typeof encodeURIComponent === "undefined") {
+        var path = pathname + escape(filePath);
+    } else {
+        var path = pathname + encodeURIComponent(filePath);
+    }
+    element.onclick = null;
+    var xhr;
+    if (window.XMLHttpRequest) {
+        xhr = new XMLHttpRequest();
+    } else {
+        try {
+            xhr = new ActiveXObject("Microsoft.XMLHTTP");
+        } catch (e) {
+            alert("{{ strings.error_sharing }}");
+            element.onclick = function () {
+                share(element, url);
+            };
+            return;
+        }
+    }
+
+    try {
+        xhr.open("POST", "/api" + path, true);
+    } catch (e) {
+        alert("{{ strings.error_sharing }}");
+        element.onclick = function () {
+            share(element, filePath);
+        };
+        return;
+    }
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4) {
+            if (xhr.status == 201) {
+                if (element) {
+                    var response = JSON.parse(xhr.responseText);
+                    element.innerText = "http://{{ host }}/file/" + response.message;
+                    element.href = "/file/" + response.message;
+                    element.onclick = function (e) {
+                        e.preventDefault();
+                        try {
+                            navigator.clipboard.writeText("http://{{ host }}/file/" + response.message);
+                        } catch (e) {
+                            window.clipboardData.setData("Text", "http://{{ host }}/file/" + response.message);
+                        }
+                    };
+                } else {
+                    alert(JSON.parse(xhr.responseText).message);
+                    element.onclick = function () {
+                        share(element, filePath);
+                    };
+                }
+            } else {
+                alert("{{ strings.error_sharing }}");
+                return;
+            }
+        }
+    };
+
+    try {
+        xhr.send();
+    } catch (e) {
+        alert("{{ strings.error_sharing }}");
+        element.onclick = function () {
+            share(element, filePath);
+        };
+    }
+}

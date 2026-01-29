@@ -68,7 +68,7 @@
             <td class="hide-more">{{ s.size | format_size(use_si=settings.use_si) }}</td>
             <td class="hide">{{ strings.file }}</td>
             {% if admin or private %}
-            <td><a style="cursor: pointer;" href="javascript:;" onclick="renameFile(this, '{{ s.name | addslashes }}', true)">{{ strings.rename }}</a> <a style="cursor: pointer;" href="javascript:;" onclick="deleteFile(this, '{{ s.name | addslashes }}', true)">{{ strings.delete }}</a></td>
+            <td><a style="cursor: pointer;" href="javascript:;" onclick="renameFile(this, '{{ s.name | addslashes }}', true)">{{ strings.rename }}</a> <a style="cursor: pointer;" href="javascript:;" onclick="share(this, '{{ s.name | addslashes }}')">{{ strings.share }}</a> <a style="cursor: pointer;" href="javascript:;" onclick="deleteFile(this, '{{ s.name | addslashes }}', true)">{{ strings.delete }}</a></td>
             {% endif %}
         </tr>
         {% endfor %}
