@@ -175,6 +175,30 @@ pub async fn get_file_by_id(mut db: Connection<FileDb>, path: &str) -> Option<St
     }
 }
 
+pub async fn add_shared_file(mut db: Connection<FileDb>, path: &str) -> Option<String> {
+    let id = Uuid::new_v4().to_string();
+
+    if let Ok(result) = sqlx::query("SELECT id FROM files WHERE path = ?")
+        .bind(path)
+        .fetch_one(&mut **db)
+        .await 
+    {
+        return result.try_get::<String, _>("id").ok();
+    }
+
+    if let Err(error) = sqlx::query("INSERT INTO files (id, path, downloads, shared) VALUES (?, ?, 0, 1) ON DUPLICATE KEY UPDATE downloads = downloads + 1")
+        .bind(&id)
+        .bind(path)
+        .execute(&mut **db)
+        .await
+    {
+        println!("Database error: {:?}", error);
+        None
+    } else {
+        Some(id)
+    }
+}
+
 pub async fn add_rememberme_token(mut db: Connection<Db>, username: &str) -> Option<String> {
     let token: String = rand::thread_rng()
         .sample_iter(&Alphanumeric)

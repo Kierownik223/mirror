@@ -21,18 +21,12 @@ use rocket_multipart_form_data::{
 use zip::write::SimpleFileOptions;
 
 use crate::{
-    config::CONFIG,
-    db::{get_downloads, FileDb},
-    jwt::JWT,
-    read_files, refresh_file_sizes,
-    responders::{ApiResponse, ApiResult},
-    utils::{
+    Disk, FileSizes, Host, MirrorFile, Sysinfo, config::CONFIG, db::{FileDb, add_shared_file, get_downloads}, jwt::JWT, read_files, refresh_file_sizes, responders::{ApiResponse, ApiResult}, utils::{
         add_path_to_zip, get_extension_from_filename, get_extension_from_path, get_genre, get_icon,
         get_name_from_path, get_real_path, get_real_path_with_perms, get_video_metadata,
         get_virtual_path, is_hidden_path_str, is_restricted, map_io_error_to_status,
         read_dirs_async,
-    },
-    Disk, FileSizes, Host, MirrorFile, Sysinfo,
+    }
 };
 
 #[derive(serde::Serialize)]
@@ -506,6 +500,34 @@ async fn delete<'a>(
             }),
         ))),
     };
+}
+
+#[post("/<file..>")]
+async fn share(
+    db: Connection<FileDb>,
+    file: PathBuf,
+    token: Result<JWT, Status>,
+) -> ApiResult {
+    let token = token?;
+
+    let username = token.claims.sub;
+    let perms = token.claims.perms;
+
+    let path = get_real_path_with_perms(&file, username, perms)?.0;
+
+    if !path.exists() {
+        return Err(Status::NotFound);
+    }
+
+    let result = add_shared_file(db, &path.display().to_string().replace("files/", "")).await;
+
+    println!("yusadyhsajhhsaida: {:?}", result);
+
+    if let Some(id) = result {
+        Ok(ApiResponse::MessageStatus((Status::Created, Json(ApiInfoResponse { message: id }))))
+    } else {
+        Err(Status::InternalServerError)
+    }
 }
 
 #[put("/<file..>", data = "<name_req>")]
@@ -1023,7 +1045,7 @@ pub fn build_api() -> AdHoc {
             .register("/api", catchers![default]);
 
         if CONFIG.enable_file_db {
-            rocket = rocket.mount("/api", routes![file_with_downloads])
+            rocket = rocket.mount("/api", routes![file_with_downloads, share])
         } else {
             rocket = rocket.mount("/api", routes![file])
         }
