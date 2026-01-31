@@ -434,7 +434,7 @@ async fn index(
         return Err(Status::Unauthorized);
     }
 
-    if !uri.0.ends_with("/") {
+    if path.is_dir() && !uri.0.ends_with("/") {
         return Ok(IndexResponse::Redirect(Redirect::moved(format!(
             "{}/",
             uri.0
