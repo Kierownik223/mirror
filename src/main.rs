@@ -203,69 +203,47 @@ async fn poster(
     }
 }
 
-#[get("/file/<file..>")]
-async fn file(
-    file: PathBuf,
+#[get("/share/<file>")]
+async fn share(
+    db: Connection<FileDb>,
+    file: &str,
+    translations: &rocket::State<TranslationStore>,
+    lang: Language,
     token: Result<JWT, Status>,
     host: Host<'_>,
+    sizes: &State<FileSizes>,
     jar: &CookieJar<'_>,
+    settings: Settings<'_>,
 ) -> IndexResult {
-    let username = if let Ok(token) = token.as_ref() {
-        if let Some(t) = &token.token {
-            add_token_cookie(&t, &host.0, jar);
-        }
+    let jwt = token.clone().unwrap_or_default();
 
-        &token.claims.sub
-    } else {
-        &"Nobody".into()
-    };
-
-    let (path, is_private) = get_real_path(&file, username.to_string())?;
-
-    if is_restricted(&path, token.is_ok()) {
-        return Err(Status::Unauthorized);
+    if let Some(t) = jwt.token {
+        add_token_cookie(&t, &host.0, jar);
     }
+    
+    let strings = translations.get_translation(&lang.0);
 
-    open_file(path, &get_cache_control(is_private)).await
+    let root_domain = get_root_domain(host.0);
+
+    if let Some(file) = get_file_by_id(db, file).await {
+        display_file(Path::new("files/").join(&file).to_path_buf(), Path::new("/").join(&file).to_path_buf(), false, strings, lang.0, root_domain, host, token, settings, jar, sizes).await
+    } else {
+        Err(Status::NotFound)
+    }
 }
 
-#[get("/file/<file..>")]
-async fn file_db(
+#[get("/share/<file>?download")]
+async fn download_share(
     db: Connection<FileDb>,
-    file: PathBuf,
-    token: Result<JWT, Status>,
-    host: Host<'_>,
-    jar: &CookieJar<'_>,
+    db2: Connection<FileDb>,
+    file: &str,
 ) -> IndexResult {
-    let username = if let Ok(token) = token.as_ref() {
-        if let Some(t) = &token.token {
-            add_token_cookie(&t, &host.0, jar);
-        }
-
-        &token.claims.sub
+    if let Some(file) = get_file_by_id(db, file).await {
+        add_download(db2, &file).await;
+        open_file(Path::new("files/").join(&file).to_path_buf(), &get_cache_control(false)).await
     } else {
-        &"Nobody".into()
-    };
-
-    let (path, is_private) = get_real_path(&file, username.to_string())?;
-
-    if !path.exists() {
-        if let Some(file) = get_file_by_id(db, &file.display().to_string()).await {
-            return open_file(
-                Path::new(&format!("files/{}", file)).to_path_buf(),
-                &get_cache_control(false),
-            )
-            .await;
-        } else {
-            return Err(Status::NotFound);
-        }
+        Err(Status::NotFound)
     }
-
-    if is_restricted(&path, token.is_ok()) {
-        return Err(Status::Unauthorized);
-    }
-
-    open_file(path, &get_cache_control(is_private)).await
 }
 
 #[get("/<file..>?download")]
@@ -317,9 +295,7 @@ async fn download_with_counter(
 
     add_download(db, &file).await;
 
-    let url = format!("/file/{}", urlencoding::encode(&file)).replace("%2F", "/");
-
-    return Ok(IndexResponse::Redirect(Redirect::found(url)));
+    open_file(path, &get_cache_control(is_private)).await
 }
 
 #[get("/<file..>?download")]
@@ -1852,9 +1828,9 @@ async fn rocket() -> _ {
     if CONFIG.enable_file_db {
         rocket = rocket
             .attach(FileDb::init())
-            .mount("/", routes![download_with_counter, file_db])
+            .mount("/", routes![download_with_counter, share, download_share])
     } else {
-        rocket = rocket.mount("/", routes![download, file])
+        rocket = rocket.mount("/", routes![download])
     }
 
     if CONFIG.enable_api {

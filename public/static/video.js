@@ -55,7 +55,7 @@ function updatePageMetadata(meta, newPath) {
         titleEl.textContent =
             meta.title || decodeURIComponent(newPath.split("/").pop());
     if (descriptionEl) descriptionEl.innerHTML = meta.description || "";
-    if (downloadEl) downloadEl.href = "/file" + newPath;
+    if (downloadEl) downloadEl.href = newPath + "?download";
     if (breadcrumbsEl)
         breadcrumbsEl.outerHTML =
             createBreadcrumbs(decodeURIComponent(newPath)).outerHTML ||
@@ -151,7 +151,7 @@ fetchJSON("/api/listing" + folderPath, function (err, files) {
         var targetFile = fileNames[index];
         var newPath = folderPath + "/" + encodeURIComponent(targetFile);
 
-        video.src = "/file" + newPath;
+        video.src = newPath + "?download";
         video.play();
 
         fetchJSON("/api" + newPath, function (err, meta) {

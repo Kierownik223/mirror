@@ -12,10 +12,10 @@
     <meta property="twitter:site" content="MARMAK Mirror" />
     <meta property="twitter:creator" content="MARMAK" />
     <meta property="twitter:title" content="{{ vidtitle }}" />
-    <meta property="twitter:player:stream"  content="/file{{ path | urlencode }}" />
+    <meta property="twitter:player:stream"  content="{{ path | urlencode }}?download" />
     <meta property="twitter:player:stream:content_type" content="video/mp4" />
-    <meta property="og:video" content="/file{{ path | urlencode }}" />
-    <meta property="og:video:secure_url" content="/file{{ path | urlencode }}" />
+    <meta property="og:video" content="{{ path | urlencode }}?download" />
+    <meta property="og:video:secure_url" content="{{ path | urlencode }}?download" />
     <meta property="og:video:type" content="video/mp4" />
     <meta property="og:image" content="{{ poster | urlencode }}" />
     <meta property="twitter:image" content="0" />
@@ -36,10 +36,10 @@
                 {{ macros::breadcrumbs(path=path) }}
             </span>
         </span>
-        <div class="actions"><a href="/file{{ path | urlencode }}" id="download" download><span>{{ macros::icon(name="favicon", hires=settings.hires) }}{{ strings.download }}</span></a></div><br>
+        <div class="actions"><a href="?download" id="download" download><span>{{ macros::icon(name="favicon", hires=settings.hires) }}{{ strings.download }}</span></a></div><br>
         <a href="./">{{ macros::icon(name="folder", hires=settings.hires) }}./</a>
     </div>
-    <video id="video" src="/file{{ path | urlencode }}" controls style="height: 60vh; width: 100%;" poster="{{ poster | urlencode }}">{{ strings.no_video }}</video>
+    <video id="video" src="?download" controls style="height: 60vh; width: 100%;" poster="{{ poster | urlencode }}">{{ strings.no_video }}</video>
     <div>
         <a href="#" id="previous" style="float: left;">&lt; {{ strings.previous }}</a>
         <a href="#" id="next" style="float: right;">{{ strings.next }} &gt;</a>

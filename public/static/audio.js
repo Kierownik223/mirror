@@ -67,7 +67,7 @@ function updatePageMetadata(meta, newPath, coverFile) {
     if (yearEl) yearEl.textContent = meta.year || "N/A";
     if (genreEl) genreEl.textContent = meta.genre || "N/A";
     if (trackEl) trackEl.textContent = meta.track || "";
-    if (downloadEl) downloadEl.href = "/file" + newPath;
+    if (downloadEl) downloadEl.href = newPath + "?download";
     if (breadcrumbsEl)
         breadcrumbsEl.outerHTML =
             createBreadcrumbs(decodeURIComponent(newPath)).outerHTML ||
@@ -186,7 +186,7 @@ fetchJSON("/api/listing" + folderPath, function (err, files) {
         var targetFile = fileNames[index];
         var newPath = folderPath + "/" + encodeURIComponent(targetFile);
 
-        audio.src = "/file" + newPath;
+        audio.src = newPath + "?download";
         audio.play();
 
         fetchJSON("/api" + newPath, function (err, meta) {

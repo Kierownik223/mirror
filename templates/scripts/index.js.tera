@@ -512,14 +512,14 @@ function share(element, filePath) {
             if (xhr.status == 201) {
                 if (element) {
                     var response = JSON.parse(xhr.responseText);
-                    element.innerText = "http://{{ host }}/file/" + response.message;
-                    element.href = "/file/" + response.message;
+                    element.innerText = "http://{{ host }}/share/" + response.message;
+                    element.href = "/share/" + response.message;
                     element.onclick = function (e) {
                         e.preventDefault();
                         try {
-                            navigator.clipboard.writeText("http://{{ host }}/file/" + response.message);
+                            navigator.clipboard.writeText("http://{{ host }}/share/" + response.message);
                         } catch (e) {
-                            window.clipboardData.setData("Text", "http://{{ host }}/file/" + response.message);
+                            window.clipboardData.setData("Text", "http://{{ host }}/share/" + response.message);
                         }
                     };
                 } else {

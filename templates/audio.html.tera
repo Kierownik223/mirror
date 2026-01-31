@@ -15,8 +15,8 @@
     <meta property="og:image" content="{{ poster }}">
     <meta property="og:locale" content="{{ lang }}">
     <meta property="og:site_name" content="MARMAK Mirror">
-    <meta property="og:audio" content="/file{{ path | urlencode }}"/>
-    <meta property="og:audio:secure_url" content="/file{{ path | urlencode }}"/>
+    <meta property="og:audio" content="{{ path | urlencode }}?download"/>
+    <meta property="og:audio:secure_url" content="{{ path | urlencode }}?download"/>
     <meta name="description" content="{{ title }}">
 
     <title>{{ audiotitle }} - MARMAK Mirror</title>
@@ -29,10 +29,10 @@
                 {{ macros::breadcrumbs(path=path) }}
             </span>
         </span>
-        <div class="actions"><a href="/file{{ path }}" id="download" download><span>{{ macros::icon(name="favicon", hires=settings.hires) }}{{ strings.download }}</span></a></div><br>
+        <div class="actions"><a href="{{ path }}?download" id="download" download><span>{{ macros::icon(name="favicon", hires=settings.hires) }}{{ strings.download }}</span></a></div><br>
         <a href="./">{{ macros::icon(name="folder", hires=settings.hires) }}./</a>
     </div>
-    <audio id="audio" src="/file{{ path }}" controls style="width: 100%;" poster="{{ poster }}">{{ strings.no_audio }}</audio>
+    <audio id="audio" src="{{ path }}?download" controls style="width: 100%;" poster="{{ poster }}">{{ strings.no_audio }}</audio>
     <div>
         <a href="#" id="previous" style="float: left;">&lt; {{ strings.previous }}</a>
         <a href="#" id="next" style="float: right;">{{ strings.next }} &gt;</a>
