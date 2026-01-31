@@ -203,6 +203,7 @@ async fn poster(
     }
 }
 
+
 #[get("/share/<file>")]
 async fn share(
     db: Connection<FileDb>,
@@ -225,7 +226,10 @@ async fn share(
 
     let root_domain = get_root_domain(host.0);
 
-    if let Some(file) = get_file_by_id(db, file).await {
+    let file_parts: Vec<&str> = file.split(".").collect();
+    let id = file_parts.iter().next().ok_or(Status::BadRequest)?;
+
+    if let Some(file) = get_file_by_id(db, id).await {
         display_file(Path::new("files/").join(&file).to_path_buf(), Path::new("/").join(&file).to_path_buf(), false, strings, lang.0, root_domain, host, token, settings, jar, sizes, true).await
     } else {
         Err(Status::NotFound)
@@ -238,7 +242,10 @@ async fn download_share(
     db2: Connection<FileDb>,
     file: &str,
 ) -> IndexResult {
-    if let Some(file) = get_file_by_id(db, file).await {
+    let file_parts: Vec<&str> = file.split(".").collect();
+    let id = file_parts.iter().next().ok_or(Status::BadRequest)?;
+
+    if let Some(file) = get_file_by_id(db, id).await {
         add_download(db2, &file).await;
         open_file(Path::new("files/").join(&file).to_path_buf(), &get_cache_control(false)).await
     } else {
