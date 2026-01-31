@@ -434,15 +434,29 @@ async fn index(
         return Err(Status::Unauthorized);
     }
 
+    if !uri.0.ends_with("/") {
+        return Ok(IndexResponse::Redirect(Redirect::moved(format!(
+            "{}/",
+            uri.0
+        ))));
+    }
+
+    display_file(path, file, is_private, strings, lang.0, root_domain, host, token, settings, jar, sizes).await
+}
+
+async fn display_file(path: PathBuf, file: PathBuf, is_private: bool, strings: &HashMap<String, String>, lang: String, root_domain: String, host: Host<'_>, token: Result<JWT, Status>, settings: Settings<'_>, jar: &CookieJar<'_>, sizes: &State<FileSizes>) -> IndexResult {
+    let jwt = token.clone().unwrap_or_default();
+
+    if let Some(t) = jwt.token {
+        add_token_cookie(&t, &host.0, jar);
+    }
+
+    let username = jwt.claims.sub;
+    let perms = jwt.claims.perms;
+
     let ext = if path.is_file() {
         path.extension().and_then(OsStr::to_str).unwrap_or("")
     } else {
-        if !uri.0.ends_with("/") {
-            return Ok(IndexResponse::Redirect(Redirect::moved(format!(
-                "{}/",
-                uri.0
-            ))));
-        }
         if is_private {
             "privatefolder"
         } else {
@@ -723,11 +737,11 @@ async fn index(
 
             if files
                 .iter()
-                .any(|f| f.name == format!("README.{}.md", lang.0))
+                .any(|f| f.name == format!("README.{}.md", lang))
             {
                 let md = fs::read_to_string(
                     Path::new(&("files".to_string() + &path_str))
-                        .join(format!("README.{}.md", lang.0)),
+                        .join(format!("README.{}.md", lang)),
                 )
                 .unwrap_or_default();
                 markdown = markdown::to_html(&md);
@@ -793,10 +807,10 @@ async fn index(
 
             if files
                 .iter()
-                .any(|f| f.name == format!("README.{}.md", lang.0))
+                .any(|f| f.name == format!("README.{}.md", lang))
             {
                 let md = fs::read_to_string(
-                    Path::new(&path.display().to_string()).join(format!("README.{}.md", lang.0)),
+                    Path::new(&path.display().to_string()).join(format!("README.{}.md", lang)),
                 )
                 .unwrap_or_default();
                 markdown = markdown::to_html(&md);
