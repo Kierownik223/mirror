@@ -83,6 +83,9 @@
 {% block scripts %}
 {% if is_logged_in %}
     <script src="/static/polyfills.js"></script>
+    {% if config.linkshortener %}
+    <script src="/scripts/linkshortener.js?lang={{ lang }}&hires={{ settings.hires }}"></script>
+    {% endif %}
     <script src="/scripts/index.js?lang={{ lang }}&hires={{ settings.hires }}"></script>
     {% if admin and path != "/" or private %}
     {% if settings.use_si %}
