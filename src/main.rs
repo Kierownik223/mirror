@@ -226,7 +226,7 @@ async fn share(
     let root_domain = get_root_domain(host.0);
 
     if let Some(file) = get_file_by_id(db, file).await {
-        display_file(Path::new("files/").join(&file).to_path_buf(), Path::new("/").join(&file).to_path_buf(), false, strings, lang.0, root_domain, host, token, settings, jar, sizes).await
+        display_file(Path::new("files/").join(&file).to_path_buf(), Path::new("/").join(&file).to_path_buf(), false, strings, lang.0, root_domain, host, token, settings, jar, sizes, true).await
     } else {
         Err(Status::NotFound)
     }
@@ -417,10 +417,10 @@ async fn index(
         ))));
     }
 
-    display_file(path, file, is_private, strings, lang.0, root_domain, host, token, settings, jar, sizes).await
+    display_file(path, file, is_private, strings, lang.0, root_domain, host, token, settings, jar, sizes, false).await
 }
 
-async fn display_file(path: PathBuf, file: PathBuf, is_private: bool, strings: &HashMap<String, String>, lang: String, root_domain: String, host: Host<'_>, token: Result<JWT, Status>, settings: Settings<'_>, jar: &CookieJar<'_>, sizes: &State<FileSizes>) -> IndexResult {
+async fn display_file(path: PathBuf, file: PathBuf, is_private: bool, strings: &HashMap<String, String>, lang: String, root_domain: String, host: Host<'_>, token: Result<JWT, Status>, settings: Settings<'_>, jar: &CookieJar<'_>, sizes: &State<FileSizes>, share: bool) -> IndexResult {
     let jwt = token.clone().unwrap_or_default();
 
     if let Some(t) = jwt.token {
@@ -469,6 +469,7 @@ async fn display_file(path: PathBuf, file: PathBuf, is_private: bool, strings: &
                     admin: perms == 0,
                     markdown,
                     settings,
+                    share,
                 },
             )))
         }
@@ -499,6 +500,7 @@ async fn display_file(path: PathBuf, file: PathBuf, is_private: bool, strings: &
                     username,
                     admin: perms == 0,
                     settings,
+                    share,
                 },
             )))
         }
@@ -532,6 +534,7 @@ async fn display_file(path: PathBuf, file: PathBuf, is_private: bool, strings: &
                     admin: perms == 0,
                     details: metadata.description,
                     settings,
+                    share,
                 },
             )))
         }
@@ -568,6 +571,7 @@ async fn display_file(path: PathBuf, file: PathBuf, is_private: bool, strings: &
                     track: None::<u16>,
                     poster: format!("/poster{}", audiopath),
                     settings: &settings,
+                    share,
                 },
             );
 
@@ -670,6 +674,7 @@ async fn display_file(path: PathBuf, file: PathBuf, is_private: bool, strings: &
                         track,
                         poster,
                         settings,
+                        share,
                     },
                 )))
             } else {
@@ -865,6 +870,7 @@ async fn display_file(path: PathBuf, file: PathBuf, is_private: bool, strings: &
                         filename: get_name_from_path(&path),
                         filesize: fs::metadata(&path).unwrap().len(),
                         settings,
+                        share,
                     },
                 )))
             } else {

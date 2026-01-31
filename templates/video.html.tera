@@ -40,20 +40,26 @@
         <a href="./">{{ macros::icon(name="folder", hires=settings.hires) }}./</a>
     </div>
     <video id="video" src="?download" controls style="height: 60vh; width: 100%;" poster="{{ poster | urlencode }}">{{ strings.no_video }}</video>
+    {% if not share %}
     <div>
         <a href="#" id="previous" style="float: left;">&lt; {{ strings.previous }}</a>
         <a href="#" id="next" style="float: right;">{{ strings.next }} &gt;</a>
         <br>
     </div>
+    {% endif %}
     <b id="title" style="font-size: 24px;">{{ vidtitle }}</b>
     <span id="description">{% if details %}{{ details }}{% endif %}</span>
+    {% if not share %}
     <br>
     <label for="autoplay"><input type="checkbox" name="autoplay" id="autoplay">{{ strings.autoplay }}</label><br>
+    {% endif %}
 {% endblock content %}
 
 {% block scripts %}
+{% if not share %}
 <script src="/static/breadcrumbs.js"></script>
 <script src="/static/video.js"></script>
+{% endif %}
 <script>
     if (window.navigator && navigator.mediaSession) {
         navigator.mediaSession.metadata = new MediaMetadata({

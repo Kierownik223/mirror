@@ -33,11 +33,13 @@
         <a href="./">{{ macros::icon(name="folder", hires=settings.hires) }}./</a>
     </div>
     <audio id="audio" src="{{ path }}?download" controls style="width: 100%;" poster="{{ poster }}">{{ strings.no_audio }}</audio>
+    {% if not share %}
     <div>
         <a href="#" id="previous" style="float: left;">&lt; {{ strings.previous }}</a>
         <a href="#" id="next" style="float: right;">{{ strings.next }} &gt;</a>
         <br>
     </div>
+    {% endif %}
     <span id="artist">{% if artist %}{{ artist }}{% else %}N/A{% endif %}</span> - <b style="font-size: 24px;"><span id="track">{% if track %}{{ track }}.{% endif %}</span> <span id="title">{{ audiotitle }}</span></b>
     <div style="display: flex; align-items: center; justify-content: space-between;">
         <div style="flex: 1;">
@@ -47,12 +49,16 @@
         </div>
         <img id="cover" src="{{ poster }}" alt="{{ strings.album_cover }}" style="width: 30%; max-height: 100%;">
     </div>
+    {% if not share %}
     <label for="autoplay"><input type="checkbox" name="autoplay" id="autoplay" checked>{{ strings.autoplay }}</label><br>
+    {% endif %}
 {% endblock content %}
 
 {% block scripts %}
+{% if not share %}
 <script src="/static/breadcrumbs.js"></script>
 <script src="/static/audio.js"></script>
+{% endif %}
 <script>
     if (window.navigator && navigator.mediaSession) {
         navigator.mediaSession.metadata = new MediaMetadata({
