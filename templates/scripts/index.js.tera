@@ -511,17 +511,22 @@ function share(element, filePath) {
         if (xhr.readyState == 4) {
             if (xhr.status == 201) {
                 if (element) {
+                    var ext = filePath.split(".").pop();
                     var response = JSON.parse(xhr.responseText);
-                    element.innerText = "http://{{ host }}/share/" + response.message;
+                    var url = "http://{{ host }}/share/" + response.message + "." + ext;
+                    element.innerText = url;
                     element.href = "/share/" + response.message;
                     element.onclick = function (e) {
                         e.preventDefault();
                         try {
-                            navigator.clipboard.writeText("http://{{ host }}/share/" + response.message);
+                            navigator.clipboard.writeText("http://{{ host }}/share/" + response.message + "." + ext);
                         } catch (e) {
-                            window.clipboardData.setData("Text", "http://{{ host }}/share/" + response.message);
+                            window.clipboardData.setData("Text", "http://{{ host }}/share/" + response.message + "." + ext);
                         }
                     };
+                    if (shorten) {
+                        shorten(element, url);
+                    }
                 } else {
                     alert(JSON.parse(xhr.responseText).message);
                     element.onclick = function () {
