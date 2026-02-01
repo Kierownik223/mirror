@@ -58,6 +58,9 @@
 {% block scripts %}
 <script src="/static/polyfills.js"></script>
 <script src="/static/utils.js"></script>
+{% if config.linkshortener %}
+<script src="/scripts/linkshortener.js?lang={{ lang }}&hires={{ settings.hires }}"></script>
+{% endif %}
 {% if settings.use_si %}
 <script src="/static/formatbytessi.js"></script>
 {% else %}
@@ -66,9 +69,6 @@
 <script src="/scripts/share.js?lang={{ lang }}&hires={{ settings.hires }}"></script>
 <script src="/scripts/upload.js?lang={{ lang }}&hires={{ settings.hires }}"></script>
 <script src="/scripts/uploader.js?lang={{ lang }}&hires={{ settings.hires }}"></script>
-{% if config.linkshortener %}
-<script src="/scripts/linkshortener.js?lang={{ lang }}&hires={{ settings.hires }}"></script>
-{% endif %}
 
 {% if settings.dir_browser %}
 <div id="browse_dialog" class="dialog">

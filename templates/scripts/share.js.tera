@@ -1,13 +1,9 @@
 function share(element, filePath) {
     var pathname = "/";
     if (window.location && typeof window.location.pathname === "string") {
-        pathname = window.location.pathname;
+        pathname = window.location.pathname.replace("/upload", "/");
     }
-    if (typeof encodeURIComponent === "undefined") {
-        var path = pathname + escape(filePath);
-    } else {
-        var path = pathname + encodeURIComponent(filePath);
-    }
+    var path = pathname + filePath;
     element.onclick = null;
     var xhr;
     if (window.XMLHttpRequest) {
