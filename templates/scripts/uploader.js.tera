@@ -234,7 +234,7 @@ function deleteFile(element, filePath) {
         !confirm(
             "{{ strings.delete_confirmation }} " +
                 decodeURIComponent(path) +
-                "?",
+                "?"
         )
     ) {
         return;
@@ -251,7 +251,7 @@ function deleteFile(element, filePath) {
                     row.parentNode.removeChild(row);
                 }
                 alert(
-                    decodeURIComponent(path) + " {{ strings.delete_success }}",
+                    decodeURIComponent(path) + " {{ strings.delete_success }}"
                 );
             } else if (xhr.status === 409) {
                 alert("{{ strings.directory_not_empty }}");
@@ -259,7 +259,7 @@ function deleteFile(element, filePath) {
                 try {
                     var errorResponse = JSON.parse(xhr.responseText);
                     alert(
-                        "{{ strings.error_occured }} " + errorResponse.message,
+                        "{{ strings.error_occured }} " + errorResponse.message
                     );
                 } catch (e) {
                     alert("{{ strings.error_occured }}");

@@ -39,11 +39,11 @@
 
                         setText(
                             document.getElementById("used_mem_readable"),
-                            formatBytes(data.used_mem),
+                            formatBytes(data.used_mem)
                         );
                         setText(
                             document.getElementById("total_mem_readable"),
-                            formatBytes(data.total_mem),
+                            formatBytes(data.total_mem)
                         );
 
                         var memUsage = document.getElementById("mem_usage");

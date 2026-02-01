@@ -98,7 +98,7 @@ function uploadViaAPI(files, path) {
                                         "onclick",
                                         'renameFile(this, "' +
                                             result.name +
-                                            '")',
+                                            '")'
                                     );
                                     tdDelete.appendChild(renLink);
                                     tdDelete.innerHTML += " ";
@@ -110,7 +110,7 @@ function uploadViaAPI(files, path) {
                                         "onclick",
                                         'deleteFile(this, "' +
                                             result.name +
-                                            '")',
+                                            '")'
                                     );
                                     tdDelete.appendChild(delLink);
                                     row.appendChild(tdDelete);
@@ -155,7 +155,7 @@ function uploadViaAPI(files, path) {
                                             if (xhr.status == 200) {
                                                 try {
                                                     var response = JSON.parse(
-                                                        xhr.responseText,
+                                                        xhr.responseText
                                                     );
 
                                                     usageProgressBar.value =
@@ -164,14 +164,14 @@ function uploadViaAPI(files, path) {
                                                         response.private_folder_quota;
 
                                                     document.getElementById(
-                                                        "folder_usage",
+                                                        "folder_usage"
                                                     ).innerText = formatBytes(
-                                                        response.private_folder_usage,
+                                                        response.private_folder_usage
                                                     );
                                                     document.getElementById(
-                                                        "folder_quota",
+                                                        "folder_quota"
                                                     ).innerText = formatBytes(
-                                                        response.private_folder_quota,
+                                                        response.private_folder_quota
                                                     );
                                                 } catch (e) {}
                                             }
@@ -187,14 +187,14 @@ function uploadViaAPI(files, path) {
                                 if (err === 413) {
                                     alert(
                                         file.name +
-                                            " {{ strings.file_too_big }}",
+                                            " {{ strings.file_too_big }}"
                                     );
                                 } else if (err === 507) {
                                     alert("{{ strings.not_enough_space }}");
                                 } else {
                                     alert(
                                         file.name +
-                                            " {{ strings.upload_error }}",
+                                            " {{ strings.upload_error }}"
                                     );
                                 }
                                 progressBar.style.display = "none";
@@ -302,7 +302,7 @@ function uploadViaAPI(files, path) {
                                             "onclick",
                                             'renameFile(this, "' +
                                                 result.name +
-                                                '")',
+                                                '")'
                                         );
                                         tdDelete.appendChild(renLink);
                                         tdDelete.innerHTML += " ";
@@ -315,7 +315,7 @@ function uploadViaAPI(files, path) {
                                             "onclick",
                                             'deleteFile(this, "' +
                                                 result.name +
-                                                '")',
+                                                '")'
                                         );
                                         tdDelete.appendChild(delLink);
                                         row.appendChild(tdDelete);
@@ -354,7 +354,7 @@ function uploadViaAPI(files, path) {
                                             xhr.open(
                                                 "GET",
                                                 "/api/upload",
-                                                true,
+                                                true
                                             );
                                         } catch (e) {}
 
@@ -362,10 +362,7 @@ function uploadViaAPI(files, path) {
                                             if (xhr.readyState == 4) {
                                                 if (xhr.status == 200) {
                                                     try {
-                                                        var response =
-                                                            JSON.parse(
-                                                                xhr.responseText,
-                                                            );
+                                                        var response =JSON.parse(xhr.responseText);
 
                                                         usageProgressBar.value =
                                                             response.private_folder_usage;
@@ -373,16 +370,16 @@ function uploadViaAPI(files, path) {
                                                             response.private_folder_quota;
 
                                                         document.getElementById(
-                                                            "folder_usage",
+                                                            "folder_usage"
                                                         ).innerText =
                                                             formatBytes(
-                                                                response.private_folder_usage,
+                                                                response.private_folder_usage
                                                             );
                                                         document.getElementById(
-                                                            "folder_quota",
+                                                            "folder_quota"
                                                         ).innerText =
                                                             formatBytes(
-                                                                response.private_folder_quota,
+                                                                response.private_folder_quota
                                                             );
                                                     } catch (e) {}
                                                 }
@@ -396,7 +393,7 @@ function uploadViaAPI(files, path) {
                                 } catch (e) {
                                     alert(
                                         file.name +
-                                            " {{ strings.upload_parse_error }}",
+                                            " {{ strings.upload_parse_error }}"
                                     );
                                 }
                             } else if (xhr.status === 507) {
@@ -405,7 +402,7 @@ function uploadViaAPI(files, path) {
                                 alert(
                                     file.name +
                                         " {{ strings.upload_failed_status }} " +
-                                        xhr.status,
+                                        xhr.status
                                 );
                             }
                         };
@@ -416,7 +413,7 @@ function uploadViaAPI(files, path) {
                             label.style.display = "none";
                             alert(
                                 file.name +
-                                    " {{ strings.upload_failed_network }}",
+                                    " {{ strings.upload_failed_network }}"
                             );
                         };
 
@@ -467,7 +464,7 @@ function uploadViaAPI(files, path) {
             preventDefaults(e);
             highlight();
         },
-        false,
+        false
     );
 
     dropTarget.addEventListener(
@@ -476,7 +473,7 @@ function uploadViaAPI(files, path) {
             preventDefaults(e);
             highlight();
         },
-        false,
+        false
     );
 
     dropTarget.addEventListener(
@@ -485,7 +482,7 @@ function uploadViaAPI(files, path) {
             preventDefaults(e);
             unhighlight();
         },
-        false,
+        false
     );
 
     dropTarget.addEventListener(
@@ -508,6 +505,6 @@ function uploadViaAPI(files, path) {
                 }
             }
         },
-        false,
+        false
     );
 })();

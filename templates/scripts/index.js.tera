@@ -126,7 +126,7 @@ function renameFile(element, filePath) {
                             "onclick",
                             'renameFile(this, "' +
                                 response.name +
-                                '")',
+                                '")'
                         );
                         tdDelete.appendChild(renLink);
                         tdDelete.innerHTML += " ";
@@ -138,7 +138,7 @@ function renameFile(element, filePath) {
                             "onclick",
                             'deleteFile(this, "' +
                                 response.name +
-                                '", true)',
+                                '", true)'
                         );
                         tdDelete.appendChild(delLink);
 
@@ -157,7 +157,7 @@ function renameFile(element, filePath) {
                                     if (isFolder) {
                                         link.setAttribute(
                                             "href",
-                                            response.name + "/",
+                                            response.name + "/"
                                         );
 
                                         link.innerHTML = "";
@@ -170,8 +170,8 @@ function renameFile(element, filePath) {
                                         link.appendChild(img);
                                         link.appendChild(
                                             document.createTextNode(
-                                                response.name + "/",
-                                            ),
+                                                response.name + "/"
+                                            )
                                         );
                                     } else {
                                         link.setAttribute("href", response.name);
@@ -187,7 +187,7 @@ function renameFile(element, filePath) {
 
                                         link.appendChild(img);
                                         link.appendChild(
-                                            document.createTextNode(response.name),
+                                            document.createTextNode(response.name)
                                         );
                                     }
                                 }
@@ -204,7 +204,7 @@ function renameFile(element, filePath) {
                     try {
                         var errorResponse = JSON.parse(xhr.responseText);
                         alert(
-                            "{{ strings.error_occured }} " + errorResponse.message,
+                            "{{ strings.error_occured }} " + errorResponse.message
                         );
                     } catch (e) {
                         alert("{{ strings.error_occured }}");
@@ -280,7 +280,7 @@ function createFolder() {
                             renLink.textContent = "{{ strings.rename }}";
                             renLink.setAttribute(
                                 "onclick",
-                                'renameFile(this, "' + newName + '")',
+                                'renameFile(this, "' + newName + '")'
                             );
                             tdDelete.appendChild(renLink);
                             tdDelete.innerHTML += " ";
@@ -289,7 +289,7 @@ function createFolder() {
                             delLink.textContent = "{{ strings.delete }}";
                             delLink.setAttribute(
                                 "onclick",
-                                'deleteFile(this, "' + newName + '")',
+                                'deleteFile(this, "' + newName + '")'
                             );
                             tdDelete.appendChild(delLink);
                             row.appendChild(tdDelete);
@@ -307,7 +307,7 @@ function createFolder() {
                     try {
                         var errorResponse = JSON.parse(xhr.responseText);
                         alert(
-                            "{{ strings.error_occured }} " + errorResponse.message,
+                            "{{ strings.error_occured }} " + errorResponse.message
                         );
                     } catch (e) {
                         alert("{{ strings.error_creating_folder }}");
@@ -383,7 +383,7 @@ function deleteFile(element, filePath, message, onComplete) {
                                         if (xhr.status == 200) {
                                             try {
                                                 var response = JSON.parse(
-                                                    xhr.responseText,
+                                                    xhr.responseText
                                                 );
 
                                                 progressBar.value =
@@ -392,14 +392,14 @@ function deleteFile(element, filePath, message, onComplete) {
                                                     response.private_folder_quota;
 
                                                 document.getElementById(
-                                                    "folder_usage",
+                                                    "folder_usage"
                                                 ).innerText = formatBytes(
-                                                    response.private_folder_usage,
+                                                    response.private_folder_usage
                                                 );
                                                 document.getElementById(
-                                                    "folder_quota",
+                                                    "folder_quota"
                                                 ).innerText = formatBytes(
-                                                    response.private_folder_quota,
+                                                    response.private_folder_quota
                                                 );
                                             } catch (e) {}
                                         }
@@ -411,7 +411,7 @@ function deleteFile(element, filePath, message, onComplete) {
                         if (message) {
                             alert(
                                 decodeURIComponent(path) +
-                                    " {{ strings.delete_success }}",
+                                    " {{ strings.delete_success }}"
                             );
                         }
                     } catch (e) {
@@ -425,7 +425,7 @@ function deleteFile(element, filePath, message, onComplete) {
                     try {
                         var errorResponse = JSON.parse(xhr.responseText);
                         alert(
-                            "{{ strings.error_occured }} " + errorResponse.message,
+                            "{{ strings.error_occured }} " + errorResponse.message
                         );
                     } catch (e) {
                         alert("{{ strings.error_occured }}");
