@@ -515,7 +515,7 @@ function share(element, filePath) {
                     var response = JSON.parse(xhr.responseText);
                     var url;
                     if (shorten) {
-                        url = shorten(null, url);
+                        url = shorten(null, "https://{{ host }}/share/" + response.message + "." + ext);
                     }
                     if (!url) url = "https://{{ host }}/share/" + response.message + "." + ext;
 
