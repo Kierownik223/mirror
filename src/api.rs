@@ -21,18 +21,12 @@ use rocket_multipart_form_data::{
 use zip::write::SimpleFileOptions;
 
 use crate::{
-    config::CONFIG,
-    db::{add_shared_file, get_downloads, FileDb},
-    jwt::JWT,
-    read_files, refresh_file_sizes,
-    responders::{ApiResponse, ApiResult},
-    utils::{
+    Disk, FileSizes, Host, MirrorFile, Sysinfo, config::CONFIG, db::{FileDb, add_shared_file, delete_file, get_downloads}, jwt::JWT, read_files, refresh_file_sizes, responders::{ApiResponse, ApiResult}, utils::{
         add_path_to_zip, get_extension_from_filename, get_extension_from_path, get_genre, get_icon,
         get_name_from_path, get_real_path, get_real_path_with_perms, get_video_metadata,
         get_virtual_path, is_hidden_path_str, is_restricted, map_io_error_to_status,
         read_dirs_async,
-    },
-    Disk, FileSizes, Host, MirrorFile, Sysinfo,
+    }
 };
 
 #[derive(serde::Serialize)]
@@ -382,6 +376,7 @@ async fn file(file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
 
 #[patch("/<file..>", data = "<rename_req>")]
 async fn rename(
+    db: Option<Connection<FileDb>>,
     file: PathBuf,
     rename_req: Json<NameRequest>,
     token: Result<JWT, Status>,
@@ -395,6 +390,10 @@ async fn rename(
 
     if !path.exists() {
         return Err(Status::NotFound);
+    }
+
+    if let Some(db) = db {
+        delete_file(db, &path.display().to_string().replacen("files/", "", 1)).await;
     }
 
     let parent = path.parent().ok_or(Status::InternalServerError)?;
@@ -425,6 +424,7 @@ async fn rename(
 
 #[delete("/<file..>?<recurse>")]
 async fn delete<'a>(
+    db: Option<Connection<FileDb>>,
     file: PathBuf,
     token: Result<JWT, Status>,
     sizes: &State<FileSizes>,
@@ -491,11 +491,14 @@ async fn delete<'a>(
         }
     }
 
-    return match remove_file(path) {
+    return match remove_file(&path) {
         Ok(_) => {
             {
                 let mut state_lock = sizes.write().await;
                 *state_lock = refresh_file_sizes().await;
+            }
+            if let Some(db) = db {
+                delete_file(db, &path.display().to_string().replacen("files/", "", 1)).await;
             }
             Err(Status::NoContent)
         }

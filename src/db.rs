@@ -153,6 +153,16 @@ pub async fn get_downloads(mut db: Connection<FileDb>, path: &str) -> Option<i32
     }
 }
 
+pub async fn delete_file(mut db: Connection<FileDb>, path: &str) -> () {
+    if let Err(error) = sqlx::query("DELETE FROM files WHERE path = ?")
+        .bind(path)
+        .execute(&mut **db)
+        .await
+    {
+        eprintln!("Database error (delete_file): {:?}", error);
+    }
+}
+
 pub async fn get_file_by_id(mut db: Connection<FileDb>, path: &str) -> Option<String> {
     let query_result = sqlx::query("SELECT path FROM files WHERE path = ? OR id = ?")
         .bind(path)
