@@ -523,8 +523,6 @@ async fn share(db: Connection<FileDb>, file: PathBuf, token: Result<JWT, Status>
 
     let result = add_shared_file(db, &path.display().to_string().replace("files/", "")).await;
 
-    println!("yusadyhsajhhsaida: {:?}", result);
-
     if let Some(id) = result {
         Ok(ApiResponse::MessageStatus((
             Status::Created,

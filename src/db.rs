@@ -53,7 +53,7 @@ pub async fn login_user(
             }
         }
         Err(error) => {
-            println!("Database error: {:?}", error);
+            eprintln!("Database error (login_user): {:?}", error);
             None
         }
     }
@@ -90,7 +90,7 @@ pub async fn get_user(mut db: Connection<Db>, username: &str) -> Option<MarmakUs
             });
         }
         Err(error) => {
-            println!("Database error: {:?}", error);
+            eprintln!("Database error (get_user): {:?}", error);
             None
         }
     }
@@ -103,7 +103,7 @@ pub async fn update_settings(mut db: Connection<Db>, username: &str, settings: &
         .execute(&mut **db)
         .await
     {
-        println!("Database error: {:?}", error);
+        eprintln!("Database error (update_settings): {:?}", error);
     }
 }
 
@@ -114,7 +114,7 @@ pub async fn add_login(mut db: Connection<Db>, username: &str, ip: &str) -> () {
         .execute(&mut **db)
         .await
     {
-        println!("Database error: {:?}", error);
+        eprintln!("Database error (add_login): {:?}", error);
     }
 }
 
@@ -127,7 +127,7 @@ pub async fn add_download(mut db: Connection<FileDb>, path: &str) -> () {
         .execute(&mut **db)
         .await
     {
-        println!("Database error: {:?}", error);
+        eprintln!("Database error (add_download): {:?}", error);
     }
 }
 
@@ -147,7 +147,7 @@ pub async fn get_downloads(mut db: Connection<FileDb>, path: &str) -> Option<i32
             }
         }
         Err(error) => {
-            println!("Database error: {:?}", error);
+            eprintln!("Database error (get_downloads): {:?}", error);
             None
         }
     }
@@ -169,7 +169,7 @@ pub async fn get_file_by_id(mut db: Connection<FileDb>, path: &str) -> Option<St
             }
         }
         Err(error) => {
-            println!("Database error: {:?}", error);
+            eprintln!("Database error (get_file_by_id): {:?}", error);
             None
         }
     }
@@ -192,7 +192,7 @@ pub async fn add_shared_file(mut db: Connection<FileDb>, path: &str) -> Option<S
         .execute(&mut **db)
         .await
     {
-        println!("Database error: {:?}", error);
+        eprintln!("Database error (add_shared_file): {:?}", error);
         None
     } else {
         Some(id)
@@ -212,7 +212,7 @@ pub async fn add_rememberme_token(mut db: Connection<Db>, username: &str) -> Opt
         .execute(&mut **db)
         .await
     {
-        println!("Database error: {:?}", error);
+        eprintln!("Database error (add_rememberme_token): {:?}", error);
         return None;
     }
 
@@ -225,7 +225,7 @@ pub async fn delete_session(mut db: Connection<Db>, token: &str) -> () {
         .execute(&mut **db)
         .await
     {
-        println!("Database error: {:?}", error);
+        eprintln!("Database error (delete_session): {:?}", error);
     }
 }
 
@@ -245,7 +245,7 @@ pub async fn get_user_by_session(mut db: Connection<Db>, id: &str) -> Option<Mar
             }
         }
         Err(error) => {
-            println!("Database error: {:?}", error);
+            eprintln!("Database error (get_user_by_session): {:?}", error);
             None
         }
     }
