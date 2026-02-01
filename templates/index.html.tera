@@ -94,6 +94,7 @@
     {% else %}
     <script src="/static/formatbytes.js"></script>
     {% endif %}
+    <script src="/scripts/share.js?lang={{ lang }}&hires={{ settings.hires }}"></script>
     <script src="/scripts/upload.js?lang={{ lang }}&hires={{ settings.hires }}"></script>
     <script src="/scripts/indexuploader.js?lang={{ lang }}&hires={{ settings.hires }}"></script>
     {% endif %}

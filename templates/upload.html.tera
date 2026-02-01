@@ -62,6 +62,7 @@
 {% else %}
 <script src="/static/formatbytes.js"></script>
 {% endif %}
+<script src="/scripts/share.js?lang={{ lang }}&hires={{ settings.hires }}"></script>
 <script src="/scripts/upload.js?lang={{ lang }}&hires={{ settings.hires }}"></script>
 <script src="/scripts/uploader.js?lang={{ lang }}&hires={{ settings.hires }}"></script>
 {% if config.linkshortener %}
