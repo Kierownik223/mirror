@@ -90,9 +90,9 @@ function uploadViaAPI() {
                                     result.name +
                                     '</span></a> {{ strings.upload_success }} <a style="cursor: pointer;" onclick="deleteFile(this, \'' +
                                     filePath +
-                                    '\')">{{ strings.delete }}</a>{% if config.linkshortener %} <a style="cursor: pointer;" onclick="shorten(this, \'http://{{ host }}' +
+                                    '\')">{{ strings.delete }}</a> <a style="cursor: pointer;" onclick="share(this, \'' +
                                     filePath +
-                                    '\')">{{ strings.shorten }}</a><br>{% endif %}';
+                                    '\')">{{ strings.share }}</a><br>';
 
                                 return true;
                             })
@@ -183,9 +183,9 @@ function uploadViaAPI() {
                                         result.name +
                                         '</span></a> {{ strings.upload_success }} <a style="cursor: pointer;" onclick="deleteFile(this, \'' +
                                         filePath +
-                                        '\')">{{ strings.delete }}</a>{% if config.linkshortener %} <a style="cursor: pointer;" onclick="shorten(this, \'http://{{ host }}' +
+                                        '\')">{{ strings.delete }}</a> <a style="cursor: pointer;" onclick="share(this, \'' +
                                         filePath +
-                                        '\')">{{ strings.shorten }}</a><br>{% endif %}';
+                                        '\')">{{ strings.share }}</a><br>';
                                 } catch (e) {
                                     label.textContent =
                                         file.name +

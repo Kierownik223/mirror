@@ -102,6 +102,19 @@ function uploadViaAPI(files, path) {
                                     );
                                     tdDelete.appendChild(renLink);
                                     tdDelete.innerHTML += " ";
+                                    var shrLink =
+                                        document.createElement("a");
+                                    shrLink.style.cursor = "pointer";
+                                    shrLink.textContent =
+                                        "{{ strings.share }}";
+                                    shrLink.setAttribute(
+                                        "onclick",
+                                        'share(this, "' +
+                                            result.name +
+                                            '")'
+                                    );
+                                    tdDelete.appendChild(shrLink);
+                                    tdDelete.innerHTML += " ";
                                     var delLink = document.createElement("a");
                                     delLink.style.cursor = "pointer";
                                     delLink.textContent =
@@ -305,6 +318,19 @@ function uploadViaAPI(files, path) {
                                                 '")'
                                         );
                                         tdDelete.appendChild(renLink);
+                                        tdDelete.innerHTML += " ";
+                                        var shrLink =
+                                            document.createElement("a");
+                                        shrLink.style.cursor = "pointer";
+                                        shrLink.textContent =
+                                            "{{ strings.share }}";
+                                        shrLink.setAttribute(
+                                            "onclick",
+                                            'share(this, "' +
+                                                result.name +
+                                                '")'
+                                        );
+                                        tdDelete.appendChild(shrLink);
                                         tdDelete.innerHTML += " ";
                                         var delLink =
                                             document.createElement("a");
