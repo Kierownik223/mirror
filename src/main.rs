@@ -254,8 +254,8 @@ async fn download_share(
 }
 
 #[get("/<file..>?download")]
-async fn download_with_counter(
-    db: Connection<FileDb>,
+async fn download(
+    db: Option<Connection<FileDb>>,
     file: PathBuf,
     token: Result<JWT, Status>,
     host: Host<'_>,
@@ -300,32 +300,8 @@ async fn download_with_counter(
         return Err(Status::Forbidden);
     }
 
-    add_download(db, &file).await;
-
-    open_file(path, &get_cache_control(is_private)).await
-}
-
-#[get("/<file..>?download")]
-async fn download(
-    file: PathBuf,
-    token: Result<JWT, Status>,
-    host: Host<'_>,
-    jar: &CookieJar<'_>,
-) -> IndexResult {
-    let username = if let Ok(token) = token.as_ref() {
-        if let Some(t) = &token.token {
-            add_token_cookie(&t, &host.0, jar);
-        }
-
-        &token.claims.sub
-    } else {
-        &"Nobody".into()
-    };
-
-    let (path, is_private) = get_real_path(&file, username.to_string())?;
-
-    if is_restricted(&path, token.is_ok()) {
-        return Err(Status::Unauthorized);
+    if let Some(db) = db {
+        add_download(db, &file).await;
     }
 
     open_file(path, &get_cache_control(is_private)).await
@@ -1827,6 +1803,7 @@ async fn rocket() -> _ {
                 scripts,
                 search,
                 static_files,
+                download,
             ],
         );
 
@@ -1841,9 +1818,7 @@ async fn rocket() -> _ {
     if CONFIG.enable_file_db {
         rocket = rocket
             .attach(FileDb::init())
-            .mount("/", routes![download_with_counter, share, download_share])
-    } else {
-        rocket = rocket.mount("/", routes![download])
+            .mount("/", routes![share, download_share])
     }
 
     if CONFIG.enable_api {
