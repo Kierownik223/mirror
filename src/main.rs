@@ -203,7 +203,6 @@ async fn poster(
     }
 }
 
-
 #[get("/share/<file>")]
 async fn share(
     db: Connection<FileDb>,
@@ -221,7 +220,7 @@ async fn share(
     if let Some(t) = jwt.token {
         add_token_cookie(&t, &host.0, jar);
     }
-    
+
     let strings = translations.get_translation(&lang.0);
 
     let root_domain = get_root_domain(host.0);
@@ -230,7 +229,21 @@ async fn share(
     let id = file_parts.iter().next().ok_or(Status::BadRequest)?;
 
     if let Some(file) = get_file_by_id(db, id).await {
-        display_file(Path::new("files/").join(&file).to_path_buf(), Path::new("/").join(&file).to_path_buf(), false, strings, lang.0, root_domain, host, token, settings, jar, sizes, true).await
+        display_file(
+            Path::new("files/").join(&file).to_path_buf(),
+            Path::new("/").join(&file).to_path_buf(),
+            false,
+            strings,
+            lang.0,
+            root_domain,
+            host,
+            token,
+            settings,
+            jar,
+            sizes,
+            true,
+        )
+        .await
     } else {
         Err(Status::NotFound)
     }
@@ -247,7 +260,11 @@ async fn download_share(
 
     if let Some(file) = get_file_by_id(db, id).await {
         add_download(db2, &file).await;
-        open_file(Path::new("files/").join(&file).to_path_buf(), &get_cache_control(false)).await
+        open_file(
+            Path::new("files/").join(&file).to_path_buf(),
+            &get_cache_control(false),
+        )
+        .await
     } else {
         Err(Status::NotFound)
     }
@@ -400,10 +417,37 @@ async fn index(
         ))));
     }
 
-    display_file(path, file, is_private, strings, lang.0, root_domain, host, token, settings, jar, sizes, false).await
+    display_file(
+        path,
+        file,
+        is_private,
+        strings,
+        lang.0,
+        root_domain,
+        host,
+        token,
+        settings,
+        jar,
+        sizes,
+        false,
+    )
+    .await
 }
 
-async fn display_file(path: PathBuf, file: PathBuf, is_private: bool, strings: &HashMap<String, String>, lang: String, root_domain: String, host: Host<'_>, token: Result<JWT, Status>, settings: Settings<'_>, jar: &CookieJar<'_>, sizes: &State<FileSizes>, share: bool) -> IndexResult {
+async fn display_file(
+    path: PathBuf,
+    file: PathBuf,
+    is_private: bool,
+    strings: &HashMap<String, String>,
+    lang: String,
+    root_domain: String,
+    host: Host<'_>,
+    token: Result<JWT, Status>,
+    settings: Settings<'_>,
+    jar: &CookieJar<'_>,
+    sizes: &State<FileSizes>,
+    share: bool,
+) -> IndexResult {
     let jwt = token.clone().unwrap_or_default();
 
     if let Some(t) = jwt.token {
