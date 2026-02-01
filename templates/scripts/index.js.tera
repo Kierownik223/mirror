@@ -87,143 +87,132 @@ function renameFile(element, filePath) {
         return;
     }
 
-    var xhr;
-    if (window.XMLHttpRequest) {
-        xhr = new XMLHttpRequest();
-    } else {
-        try {
-            xhr = new ActiveXObject("Microsoft.XMLHTTP");
-        } catch (e) {
+    sendRequest({
+        method: "PATCH",
+        url: "/api" + path,
+        body: '{"name":"' + newName + '"}',
+        onInitError: function () {
             alert("{{ strings.error_renaming }}");
-            return;
-        }
-    }
+        },
+        onOpenError: function () {
+            alert("{{ strings.error_renaming }}");
+        },
+        onSendError: function () {
+            alert("{{ strings.error_renaming }}");
+            if (onComplete) onComplete();
+        },
+        onReady: function (xhr) {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    try {
+                        var response = JSON.parse(xhr.responseText);
 
-    try {
-        xhr.open("PATCH", "/api" + path, true);
-    } catch (e) {
-        alert("{{ strings.error_renaming }}");
-        return;
-    }
+                        element.onclick = function () {
+                            renameFile(element, response.name);
+                        };
 
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-            if (xhr.status === 200) {
-                try {
-                    var response = JSON.parse(xhr.responseText);
+                        var row = element;
+                        while (row && row.nodeType === 1) {
+                            if (String(row.tagName).toLowerCase() === "tr") break;
+                            row = row.parentNode;
+                        }
 
-                    element.onclick = function () {
-                        renameFile(element, response.name);
-                    };
+                        var tdDelete = document.createElement("td");
+                        var renLink = document.createElement("a");
+                        renLink.style.cursor = "pointer";
+                        renLink.textContent =
+                            "{{ strings.rename }}";
+                        renLink.setAttribute(
+                            "onclick",
+                            'renameFile(this, "' +
+                                response.name +
+                                '")',
+                        );
+                        tdDelete.appendChild(renLink);
+                        tdDelete.innerHTML += " ";
+                        var delLink = document.createElement("a");
+                        delLink.style.cursor = "pointer";
+                        delLink.textContent =
+                            "{{ strings.delete }}";
+                        delLink.setAttribute(
+                            "onclick",
+                            'deleteFile(this, "' +
+                                response.name +
+                                '", true)',
+                        );
+                        tdDelete.appendChild(delLink);
 
-                    var row = element;
-                    while (row && row.nodeType === 1) {
-                        if (String(row.tagName).toLowerCase() === "tr") break;
-                        row = row.parentNode;
-                    }
+                        element.parentNode.innerHTML = tdDelete.innerHTML;
 
-                    var tdDelete = document.createElement("td");
-                    var renLink = document.createElement("a");
-                    renLink.style.cursor = "pointer";
-                    renLink.textContent =
-                        "{{ strings.rename }}";
-                    renLink.setAttribute(
-                        "onclick",
-                        'renameFile(this, "' +
-                            response.name +
-                            '")',
-                    );
-                    tdDelete.appendChild(renLink);
-                    tdDelete.innerHTML += " ";
-                    var delLink = document.createElement("a");
-                    delLink.style.cursor = "pointer";
-                    delLink.textContent =
-                        "{{ strings.delete }}";
-                    delLink.setAttribute(
-                        "onclick",
-                        'deleteFile(this, "' +
-                            response.name +
-                            '", true)',
-                    );
-                    tdDelete.appendChild(delLink);
+                        if (row) {
+                            var cells = row.getElementsByTagName("td");
+                            if (cells.length > 0) {
+                                var td = cells[1];
+                                var link = td.querySelector("a");
 
-                    element.parentNode.innerHTML = tdDelete.innerHTML;
-
-                    if (row) {
-                        var cells = row.getElementsByTagName("td");
-                        if (cells.length > 0) {
-                            var td = cells[1];
-                            var link = td.querySelector("a");
-
-                            if (link) {
-                                var isFolder =
-                                    cells[3].innerText ==
-                                    "{{ strings.folder }}";
-                                if (isFolder) {
-                                    link.setAttribute(
-                                        "href",
-                                        response.name + "/",
-                                    );
-
-                                    link.innerHTML = "";
-
-                                    var img = document.createElement("img");
-                                    img.src =
-                                        "/static/images/icons/{% if hires %}hires/{% endif %}folder.png";
-                                    img.className = "icon";
-
-                                    link.appendChild(img);
-                                    link.appendChild(
-                                        document.createTextNode(
+                                if (link) {
+                                    var isFolder =
+                                        cells[3].innerText ==
+                                        "{{ strings.folder }}";
+                                    if (isFolder) {
+                                        link.setAttribute(
+                                            "href",
                                             response.name + "/",
-                                        ),
-                                    );
-                                } else {
-                                    link.setAttribute("href", response.name);
+                                        );
 
-                                    link.innerHTML = "";
+                                        link.innerHTML = "";
 
-                                    var img = document.createElement("img");
-                                    img.src =
-                                        "/static/images/icons/{% if hires %}hires/{% endif %}" +
-                                        response.icon +
-                                        ".png";
-                                    img.className = "icon";
+                                        var img = document.createElement("img");
+                                        img.src =
+                                            "/static/images/icons/{% if hires %}hires/{% endif %}folder.png";
+                                        img.className = "icon";
 
-                                    link.appendChild(img);
-                                    link.appendChild(
-                                        document.createTextNode(response.name),
-                                    );
+                                        link.appendChild(img);
+                                        link.appendChild(
+                                            document.createTextNode(
+                                                response.name + "/",
+                                            ),
+                                        );
+                                    } else {
+                                        link.setAttribute("href", response.name);
+
+                                        link.innerHTML = "";
+
+                                        var img = document.createElement("img");
+                                        img.src =
+                                            "/static/images/icons/{% if hires %}hires/{% endif %}" +
+                                            response.icon +
+                                            ".png";
+                                        img.className = "icon";
+
+                                        link.appendChild(img);
+                                        link.appendChild(
+                                            document.createTextNode(response.name),
+                                        );
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    alert("{{ strings.rename_success }}");
-                } catch (e) {
-                    location.reload();
-                }
-            } else if (xhr.status === 404) {
-                alert("{{ strings.not_found }}");
-            } else {
-                try {
-                    var errorResponse = JSON.parse(xhr.responseText);
-                    alert(
-                        "{{ strings.error_occured }} " + errorResponse.message,
-                    );
-                } catch (e) {
-                    alert("{{ strings.error_occured }}");
+                        alert("{{ strings.rename_success }}");
+                    } catch (e) {
+                        location.reload();
+                    }
+                } else if (xhr.status === 404) {
+                    alert("{{ strings.not_found }}");
+                } else {
+                    try {
+                        var errorResponse = JSON.parse(xhr.responseText);
+                        alert(
+                            "{{ strings.error_occured }} " + errorResponse.message,
+                        );
+                    } catch (e) {
+                        alert("{{ strings.error_occured }}");
+                    }
                 }
             }
         }
-    };
-
-    try {
-        xhr.send('{"name":"' + newName + '"}');
-    } catch (e) {
-        alert("{{ strings.error_renaming }}");
-        if (onComplete) onComplete();
-    }
+    });
 }
 
 function createFolder() {
@@ -238,106 +227,95 @@ function createFolder() {
         return;
     }
 
-    var xhr;
-    if (window.XMLHttpRequest) {
-        xhr = new XMLHttpRequest();
-    } else {
-        try {
-            xhr = new ActiveXObject("Microsoft.XMLHTTP");
-        } catch (e) {
+    sendRequest({
+        method: "PUT",
+        url: "/api" + path,
+        body: '{"name":"' + newName + '"}',
+        onInitError: function () {
             alert("{{ strings.error_creating_folder }}");
-            return;
-        }
-    }
+        },
+        onOpenError: function () {
+            alert("{{ strings.error_creating_folder }}");
+        },
+        onSendError: function () {
+            alert("{{ strings.error_creating_folder }}");
+        },
+        onReady: function (xhr) {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 201) {
+                    try {
+                        var tableBody = document.querySelector("table tbody");
+                        if (tableBody) {
+                            var row = document.createElement("tr");
 
-    try {
-        xhr.open("PUT", "/api" + path, true);
-    } catch (e) {
-        alert("{{ strings.error_creating_folder }}");
-        return;
-    }
+                            var tdCheck = document.createElement("td");
+                            var cb = document.createElement("input");
+                            cb.type = "checkbox";
+                            cb.className = "delete-checkbox";
+                            cb.value = newName;
+                            tdCheck.appendChild(cb);
+                            row.appendChild(tdCheck);
 
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-            if (xhr.status === 201) {
-                try {
-                    var tableBody = document.querySelector("table tbody");
-                    if (tableBody) {
-                        var row = document.createElement("tr");
+                            var tdName = document.createElement("td");
+                            var a = document.createElement("a");
+                            a.href = newName + "/";
+                            a.innerHTML =
+                                '<img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">' +
+                                newName +
+                                "/";
+                            tdName.appendChild(a);
+                            row.appendChild(tdName);
 
-                        var tdCheck = document.createElement("td");
-                        var cb = document.createElement("input");
-                        cb.type = "checkbox";
-                        cb.className = "delete-checkbox";
-                        cb.value = newName;
-                        tdCheck.appendChild(cb);
-                        row.appendChild(tdCheck);
+                            var tdSize = document.createElement("td");
+                            tdSize.textContent = "0 B";
+                            row.appendChild(tdSize);
 
-                        var tdName = document.createElement("td");
-                        var a = document.createElement("a");
-                        a.href = newName + "/";
-                        a.innerHTML =
-                            '<img src="/static/images/icons/{% if hires %}hires/{% endif %}folder.png" class="icon">' +
-                            newName +
-                            "/";
-                        tdName.appendChild(a);
-                        row.appendChild(tdName);
+                            var tdType = document.createElement("td");
+                            tdType.textContent = "{{ strings.folder }}";
+                            row.appendChild(tdType);
 
-                        var tdSize = document.createElement("td");
-                        tdSize.textContent = "0 B";
-                        row.appendChild(tdSize);
+                            var tdDelete = document.createElement("td");
+                            var renLink = document.createElement("a");
+                            renLink.style.cursor = "pointer";
+                            renLink.textContent = "{{ strings.rename }}";
+                            renLink.setAttribute(
+                                "onclick",
+                                'renameFile(this, "' + newName + '")',
+                            );
+                            tdDelete.appendChild(renLink);
+                            tdDelete.innerHTML += " ";
+                            var delLink = document.createElement("a");
+                            delLink.style.cursor = "pointer";
+                            delLink.textContent = "{{ strings.delete }}";
+                            delLink.setAttribute(
+                                "onclick",
+                                'deleteFile(this, "' + newName + '")',
+                            );
+                            tdDelete.appendChild(delLink);
+                            row.appendChild(tdDelete);
 
-                        var tdType = document.createElement("td");
-                        tdType.textContent = "{{ strings.folder }}";
-                        row.appendChild(tdType);
+                            tableBody.appendChild(row);
+                        }
 
-                        var tdDelete = document.createElement("td");
-                        var renLink = document.createElement("a");
-                        renLink.style.cursor = "pointer";
-                        renLink.textContent = "{{ strings.rename }}";
-                        renLink.setAttribute(
-                            "onclick",
-                            'renameFile(this, "' + newName + '")',
-                        );
-                        tdDelete.appendChild(renLink);
-                        tdDelete.innerHTML += " ";
-                        var delLink = document.createElement("a");
-                        delLink.style.cursor = "pointer";
-                        delLink.textContent = "{{ strings.delete }}";
-                        delLink.setAttribute(
-                            "onclick",
-                            'deleteFile(this, "' + newName + '")',
-                        );
-                        tdDelete.appendChild(delLink);
-                        row.appendChild(tdDelete);
-
-                        tableBody.appendChild(row);
+                        alert("{{ strings.folder_create_success }}");
+                    } catch (e) {
+                        location.reload();
                     }
-
-                    alert("{{ strings.folder_create_success }}");
-                } catch (e) {
-                    location.reload();
-                }
-            } else if (xhr.status === 404) {
-                alert("{{ strings.not_found }}");
-            } else {
-                try {
-                    var errorResponse = JSON.parse(xhr.responseText);
-                    alert(
-                        "{{ strings.error_occured }} " + errorResponse.message,
-                    );
-                } catch (e) {
-                    alert("{{ strings.error_creating_folder }}");
+                } else if (xhr.status === 404) {
+                    alert("{{ strings.not_found }}");
+                } else {
+                    try {
+                        var errorResponse = JSON.parse(xhr.responseText);
+                        alert(
+                            "{{ strings.error_occured }} " + errorResponse.message,
+                        );
+                    } catch (e) {
+                        alert("{{ strings.error_creating_folder }}");
+                    }
                 }
             }
         }
-    };
-
-    try {
-        xhr.send('{"name":"' + newName + '"}');
-    } catch (e) {
-        alert("{{ strings.error_creating_folder }}");
-    }
+    });
 }
 
 function deleteFile(element, filePath, message, onComplete) {
@@ -359,109 +337,104 @@ function deleteFile(element, filePath, message, onComplete) {
         }
     }
 
-    var xhr;
-    if (window.XMLHttpRequest) {
-        xhr = new XMLHttpRequest();
-    } else {
-        try {
-            xhr = new ActiveXObject("Microsoft.XMLHTTP");
-        } catch (e) {
+    sendRequest({
+        method: "DELETE",
+        url: "/api" + path,
+        onInitError: function () {
             alert("{{ strings.error_deleting }}");
-            return;
-        }
-    }
-
-    try {
-        xhr.open("DELETE", "/api" + path, true);
-    } catch (e) {
-        alert("{{ strings.error_deleting }}");
-        return;
-    }
-
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState == 4) {
-            if (xhr.status == 204) {
-                try {
-                    var row = element;
-                    while (row && row.nodeType === 1) {
-                        if (String(row.tagName).toLowerCase() === "tr") break;
-                        row = row.parentNode;
-                    }
-
-                    if (row && row.parentNode) {
-                        try {
-                            row.parentNode.removeChild(row);
-                        } catch (e) {
-                            row.outerHTML = "";
-                        }
-                    }
-
-                    var progressBar = document.getElementById("usage");
-
-                    if (progressBar) {
-                        try {
-                            xhr.open("GET", "/api/upload", true);
-                        } catch (e) {}
-
-                        xhr.onreadystatechange = function () {
-                            if (xhr.readyState == 4) {
-                                if (xhr.status == 200) {
-                                    try {
-                                        var response = JSON.parse(
-                                            xhr.responseText,
-                                        );
-
-                                        progressBar.value =
-                                            response.private_folder_usage;
-                                        progressBar.max =
-                                            response.private_folder_quota;
-
-                                        document.getElementById(
-                                            "folder_usage",
-                                        ).innerText = formatBytes(
-                                            response.private_folder_usage,
-                                        );
-                                        document.getElementById(
-                                            "folder_quota",
-                                        ).innerText = formatBytes(
-                                            response.private_folder_quota,
-                                        );
-                                    } catch (e) {}
-                                }
-                            }
-                        };
-
-                        try {
-                            xhr.send();
-                        } catch (e) {}
-                    }
-
-                    if (message) {
-                        alert(
-                            decodeURIComponent(path) +
-                                " {{ strings.delete_success }}",
-                        );
-                    }
-                } catch (e) {
-                    alert("{{ strings.error_occured }} " + (e.message || ""));
-                }
-            } else if (xhr.status == 409) {
-                alert("{{ strings.directory_not_empty }}");
-            } else if (xhr.status == 404) {
-                alert("{{ strings.not_found }}");
-            } else {
-                try {
-                    var errorResponse = JSON.parse(xhr.responseText);
-                    alert(
-                        "{{ strings.error_occured }} " + errorResponse.message,
-                    );
-                } catch (e) {
-                    alert("{{ strings.error_occured }}");
-                }
-            }
+        },
+        onOpenError: function () {
+            alert("{{ strings.error_deleting }}");
+        },
+        onError: function () {
+            alert("{{ strings.error_deleting }}");
             if (onComplete) onComplete();
+        },
+        onReady: function (xhr) {
+            if (xhr.readyState == 4) {
+                if (xhr.status == 204) {
+                    try {
+                        var row = element;
+                        while (row && row.nodeType === 1) {
+                            if (String(row.tagName).toLowerCase() === "tr") break;
+                            row = row.parentNode;
+                        }
+
+                        if (row && row.parentNode) {
+                            try {
+                                row.parentNode.removeChild(row);
+                            } catch (e) {
+                                row.outerHTML = "";
+                            }
+                        }
+
+                        var progressBar = document.getElementById("usage");
+
+                        if (progressBar) {
+                            try {
+                                xhr.open("GET", "/api/upload", true);
+                            } catch (e) {}
+
+                            sendRequest({
+                                method: "GET",
+                                url: "/api/upload",
+                                onReady: function (xhr) {
+                                    if (xhr.readyState == 4) {
+                                        if (xhr.status == 200) {
+                                            try {
+                                                var response = JSON.parse(
+                                                    xhr.responseText,
+                                                );
+
+                                                progressBar.value =
+                                                    response.private_folder_usage;
+                                                progressBar.max =
+                                                    response.private_folder_quota;
+
+                                                document.getElementById(
+                                                    "folder_usage",
+                                                ).innerText = formatBytes(
+                                                    response.private_folder_usage,
+                                                );
+                                                document.getElementById(
+                                                    "folder_quota",
+                                                ).innerText = formatBytes(
+                                                    response.private_folder_quota,
+                                                );
+                                            } catch (e) {}
+                                        }
+                                    }
+                                }
+                            });
+                        }
+
+                        if (message) {
+                            alert(
+                                decodeURIComponent(path) +
+                                    " {{ strings.delete_success }}",
+                            );
+                        }
+                    } catch (e) {
+                        alert("{{ strings.error_occured }} " + (e.message || ""));
+                    }
+                } else if (xhr.status == 409) {
+                    alert("{{ strings.directory_not_empty }}");
+                } else if (xhr.status == 404) {
+                    alert("{{ strings.not_found }}");
+                } else {
+                    try {
+                        var errorResponse = JSON.parse(xhr.responseText);
+                        alert(
+                            "{{ strings.error_occured }} " + errorResponse.message,
+                        );
+                    } catch (e) {
+                        alert("{{ strings.error_occured }}");
+                    }
+                }
+                if (onComplete) onComplete();
+            }
         }
-    };
+    });
 
     try {
         xhr.send();
@@ -507,47 +480,117 @@ function share(element, filePath) {
         return;
     }
 
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState == 4) {
-            if (xhr.status == 201) {
-                if (element) {
-                    var ext = filePath.split(".").pop();
-                    var response = JSON.parse(xhr.responseText);
-                    var url;
-                    if (shorten) {
-                        url = shorten(null, "https://{{ host }}/share/" + response.message + "." + ext);
-                    }
-                    if (!url) url = "https://{{ host }}/share/" + response.message + "." + ext;
+    sendRequest({
+        method: "POST",
+        url: "/api" + path,
+        onInitError: function() {
+            alert("{{ strings.error_sharing }}");
+            element.onclick = function () {
+                share(element, url);
+            };
+        },
+        onOpenError: function() {
+            alert("{{ strings.error_sharing }}");
+            element.onclick = function () {
+                share(element, url);
+            };
+        },
+        onSendError: function() {
+            alert("{{ strings.error_sharing }}");
+            element.onclick = function () {
+                share(element, url);
+            };
+        },
+        onReady: function(xhr) {
+            if (xhr.readyState == 4) {
+                if (xhr.status == 201) {
+                    if (element) {
+                        var ext = filePath.split(".").pop();
+                        var response = JSON.parse(xhr.responseText);
 
-                    element.innerText = url;
-                    element.href = url;
-                    element.onclick = function (e) {
-                        e.preventDefault();
-                        try {
-                            navigator.clipboard.writeText(url);
-                        } catch (e) {
-                            window.clipboardData.setData("Text", url);
+                        //{% if config.linkshortener %}
+                        function renderElement() {
+                            var url = "https://{{ host }}/share/" + response.message + "." + ext;
+                            element.innerText = url;
+                            element.href = url;
+                            element.onclick = function (e) {
+                                e.preventDefault();
+                                try {
+                                    navigator.clipboard.writeText(url);
+                                } catch (e) {
+                                    window.clipboardData.setData("Text", url);
+                                }
+                            };
                         }
-                    };
+
+                        sendRequest({
+                            method: "POST",
+                            url: "{{ config.linkshortener_url }}",
+                            body: '{"url":"https://{{ host }}/share/' + response.message + '.' + ext + '"}',
+                            contentType: "application/json",
+                            onInitError: function () {
+                                alert("{{ strings.error_shortening }}");
+                                renderElement();
+                            },
+                            onOpenError: function () {
+                                alert("{{ strings.error_shortening }}");
+                                renderElement();
+                            },
+                            onSendError: function () {
+                                alert("{{ strings.error_shortening }}");
+                                renderElement();
+                            },
+                            onReady: function (xhr) {
+                                if (xhr.readyState == 4) {
+                                    if (xhr.status == 200) {
+                                        var response = JSON.parse(xhr.responseText);
+                                        if (response.error) {
+                                            alert(response.error);
+                                            return null;
+                                        }
+                                        element.innerText = response.link;
+                                        element.href = response.link;
+                                        element.onclick = function (e) {
+                                            e.preventDefault();
+                                            try {
+                                                navigator.clipboard.writeText(response.link);
+                                            } catch (e) {
+                                                window.clipboardData.setData("Text", response.link);
+                                            }
+                                        };
+                                    } else if (xhr.status == 429) {
+                                        alert("{{ strings.shortening_ratelimit }}");
+                                        renderElement();
+                                    } else {
+                                        alert("{{ strings.error_shortening }}");
+                                    }
+                                }
+                            }
+                        });
+                        //{% else %}
+                        var url = "https://{{ host }}/share/" + response.message + "." + ext;
+                        element.innerText = url;
+                        element.href = url;
+                        element.onclick = function (e) {
+                            e.preventDefault();
+                            try {
+                                navigator.clipboard.writeText(url);
+                            } catch (e) {
+                                window.clipboardData.setData("Text", url);
+                            }
+                        };
+                        //{% endif %}
+                    } else {
+                        alert(JSON.parse(xhr.responseText).message);
+                        element.onclick = function () {
+                            share(element, filePath);
+                        };
+                    }
                 } else {
-                    alert(JSON.parse(xhr.responseText).message);
-                    element.onclick = function () {
-                        share(element, filePath);
-                    };
+                    alert("{{ strings.error_sharing }}");
+                    return;
                 }
-            } else {
-                alert("{{ strings.error_sharing }}");
-                return;
             }
         }
-    };
-
-    try {
-        xhr.send();
-    } catch (e) {
-        alert("{{ strings.error_sharing }}");
-        element.onclick = function () {
-            share(element, filePath);
-        };
-    }
+    });
 }

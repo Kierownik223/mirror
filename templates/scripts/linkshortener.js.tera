@@ -26,47 +26,61 @@ function shorten(element, url) {
         return null;
     }
 
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState == 4) {
-            if (xhr.status == 200) {
-                var response = JSON.parse(xhr.responseText);
-                if (response.error) {
-                    alert(response.error);
+    sendRequest({
+        method: "POST",
+        url: "{{ config.linkshortener_url }}",
+        body: '{"url":"' + url + '"}',
+        contentType: "application/json",
+        onInitError: function () {
+            alert("{{ strings.error_shortening }}");
+            element.onclick = function () {
+                shorten(element, url);
+            };
+        },
+        onOpenError: function () {
+            alert("{{ strings.error_shortening }}");
+            element.onclick = function () {
+                shorten(element, url);
+            };
+        },
+        onSendError: function () {
+            alert("{{ strings.error_shortening }}");
+            element.onclick = function () {
+                shorten(element, url);
+            };
+        },
+        onReady: function (xhr) {
+            if (xhr.readyState == 4) {
+                if (xhr.status == 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.error) {
+                        alert(response.error);
+                        return null;
+                    }
+                    if (element) {
+                        element.innerText = response.link;
+                        element.href = response.link;
+                        element.onclick = function (e) {
+                            e.preventDefault();
+                            try {
+                                navigator.clipboard.writeText(response.link);
+                            } catch (e) {
+                                window.clipboardData.setData("Text", response.link);
+                            }
+                        };
+                    }
+                    return response.url;
+                } else if (xhr.status == 429) {
+                    alert("{{ strings.shortening_ratelimit }}");
+                    element.onclick = function () {
+                        shorten(element, url);
+                    };
+                    return null;
+                } else {
+                    alert("{{ strings.error_shortening }}");
                     return null;
                 }
-                if (element) {
-                    element.innerText = response.link;
-                    element.href = response.link;
-                    element.onclick = function (e) {
-                        e.preventDefault();
-                        try {
-                            navigator.clipboard.writeText(response.link);
-                        } catch (e) {
-                            window.clipboardData.setData("Text", response.link);
-                        }
-                    };
-                }
-                return response.url;
-            } else if (xhr.status == 419) {
-                alert("{{ strings.shortening_ratelimit }}");
-                element.onclick = function () {
-                    shorten(element, url);
-                };
-                return null;
-            } else {
-                alert("{{ strings.error_shortening }}");
-                return null;
             }
         }
-    };
-
-    try {
-        xhr.send('{"url":"' + url + '"}');
-    } catch (e) {
-        alert("{{ strings.error_shortening }}");
-        element.onclick = function () {
-            shorten(element, url);
-        };
-        return null;
-    }
+    });
 }
