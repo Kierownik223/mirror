@@ -435,13 +435,6 @@ function deleteFile(element, filePath, message, onComplete) {
             }
         }
     });
-
-    try {
-        xhr.send();
-    } catch (e) {
-        alert("{{ strings.error_deleting }}");
-        if (onComplete) onComplete();
-    }
 }
 
 function share(element, filePath) {
