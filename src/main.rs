@@ -211,7 +211,6 @@ async fn share(
     lang: Language,
     token: Result<JWT, Status>,
     host: Host<'_>,
-    sizes: &State<FileSizes>,
     jar: &CookieJar<'_>,
     settings: Settings<'_>,
 ) -> IndexResult {
@@ -223,24 +222,18 @@ async fn share(
 
     let strings = translations.get_translation(&lang.0);
 
-    let root_domain = get_root_domain(host.0);
-
     let file_parts: Vec<&str> = file.split(".").collect();
     let id = file_parts.iter().next().ok_or(Status::BadRequest)?;
 
     if let Some(file) = get_file_by_id(db, id).await {
         display_file(
-            Path::new("files/").join(&file).to_path_buf(),
             Path::new("/").join(&file).to_path_buf(),
             false,
             strings,
             lang.0,
-            root_domain,
             host,
             token,
             settings,
-            jar,
-            sizes,
             true,
         )
         .await
@@ -417,45 +410,49 @@ async fn index(
         ))));
     }
 
-    display_file(
-        path,
-        file,
-        is_private,
-        strings,
-        lang.0,
-        root_domain,
-        host,
-        token,
-        settings,
-        jar,
-        sizes,
-        false,
-    )
-    .await
+    if path.is_dir() {
+        display_folder(
+            file,
+            is_private,
+            strings,
+            lang.0,
+            host,
+            token,
+            settings,
+            sizes,
+        )
+        .await
+    } else {
+        display_file(
+            file,
+            is_private,
+            strings,
+            lang.0,
+            host,
+            token,
+            settings,
+            false,
+        )
+        .await
+    }
 }
 
 async fn display_file(
-    path: PathBuf,
     file: PathBuf,
     is_private: bool,
     strings: &HashMap<String, String>,
     lang: String,
-    root_domain: String,
     host: Host<'_>,
     token: Result<JWT, Status>,
     settings: Settings<'_>,
-    jar: &CookieJar<'_>,
-    sizes: &State<FileSizes>,
     share: bool,
 ) -> IndexResult {
     let jwt = token.clone().unwrap_or_default();
 
-    if let Some(t) = jwt.token {
-        add_token_cookie(&t, &host.0, jar);
-    }
-
     let username = jwt.claims.sub;
     let perms = jwt.claims.perms;
+
+    let path =  Path::new("files/").join(&file).to_path_buf();
 
     let ext = if path.is_file() {
         path.extension().and_then(OsStr::to_str).unwrap_or("")
@@ -469,6 +466,8 @@ async fn display_file(
     .to_lowercase();
 
     let cache_control = &get_cache_control(is_private);
+
+    let root_domain = get_root_domain(&host.0);
 
     match ext.as_str() {
         "md" => {
@@ -708,6 +707,64 @@ async fn display_file(
                 return Ok(IndexResponse::Template(generic_template));
             }
         }
+        _ => {
+            if CONFIG.extensions.contains(&ext) {
+                Ok(IndexResponse::Template(Template::render(
+                    if settings.plain {
+                        "plain/details"
+                    } else {
+                        "details"
+                    },
+                    context! {
+                        title: format!("{} {}", strings.get("file_details").unwrap_or(&("file_details".into())), Path::new("/").join(&file).display()),
+                        lang,
+                        strings,
+                        root_domain,
+                        host: host.0,
+                        config: (*CONFIG).clone(),
+                        path: Path::new("/").join(&file).display().to_string(),
+                        is_logged_in: token.is_ok(),
+                        username,
+                        admin: perms == 0,
+                        filename: get_name_from_path(&path),
+                        filesize: fs::metadata(&path).unwrap().len(),
+                        settings,
+                        share,
+                    },
+                )))
+            } else {
+                open_file(path, cache_control).await
+            }
+        }
+    }
+}
+
+async fn display_folder(
+    file: PathBuf,
+    is_private: bool,
+    strings: &HashMap<String, String>,
+    lang: String,
+    host: Host<'_>,
+    token: Result<JWT, Status>,
+    settings: Settings<'_>,
+    sizes: &State<FileSizes>,
+) -> IndexResult {
+    let jwt = token.clone().unwrap_or_default();
+
+    let username = jwt.claims.sub;
+    let perms = jwt.claims.perms;
+
+    let ext = if is_private {
+        "privatefolder"
+    } else {
+        "folder"
+    }.to_lowercase();
+
+    let root_domain = get_root_domain(&host.0);
+
+    let path =  Path::new("files/").join(&file).to_path_buf();
+
+    match ext.as_str() {
         "folder" => {
             if is_hidden(
                 &path,
@@ -875,35 +932,7 @@ async fn display_file(
                 },
             )))
         }
-        _ => {
-            if CONFIG.extensions.contains(&ext) {
-                Ok(IndexResponse::Template(Template::render(
-                    if settings.plain {
-                        "plain/details"
-                    } else {
-                        "details"
-                    },
-                    context! {
-                        title: format!("{} {}", strings.get("file_details").unwrap_or(&("file_details".into())), Path::new("/").join(&file).display()),
-                        lang,
-                        strings,
-                        root_domain,
-                        host: host.0,
-                        config: (*CONFIG).clone(),
-                        path: Path::new("/").join(&file).display().to_string(),
-                        is_logged_in: token.is_ok(),
-                        username,
-                        admin: perms == 0,
-                        filename: get_name_from_path(&path),
-                        filesize: fs::metadata(&path).unwrap().len(),
-                        settings,
-                        share,
-                    },
-                )))
-            } else {
-                open_file(path, cache_control).await
-            }
-        }
+        _ => Err(Status::NotFound)
     }
 }
 
