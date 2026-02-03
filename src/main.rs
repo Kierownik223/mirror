@@ -264,14 +264,28 @@ async fn download_share(
 }
 
 #[get("/<file..>?download")]
-async fn download(
-    db: Option<Connection<FileDb>>,
+async fn download_db(
+    db: Connection<FileDb>,
     file: PathBuf,
     token: Result<JWT, Status>,
     host: Host<'_>,
     jar: &CookieJar<'_>,
 ) -> IndexResult {
-    let username = if let Ok(token) = token.as_ref() {
+    perform_download(Some(db), file, token, host, jar).await
+}
+
+#[get("/<file..>?download")]
+async fn download(
+    file: PathBuf,
+    token: Result<JWT, Status>,
+    host: Host<'_>,
+    jar: &CookieJar<'_>,
+) -> IndexResult {
+    perform_download(None, file, token, host, jar).await
+}
+
+async fn perform_download(db: Option<Connection<FileDb>>, file: PathBuf, token: Result<JWT, Status>, host: Host<'_>, jar: &CookieJar<'_>) -> IndexResult {
+        let username = if let Ok(token) = token.as_ref() {
         if let Some(t) = &token.token {
             add_token_cookie(&t, &host.0, jar);
         }
@@ -1876,7 +1890,6 @@ async fn rocket() -> _ {
                 scripts,
                 search,
                 static_files,
-                download,
             ],
         );
 
@@ -1891,7 +1904,10 @@ async fn rocket() -> _ {
     if CONFIG.enable_file_db {
         rocket = rocket
             .attach(FileDb::init())
-            .mount("/", routes![share, download_share])
+            .mount("/", routes![share, download_share, download_db])
+    } else {
+        rocket = rocket
+            .mount("/", routes![download])
     }
 
     if CONFIG.enable_api {

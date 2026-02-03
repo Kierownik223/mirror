@@ -381,12 +381,25 @@ async fn file(file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
 }
 
 #[patch("/<file..>", data = "<rename_req>")]
-async fn rename(
-    db: Option<Connection<FileDb>>,
+async fn rename_db(
+    db: Connection<FileDb>,
     file: PathBuf,
     rename_req: Json<NameRequest>,
     token: Result<JWT, Status>,
 ) -> ApiResult {
+    perform_rename(Some(db), file, rename_req, token).await
+}
+
+#[patch("/<file..>", data = "<rename_req>")]
+async fn rename(
+    file: PathBuf,
+    rename_req: Json<NameRequest>,
+    token: Result<JWT, Status>,
+) -> ApiResult {
+    perform_rename(None, file, rename_req, token).await
+}
+
+async fn perform_rename(db: Option<Connection<FileDb>>, file: PathBuf, rename_req: Json<NameRequest>, token: Result<JWT, Status>) -> ApiResult {
     let token = token?;
 
     let username = token.claims.sub;
@@ -429,13 +442,27 @@ async fn rename(
 }
 
 #[delete("/<file..>?<recurse>")]
-async fn delete<'a>(
-    db: Option<Connection<FileDb>>,
+async fn delete_db<'a>(
+    db: Connection<FileDb>,
     file: PathBuf,
     token: Result<JWT, Status>,
     sizes: &State<FileSizes>,
     recurse: Option<bool>,
 ) -> ApiResult {
+    perform_delete(Some(db), file, token, sizes, recurse).await
+}
+
+#[delete("/<file..>?<recurse>")]
+async fn delete<'a>(
+    file: PathBuf,
+    token: Result<JWT, Status>,
+    sizes: &State<FileSizes>,
+    recurse: Option<bool>,
+) -> ApiResult {
+    perform_delete(None, file, token, sizes, recurse).await
+}
+
+async fn perform_delete(db: Option<Connection<FileDb>>, file: PathBuf, token: Result<JWT, Status>, sizes: &State<FileSizes>, recurse: Option<bool>) -> ApiResult {
     let token = token?;
 
     let username = token.claims.sub;
@@ -1046,8 +1073,6 @@ pub fn build_api() -> AdHoc {
                     listing,
                     sysinfo,
                     upload,
-                    delete,
-                    rename,
                     search,
                     upload_chunked,
                     upload_info,
@@ -1057,9 +1082,9 @@ pub fn build_api() -> AdHoc {
             .register("/api", catchers![default]);
 
         if CONFIG.enable_file_db {
-            rocket = rocket.mount("/api", routes![file_with_downloads, share])
+            rocket = rocket.mount("/api", routes![file_with_downloads, share, delete_db, rename_db])
         } else {
-            rocket = rocket.mount("/api", routes![file])
+            rocket = rocket.mount("/api", routes![file, delete, rename])
         }
 
         if CONFIG.enable_zip_downloads {
