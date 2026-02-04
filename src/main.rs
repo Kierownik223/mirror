@@ -369,9 +369,6 @@ async fn index(
         add_token_cookie(&t, &host.0, jar);
     }
 
-    let username = jwt.claims.sub;
-    let perms = jwt.claims.perms;
-
     let path: PathBuf;
     let is_private: bool;
 
@@ -379,10 +376,10 @@ async fn index(
 
     let root_domain = get_root_domain(host.0);
 
-    if let Ok((p, i)) = get_real_path(&file, username.clone()) {
+    if let Ok((p, i)) = get_real_path(&file, jwt.claims.sub.clone()) {
         path = p;
         is_private = i;
-    } else if let Err(e) = get_real_path(&file, username.clone()) {
+    } else if let Err(e) = get_real_path(&file, jwt.claims.sub.clone()) {
         if e == Status::Forbidden {
             return Ok(IndexResponse::Template(Template::render(
                 if settings.plain {
@@ -398,7 +395,7 @@ async fn index(
                     host: host.0,
                     config: (*CONFIG).clone(),
                     is_logged_in: token.is_ok(),
-                    admin: perms == 0,
+                    admin: jwt.claims.perms == 0,
                     settings,
                 },
             )));
@@ -463,9 +460,6 @@ async fn display_file(
 ) -> IndexResult {
     let jwt = token.clone().unwrap_or_default();
 
-    let username = jwt.claims.sub;
-    let perms = jwt.claims.perms;
-
     let path =  Path::new("files/").join(&file).to_path_buf();
 
     let ext = if path.is_file() {
@@ -506,7 +500,7 @@ async fn display_file(
                     config: (*CONFIG).clone(),
                     path: Path::new("/").join(&file).display().to_string(),
                     is_logged_in: token.is_ok(),
-                    admin: perms == 0,
+                    admin: jwt.claims.perms == 0,
                     markdown,
                     settings,
                     share,
@@ -537,8 +531,7 @@ async fn display_file(
                     path: Path::new("/").join(&file).display().to_string(),
                     files,
                     is_logged_in: token.is_ok(),
-                    username,
-                    admin: perms == 0,
+                    admin: jwt.claims.perms == 0,
                     settings,
                     share,
                 },
@@ -570,8 +563,7 @@ async fn display_file(
                     poster: format!("/images/videoposters{}.jpg", videopath.replace("video/", "")),
                     vidtitle: metadata.title,
                     is_logged_in: token.is_ok(),
-                    username,
-                    admin: perms == 0,
+                    admin: jwt.claims.perms == 0,
                     details: metadata.description,
                     settings,
                     share,
@@ -602,8 +594,7 @@ async fn display_file(
                     path: audiopath,
                     audiotitle: get_name_from_path(&path),
                     is_logged_in: token.is_ok(),
-                    username: &username,
-                    admin: perms == 0,
+                    admin: jwt.claims.perms == 0,
                     artist: "N/A",
                     year: "N/A",
                     album: "N/A",
@@ -705,8 +696,7 @@ async fn display_file(
                         path: audiopath,
                         audiotitle,
                         is_logged_in: token.is_ok(),
-                        username,
-                        admin: perms == 0,
+                        admin: jwt.claims.perms == 0,
                         artist,
                         year,
                         album,
@@ -738,8 +728,7 @@ async fn display_file(
                         config: (*CONFIG).clone(),
                         path: Path::new("/").join(&file).display().to_string(),
                         is_logged_in: token.is_ok(),
-                        username,
-                        admin: perms == 0,
+                        admin: jwt.claims.perms == 0,
                         filename: get_name_from_path(&path),
                         filesize: fs::metadata(&path).unwrap().len(),
                         settings,
@@ -764,9 +753,6 @@ async fn display_folder(
     sizes: &State<FileSizes>,
 ) -> IndexResult {
     let jwt = token.clone().unwrap_or_default();
-
-    let username = jwt.claims.sub;
-    let perms = jwt.claims.perms;
 
     let ext = if is_private {
         "privatefolder"
@@ -806,7 +792,7 @@ async fn display_folder(
                 }
             }
 
-            if perms != 0 {
+            if jwt.claims.perms != 0 {
                 dirs.retain(|x| !CONFIG.hidden_files.contains(&x.name));
                 files.retain(|x| !CONFIG.hidden_files.contains(&x.name));
             }
@@ -849,8 +835,7 @@ async fn display_folder(
                     dirs,
                     files,
                     is_logged_in: token.is_ok(),
-                    username,
-                    admin: perms == 0,
+                    admin: jwt.claims.perms == 0,
                     markdown,
                     private: is_private,
                     settings,
@@ -872,7 +857,7 @@ async fn display_folder(
                 .iter()
                 .find(|entry| {
                     entry.file.strip_suffix("/").unwrap_or_default().to_string()
-                        == format!("files/private/{}", &username)
+                        == format!("files/private/{}", &jwt.claims.sub)
                 })
                 .map(|entry| entry.size)
                 .unwrap_or(0);
@@ -901,7 +886,7 @@ async fn display_folder(
             }
 
             let path_str = if let Ok(rest) = file.strip_prefix("private") {
-                if username.is_empty() {
+                if jwt.claims.sub.is_empty() {
                     return Err(Status::Forbidden);
                 }
 
@@ -936,8 +921,7 @@ async fn display_folder(
                     dirs,
                     files,
                     is_logged_in: token.is_ok(),
-                    username,
-                    admin: perms == 0,
+                    admin: jwt.claims.perms == 0,
                     markdown,
                     private: is_private,
                     settings,
@@ -1073,9 +1057,8 @@ async fn fetch_settings(
     }
 
     let strings = translations.get_translation(&lang.0);
-    let username = token.claims.sub;
 
-    if let Some(db_user) = get_user(db, username.as_str()).await {
+    if let Some(db_user) = get_user(db, &token.claims.sub).await {
         let decoded: HashMap<String, String> =
             serde_json::from_str(&db_user.mirror_settings.unwrap_or("{}".to_string()))
                 .expect("Failed to parse JSON");
@@ -1114,7 +1097,6 @@ async fn sync_settings(
     }
 
     let strings = translations.get_translation(&lang.0);
-    let username = token.claims.sub;
 
     let keys = vec![
         "lang",
@@ -1136,7 +1118,7 @@ async fn sync_settings(
 
     let settings = serde_json::to_string(&cookie_map).expect("Failed to serialize cookie data");
 
-    db::update_settings(db, username.as_str(), settings.as_str()).await;
+    db::update_settings(db, &token.claims.sub, settings.as_str()).await;
 
     return Ok(RawHtml(format!(
         "<script>alert(\"{}\");window.location.replace(\"/settings\");</script>",
@@ -1296,9 +1278,6 @@ fn uploader(
         add_token_cookie(&t, &host.0, jar);
     }
 
-    let username = token.claims.sub;
-    let perms = token.claims.perms;
-
     let strings = translations.get_translation(&lang.0);
 
     return Ok(IndexResponse::Template(Template::render(
@@ -1315,8 +1294,8 @@ fn uploader(
             host: host.0,
             config: (*CONFIG).clone(),
             is_logged_in: true,
-            username: username,
-            admin: perms == 0,
+            username: token.claims.sub,
+            admin: token.claims.perms == 0,
             path: path.unwrap_or_default(),
             uploadedfiles: vec![MirrorFile { name: "".to_string(), ext: "".to_string(), icon: "default".to_string(), size: 0, downloads: None }],
             max_size: CONFIG.max_upload_sizes.get(&token.claims.perms.to_string()).unwrap_or(&(104857600 as u64)),
@@ -1343,9 +1322,6 @@ async fn upload(
     if let Some(t) = token.token {
         add_token_cookie(&t, &host.0, jar);
     }
-
-    let username = token.claims.sub;
-    let perms = token.claims.perms;
 
     let max_size = CONFIG
         .max_upload_sizes
@@ -1378,14 +1354,14 @@ async fn upload(
     }
 
     let is_private = user_path.starts_with("private");
-    if !is_private && perms != 0 {
+    if !is_private && token.claims.perms != 0 {
         return Err(Status::Forbidden);
     }
 
     let base_path = if is_private {
         format!(
             "files/private/{}/{}",
-            username,
+            &token.claims.sub,
             user_path.trim_start_matches("private")
         )
     } else {
@@ -1403,7 +1379,7 @@ async fn upload(
         .iter()
         .find(|entry| {
             entry.file.strip_suffix("/").unwrap_or_default().to_string()
-                == format!("files/private/{}", &username)
+                == format!("files/private/{}", &token.claims.sub)
         })
         .map(|entry| entry.size)
         .unwrap_or(0);
@@ -1443,7 +1419,7 @@ async fn upload(
                                 icon = "default".to_string();
                             }
 
-                            if perms == 0 {
+                            if token.claims.perms == 0 {
                                 uploaded_files.push(MirrorFile {
                                     name: file_name,
                                     ext: format!(
@@ -1463,7 +1439,7 @@ async fn upload(
                                     ext: format!(
                                         "/{}/{}",
                                         user_path.replacen(
-                                            format!("/{}", &username).as_str(),
+                                            format!("/{}", &token.claims.sub).as_str(),
                                             "",
                                             1
                                         ),
@@ -1514,8 +1490,8 @@ async fn upload(
                 config: (*CONFIG).clone(),
                 theme: get_theme(jar),
                 is_logged_in: true,
-                username,
-                admin: perms == 0,
+                username: token.claims.sub,
+                admin: token.claims.perms == 0,
                 path: path.unwrap_or_default(),
                 uploadedfiles: uploaded_files,
                 max_size,
@@ -1544,9 +1520,6 @@ async fn search(
         add_token_cookie(&t, &host.0, jar);
     }
 
-    let username = jwt.claims.sub;
-    let perms = jwt.claims.perms;
-
     let strings = translations.get_translation(&lang.0);
 
     if let Some(q) = q {
@@ -1566,8 +1539,8 @@ async fn search(
                     config: (*CONFIG).clone(),
                     theme: get_theme(jar),
                     is_logged_in: token.is_ok(),
-                    username,
-                    admin: perms == 0,
+                    username: &jwt.claims.sub,
+                    admin: jwt.claims.perms == 0,
                     message: strings.get("search_query_too_short").unwrap_or(&("search_query_too_short".into())),
                     settings,
                 },
@@ -1593,7 +1566,7 @@ async fn search(
         results.retain(|x| !CONFIG.hidden_files.contains(&x.name));
         results.retain(|x| x.name.to_lowercase().contains(&q.to_lowercase()));
         results.retain(|x| {
-            !is_hidden_path_str(&x.full_path, if token.is_ok() { Some(perms) } else { None })
+            !is_hidden_path_str(&x.full_path, if token.is_ok() { Some(jwt.claims.perms) } else { None })
         });
         results.retain(|x| !x.full_path.starts_with("/private/"));
 
@@ -1613,8 +1586,8 @@ async fn search(
                     config: (*CONFIG).clone(),
                     theme: get_theme(jar),
                     is_logged_in: token.is_ok(),
-                    username,
-                    admin: perms == 0,
+                    username: &jwt.claims.sub,
+                    admin: jwt.claims.perms == 0,
                     message: strings.get("search_no_results").unwrap_or(&("search_no_results".into())),
                     settings,
                 },
@@ -1636,8 +1609,8 @@ async fn search(
                 config: (*CONFIG).clone(),
                 theme: get_theme(jar),
                 is_logged_in: token.is_ok(),
-                username,
-                admin: perms == 0,
+                username: &jwt.claims.sub,
+                admin: jwt.claims.perms == 0,
                 results,
                 query: q,
                 settings,
@@ -1659,8 +1632,8 @@ async fn search(
                 config: (*CONFIG).clone(),
                 theme: get_theme(jar),
                 is_logged_in: token.is_ok(),
-                username,
-                admin: perms == 0,
+                username: &jwt.claims.sub,
+                admin: jwt.claims.perms == 0,
                 settings,
             },
         )));

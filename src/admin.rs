@@ -23,20 +23,17 @@ fn sysinfo(
     token: Result<JWT, Status>,
     settings: Settings<'_>,
 ) -> IndexResult {
+    if !::sysinfo::IS_SUPPORTED_SYSTEM {
+        return Err(Status::NotFound);
+    }
+    
     let token = token?;
 
     if let Some(t) = token.token {
         add_token_cookie(&t, &host.0, jar);
     }
 
-    if !::sysinfo::IS_SUPPORTED_SYSTEM {
-        return Err(Status::NotFound);
-    }
-
-    let username = token.claims.sub;
-    let perms = token.claims.perms;
-
-    if perms != 0 {
+    if token.claims.perms != 0 {
         return Err(Status::Forbidden);
     }
 
@@ -70,8 +67,8 @@ fn sysinfo(
             host: host.0,
             config: (*CONFIG).clone(),
             is_logged_in: true,
-            admin: perms == 0,
-            username,
+            admin: token.claims.perms == 0,
+            username: token.claims.sub,
             system: System::new_all(),
             hostname: System::host_name(),
             sys_name: System::name(),
@@ -97,10 +94,7 @@ fn admin(
         add_token_cookie(&t, &host.0, jar);
     }
 
-    let username = token.claims.sub;
-    let perms = token.claims.perms;
-
-    if perms != 0 {
+    if token.claims.perms != 0 {
         return Err(Status::Forbidden);
     }
 
@@ -120,8 +114,8 @@ fn admin(
             host: host.0,
             config: (*CONFIG).clone(),
             is_logged_in: true,
-            username: username,
-            admin: perms == 0,
+            username: token.claims.sub,
+            admin: token.claims.perms == 0,
             settings,
         },
     )));

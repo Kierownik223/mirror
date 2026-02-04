@@ -402,10 +402,7 @@ async fn rename(
 async fn perform_rename(db: Option<Connection<FileDb>>, file: PathBuf, rename_req: Json<NameRequest>, token: Result<JWT, Status>) -> ApiResult {
     let token = token?;
 
-    let username = token.claims.sub;
-    let perms = token.claims.perms;
-
-    let path = get_real_path_with_perms(&file, username, perms)?.0;
+    let path = get_real_path_with_perms(&file, token.claims.sub, token.claims.perms)?.0;
 
     if !path.exists() {
         return Err(Status::NotFound);
@@ -465,10 +462,7 @@ async fn delete<'a>(
 async fn perform_delete(db: Option<Connection<FileDb>>, file: PathBuf, token: Result<JWT, Status>, sizes: &State<FileSizes>, recurse: Option<bool>) -> ApiResult {
     let token = token?;
 
-    let username = token.claims.sub;
-    let perms = token.claims.perms;
-
-    let path = get_real_path_with_perms(&file, username, perms)?.0;
+    let path = get_real_path_with_perms(&file, token.claims.sub, token.claims.perms)?.0;
 
     if !path.exists() {
         return Err(Status::NotFound);
@@ -548,10 +542,7 @@ async fn perform_delete(db: Option<Connection<FileDb>>, file: PathBuf, token: Re
 async fn share(db: Connection<FileDb>, file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
     let token = token?;
 
-    let username = token.claims.sub;
-    let perms = token.claims.perms;
-
-    let path = get_real_path_with_perms(&file, username, perms)?.0;
+    let path = get_real_path_with_perms(&file, token.claims.sub, token.claims.perms)?.0;
 
     if !path.exists() {
         return Err(Status::NotFound);
@@ -577,10 +568,7 @@ async fn create_folder<'a>(
 ) -> ApiResult {
     let token = token?;
 
-    let username = token.claims.sub;
-    let perms = token.claims.perms;
-
-    let path = get_real_path_with_perms(&file, username, perms)?.0;
+    let path = get_real_path_with_perms(&file, token.claims.sub, token.claims.perms)?.0;
 
     if !path.exists() && !name_req.is_some() {
         return match create_dir(path) {
@@ -665,9 +653,6 @@ async fn upload(
 ) -> ApiResult {
     let token = token?;
 
-    let username = token.claims.sub;
-    let perms = token.claims.perms;
-
     let max_size = CONFIG
         .max_upload_sizes
         .get(&token.claims.perms.to_string())
@@ -710,14 +695,14 @@ async fn upload(
     }
 
     let is_private = user_path.starts_with("private");
-    if !is_private && perms != 0 {
+    if !is_private && token.claims.perms != 0 {
         return Err(Status::Forbidden);
     }
 
     let base_path = if is_private {
         format!(
             "files/private/{}/{}",
-            username,
+            &token.claims.sub,
             user_path.trim_start_matches("private")
         )
     } else {
@@ -742,7 +727,7 @@ async fn upload(
         .iter()
         .find(|entry| {
             entry.file.strip_suffix("/").unwrap_or_default().to_string()
-                == format!("files/private/{}", &username)
+                == format!("files/private/{}", &token.claims.sub)
         })
         .map(|entry| entry.size)
         .unwrap_or(0);
@@ -851,8 +836,6 @@ async fn upload_chunked(
     sizes: &State<FileSizes>,
 ) -> ApiResult {
     let token = token?;
-    let username = token.claims.sub;
-    let perms = token.claims.perms;
 
     let options = MultipartFormDataOptions::with_multipart_form_data_fields(vec![
         MultipartFormDataField::file("file").size_limit(u64::from(100.megabytes())),
@@ -882,14 +865,14 @@ async fn upload_chunked(
     }
 
     let is_private = user_path.starts_with("private");
-    if !is_private && perms != 0 {
+    if !is_private && token.claims.perms != 0 {
         return Err(Status::Forbidden);
     }
 
     let base_path = if is_private {
         format!(
             "files/private/{}/{}",
-            username,
+            &token.claims.sub,
             user_path.trim_start_matches("private")
         )
     } else {
@@ -927,7 +910,7 @@ async fn upload_chunked(
         .iter()
         .find(|entry| {
             entry.file.strip_suffix("/").unwrap_or_default().to_string()
-                == format!("files/private/{}", &username)
+                == format!("files/private/{}", &token.claims.sub)
         })
         .map(|entry| entry.size)
         .unwrap_or(0);
@@ -936,7 +919,7 @@ async fn upload_chunked(
         return Err(Status::InsufficientStorage);
     }
 
-    let chunk_dir = format!(".chunks/{}/{}", username, file_id);
+    let chunk_dir = format!(".chunks/{}/{}", &token.claims.sub, file_id);
     std::fs::create_dir_all(&chunk_dir).map_err(map_io_error_to_status)?;
 
     let chunk_path = format!("{}/{:05}.part", chunk_dir, chunk_index);

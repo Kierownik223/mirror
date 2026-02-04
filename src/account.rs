@@ -52,9 +52,7 @@ fn login_page(
             add_token_cookie(&t, &host.0, jar);
         }
 
-        let perms = token.claims.perms;
-
-        if perms == 0 {
+        if token.claims.perms == 0 {
             return IndexResponse::Redirect(Redirect::to("/admin/"));
         } else {
             return IndexResponse::Redirect(Redirect::to("/"));
