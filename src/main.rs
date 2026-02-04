@@ -228,7 +228,6 @@ async fn share(
     if let Some(file) = get_file_by_id(db, id).await {
         display_file(
             Path::new("/").join(&file).to_path_buf(),
-            false,
             strings,
             lang.0,
             host,
@@ -370,15 +369,13 @@ async fn index(
     }
 
     let path: PathBuf;
-    let is_private: bool;
 
     let strings = translations.get_translation(&lang.0);
 
     let root_domain = get_root_domain(host.0);
 
-    if let Ok((p, i)) = get_real_path(&file, jwt.claims.sub.clone()) {
+    if let Ok((p, _)) = get_real_path(&file, jwt.claims.sub.clone()) {
         path = p;
-        is_private = i;
     } else if let Err(e) = get_real_path(&file, jwt.claims.sub.clone()) {
         if e == Status::Forbidden {
             return Ok(IndexResponse::Template(Template::render(
@@ -424,7 +421,6 @@ async fn index(
     if path.is_dir() {
         display_folder(
             file,
-            is_private,
             strings,
             lang.0,
             host,
@@ -436,7 +432,6 @@ async fn index(
     } else {
         display_file(
             file,
-            is_private,
             strings,
             lang.0,
             host,
@@ -450,7 +445,6 @@ async fn index(
 
 async fn display_file(
     file: PathBuf,
-    is_private: bool,
     strings: &HashMap<String, String>,
     lang: String,
     host: Host<'_>,
@@ -460,7 +454,11 @@ async fn display_file(
 ) -> IndexResult {
     let jwt = token.clone().unwrap_or_default();
 
-    let path =  Path::new("files/").join(&file).to_path_buf();
+    let (path, is_private) = if share {
+        (Path::new("files").join(&file.strip_prefix("/").unwrap_or(Path::new("files"))).to_path_buf(), false)
+    } else { 
+        get_real_path(&file, jwt.claims.sub.clone())?
+    };
 
     let ext = if path.is_file() {
         path.extension().and_then(OsStr::to_str).unwrap_or("")
@@ -744,7 +742,6 @@ async fn display_file(
 
 async fn display_folder(
     file: PathBuf,
-    is_private: bool,
     strings: &HashMap<String, String>,
     lang: String,
     host: Host<'_>,
@@ -754,6 +751,8 @@ async fn display_folder(
 ) -> IndexResult {
     let jwt = token.clone().unwrap_or_default();
 
+    let (path, is_private) = get_real_path(&file, jwt.claims.sub.clone())?;
+
     let ext = if is_private {
         "privatefolder"
     } else {
@@ -761,8 +760,6 @@ async fn display_folder(
     }.to_lowercase();
 
     let root_domain = get_root_domain(&host.0);
-
-    let path =  Path::new("files/").join(&file).to_path_buf();
 
     match ext.as_str() {
         "folder" => {
