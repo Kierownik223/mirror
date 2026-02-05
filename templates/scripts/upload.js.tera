@@ -1,31 +1,30 @@
-function uploadFileInChunks(file, path, ui) {
-    return new Promise(function (resolve, reject) {
-        var totalChunks = Math.ceil(file.size / CHUNK_SIZE);
-        var fileId = Date.now() + "_" + Math.random().toString(36).slice(2);
+function uploadFileInChunks(file, path, ui, onFinish, onError) {
+    var totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+    var fileId = Date.now() + "_" + Math.random().toString(36).slice(2);
 
-        var uploadedBytes = 0;
-        var startTime = Date.now();
+    var uploadedBytes = 0;
+    var startTime = Date.now();
+    var responseText;
 
-        var responseText;
+    function uploadNextChunk(i) {
+        if (i >= totalChunks) {
+            return onFinish(responseText);
+        }
 
-        var uploadNextChunk = function (i) {
-            if (i >= totalChunks) {
-                return resolve(responseText);
-            }
+        var start = i * CHUNK_SIZE;
+        var end = Math.min(start + CHUNK_SIZE, file.size);
+        var chunk = file.slice(start, end);
 
-            var start = i * CHUNK_SIZE;
-            var end = Math.min(start + CHUNK_SIZE, file.size);
-            var chunk = file.slice(start, end);
+        var formData = new FormData();
+        formData.append("file", chunk);
+        formData.append("path", path);
+        formData.append("fileid", fileId);
+        formData.append("filename", file.name);
+        formData.append("chunkindex", i);
+        formData.append("totalchunks", totalChunks);
 
-            var formData = new FormData();
-            formData.append("file", chunk);
-            formData.append("path", path);
-            formData.append("fileid", fileId);
-            formData.append("filename", file.name);
-            formData.append("chunkindex", i);
-            formData.append("totalchunks", totalChunks);
-
-            uploadChunk({
+        uploadChunk(
+            {
                 formData: formData,
                 onProgress: function (e) {
                     if (e.lengthComputable) {
@@ -47,41 +46,41 @@ function uploadFileInChunks(file, path, ui) {
                             formatBytes(speed) +
                             "/s";
                     }
-                },
-            })
-                .then(function (response) {
-                    responseText = response;
-                    uploadedBytes += end - start;
-                    uploadNextChunk(i + 1);
-                })
-                .catch(function (err) {
-                    reject(err);
-                });
-        };
+                }
+            },
+            function (response) {
+                responseText = response;
+                uploadedBytes += end - start;
+                uploadNextChunk(i + 1);
+            },
+            function (error) {
+                onError(error);
+            }
+        );
+    }
 
-        uploadNextChunk(0);
-    });
+    uploadNextChunk(0);
 }
 
-function uploadChunk(options) {
-    return new Promise(function (resolve, reject) {
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", "/api/upload_chunked", true);
+function uploadChunk(options, onFinish, onError) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/upload_chunked", true);
 
-        xhr.upload.onprogress = options.onProgress || null;
+    if (options.onProgress) {
+        xhr.upload.onprogress = options.onProgress;
+    }
 
-        xhr.onload = function () {
-            if (xhr.status === 200) {
-                resolve(xhr.responseText);
-            } else {
-                reject(xhr.status);
-            }
-        };
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            onFinish(xhr.responseText);
+        } else {
+            onError(xhr.status);
+        }
+    };
 
-        xhr.onerror = function () {
-            reject("network");
-        };
+    xhr.onerror = function () {
+        callback("network");
+    };
 
-        xhr.send(options.formData);
-    });
+    xhr.send(options.formData);
 }

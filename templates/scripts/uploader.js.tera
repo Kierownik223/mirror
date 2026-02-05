@@ -51,52 +51,51 @@ function uploadViaAPI() {
                         uploadFileInChunks(file, path, {
                             progressBar: progressBar,
                             info: info,
-                            label: label,
-                        })
-                            .then(function (responseText) {
-                                progressBar.style.display = "none";
-                                info.style.display = "none";
-                                var response = JSON.parse(responseText);
-                                var result = response[0];
+                            label: label
+                        }, function (responseText) {
+                            progressBar.style.display = "none";
+                            info.style.display = "none";
+                            var response = JSON.parse(responseText);
+                            var result = response[0];
 
-                                if (!result || result.url == null) {
-                                    ui.label.textContent =
-                                        "{{ strings.upload_error }} " +
-                                        (result && result.error
-                                            ? result.error
-                                            : "");
-                                    return;
-                                }
+                            if (!result || result.url == null) {
+                                ui.label.textContent =
+                                    "{{ strings.upload_error }} " +
+                                    (result && result.error
+                                        ? result.error
+                                        : "");
+                                return;
+                            }
 
-                                var iconPath =
-                                    "/static/images/icons/{% if hires %}hires/{% endif %}" +
-                                    result.icon +
-                                    ".png";
+                            var iconPath =
+                                "/static/images/icons/{% if hires %}hires/{% endif %}" +
+                                result.icon +
+                                ".png";
 
-                                var a = document.createElement("a");
-                                a.href = result.url;
-                                var filePath = a.pathname;
+                            var a = document.createElement("a");
+                            a.href = result.url;
+                            var filePath = a.pathname;
 
-                                if (!filePath.startsWith("/")) {
-                                    filePath = "/" + filePath;
-                                }
+                            if (!filePath.startsWith("/")) {
+                                filePath = "/" + filePath;
+                            }
 
-                                label.innerHTML =
-                                    '<a href="' +
-                                    result.url +
-                                    '"><span><img src="' +
-                                    iconPath +
-                                    '" class="icon">' +
-                                    result.name +
-                                    '</span></a> {{ strings.upload_success }} <a style="cursor: pointer;" onclick="deleteFile(this, \'' +
-                                    filePath +
-                                    '\')">{{ strings.delete }}</a> <a style="cursor: pointer;" onclick="share(this, \'' +
-                                    filePath +
-                                    '\')">{{ strings.share }}</a><br>';
+                            label.innerHTML =
+                                '<a href="' +
+                                result.url +
+                                '"><span><img src="' +
+                                iconPath +
+                                '" class="icon">' +
+                                result.name +
+                                '</span></a> {{ strings.upload_success }} <a style="cursor: pointer;" onclick="deleteFile(this, \'' +
+                                filePath +
+                                '\')">{{ strings.delete }}</a> <a style="cursor: pointer;" onclick="share(this, \'' +
+                                filePath +
+                                '\')">{{ strings.share }}</a><br>';
 
-                                return true;
-                            })
-                            .catch(function (err) {
+                            return true;
+                        },
+                            function (err) {
                                 if (err === 413) {
                                     label.textContent =
                                         file.name +
@@ -233,8 +232,8 @@ function deleteFile(element, filePath) {
     if (
         !confirm(
             "{{ strings.delete_confirmation }} " +
-                decodeURIComponent(path) +
-                "?"
+            decodeURIComponent(path) +
+            "?"
         )
     ) {
         return;

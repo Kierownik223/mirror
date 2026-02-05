@@ -37,179 +37,179 @@ function uploadViaAPI(files, path) {
                         uploadFileInChunks(file, path, {
                             progressBar: progressBar,
                             info: info,
-                            label: label,
-                        })
-                            .then(function (responseText) {
-                                progressBar.style.display = "none";
-                                info.style.display = "none";
-                                label.style.display = "none";
-                                var response = JSON.parse(responseText);
-                                var result = response[0];
+                            label: label
+                        }, function (responseText) {
+                            progressBar.style.display = "none";
+                            info.style.display = "none";
+                            label.style.display = "none";
+                            var response = JSON.parse(responseText);
+                            var result = response[0];
 
-                                if (!result || result.url == null) {
-                                    label.textContent =
-                                        "{{ strings.upload_error }} " +
-                                        (result && result.error
-                                            ? result.error
-                                            : "");
-                                    return;
-                                }
+                            if (!result || result.url == null) {
+                                label.textContent =
+                                    "{{ strings.upload_error }} " +
+                                    (result && result.error
+                                        ? result.error
+                                        : "");
+                                return;
+                            }
 
-                                var tableBody =
-                                    document.querySelector("table tbody");
-                                if (tableBody) {
-                                    var row = document.createElement("tr");
+                            var tableBody =
+                                document.querySelector("table tbody");
+                            if (tableBody) {
+                                var row = document.createElement("tr");
 
-                                    var tdCheck = document.createElement("td");
-                                    var cb = document.createElement("input");
-                                    cb.type = "checkbox";
-                                    cb.className = "delete-checkbox";
-                                    cb.value = result.name;
-                                    tdCheck.appendChild(cb);
-                                    row.appendChild(tdCheck);
+                                var tdCheck = document.createElement("td");
+                                var cb = document.createElement("input");
+                                cb.type = "checkbox";
+                                cb.className = "delete-checkbox";
+                                cb.value = result.name;
+                                tdCheck.appendChild(cb);
+                                row.appendChild(tdCheck);
 
-                                    var tdName = document.createElement("td");
-                                    var a = document.createElement("a");
-                                    a.href = result.url;
-                                    a.innerHTML =
-                                        '<img src="/static/images/icons/{% if hires %}hires/{% endif %}' +
-                                        result.icon +
-                                        '.png" class="icon">' +
-                                        result.name;
-                                    tdName.appendChild(a);
-                                    row.appendChild(tdName);
+                                var tdName = document.createElement("td");
+                                var a = document.createElement("a");
+                                a.href = result.url;
+                                a.innerHTML =
+                                    '<img src="/static/images/icons/{% if hires %}hires/{% endif %}' +
+                                    result.icon +
+                                    '.png" class="icon">' +
+                                    result.name;
+                                tdName.appendChild(a);
+                                row.appendChild(tdName);
 
-                                    var tdSize = document.createElement("td");
-                                    tdSize.textContent = result.size
-                                        ? formatBytes(result.size)
-                                        : "---";
-                                    row.appendChild(tdSize);
+                                var tdSize = document.createElement("td");
+                                tdSize.textContent = result.size
+                                    ? formatBytes(result.size)
+                                    : "---";
+                                row.appendChild(tdSize);
 
-                                    var tdType = document.createElement("td");
-                                    tdType.textContent = "{{ strings.file }}";
-                                    row.appendChild(tdType);
+                                var tdType = document.createElement("td");
+                                tdType.textContent = "{{ strings.file }}";
+                                row.appendChild(tdType);
 
-                                    var tdDelete = document.createElement("td");
-                                    var renLink = document.createElement("a");
-                                    renLink.style.cursor = "pointer";
-                                    renLink.textContent =
-                                        "{{ strings.rename }}";
-                                    renLink.setAttribute(
-                                        "onclick",
-                                        'renameFile(this, "' +
-                                            result.name +
-                                            '")'
-                                    );
-                                    tdDelete.appendChild(renLink);
-                                    tdDelete.innerHTML += " ";
-                                    var shrLink =
-                                        document.createElement("a");
-                                    shrLink.style.cursor = "pointer";
-                                    shrLink.textContent =
-                                        "{{ strings.share }}";
-                                    shrLink.setAttribute(
-                                        "onclick",
-                                        'share(this, "' +
-                                            result.name +
-                                            '")'
-                                    );
-                                    tdDelete.appendChild(shrLink);
-                                    tdDelete.innerHTML += " ";
-                                    var delLink = document.createElement("a");
-                                    delLink.style.cursor = "pointer";
-                                    delLink.textContent =
-                                        "{{ strings.delete }}";
-                                    delLink.setAttribute(
-                                        "onclick",
-                                        'deleteFile(this, "' +
-                                            result.name +
-                                            '")'
-                                    );
-                                    tdDelete.appendChild(delLink);
-                                    row.appendChild(tdDelete);
+                                var tdDelete = document.createElement("td");
+                                var renLink = document.createElement("a");
+                                renLink.style.cursor = "pointer";
+                                renLink.textContent =
+                                    "{{ strings.rename }}";
+                                renLink.setAttribute(
+                                    "onclick",
+                                    'renameFile(this, "' +
+                                    result.name +
+                                    '")'
+                                );
+                                tdDelete.appendChild(renLink);
+                                tdDelete.innerHTML += " ";
+                                var shrLink =
+                                    document.createElement("a");
+                                shrLink.style.cursor = "pointer";
+                                shrLink.textContent =
+                                    "{{ strings.share }}";
+                                shrLink.setAttribute(
+                                    "onclick",
+                                    'share(this, "' +
+                                    result.name +
+                                    '")'
+                                );
+                                tdDelete.appendChild(shrLink);
+                                tdDelete.innerHTML += " ";
+                                var delLink = document.createElement("a");
+                                delLink.style.cursor = "pointer";
+                                delLink.textContent =
+                                    "{{ strings.delete }}";
+                                delLink.setAttribute(
+                                    "onclick",
+                                    'deleteFile(this, "' +
+                                    result.name +
+                                    '")'
+                                );
+                                tdDelete.appendChild(delLink);
+                                row.appendChild(tdDelete);
 
-                                    var rows = tableBody.querySelectorAll("tr");
-                                    var normalizedNew = result.name.toLowerCase();
+                                var rows = tableBody.querySelectorAll("tr");
+                                var normalizedNew = result.name.toLowerCase();
 
-                                    for (var i = 0; i < rows.length; i++) {
-                                        var existingRow = rows[i];
+                                for (var i = 0; i < rows.length; i++) {
+                                    var existingRow = rows[i];
 
-                                        if (!existingRow.cells || existingRow.cells.length < 2) {
-                                            continue;
-                                        }
-
-                                        var existingName = existingRow.cells[1].textContent;
-                                        if (!existingName) {
-                                            continue;
-                                        }
-
-                                        existingName = existingName.trim().toLowerCase();
-
-                                        if (normalizedNew.localeCompare(existingName) < 0) {
-                                            tableBody.insertBefore(row, existingRow);
-                                            return;
-                                        }
+                                    if (!existingRow.cells || existingRow.cells.length < 2) {
+                                        continue;
                                     }
 
-                                    tableBody.appendChild(row);
+                                    var existingName = existingRow.cells[1].textContent;
+                                    if (!existingName) {
+                                        continue;
+                                    }
+
+                                    existingName = existingName.trim().toLowerCase();
+
+                                    if (normalizedNew.localeCompare(existingName) < 0) {
+                                        tableBody.insertBefore(row, existingRow);
+                                        return;
+                                    }
                                 }
 
-                                var usageProgressBar =
-                                    document.getElementById("usage");
+                                tableBody.appendChild(row);
+                            }
 
-                                if (usageProgressBar) {
-                                    var xhr = new XMLHttpRequest();
-                                    try {
-                                        xhr.open("GET", "/api/upload", true);
-                                    } catch (e) {}
+                            var usageProgressBar =
+                                document.getElementById("usage");
 
-                                    xhr.onreadystatechange = function () {
-                                        if (xhr.readyState == 4) {
-                                            if (xhr.status == 200) {
-                                                try {
-                                                    var response = JSON.parse(
-                                                        xhr.responseText
-                                                    );
+                            if (usageProgressBar) {
+                                var xhr = new XMLHttpRequest();
+                                try {
+                                    xhr.open("GET", "/api/upload", true);
+                                } catch (e) { }
 
-                                                    usageProgressBar.value =
-                                                        response.private_folder_usage;
-                                                    usageProgressBar.max =
-                                                        response.private_folder_quota;
+                                xhr.onreadystatechange = function () {
+                                    if (xhr.readyState == 4) {
+                                        if (xhr.status == 200) {
+                                            try {
+                                                var response = JSON.parse(
+                                                    xhr.responseText
+                                                );
 
-                                                    document.getElementById(
-                                                        "folder_usage"
-                                                    ).innerText = formatBytes(
-                                                        response.private_folder_usage
-                                                    );
-                                                    document.getElementById(
-                                                        "folder_quota"
-                                                    ).innerText = formatBytes(
-                                                        response.private_folder_quota
-                                                    );
-                                                } catch (e) {}
-                                            }
+                                                usageProgressBar.value =
+                                                    response.private_folder_usage;
+                                                usageProgressBar.max =
+                                                    response.private_folder_quota;
+
+                                                document.getElementById(
+                                                    "folder_usage"
+                                                ).innerText = formatBytes(
+                                                    response.private_folder_usage
+                                                );
+                                                document.getElementById(
+                                                    "folder_quota"
+                                                ).innerText = formatBytes(
+                                                    response.private_folder_quota
+                                                );
+                                            } catch (e) { }
                                         }
-                                    };
+                                    }
+                                };
 
-                                    try {
-                                        xhr.send();
-                                    } catch (e) {}
-                                }
-                            })
-                            .catch(function (err) {
+                                try {
+                                    xhr.send();
+                                } catch (e) { }
+                            }
+                        },
+                            function (err, xhr) {
                                 if (err === 413) {
                                     alert(
                                         file.name +
-                                            " {{ strings.file_too_big }}"
+                                        " {{ strings.file_too_big }}"
                                     );
                                 } else if (err === 507) {
                                     alert("{{ strings.not_enough_space }}");
-                                } else {
+                                }/*  else {
+                                    console.error(xhr);
                                     alert(
                                         file.name +
-                                            " {{ strings.upload_error }}"
+                                        " {{ strings.upload_error }}"
                                     );
-                                }
+                                } */
                                 progressBar.style.display = "none";
                                 info.style.display = "none";
                                 label.style.display = "none";
@@ -314,8 +314,8 @@ function uploadViaAPI(files, path) {
                                         renLink.setAttribute(
                                             "onclick",
                                             'renameFile(this, "' +
-                                                result.name +
-                                                '")'
+                                            result.name +
+                                            '")'
                                         );
                                         tdDelete.appendChild(renLink);
                                         tdDelete.innerHTML += " ";
@@ -327,8 +327,8 @@ function uploadViaAPI(files, path) {
                                         shrLink.setAttribute(
                                             "onclick",
                                             'share(this, "' +
-                                                result.name +
-                                                '")'
+                                            result.name +
+                                            '")'
                                         );
                                         tdDelete.appendChild(shrLink);
                                         tdDelete.innerHTML += " ";
@@ -340,8 +340,8 @@ function uploadViaAPI(files, path) {
                                         delLink.setAttribute(
                                             "onclick",
                                             'deleteFile(this, "' +
-                                                result.name +
-                                                '")'
+                                            result.name +
+                                            '")'
                                         );
                                         tdDelete.appendChild(delLink);
                                         row.appendChild(tdDelete);
@@ -382,13 +382,13 @@ function uploadViaAPI(files, path) {
                                                 "/api/upload",
                                                 true
                                             );
-                                        } catch (e) {}
+                                        } catch (e) { }
 
                                         xhr.onreadystatechange = function () {
                                             if (xhr.readyState == 4) {
                                                 if (xhr.status == 200) {
                                                     try {
-                                                        var response =JSON.parse(xhr.responseText);
+                                                        var response = JSON.parse(xhr.responseText);
 
                                                         usageProgressBar.value =
                                                             response.private_folder_usage;
@@ -407,19 +407,19 @@ function uploadViaAPI(files, path) {
                                                             formatBytes(
                                                                 response.private_folder_quota
                                                             );
-                                                    } catch (e) {}
+                                                    } catch (e) { }
                                                 }
                                             }
                                         };
 
                                         try {
                                             xhr.send();
-                                        } catch (e) {}
+                                        } catch (e) { }
                                     }
                                 } catch (e) {
                                     alert(
                                         file.name +
-                                            " {{ strings.upload_parse_error }}"
+                                        " {{ strings.upload_parse_error }}"
                                     );
                                 }
                             } else if (xhr.status === 507) {
@@ -427,8 +427,8 @@ function uploadViaAPI(files, path) {
                             } else {
                                 alert(
                                     file.name +
-                                        " {{ strings.upload_failed_status }} " +
-                                        xhr.status
+                                    " {{ strings.upload_failed_status }} " +
+                                    xhr.status
                                 );
                             }
                         };
@@ -439,7 +439,7 @@ function uploadViaAPI(files, path) {
                             label.style.display = "none";
                             alert(
                                 file.name +
-                                    " {{ strings.upload_failed_network }}"
+                                " {{ strings.upload_failed_network }}"
                             );
                         };
 
