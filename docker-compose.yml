@@ -1,0 +1,28 @@
+services:
+  mirror:
+    image: mirror:latest
+    restart: always
+    container_name: mirror
+    environment:
+      MIRROR_EXTENSIONS: '["exe", "cab", "appx", "xap", "appxbundle", "zip", "7z", "apk", "rar"]'
+      MIRROR_HIDDEN_FILES: '["static", "uploads", "private", "robots.txt", "favicon.ico", "top", "RESTRICTED", "metadata", "HIDDEN"]'
+      MIRROR_ENABLE_LOGIN: 'true'
+      MIRROR_ENABLE_API: 'true'
+      MIRROR_ENABLE_MARMAK_LINK: 'true'
+      MIRROR_INSTANCE_INFO: 'My Mirror instance!'
+      MIRROR_X_SENDFILE_HEADER: 'X-Send-File'
+      MIRROR_X_SENDFILE_PREFIX: '/opt/mirror/'
+      MIRROR_STANDALONE: 'false'
+      MIRROR_FALLBACK_ROOT_DOMAIN: 'marmak.net.pl'
+      MIRROR_ENABLE_FILE_DB: 'true'
+      MIRROR_ENABLE_ZIP_DOWNLOADS: 'false'
+      MIRROR_MAX_AGE: '86400'
+      MIRROR_STATIC_MAX_AGE: '604800'
+      MIRROR_JWT_SECRET: ''
+      MIRROR_LINKSHORTENER: 'true'
+      MIRROR_LINKSHORTENER_URL: 'https://short.marmak.net.pl/api/url'
+      ROCKET_DATABASES: '{marmak={url="mysql://mirror:12345678@localhost:3306/marmak"}, {mirror={url="mysql://mirror:12345678@localhost:3306/mirror"}}}'
+      ROCKET_ADDRESS: "0.0.0.0"
+      ROCKET_PORT: "8080"
+    ports:
+      - '2115:8080'
