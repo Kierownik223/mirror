@@ -6,10 +6,7 @@ ident = "Mirror"
 data-form = "100 MB"
 file = "100 MB"
 
-[release]
-secret_key = "your-secret-key"
-
-# prod database
+# prod databases
 
 [release.databases.marmak]
 url = "mysql://mirror:12345678@localhost:3306/marmak"
@@ -17,7 +14,7 @@ url = "mysql://mirror:12345678@localhost:3306/marmak"
 [release.databases.mirror]
 url = "mysql://mirror:12345678@localhost:3306/mirror"
 
-# dev database
+# dev databases
 
 [debug.databases.marmak]
 url = "mysql://mirror:12345678@localhost:3306/marmak"
