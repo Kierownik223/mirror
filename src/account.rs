@@ -224,11 +224,7 @@ async fn logout(
 
 pub fn build_account() -> AdHoc {
     AdHoc::on_ignite("Account", |rocket| async {
-        let mut rocket = rocket.mount("/account", routes![login_page, login, logout]);
-
-        if CONFIG.enable_direct {
-            rocket = rocket.mount("/account", routes![direct]);
-        }
+        let mut rocket = rocket.mount("/account", routes![login_page, login, logout, direct]);
 
         rocket
     })

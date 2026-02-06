@@ -7,9 +7,7 @@
 <a href="/upload">{{ strings.uploader }}</a>
 &nbsp;
 <a href="/admin/sysinfo">{{ strings.sysinfo }}</a>
-{% if config.enable_direct %}
 &nbsp;
 <a href="http://account.{{ root_domain }}">{{ strings.manage_account }}</a>
-{% endif %}
 
 {% endblock content %}

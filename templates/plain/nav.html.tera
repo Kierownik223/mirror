@@ -11,9 +11,7 @@
     {% if admin %}
     <a href="/admin/">{{ strings.admin }}</a>&nbsp;
     {% else %}
-    {% if config.enable_direct %}
     <a href="http://account.{{ root_domain }}">{{ strings.manage_account }}</a>&nbsp;
-    {% endif %}
     {% endif %}
     <a href="/account/logout">{{ strings.log_out }}</a>&nbsp;
     {% endif %}

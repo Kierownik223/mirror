@@ -11,9 +11,7 @@
     {% if admin %}
     <a href="/admin/"><span>{{ macros::icon(name="ui/admin", hires=settings.hires) }}{{ strings.admin }}</span></a>
     {% else %}
-    {% if config.enable_direct %}
     <a href="http://account.{{ root_domain }}"><span>{{ macros::icon(name="ui/settings", hires=settings.hires) }}{{ strings.manage_account }}</span></a>
-    {% endif %}
     {% endif %}
     <a href="/account/logout"><span>{{ macros::icon(name="ui/login", hires=settings.hires) }}{{ strings.log_out }}</span></a>
     {% endif %}
