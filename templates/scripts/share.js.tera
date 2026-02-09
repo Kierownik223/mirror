@@ -50,7 +50,7 @@ function share(filePath) {
                         body: '{"url":"https://{{ host }}/share/' + response.message + '.' + ext + '"}',
                         contentType: "application/json",
                         onInitError: function () {
-                            alert("{{ strings.error_shortening }} Full URL copied to clipboard.");
+                            alert("{{ strings.error_shortening }} {{ strings.full_url_copied }}");
 
                             try {
                                 navigator.clipboard.writeText(url);
@@ -59,7 +59,7 @@ function share(filePath) {
                             }
                         },
                         onOpenError: function () {
-                            alert("{{ strings.error_shortening }} Full URL copied to clipboard.");
+                            alert("{{ strings.error_shortening }} {{ strings.full_url_copied }}");
 
                             try {
                                 navigator.clipboard.writeText(url);
@@ -68,7 +68,7 @@ function share(filePath) {
                             }
                         },
                         onSendError: function () {
-                            alert("{{ strings.error_shortening }} Full URL copied to clipboard.");
+                            alert("{{ strings.error_shortening }} {{ strings.full_url_copied }}");
 
                             try {
                                 navigator.clipboard.writeText(url);
@@ -90,10 +90,10 @@ function share(filePath) {
                                     } catch (e) {
                                         window.clipboardData.setData("Text", response.url);
                                     } finally {
-                                        alert('Copied to clipboard:' + ' ' + response.url);
+                                        alert('{{ strings.copied_to_clipboard }}: ' + response.url);
                                     }
                                 } else if (xhr.status == 429) {
-                                    alert("{{ strings.shortening_ratelimit }} Full URL copied to clipboard.");
+                                    alert("{{ strings.shortening_ratelimit }} {{ strings.full_url_copied }}");
 
                                     try {
                                         navigator.clipboard.writeText(url);
@@ -101,7 +101,7 @@ function share(filePath) {
                                         window.clipboardData.setData("Text", url);
                                     }
                                 } else {
-                                    alert("{{ strings.error_shortening }} Full URL copied to clipboard.");
+                                    alert("{{ strings.error_shortening }} {{ strings.full_url_copied }}");
 
                                     try {
                                         navigator.clipboard.writeText(url);
@@ -118,7 +118,7 @@ function share(filePath) {
                     } catch (e) {
                         window.clipboardData.setData("Text", url);
                     } finally {
-                        alert('Copied to clipboard!');
+                        alert('{{ strings.copied_to_clipboard }}!');
                     }
                     //{% endif %}
                 } else {
