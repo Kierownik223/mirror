@@ -1,10 +1,9 @@
-function share(element, filePath) {
+function share(filePath) {
     var pathname = "/";
     if (window.location && typeof window.location.pathname === "string") {
         pathname = window.location.pathname.replace("/upload", "/");
     }
     var path = pathname + filePath;
-    element.onclick = null;
     var xhr;
     if (window.XMLHttpRequest) {
         xhr = new XMLHttpRequest();
@@ -13,9 +12,6 @@ function share(element, filePath) {
             xhr = new ActiveXObject("Microsoft.XMLHTTP");
         } catch (e) {
             alert("{{ strings.error_sharing }}");
-            element.onclick = function () {
-                share(element, url);
-            };
             return;
         }
     }
@@ -24,9 +20,6 @@ function share(element, filePath) {
         xhr.open("POST", "/api" + path, true);
     } catch (e) {
         alert("{{ strings.error_sharing }}");
-        element.onclick = function () {
-            share(element, filePath);
-        };
         return;
     }
 
@@ -35,107 +28,99 @@ function share(element, filePath) {
         url: "/api" + path,
         onInitError: function() {
             alert("{{ strings.error_sharing }}");
-            element.onclick = function () {
-                share(element, url);
-            };
         },
         onOpenError: function() {
             alert("{{ strings.error_sharing }}");
-            element.onclick = function () {
-                share(element, url);
-            };
         },
         onSendError: function() {
             alert("{{ strings.error_sharing }}");
-            element.onclick = function () {
-                share(element, url);
-            };
         },
         onReady: function(xhr) {
             if (xhr.readyState == 4) {
                 if (xhr.status == 201) {
-                    if (element) {
-                        var ext = filePath.split(".").pop();
-                        var response = JSON.parse(xhr.responseText);
+                    var ext = filePath.split(".").pop();
+                    var response = JSON.parse(xhr.responseText);
 
-                        //{% if config.linkshortener %}
-                        function renderElement() {
-                            var url = "https://{{ host }}/share/" + response.message + "." + ext;
-                            element.innerText = url;
-                            element.href = url;
-                            element.onclick = function (e) {
-                                e.preventDefault();
-                                try {
-                                    navigator.clipboard.writeText(url);
-                                } catch (e) {
-                                    window.clipboardData.setData("Text", url);
-                                }
-                            };
-                        }
+                    var url = "https://{{ host }}/share/" + response.message + "." + ext;
 
-                        sendRequest({
-                            method: "POST",
-                            url: "{{ config.linkshortener_url }}",
-                            body: '{"url":"https://{{ host }}/share/' + response.message + '.' + ext + '"}',
-                            contentType: "application/json",
-                            onInitError: function () {
-                                alert("{{ strings.error_shortening }}");
-                                renderElement();
-                            },
-                            onOpenError: function () {
-                                alert("{{ strings.error_shortening }}");
-                                renderElement();
-                            },
-                            onSendError: function () {
-                                alert("{{ strings.error_shortening }}");
-                                renderElement();
-                            },
-                            onReady: function (xhr) {
-                                if (xhr.readyState == 4) {
-                                    if (xhr.status == 200) {
-                                        var response = JSON.parse(xhr.responseText);
-                                        if (response.error) {
-                                            alert(response.error);
-                                            return null;
-                                        }
-                                        element.innerText = response.link;
-                                        element.href = response.link;
-                                        element.onclick = function (e) {
-                                            e.preventDefault();
-                                            try {
-                                                navigator.clipboard.writeText(response.link);
-                                            } catch (e) {
-                                                window.clipboardData.setData("Text", response.link);
-                                            }
-                                        };
-                                    } else if (xhr.status == 429) {
-                                        alert("{{ strings.shortening_ratelimit }}");
-                                        renderElement();
-                                    } else {
-                                        alert("{{ strings.error_shortening }}");
-                                    }
-                                }
-                            }
-                        });
-                        //{% else %}
-                        var url = "https://{{ host }}/share/" + response.message + "." + ext;
-                        element.innerText = url;
-                        element.href = url;
-                        element.onclick = function (e) {
-                            e.preventDefault();
+                    //{% if config.linkshortener %}
+                    sendRequest({
+                        method: "POST",
+                        url: "{{ config.linkshortener_url }}",
+                        body: '{"url":"https://{{ host }}/share/' + response.message + '.' + ext + '"}',
+                        contentType: "application/json",
+                        onInitError: function () {
+                            alert("{{ strings.error_shortening }} Full URL copied to clipboard.");
+
                             try {
                                 navigator.clipboard.writeText(url);
                             } catch (e) {
                                 window.clipboardData.setData("Text", url);
                             }
-                        };
-                        //{% endif %}
-                    } else {
-                        alert(JSON.parse(xhr.responseText).message);
-                        element.onclick = function () {
-                            share(element, filePath);
-                        };
+                        },
+                        onOpenError: function () {
+                            alert("{{ strings.error_shortening }} Full URL copied to clipboard.");
+
+                            try {
+                                navigator.clipboard.writeText(url);
+                            } catch (e) {
+                                window.clipboardData.setData("Text", url);
+                            }
+                        },
+                        onSendError: function () {
+                            alert("{{ strings.error_shortening }} Full URL copied to clipboard.");
+
+                            try {
+                                navigator.clipboard.writeText(url);
+                            } catch (e) {
+                                window.clipboardData.setData("Text", url);
+                            }
+                        },
+                        onReady: function (xhr) {
+                            if (xhr.readyState == 4) {
+                                if (xhr.status == 200) {
+                                    var response = JSON.parse(xhr.responseText);
+                                    if (response.error) {
+                                        alert(response.error);
+                                        return null;
+                                    }
+
+                                    try {
+                                        navigator.clipboard.writeText(response.url);
+                                    } catch (e) {
+                                        window.clipboardData.setData("Text", response.url);
+                                    } finally {
+                                        alert('Copied to clipboard:' + ' ' + response.url);
+                                    }
+                                } else if (xhr.status == 429) {
+                                    alert("{{ strings.shortening_ratelimit }} Full URL copied to clipboard.");
+
+                                    try {
+                                        navigator.clipboard.writeText(url);
+                                    } catch (e) {
+                                        window.clipboardData.setData("Text", url);
+                                    }
+                                } else {
+                                    alert("{{ strings.error_shortening }} Full URL copied to clipboard.");
+
+                                    try {
+                                        navigator.clipboard.writeText(url);
+                                    } catch (e) {
+                                        window.clipboardData.setData("Text", url);
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    //{% else %}
+                    try {
+                        navigator.clipboard.writeText(url);
+                    } catch (e) {
+                        window.clipboardData.setData("Text", url);
+                    } finally {
+                        alert('Copied to clipboard!');
                     }
+                    //{% endif %}
                 } else {
                     alert("{{ strings.error_sharing }}");
                     return;

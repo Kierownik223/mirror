@@ -74,6 +74,91 @@ function deleteSelected() {
     deleteNext();
 }
 
+function renameSelected() {
+    var inputs = document.getElementsByTagName("input");
+    var filePathList = [];
+    var elementList = [];
+
+    for (var i = 0; i < inputs.length; i++) {
+        var input = inputs[i];
+        if (
+            input.type === "checkbox" &&
+            hasClass(input, "delete-checkbox") &&
+            input.checked
+        ) {
+            filePathList[filePathList.length] = input.value;
+
+            var row = input;
+            while (
+                row &&
+                row.nodeType === 1 &&
+                String(row.tagName).toLowerCase() !== "tr"
+            ) {
+                row = row.parentNode;
+            }
+
+            elementList[elementList.length] = row;
+        }
+    }
+
+    if (filePathList.length === 0) {
+        return;
+    }
+
+    if (elementList.length > 1) {
+        alert('Select one file');
+        return;
+    }
+
+    var path = filePathList[0];
+    var rowElement = elementList[0];
+
+    console.log(rowElement);
+
+    renameFile(rowElement, path);
+}
+
+function shareSelected() {
+    var inputs = document.getElementsByTagName("input");
+    var filePathList = [];
+    var elementList = [];
+
+    for (var i = 0; i < inputs.length; i++) {
+        var input = inputs[i];
+        if (
+            input.type === "checkbox" &&
+            hasClass(input, "delete-checkbox") &&
+            input.checked
+        ) {
+            filePathList[filePathList.length] = input.value;
+
+            var row = input;
+            while (
+                row &&
+                row.nodeType === 1 &&
+                String(row.tagName).toLowerCase() !== "tr"
+            ) {
+                row = row.parentNode;
+            }
+
+            elementList[elementList.length] = row;
+        }
+    }
+
+    if (filePathList.length === 0) {
+        return;
+    }
+
+    if (elementList.length > 1) {
+        alert('Select one file');
+        return;
+    }
+
+    var path = filePathList[0];
+
+    share(path);
+}
+
 function renameFile(element, filePath) {
     var pathname = "/";
     if (window.location && typeof window.location.pathname === "string") {
@@ -107,46 +192,18 @@ function renameFile(element, filePath) {
                     try {
                         var response = JSON.parse(xhr.responseText);
 
-                        element.onclick = function () {
-                            renameFile(element, response.name);
-                        };
-
                         var row = element;
-                        while (row && row.nodeType === 1) {
-                            if (String(row.tagName).toLowerCase() === "tr") break;
-                            row = row.parentNode;
-                        }
-
-                        var tdDelete = document.createElement("td");
-                        var renLink = document.createElement("a");
-                        renLink.style.cursor = "pointer";
-                        renLink.textContent =
-                            "{{ strings.rename }}";
-                        renLink.setAttribute(
-                            "onclick",
-                            'renameFile(this, "' +
-                                response.name +
-                                '")'
-                        );
-                        tdDelete.appendChild(renLink);
-                        tdDelete.innerHTML += " ";
-                        var delLink = document.createElement("a");
-                        delLink.style.cursor = "pointer";
-                        delLink.textContent =
-                            "{{ strings.delete }}";
-                        delLink.setAttribute(
-                            "onclick",
-                            'deleteFile(this, "' +
-                                response.name +
-                                '", true)'
-                        );
-                        tdDelete.appendChild(delLink);
-
-                        element.parentNode.innerHTML = tdDelete.innerHTML;
 
                         if (row) {
                             var cells = row.getElementsByTagName("td");
                             if (cells.length > 0) {
+                                var checkboxTd = cells[0];
+                                var checkbox = checkboxTd.querySelector("input");
+
+                                if (checkbox) {
+                                    checkbox.value = response.name;
+                                }
+
                                 var td = cells[1];
                                 var link = td.querySelector("a");
 
@@ -273,26 +330,6 @@ function createFolder() {
                             var tdType = document.createElement("td");
                             tdType.textContent = "{{ strings.folder }}";
                             row.appendChild(tdType);
-
-                            var tdDelete = document.createElement("td");
-                            var renLink = document.createElement("a");
-                            renLink.style.cursor = "pointer";
-                            renLink.textContent = "{{ strings.rename }}";
-                            renLink.setAttribute(
-                                "onclick",
-                                'renameFile(this, "' + newName + '")'
-                            );
-                            tdDelete.appendChild(renLink);
-                            tdDelete.innerHTML += " ";
-                            var delLink = document.createElement("a");
-                            delLink.style.cursor = "pointer";
-                            delLink.textContent = "{{ strings.delete }}";
-                            delLink.setAttribute(
-                                "onclick",
-                                'deleteFile(this, "' + newName + '")'
-                            );
-                            tdDelete.appendChild(delLink);
-                            row.appendChild(tdDelete);
 
                             tableBody.appendChild(row);
                         }
