@@ -86,11 +86,11 @@ function share(filePath) {
                                     }
 
                                     try {
-                                        navigator.clipboard.writeText(response.url);
+                                        navigator.clipboard.writeText(response.link);
                                     } catch (e) {
-                                        window.clipboardData.setData("Text", response.url);
+                                        window.clipboardData.setData("Text", response.link);
                                     } finally {
-                                        alert('{{ strings.copied_to_clipboard }}: ' + response.url);
+                                        alert('{{ strings.copied_to_clipboard }}: ' + response.link);
                                     }
                                 } else if (xhr.status == 429) {
                                     alert("{{ strings.shortening_ratelimit }} {{ strings.full_url_copied }}");
