@@ -134,6 +134,10 @@ tr a {
     overflow-wrap: anywhere;
 }
 
+thead tr a {
+    display: inline-block;
+}
+
 tr:hover {
     background-color: #21252a;
 }
