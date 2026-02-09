@@ -89,7 +89,7 @@ function uploadViaAPI() {
                                 result.name +
                                 '</span></a> {{ strings.upload_success }} <a style="cursor: pointer;" onclick="deleteFile(this, \'' +
                                 filePath +
-                                '\')">{{ strings.delete }}</a> <a style="cursor: pointer;" onclick="share(this, \'' +
+                                '\')">{{ strings.delete }}</a> <a style="cursor: pointer;" onclick="share(\'' +
                                 filePath +
                                 '\')">{{ strings.share }}</a><br>';
 
@@ -182,7 +182,7 @@ function uploadViaAPI() {
                                         result.name +
                                         '</span></a> {{ strings.upload_success }} <a style="cursor: pointer;" onclick="deleteFile(this, \'' +
                                         filePath +
-                                        '\')">{{ strings.delete }}</a> <a style="cursor: pointer;" onclick="share(this, \'' +
+                                        '\')">{{ strings.delete }}</a> <a style="cursor: pointer;" onclick="share(\'' +
                                         filePath +
                                         '\')">{{ strings.share }}</a><br>';
                                 } catch (e) {
