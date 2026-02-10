@@ -105,8 +105,8 @@ function renameSelected() {
         return;
     }
 
-    if (elementList.length > 1) {
-        alert('Select one file');
+    if (elementList.length != 1) {
+        alert('{{ strings.select_one_file }}');
         return;
     }
 
@@ -149,8 +149,8 @@ function shareSelected() {
         return;
     }
 
-    if (elementList.length > 1) {
-        alert('Select one file');
+    if (elementList.length != 1) {
+        alert('{{ strings.select_one_file }}');
         return;
     }
 
