@@ -283,8 +283,14 @@ async fn download(
     perform_download(None, file, token, host, jar).await
 }
 
-async fn perform_download(db: Option<Connection<FileDb>>, file: PathBuf, token: Result<JWT, Status>, host: Host<'_>, jar: &CookieJar<'_>) -> IndexResult {
-        let username = if let Ok(token) = token.as_ref() {
+async fn perform_download(
+    db: Option<Connection<FileDb>>,
+    file: PathBuf,
+    token: Result<JWT, Status>,
+    host: Host<'_>,
+    jar: &CookieJar<'_>,
+) -> IndexResult {
+    let username = if let Ok(token) = token.as_ref() {
         if let Some(t) = &token.token {
             add_token_cookie(&t, &host.0, jar);
         }
@@ -419,27 +425,9 @@ async fn index(
     }
 
     if path.is_dir() {
-        display_folder(
-            file,
-            strings,
-            lang.0,
-            host,
-            token,
-            settings,
-            sizes,
-        )
-        .await
+        display_folder(file, strings, lang.0, host, token, settings, sizes).await
     } else {
-        display_file(
-            file,
-            strings,
-            lang.0,
-            host,
-            token,
-            settings,
-            false,
-        )
-        .await
+        display_file(file, strings, lang.0, host, token, settings, false).await
     }
 }
 
@@ -455,8 +443,13 @@ async fn display_file(
     let jwt = token.clone().unwrap_or_default();
 
     let (path, is_private) = if share {
-        (Path::new("files").join(&file.strip_prefix("/").unwrap_or(Path::new("files"))).to_path_buf(), false)
-    } else { 
+        (
+            Path::new("files")
+                .join(&file.strip_prefix("/").unwrap_or(Path::new("files")))
+                .to_path_buf(),
+            false,
+        )
+    } else {
         get_real_path(&file, jwt.claims.sub.clone())?
     };
 
@@ -757,7 +750,8 @@ async fn display_folder(
         "privatefolder"
     } else {
         "folder"
-    }.to_lowercase();
+    }
+    .to_lowercase();
 
     let root_domain = get_root_domain(&host.0);
 
@@ -927,7 +921,7 @@ async fn display_folder(
                 },
             )))
         }
-        _ => Err(Status::NotFound)
+        _ => Err(Status::NotFound),
     }
 }
 
@@ -1563,7 +1557,14 @@ async fn search(
         results.retain(|x| !CONFIG.hidden_files.contains(&x.name));
         results.retain(|x| x.name.to_lowercase().contains(&q.to_lowercase()));
         results.retain(|x| {
-            !is_hidden_path_str(&x.full_path, if token.is_ok() { Some(jwt.claims.perms) } else { None })
+            !is_hidden_path_str(
+                &x.full_path,
+                if token.is_ok() {
+                    Some(jwt.claims.perms)
+                } else {
+                    None
+                },
+            )
         });
         results.retain(|x| !x.full_path.starts_with("/private/"));
 
@@ -1876,8 +1877,7 @@ async fn rocket() -> _ {
             .attach(FileDb::init())
             .mount("/", routes![share, download_share, download_db])
     } else {
-        rocket = rocket
-            .mount("/", routes![download])
+        rocket = rocket.mount("/", routes![download])
     }
 
     if CONFIG.enable_api {

@@ -399,7 +399,12 @@ async fn rename(
     perform_rename(None, file, rename_req, token).await
 }
 
-async fn perform_rename(db: Option<Connection<FileDb>>, file: PathBuf, rename_req: Json<NameRequest>, token: Result<JWT, Status>) -> ApiResult {
+async fn perform_rename(
+    db: Option<Connection<FileDb>>,
+    file: PathBuf,
+    rename_req: Json<NameRequest>,
+    token: Result<JWT, Status>,
+) -> ApiResult {
     let token = token?;
 
     let path = get_real_path_with_perms(&file, token.claims.sub, token.claims.perms)?.0;
@@ -459,7 +464,13 @@ async fn delete<'a>(
     perform_delete(None, file, token, sizes, recurse).await
 }
 
-async fn perform_delete(db: Option<Connection<FileDb>>, file: PathBuf, token: Result<JWT, Status>, sizes: &State<FileSizes>, recurse: Option<bool>) -> ApiResult {
+async fn perform_delete(
+    db: Option<Connection<FileDb>>,
+    file: PathBuf,
+    token: Result<JWT, Status>,
+    sizes: &State<FileSizes>,
+    recurse: Option<bool>,
+) -> ApiResult {
     let token = token?;
 
     let path = get_real_path_with_perms(&file, token.claims.sub, token.claims.perms)?.0;
@@ -1065,7 +1076,10 @@ pub fn build_api() -> AdHoc {
             .register("/api", catchers![default]);
 
         if CONFIG.enable_file_db {
-            rocket = rocket.mount("/api", routes![file_with_downloads, share, delete_db, rename_db])
+            rocket = rocket.mount(
+                "/api",
+                routes![file_with_downloads, share, delete_db, rename_db],
+            )
         } else {
             rocket = rocket.mount("/api", routes![file, delete, rename])
         }

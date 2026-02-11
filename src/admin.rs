@@ -26,7 +26,7 @@ fn sysinfo(
     if !::sysinfo::IS_SUPPORTED_SYSTEM {
         return Err(Status::NotFound);
     }
-    
+
     let token = token?;
 
     if let Some(t) = token.token {
