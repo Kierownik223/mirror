@@ -138,7 +138,7 @@ pub fn read_files(path: &str) -> Result<Vec<MirrorFile>, Error> {
                     .to_lowercase();
 
                 let icon = get_icon(file_name);
-                
+
                 let file: MirrorFile = MirrorFile {
                     name: file_name.to_owned(),
                     ext: ext.to_string(),
@@ -366,7 +366,9 @@ pub fn parse_7z_output(output: &str) -> Vec<MirrorFile> {
 
             files.push(MirrorFile {
                 name,
-                ext: get_extension_from_filename(&filename).unwrap_or_default().into(),
+                ext: get_extension_from_filename(&filename)
+                    .unwrap_or_default()
+                    .into(),
                 icon,
                 size,
                 downloads: None,
@@ -571,11 +573,10 @@ pub fn parse_bool(input: &str) -> bool {
 }
 
 fn load_shared_icons() -> HashMap<String, String> {
-    let toml_str = fs::read_to_string("shared_icons.toml")
-        .expect("Failed to load shared_icons.toml");
+    let toml_str =
+        fs::read_to_string("shared_icons.toml").expect("Failed to load shared_icons.toml");
 
-    let parsed: toml::Value =
-        toml::from_str(&toml_str).expect("Failed to parse shared_icons.toml");
+    let parsed: toml::Value = toml::from_str(&toml_str).expect("Failed to parse shared_icons.toml");
 
     let table = parsed
         .get("shared_icons")
@@ -589,8 +590,5 @@ fn load_shared_icons() -> HashMap<String, String> {
 }
 
 fn get_shared_icon<'a>(ext: &'a str) -> &'a str {
-    SHARED_ICONS
-        .get(ext)
-        .map(|s| s.as_str())
-        .unwrap_or(ext)
+    SHARED_ICONS.get(ext).map(|s| s.as_str()).unwrap_or(ext)
 }

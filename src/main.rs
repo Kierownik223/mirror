@@ -181,12 +181,12 @@ async fn poster(
         if !path.exists() {
             return Err(Status::NotFound);
         }
-    
+
         let icon = if path.is_dir() {
-                "folder".into()
-            } else {
-                get_icon(&get_name_from_path(&path))
-            };
+            "folder".into()
+        } else {
+            get_icon(&get_name_from_path(&path))
+        };
 
         open_file(
             Path::new(&format!("public/static/images/icons/256x256/{}.png", icon)).to_path_buf(),
