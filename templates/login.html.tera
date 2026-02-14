@@ -18,7 +18,7 @@
     {% if next %}
     {{ strings.login_to_continue }} {{ next }}
     {% endif %}
-    <p><span>{{ macros::icon(name="md", hires=settings.hires) }}{{ strings.tip }}</span></p>
+    <p><span>{{ macros::icon(name="info", hires=settings.hires) }}{{ strings.tip }}</span></p>
     {{ strings.settings_tip1 }} <a href="/settings">{{ macros::icon(name="ui/settings", hires=settings.hires) }}{{ strings.settings }}</a> {{ strings.settings_tip2 }}
 </form>
 {% endblock content %}

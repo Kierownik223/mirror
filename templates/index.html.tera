@@ -69,7 +69,7 @@
     </tbody>
 </table>
 {% if markdown != "" %}
-<p><span>{{ macros::icon(name="md", hires=settings.hires) }}README.md</span></p>
+<p><span>{{ macros::icon(name="info", hires=settings.hires) }}README.md</span></p>
 {{ markdown }}
 {% endif %}
 {% endblock content %}
