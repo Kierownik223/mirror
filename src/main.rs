@@ -135,7 +135,7 @@ async fn poster(
         if username == "Nobody" {
             if get_extension_from_path(&rest.to_path_buf()) == "mp3" {
                 return open_file(
-                    Path::new(&"public/static/images/icons/256x256/mp3.png").to_path_buf(),
+                    Path::new(&"public/static/images/icons/256x256/audio.png").to_path_buf(),
                     "private",
                 )
                 .await;
@@ -172,7 +172,7 @@ async fn poster(
             ));
         } else {
             return open_file(
-                Path::new(&"public/static/images/icons/256x256/mp3.png").to_path_buf(),
+                Path::new(&"public/static/images/icons/256x256/audio.png").to_path_buf(),
                 &get_cache_control(is_private),
             )
             .await;
@@ -181,22 +181,15 @@ async fn poster(
         if !path.exists() {
             return Err(Status::NotFound);
         }
-
-        let ext = if path.is_file() {
-            path.extension().and_then(OsStr::to_str).unwrap_or("")
-        } else {
-            "folder"
-        }
-        .to_lowercase();
-
-        let mut icon = format!("public/static/images/icons/256x256/{}.png", ext);
-
-        if !Path::new(&(icon).to_string()).exists() {
-            icon = "public/static/images/icons/256x256/default.png".to_string();
-        }
+    
+        let icon = if path.is_dir() {
+                "folder".into()
+            } else {
+                get_icon(&get_name_from_path(&path))
+            };
 
         open_file(
-            Path::new(&icon).to_path_buf(),
+            Path::new(&format!("public/static/images/icons/256x256/{}.png", icon)).to_path_buf(),
             if is_private { "private" } else { "public" },
         )
         .await
@@ -1402,13 +1395,7 @@ async fn upload(
                             let _ = temp_file.read_to_end(&mut buffer);
 
                             let _ = file.write_all(&buffer);
-                            let mut icon =
-                                get_extension_from_path(&Path::new(&normalized_path).to_path_buf());
-                            if !Path::new(&format!("public/static/images/icons/{}.png", &icon))
-                                .exists()
-                            {
-                                icon = "default".to_string();
-                            }
+                            let icon = get_icon(&file_name);
 
                             if token.claims.perms == 0 {
                                 uploaded_files.push(MirrorFile {

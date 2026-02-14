@@ -235,11 +235,7 @@ async fn file_with_downloads(
     let name = get_name_from_path(&path);
     let downloads = get_downloads(db, &file).await.unwrap_or(0);
     let ext = get_extension_from_path(&path);
-    let mut icon = get_extension_from_path(&path);
-
-    if !Path::new(&format!("public/static/images/icons/{}.png", &icon)).exists() {
-        icon = "default".into();
-    }
+    let icon = get_icon(&get_name_from_path(&path));
 
     if ext == "mp3" || ext == "m4a" || ext == "m4b" || ext == "flac" {
         if let Ok(tag) = Tag::new().read_from_path(&path) {
@@ -333,11 +329,7 @@ async fn file(file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
 
     let ext = get_extension_from_path(&path);
 
-    let mut icon = get_extension_from_path(&path);
-
-    if !Path::new(&format!("public/static/images/icons/{}.png", &icon)).exists() {
-        icon = "default".into();
-    }
+    let icon = get_icon(&get_name_from_path(&path));
 
     if ext == "mp3" || ext == "m4a" || ext == "m4b" || ext == "flac" {
         if let Ok(tag) = Tag::new().read_from_path(&path) {
@@ -424,20 +416,16 @@ async fn perform_rename(
 
     let md = fs::metadata(&new_path).map_err(map_io_error_to_status)?;
 
-    let mut icon = get_extension_from_path(&new_path);
-
-    if !Path::new(&format!("public/static/images/icons/{}.png", &icon)).exists() {
-        icon = "default".into();
-    }
-
-    if md.is_dir() {
-        icon = "folder".into()
-    }
+    let icon = if md.is_dir() {
+        "folder"
+    } else {
+        &get_icon(&get_name_from_path(&new_path))
+    };
 
     Ok(ApiResponse::File(Json(MirrorFile {
         name: get_name_from_path(&new_path),
         ext: get_extension_from_path(&new_path),
-        icon,
+        icon: icon.into(),
         size: md.len(),
         downloads: None,
     })))
