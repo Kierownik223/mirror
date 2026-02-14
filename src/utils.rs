@@ -8,6 +8,7 @@ use std::{
     sync::Arc,
 };
 
+use once_cell::sync::Lazy;
 use rocket::{
     fs::NamedFile,
     http::{Cookie, CookieJar, SameSite, Status},
@@ -18,6 +19,8 @@ use tokio::sync::RwLock;
 use zip::write::SimpleFileOptions;
 
 use crate::{api::VideoFile, config::CONFIG, FileEntry, HeaderFile, IndexResponse, MirrorFile};
+
+static SHARED_ICONS: Lazy<HashMap<String, String>> = Lazy::new(load_shared_icons);
 
 pub fn read_dirs(path: &str) -> Result<Vec<MirrorFile>, Error> {
     let mut dir_list = Vec::new();
@@ -134,11 +137,8 @@ pub fn read_files(path: &str) -> Result<Vec<MirrorFile>, Error> {
                     .unwrap_or_else(|| "")
                     .to_lowercase();
 
-                let mut icon = ext.as_str();
-
-                if !Path::new(&format!("public/static/images/icons/{}.png", &icon)).exists() {
-                    icon = "default";
-                }
+                let icon = get_icon(file_name);
+                
                 let file: MirrorFile = MirrorFile {
                     name: file_name.to_owned(),
                     ext: ext.to_string(),
@@ -362,20 +362,12 @@ pub fn parse_7z_output(output: &str) -> Vec<MirrorFile> {
 
             let name = filename.to_string();
 
-            let ext = get_extension_from_filename(&filename)
-                .unwrap_or_default()
-                .to_string();
-
-            let mut icon = ext.to_lowercase();
-
-            if !Path::new(&format!("public/static/images/icons/{}.png", &icon)).exists() {
-                icon = "default".to_string();
-            }
+            let icon = get_icon(&filename);
 
             files.push(MirrorFile {
                 name,
-                ext: ext.to_string(),
-                icon: icon.to_string(),
+                ext: get_extension_from_filename(&filename).unwrap_or_default().into(),
+                icon,
                 size,
                 downloads: None,
             });
@@ -516,7 +508,7 @@ pub fn get_icon(file_name: &str) -> String {
         .unwrap_or_else(|| "")
         .to_lowercase();
 
-    let mut icon = ext.as_str();
+    let mut icon = get_shared_icon(&ext);
 
     if !Path::new(&format!("public/static/images/icons/{}.png", &icon)).exists() {
         icon = "default";
@@ -576,4 +568,29 @@ pub fn parse_bool(input: &str) -> bool {
         "false" => false,
         _ => false,
     }
+}
+
+fn load_shared_icons() -> HashMap<String, String> {
+    let toml_str = fs::read_to_string("shared_icons.toml")
+        .expect("Failed to load shared_icons.toml");
+
+    let parsed: toml::Value =
+        toml::from_str(&toml_str).expect("Failed to parse shared_icons.toml");
+
+    let table = parsed
+        .get("shared_icons")
+        .and_then(|v| v.as_table())
+        .expect("Failed to parse shared_icons.toml");
+
+    table
+        .iter()
+        .map(|(k, v)| (k.clone(), v.as_str().unwrap().to_string()))
+        .collect()
+}
+
+fn get_shared_icon<'a>(ext: &'a str) -> &'a str {
+    SHARED_ICONS
+        .get(ext)
+        .map(|s| s.as_str())
+        .unwrap_or(ext)
 }
