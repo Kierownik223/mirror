@@ -55,7 +55,7 @@ function fetchJSON(url, callback) {
     xhr.send();
 }
 
-function updatePageMetadata(meta, newPath, coverFile) {
+function updatePageMetadata(meta, newPath, coverFile, push) {
     if (meta.track) {
         meta.track += ".";
     }
@@ -111,7 +111,7 @@ function updatePageMetadata(meta, newPath, coverFile) {
         meta.title ||
         decodeURIComponent(newPath.split("/").pop()) + " - MARMAK Mirror";
 
-    if (window.history && history.pushState) {
+    if (push && window.history && history.pushState) {
         history.pushState(null, "", newPath);
     }
 }
@@ -191,10 +191,35 @@ fetchJSON("/api/listing" + folderPath, function (err, files) {
 
         fetchJSON("/api" + newPath, function (err, meta) {
             if (!err && meta) {
-                updatePageMetadata(meta, newPath, coverFile);
+                updatePageMetadata(meta, newPath, coverFile, true);
             }
         });
     }
+
+    window.addEventListener("popstate", function () {
+        var pathname = window.location.pathname.split("/");
+        var file = decodeURIComponent(pathname.pop());
+
+        var index = fileNames.indexOf(file);
+        if (index !== -1) {
+            currentIndex = index;
+
+            next.style.display = currentIndex >= fileNames.length - 1 ? "none" : "inline";
+            previous.style.display = currentIndex <= 0 ? "none" : "inline";
+
+            var targetFile = fileNames[currentIndex];
+            var newPath = folderPath + "/" + encodeURIComponent(targetFile);
+
+            audio.src = newPath + "?download";
+            audio.play();
+
+            fetchJSON("/api" + newPath, function (err, meta) {
+                if (!err && meta) {
+                    updatePageMetadata(meta, newPath, coverFile, false);
+                }
+            });
+        }
+    });
 
     previous.onclick = function () {
         if (currentIndex - 1 == fileNames.length) {
