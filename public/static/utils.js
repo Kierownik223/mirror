@@ -27,7 +27,7 @@ function sendRequest(options) {
     };
 
     try {
-        if (options.body !== undefined) {
+        if (options.body) {
             xhr.send(options.body);
         } else {
             xhr.send();
