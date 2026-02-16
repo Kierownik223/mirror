@@ -113,8 +113,6 @@ function renameSelected() {
     var path = filePathList[0];
     var rowElement = elementList[0];
 
-    console.log(rowElement);
-
     renameFile(rowElement, path);
 }
 
