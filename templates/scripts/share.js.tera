@@ -38,7 +38,8 @@ function share(filePath) {
         onReady: function(xhr) {
             if (xhr.readyState == 4) {
                 if (xhr.status == 201) {
-                    var ext = filePath.split(".").pop();
+                    var parts = filePath.split(".");
+                    var ext = parts[parts.length - 1];
                     var response = JSON.parse(xhr.responseText);
 
                     var url = "https://{{ host }}/share/" + response.message + "." + ext;
