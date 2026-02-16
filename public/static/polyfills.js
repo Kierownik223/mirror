@@ -1,8 +1,10 @@
 if (!window.JSON) {
-    window.JSON = {
-        parse: function (s) {
-            return eval("(" + s + ")");
-        },
+    window.JSON = {};
+}
+
+if (!window.JSON.parse) {
+    window.JSON.parse = function (s) {
+        return eval("(" + s + ")");
     };
 }
 
@@ -19,10 +21,8 @@ if (typeof encodeURIComponent !== "function") {
 }
 
 if (!String.prototype.startsWith) {
-    Object.defineProperty(String.prototype, "startsWith", {
-        value: function (search, rawPos) {
-            var pos = rawPos > 0 ? rawPos | 0 : 0;
-            return this.substring(pos, pos + search.length) === search;
-        },
-    });
+    String.prototype.startsWith = function (search, rawPos) {
+        var pos = rawPos > 0 ? rawPos : 0;
+        return this.substring(pos, pos + search.length) === search;
+    };
 }
