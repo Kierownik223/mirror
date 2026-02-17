@@ -47,7 +47,7 @@
         <br>
     </div>
     {% endif %}
-    <b id="title" style="font-size: 24px;">{{ vidtitle }}</b>
+    <span id="title">{{ vidtitle }}</span>
     <span id="description">{% if details %}{{ details }}{% endif %}</span>
     {% if not share %}
     <br>
