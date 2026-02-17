@@ -79,13 +79,11 @@
     <br>
     <label><input type="radio" name="use_si" value="true"{% if settings.use_si %} checked{% endif %}>{{ strings.enable }}</label>
     <label><input type="radio" name="use_si" value="false"{% if not settings.use_si %} checked{% endif %}>{{ strings.disable }}</label>
-    {% if is_logged_in and admin %}
     <br>
     <label for="dir_browser">{{ macros::icon(name="folder", hires=settings.hires) }}{{ strings.directory_browser }}</label>
     <br>
     <label><input type="radio" name="dir_browser" value="true"{% if settings.dir_browser %} checked{% endif %}>{{ strings.enable }}</label>
     <label><input type="radio" name="dir_browser" value="false"{% if not settings.dir_browser %} checked{% endif %}>{{ strings.disable }}</label>
-    {% endif %}
     <br>
     <center>
         <button type="submit" class="submit"><span>{{ macros::icon(name="ui/settings", hires=settings.hires) }}{{ strings.save_settings }}</span></button>
