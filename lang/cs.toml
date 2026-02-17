@@ -40,6 +40,7 @@ use_si_prefixes = "Používejte předpony SI"
 audio_player = "Použít pokročilý audio přehrávač"
 video_player = "Použít pokročilý video přehrávač"
 directory_browser = "Prohlížeč adresářů v nahrávači"
+show_cover = "Zobrazit obal alba"
 
 # Files
 

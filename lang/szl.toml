@@ -67,6 +67,7 @@ new_name = "Nowy mjano"
 error_renaming = "Pojawiou sie feler przi przemiynianiu"
 create_folder = "Nowy folder"
 folder_create_success = "Folder z plikami porzōndnie utworzony!"
+show_cover = "Pokazuj okładkę albumu"
 
 # Uploader
 

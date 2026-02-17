@@ -40,6 +40,7 @@ use_si_prefixes = "Use prefixos SI"
 audio_player = "Usar reprodutor de áudio avançado"
 video_player = "Usar reprodutor de vídeo avançado"
 directory_browser = "Navegador de diretórios no carregador"
+show_cover = "Mostrar capa do álbum"
 
 # Files
 

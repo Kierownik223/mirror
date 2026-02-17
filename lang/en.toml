@@ -40,6 +40,7 @@ use_si_prefixes = "Use SI prefixes"
 audio_player = "Use advanced audio player"
 video_player = "Use advanced video player"
 directory_browser = "Directory browser in the uploader"
+show_cover = "Show album cover"
 
 # Files
 

@@ -40,6 +40,7 @@ use_si_prefixes = "SI接頭語を使用してください"
 audio_player = "高度なオーディオプレーヤーを使用する"
 video_player = "高度なビデオプレーヤーを使用する"
 directory_browser = "アップローダー内のディレクトリブラウザー"
+show_cover = "アルバムのジャケットを表示する"
 
 # Files
 
