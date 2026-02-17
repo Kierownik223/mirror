@@ -693,6 +693,8 @@ async fn upload(
         user_path = query_path.trim_matches('/').to_string();
     }
 
+    user_path = urlencoding::decode(&user_path).unwrap_or((&user_path).into()).to_string();
+
     let is_private = user_path.starts_with("private");
     if !is_private && token.claims.perms != 0 {
         return Err(Status::Forbidden);
@@ -862,6 +864,8 @@ async fn upload_chunked(
     if let Some(query_path) = path {
         user_path = query_path.trim_matches('/').to_string();
     }
+
+    user_path = urlencoding::decode(&user_path).unwrap_or((&user_path).into()).to_string();
 
     let is_private = user_path.starts_with("private");
     if !is_private && token.claims.perms != 0 {
