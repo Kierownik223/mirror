@@ -65,17 +65,17 @@
     <label><input type="radio" name="viewers" value="true"{% if settings.viewers %} checked{% endif %}>{{ strings.enable }}</label>
     <label><input type="radio" name="viewers" value="false"{% if not settings.viewers %} checked{% endif %}>{{ strings.disable }}</label>
     <br>
-    <label for="audio_player">{{ macros::icon(name="mp3", hires=settings.hires) }}{{ strings.audio_player }}</label>
+    <label for="audio_player">{{ macros::icon(name="audio", hires=settings.hires) }}{{ strings.audio_player }}</label>
     <br>
     <label><input type="radio" name="audio_player" value="true"{% if settings.audio_player %} checked{% endif %}>{{ strings.enable }}</label>
     <label><input type="radio" name="audio_player" value="false"{% if not settings.audio_player %} checked{% endif %}>{{ strings.disable }}</label>
     <br>
-    <label for="video_player">{{ macros::icon(name="mp4", hires=settings.hires) }}{{ strings.video_player }}</label>
+    <label for="video_player">{{ macros::icon(name="video", hires=settings.hires) }}{{ strings.video_player }}</label>
     <br>
     <label><input type="radio" name="video_player" value="true"{% if settings.video_player %} checked{% endif %}>{{ strings.enable }}</label>
     <label><input type="radio" name="video_player" value="false"{% if not settings.video_player %} checked{% endif %}>{{ strings.disable }}</label>
     <br>
-    <label for="use_si">{{ macros::icon(name="md", hires=settings.hires) }}{{ strings.use_si_prefixes }}</label>
+    <label for="use_si">{{ macros::icon(name="info", hires=settings.hires) }}{{ strings.use_si_prefixes }}</label>
     <br>
     <label><input type="radio" name="use_si" value="true"{% if settings.use_si %} checked{% endif %}>{{ strings.enable }}</label>
     <label><input type="radio" name="use_si" value="false"{% if not settings.use_si %} checked{% endif %}>{{ strings.disable }}</label>
