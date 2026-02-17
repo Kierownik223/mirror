@@ -1473,7 +1473,7 @@ dependencies = [
 
 [[package]]
 name = "mirror"
-version = "1.7.4"
+version = "1.7.5"
 dependencies = [
  "audiotags",
  "bcrypt",
