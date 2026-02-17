@@ -40,12 +40,12 @@
         <br>
     </div>
     {% endif %}
-    <span id="artist">{% if artist %}{{ artist }}{% else %}N/A{% endif %}</span> - <b style="font-size: 24px;"><span id="track">{% if track %}{{ track }}.{% endif %}</span> <span id="title">{{ audiotitle }}</span></b>
+    <span id="artist">{% if artist %}{{ artist }}{% else %}N/A{% endif %}</span> - <span id="track">{% if track %}{{ track }}.{% endif %}</span> <span id="title">{{ audiotitle }}</span>
     <div class="audio-metadata">
         <div class="audio-details">
-            {{ strings.album }}: <b id="album">{% if album %}{{ album }}{% else %}N/A{% endif %}</b><br>
-            {{ strings.year }}: <b id="year">{% if year %}{{ year }}{% else %}N/A{% endif %}</b><br>
-            {{ strings.genre }}: <b id="genre">{% if genre %}{{ genre }}{% else %}N/A{% endif %}</b><br>
+            {{ strings.album }}: <span id="album">{% if album %}{{ album }}{% else %}N/A{% endif %}</span><br>
+            {{ strings.year }}: <span id="year">{% if year %}{{ year }}{% else %}N/A{% endif %}</span><br>
+            {{ strings.genre }}: <span id="genre">{% if genre %}{{ genre }}{% else %}N/A{% endif %}</span><br>
         </div>
         <img id="cover" src="{{ poster }}" alt="{{ strings.album_cover }}">
     </div>

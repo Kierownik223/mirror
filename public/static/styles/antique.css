@@ -127,6 +127,15 @@ iframe {
     max-height: 100%;
 }
 
+#track, #title {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+#album, #year, #genre {
+    font-weight: bold;
+}
+
 @media only screen and (max-width: 640px) {
     .hide {
         display: none;
