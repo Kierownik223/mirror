@@ -27,7 +27,7 @@ use crate::{
     read_files, refresh_file_sizes,
     responders::{ApiResponse, ApiResult},
     utils::{
-        add_path_to_zip, get_extension_from_filename, get_extension_from_path, get_genre, get_icon,
+        add_path_to_zip, get_extension_from_path, get_genre, get_icon,
         get_name_from_path, get_real_path, get_real_path_with_perms, get_video_metadata,
         get_virtual_path, is_hidden_path_str, is_restricted, map_io_error_to_status,
         read_dirs_async,
@@ -762,15 +762,6 @@ async fn upload(
                 let _ = temp_file.read_to_end(&mut buffer);
 
                 let _ = file.write_all(&buffer);
-
-                let ext = get_extension_from_filename(file_name)
-                    .unwrap_or_else(|| "")
-                    .to_lowercase();
-                let mut icon = ext.as_str();
-                if !Path::new(&format!("public/static/images/icons/{}.png", &icon)).exists() {
-                    icon = "default";
-                }
-
                 {
                     let mut state_lock = sizes.write().await;
                     *state_lock = refresh_file_sizes().await;
@@ -779,7 +770,7 @@ async fn upload(
                 uploaded_files.push(UploadFile {
                     name: file_name.to_string(),
                     url: Some(format!("http://{}/{}/{}", host.0, user_path, file_name)),
-                    icon: Some(icon.to_string()),
+                    icon: Some(get_icon(file_name)),
                     error: None,
                     size: Some(file.metadata().unwrap().len()),
                 });
@@ -966,16 +957,6 @@ async fn upload_chunked(
 
     std::fs::remove_dir_all(&chunk_dir).map_err(map_io_error_to_status)?;
 
-    let ext = get_extension_from_filename(file_name)
-        .unwrap_or("")
-        .to_lowercase();
-
-    let icon = if Path::new(&format!("public/static/images/icons/{}.png", ext)).exists() {
-        ext
-    } else {
-        "default".into()
-    };
-
     {
         let mut state_lock = sizes.write().await;
         *state_lock = refresh_file_sizes().await;
@@ -984,7 +965,7 @@ async fn upload_chunked(
     Ok(ApiResponse::UploadFiles(Json(vec![UploadFile {
         name: file_name.clone(),
         url: Some(format!("http://{}/{}/{}", host.0, user_path, file_name)),
-        icon: Some(icon),
+        icon: Some(get_icon(file_name)),
         error: None,
         size: Some(final_file.metadata().unwrap().len()),
     }])))
