@@ -954,6 +954,7 @@ fn settings(
         ("use_si", opt.use_si),
         ("audio_player", opt.audio_player),
         ("video_player", opt.video_player),
+        ("show_cover", opt.show_cover),
     ];
 
     let mut redir = false;

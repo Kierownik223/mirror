@@ -70,6 +70,11 @@
     <label><input type="radio" name="audio_player" value="true"{% if settings.audio_player %} checked{% endif %}>{{ strings.enable }}</label>
     <label><input type="radio" name="audio_player" value="false"{% if not settings.audio_player %} checked{% endif %}>{{ strings.disable }}</label>
     <br>
+    <label for="show_cover">{{ macros::icon(name="image", hires=settings.hires) }}{{ strings.show_cover }}</label>
+    <br>
+    <label><input type="radio" name="show_cover" value="true"{% if settings.show_cover %} checked{% endif %}>{{ strings.enable }}</label>
+    <label><input type="radio" name="show_cover" value="false"{% if not settings.show_cover %} checked{% endif %}>{{ strings.disable }}</label>
+    <br>
     <label for="video_player">{{ macros::icon(name="video", hires=settings.hires) }}{{ strings.video_player }}</label>
     <br>
     <label><input type="radio" name="video_player" value="true"{% if settings.video_player %} checked{% endif %}>{{ strings.enable }}</label>

@@ -20,6 +20,7 @@ pub struct FormSettings<'r> {
     pub use_si: Option<&'r str>,
     pub audio_player: Option<&'r str>,
     pub video_player: Option<&'r str>,
+    pub show_cover: Option<&'r str>,
 }
 
 #[derive(serde::Serialize)]
@@ -36,6 +37,7 @@ pub struct Settings<'r> {
     pub use_si: bool,
     pub audio_player: bool,
     pub video_player: bool,
+    pub show_cover: bool,
 }
 
 impl<'r> Settings<'r> {
@@ -100,8 +102,13 @@ impl<'r> Settings<'r> {
             .map(|c| c.value() == "true")
             .unwrap_or(true);
 
+        let show_cover: bool = jar
+            .get("show_cover")
+            .map(|c| c.value() == "true")
+            .unwrap_or(true);
+
         Self {
-            theme: theme,
+            theme,
             js_present: std::path::Path::new(&format!("public/static/styles/{}.js", &theme))
                 .exists(),
             lang: lang,
@@ -114,6 +121,7 @@ impl<'r> Settings<'r> {
             use_si,
             audio_player,
             video_player,
+            show_cover,
         }
     }
 }
@@ -133,6 +141,7 @@ impl Default for Settings<'_> {
             use_si: true,
             audio_player: true,
             video_player: true,
+            show_cover: true,
         }
     }
 }
