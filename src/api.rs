@@ -27,10 +27,9 @@ use crate::{
     read_files, refresh_file_sizes,
     responders::{ApiResponse, ApiResult},
     utils::{
-        add_path_to_zip, get_extension_from_path, get_genre, get_icon,
-        get_name_from_path, get_real_path, get_real_path_with_perms, get_video_metadata,
-        get_virtual_path, is_hidden_path_str, is_restricted, map_io_error_to_status,
-        read_dirs_async,
+        add_path_to_zip, get_extension_from_path, get_genre, get_icon, get_name_from_path,
+        get_real_path, get_real_path_with_perms, get_video_metadata, get_virtual_path,
+        is_hidden_path_str, is_restricted, map_io_error_to_status, read_dirs_async,
     },
     Disk, FileSizes, Host, MirrorFile, Sysinfo,
 };
@@ -693,7 +692,9 @@ async fn upload(
         user_path = query_path.trim_matches('/').to_string();
     }
 
-    user_path = urlencoding::decode(&user_path).unwrap_or((&user_path).into()).to_string();
+    user_path = urlencoding::decode(&user_path)
+        .unwrap_or((&user_path).into())
+        .to_string();
 
     let is_private = user_path.starts_with("private");
     if !is_private && token.claims.perms != 0 {
@@ -856,7 +857,9 @@ async fn upload_chunked(
         user_path = query_path.trim_matches('/').to_string();
     }
 
-    user_path = urlencoding::decode(&user_path).unwrap_or((&user_path).into()).to_string();
+    user_path = urlencoding::decode(&user_path)
+        .unwrap_or((&user_path).into())
+        .to_string();
 
     let is_private = user_path.starts_with("private");
     if !is_private && token.claims.perms != 0 {
