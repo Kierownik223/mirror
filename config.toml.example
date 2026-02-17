@@ -6,8 +6,8 @@ hidden_files = ["static", "uploads", "private", "robots.txt", "favicon.ico", "to
 enable_login = true
 # Enable /api
 enable_api = true
-# Enable MARMAK link in the header
-enable_marmak_link = true
+# Text to show as the MARMAK link, comment out to hide
+marmak_link = "MARMAK"
 # Instance info to show in footer, leave empty to hide
 instance_info = "My Mirror instance!"
 # X-Send-File header to handle file serving

@@ -3,7 +3,7 @@
     {% if not setttings.smallhead %}<a href="/">{{ strings.home }}</a>&nbsp;{% endif %}
     <a href="/settings">{{ strings.settings }}</a>&nbsp;
     <a href="/search">{{ strings.search_engine }}</a>&nbsp;
-    {% if config.enable_marmak_link %}<a href="http://{{ root_domain }}">MARMAK</a>{% endif %}&nbsp;
+    {% if config.marmak_link %}<a href="http://{{ root_domain }}">{{ config.marmak_link }}</a>{% endif %}&nbsp;
     {% if config.enable_login %}
     {% if not is_logged_in %}
     <a href="/account/login">{{ strings.log_in }}</a>&nbsp;

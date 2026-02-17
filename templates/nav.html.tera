@@ -3,7 +3,7 @@
     {% if not smallhead %}<a href="/"><span>{{ macros::icon(name="ui/home", hires=settings.hires) }}{{ strings.home }}</span></a>{% endif %}
     <a href="/settings"><span>{{ macros::icon(name="ui/settings", hires=settings.hires) }}{{ strings.settings }}</span></a>
     <a href="/search"><span>{{ macros::icon(name="ui/search", hires=settings.hires) }}{{ strings.search_engine }}</span></a>
-    {% if config.enable_marmak_link %}<a href="http://{{ root_domain }}"><span>{{ macros::icon(name="ui/marmak", hires=settings.hires) }}MARMAK</span></a>{% endif %}
+    {% if config.marmak_link %}<a href="http://{{ root_domain }}"><span>{{ macros::icon(name="ui/marmak", hires=settings.hires) }}{{ config.marmak_link }}</span></a>{% endif %}
     {% if config.enable_login %}
     {% if not is_logged_in %}
     <a href="/account/login"><span>{{ macros::icon(name="ui/login", hires=settings.hires) }}{{ strings.log_in }}</span></a>
