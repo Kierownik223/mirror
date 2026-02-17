@@ -140,6 +140,21 @@ iframe {
     float: right;
 }
 
+.audio-metadata {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.audio-details {
+    flex: 1;
+}
+
+.audio-metadata #cover {
+    width: 30%;
+    max-height: 100%;
+}
+
 @media only screen and (max-width: 640px) {
     .hide {
         display: none;

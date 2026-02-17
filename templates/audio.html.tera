@@ -41,13 +41,13 @@
     </div>
     {% endif %}
     <span id="artist">{% if artist %}{{ artist }}{% else %}N/A{% endif %}</span> - <b style="font-size: 24px;"><span id="track">{% if track %}{{ track }}.{% endif %}</span> <span id="title">{{ audiotitle }}</span></b>
-    <div style="display: flex; align-items: center; justify-content: space-between;">
-        <div style="flex: 1;">
+    <div class="audio-metadata">
+        <div class="audio-details">
             {{ strings.album }}: <b id="album">{% if album %}{{ album }}{% else %}N/A{% endif %}</b><br>
             {{ strings.year }}: <b id="year">{% if year %}{{ year }}{% else %}N/A{% endif %}</b><br>
             {{ strings.genre }}: <b id="genre">{% if genre %}{{ genre }}{% else %}N/A{% endif %}</b><br>
         </div>
-        <img id="cover" src="{{ poster }}" alt="{{ strings.album_cover }}" style="width: 30%; max-height: 100%;">
+        <img id="cover" src="{{ poster }}" alt="{{ strings.album_cover }}">
     </div>
     {% if not share %}
     <label for="autoplay"><input type="checkbox" name="autoplay" id="autoplay" checked>{{ strings.autoplay }}</label><br>
