@@ -19,6 +19,69 @@ video.addEventListener("volumechange", function () {
     document.cookie = "audiovolume=" + video.volume + "; path=/"; 
 });
 
+(function () {
+    function getQueryParam(name) {
+        var match = new RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+        return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+    }
+
+    function parseTimeToSeconds(timeStr) {
+        if (!timeStr) return null;
+
+        timeStr = timeStr.toLowerCase().trim();
+
+        if (/^\d+$/.test(timeStr)) {
+            return parseInt(timeStr, 10);
+        }
+
+        var total = 0;
+        var match;
+
+        var regex = /(\d+)(h|m|s)/g;
+        while ((match = regex.exec(timeStr)) !== null) {
+            var value = parseInt(match[1], 10);
+            var unit = match[2];
+
+            if (unit === "h") total += value * 3600;
+            if (unit === "m") total += value * 60;
+            if (unit === "s") total += value;
+        }
+
+        if (total > 0) return total;
+
+        if (timeStr.indexOf(":") !== -1) {
+            var parts = timeStr.split(":");
+            var seconds = 0;
+
+            if (parts.length === 2) {
+                seconds =
+                parseInt(parts[0], 10) * 60 +
+                parseInt(parts[1], 10);
+            } else if (parts.length === 3) {
+                seconds =
+                parseInt(parts[0], 10) * 3600 +
+                parseInt(parts[1], 10) * 60 +
+                parseInt(parts[2], 10);
+            }
+
+            return seconds;
+        }
+
+        return null;
+    }
+    var timeParam = getQueryParam("t");
+    var startTime = parseTimeToSeconds(timeParam);
+
+    if (startTime !== null && !isNaN(startTime)) {
+        video.addEventListener("loadedmetadata", function () {
+            video.currentTime = Math.min(
+                Math.max(0, startTime),
+                video.duration
+            );
+        });
+    }
+})();
+
 function fetchJSON(url, callback) {
     var xhr;
     if (window.XMLHttpRequest) {
