@@ -8,9 +8,7 @@ use rocket::{
 use rocket_dyn_templates::Template;
 
 use crate::{
-    api::{ApiInfoResponse, MusicFile, SearchFile, UploadFile, UploadLimits, VideoFile},
-    guards::HeaderFile,
-    MirrorFile, Sysinfo,
+    MirrorFile, Sysinfo, api::{ApiInfoResponse, MirrorFileWrapper, MusicFile, SearchFile, UploadFile, UploadLimits, VideoFile}, guards::HeaderFile
 };
 
 pub struct Cached<R> {
@@ -65,7 +63,7 @@ impl<'r> Responder<'r, 'r> for IndexResponse {
 
 pub enum ApiResponse {
     Files(Json<Vec<MirrorFile>>),
-    File(Json<MirrorFile>),
+    File(Json<MirrorFileWrapper>),
     MusicFile(Json<MusicFile>),
     VideoFile(Json<VideoFile>),
     MessageStatus((Status, Json<ApiInfoResponse>)),

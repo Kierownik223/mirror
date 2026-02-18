@@ -44,6 +44,11 @@ pub struct ApiInfoResponse {
     message: String,
 }
 
+#[derive(serde::Serialize)]
+pub struct MirrorFileWrapper {
+    file: MirrorFile,
+}
+
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct UploadFile {
     name: String,
@@ -314,13 +319,13 @@ async fn file_with_downloads(
         })));
     }
 
-    Ok(ApiResponse::File(Json(MirrorFile {
+    Ok(ApiResponse::File(Json(MirrorFileWrapper { file: MirrorFile {
         name,
         ext,
         icon: icon.to_string(),
         size: md.len(),
         downloads: Some(downloads),
-    })))
+    }} )))
 }
 
 #[get("/<file..>", rank = 1)]
@@ -391,13 +396,13 @@ async fn file(file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
                 })))));
     }
 
-    Ok(ApiResponse::File(Json(MirrorFile {
+    Ok(ApiResponse::File(Json(MirrorFileWrapper { file: MirrorFile {
         name: get_name_from_path(&path),
         ext,
         icon,
         size: md.len(),
         downloads: None,
-    })))
+    }})))
 }
 
 #[patch("/<file..>", data = "<rename_req>")]
@@ -450,13 +455,13 @@ async fn perform_rename(
         &get_icon(&get_name_from_path(&new_path))
     };
 
-    Ok(ApiResponse::File(Json(MirrorFile {
+    Ok(ApiResponse::File(Json(MirrorFileWrapper { file: MirrorFile {
         name: get_name_from_path(&new_path),
         ext: get_extension_from_path(&new_path),
         icon: icon.into(),
         size: md.len(),
         downloads: None,
-    })))
+    }} )))
 }
 
 #[delete("/<file..>?<recurse>")]

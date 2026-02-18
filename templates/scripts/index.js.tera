@@ -199,7 +199,7 @@ function renameFile(element, filePath) {
                                 var checkbox = checkboxTd.querySelector("input");
 
                                 if (checkbox) {
-                                    checkbox.value = response.name;
+                                    checkbox.value = response.file.name;
                                 }
 
                                 var td = cells[1];
@@ -212,7 +212,7 @@ function renameFile(element, filePath) {
                                     if (isFolder) {
                                         link.setAttribute(
                                             "href",
-                                            response.name + "/"
+                                            response.file.name + "/"
                                         );
 
                                         link.innerHTML = "";
@@ -225,24 +225,24 @@ function renameFile(element, filePath) {
                                         link.appendChild(img);
                                         link.appendChild(
                                             document.createTextNode(
-                                                response.name + "/"
+                                                response.file.name + "/"
                                             )
                                         );
                                     } else {
-                                        link.setAttribute("href", response.name);
+                                        link.setAttribute("href", response.file.name);
 
                                         link.innerHTML = "";
 
                                         var img = document.createElement("img");
                                         img.src =
                                             "/static/images/icons/{% if hires %}hires/{% endif %}" +
-                                            response.icon +
+                                            response.file.icon +
                                             ".png";
                                         img.className = "icon";
 
                                         link.appendChild(img);
                                         link.appendChild(
-                                            document.createTextNode(response.name)
+                                            document.createTextNode(response.file.name)
                                         );
                                     }
                                 }
