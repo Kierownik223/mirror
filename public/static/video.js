@@ -73,12 +73,16 @@ video.addEventListener("volumechange", function () {
     var startTime = parseTimeToSeconds(timeParam);
 
     if (startTime !== null && !isNaN(startTime)) {
-        video.addEventListener("loadedmetadata", function () {
+        var onLoadedData = function () {
             video.currentTime = Math.min(
                 Math.max(0, startTime),
                 video.duration
             );
-        });
+
+            video.removeEventListener("loadedmetadata", onLoadedData);
+        };
+
+        video.addEventListener("loadedmetadata", onLoadedData);
     }
 })();
 

@@ -78,12 +78,16 @@ audio.addEventListener("volumechange", function () {
     var startTime = parseTimeToSeconds(timeParam);
 
     if (startTime !== null && !isNaN(startTime)) {
-        audio.addEventListener("loadeddata", function () {
+        var onLoadedData = function () {
             audio.currentTime = Math.min(
                 Math.max(0, startTime),
                 audio.duration
             );
-        });
+
+            audio.removeEventListener("loadeddata", onLoadedData);
+        };
+
+        audio.addEventListener("loadeddata", onLoadedData);
     }
 })();
 
