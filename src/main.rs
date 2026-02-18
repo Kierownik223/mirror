@@ -393,6 +393,7 @@ async fn index(
                     is_logged_in: token.is_ok(),
                     admin: jwt.claims.perms == 0,
                     settings,
+                    version: env!("CARGO_PKG_VERSION").to_string(),
                 },
             )));
         } else {
@@ -488,6 +489,7 @@ async fn display_file(
                     markdown,
                     settings,
                     share,
+                    version: env!("CARGO_PKG_VERSION").to_string(),
                 },
             )))
         }
@@ -518,6 +520,7 @@ async fn display_file(
                     admin: jwt.claims.perms == 0,
                     settings,
                     share,
+                    version: env!("CARGO_PKG_VERSION").to_string(),
                 },
             )))
         }
@@ -551,6 +554,7 @@ async fn display_file(
                     details: metadata.description,
                     settings,
                     share,
+                    version: env!("CARGO_PKG_VERSION").to_string(),
                 },
             )))
         }
@@ -587,6 +591,7 @@ async fn display_file(
                     poster: format!("/poster{}", audiopath),
                     settings: &settings,
                     share,
+                    version: env!("CARGO_PKG_VERSION").to_string(),
                 },
             );
 
@@ -689,6 +694,7 @@ async fn display_file(
                         poster,
                         settings,
                         share,
+                        version: env!("CARGO_PKG_VERSION").to_string(),
                     },
                 )))
             } else {
@@ -717,6 +723,7 @@ async fn display_file(
                         filesize: fs::metadata(&path).unwrap().len(),
                         settings,
                         share,
+                        version: env!("CARGO_PKG_VERSION").to_string(),
                     },
                 )))
             } else {
@@ -823,6 +830,7 @@ async fn display_folder(
                     markdown,
                     private: is_private,
                     settings,
+                    version: env!("CARGO_PKG_VERSION").to_string(),
                 },
             )))
         }
@@ -911,6 +919,7 @@ async fn display_folder(
                     settings,
                     folder_quota,
                     folder_usage,
+                    version: env!("CARGO_PKG_VERSION").to_string(),
                 },
             )))
         }
@@ -1022,6 +1031,7 @@ fn settings(
             settings,
             language_names,
             show_cookie_notice,
+            version: env!("CARGO_PKG_VERSION").to_string(),
         },
     ));
 }
@@ -1177,6 +1187,7 @@ async fn iframe(
             path: file.display().to_string(),
             dirs,
             settings,
+            version: env!("CARGO_PKG_VERSION").to_string(),
         },
     )))
 }
@@ -1285,6 +1296,7 @@ fn uploader(
             uploadedfiles: vec![MirrorFile { name: "".to_string(), ext: "".to_string(), icon: "default".to_string(), size: 0, downloads: None }],
             max_size: CONFIG.max_upload_sizes.get(&token.claims.perms.to_string()).unwrap_or(&(104857600 as u64)),
             settings,
+            version: env!("CARGO_PKG_VERSION").to_string(),
         },
     )));
 }
@@ -1475,6 +1487,7 @@ async fn upload(
                 uploadedfiles: uploaded_files,
                 max_size,
                 settings,
+                version: env!("CARGO_PKG_VERSION").to_string(),
             },
         )));
     } else {
@@ -1522,6 +1535,7 @@ async fn search(
                     admin: jwt.claims.perms == 0,
                     message: strings.get("search_query_too_short").unwrap_or(&("search_query_too_short".into())),
                     settings,
+                    version: env!("CARGO_PKG_VERSION").to_string(),
                 },
             )));
         }
@@ -1576,6 +1590,7 @@ async fn search(
                     admin: jwt.claims.perms == 0,
                     message: strings.get("search_no_results").unwrap_or(&("search_no_results".into())),
                     settings,
+                    version: env!("CARGO_PKG_VERSION").to_string(),
                 },
             )));
         }
@@ -1600,6 +1615,7 @@ async fn search(
                 results,
                 query: q,
                 settings,
+                version: env!("CARGO_PKG_VERSION").to_string(),
             },
         )));
     } else {
@@ -1621,6 +1637,7 @@ async fn search(
                 username: &jwt.claims.sub,
                 admin: jwt.claims.perms == 0,
                 settings,
+                version: env!("CARGO_PKG_VERSION").to_string(),
             },
         )));
     }
@@ -1693,6 +1710,7 @@ async fn unprocessable_entry(_status: Status, req: &Request<'_>) -> Cached<(Stat
                     is_logged_in,
                     admin,
                     settings,
+                    version: env!("CARGO_PKG_VERSION").to_string(),
                 },
             ),
         ),
@@ -1748,6 +1766,7 @@ async fn default(status: Status, req: &Request<'_>) -> Cached<Template> {
                 is_logged_in,
                 admin,
                 settings,
+                version: env!("CARGO_PKG_VERSION").to_string(),
             },
         ),
         header: "no-cache",

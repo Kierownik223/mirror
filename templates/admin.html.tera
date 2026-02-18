@@ -18,10 +18,10 @@ Loading...
 
 {% block scripts %}
 {% if settings.use_si %}
-<script src="/static/formatbytessi.js"></script>
+<script src="/static/formatbytessi.js?v={{ version }}"></script>
 {% else %}
-<script src="/static/formatbytes.js"></script>
+<script src="/static/formatbytes.js?v={{ version }}"></script>
 {% endif %}
-<script src="/static/polyfills.js"></script>
-<script src="/static/admin.js"></script>
+<script src="/static/polyfills.js?v={{ version }}"></script>
+<script src="/static/admin.js?v={{ version }}"></script>
 {% endblock scripts %}

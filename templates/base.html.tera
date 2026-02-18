@@ -31,9 +31,9 @@
 
     <title>{{ title }} - MARMAK Mirror</title>
     {% endblock head %}
-    <link rel="stylesheet" href="/static/styles/{{ settings.theme }}.css">
+    <link rel="stylesheet" href="/static/styles/{{ settings.theme }}.css?v={{ version }}">
     {% if settings.js_present %}
-    <script src="/static/styles/{{ settings.theme }}.js"></script>
+    <script src="/static/styles/{{ settings.theme }}.js?v={{ version }}"></script>
     {% endif %}
     <!--[if lt IE 7]>
     <style>

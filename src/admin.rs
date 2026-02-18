@@ -75,6 +75,7 @@ fn sysinfo(
             sys_ver: System::kernel_version(),
             disks,
             settings,
+            version: env!("CARGO_PKG_VERSION").to_string(),
         },
     )));
 }
@@ -117,6 +118,7 @@ fn admin(
             username: token.claims.sub,
             admin: token.claims.perms == 0,
             settings,
+            version: env!("CARGO_PKG_VERSION").to_string(),
         },
     )));
 }

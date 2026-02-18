@@ -57,8 +57,8 @@
 
 {% block scripts %}
 {% if not share %}
-<script src="/static/breadcrumbs.js"></script>
-<script src="/static/video.js"></script>
+<script src="/static/breadcrumbs.js?v={{ version }}"></script>
+<script src="/static/video.js?v={{ version }}"></script>
 {% endif %}
 <script>
     if (window.navigator && navigator.mediaSession) {

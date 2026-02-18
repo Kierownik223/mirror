@@ -76,6 +76,7 @@ fn login_page(
             config: (*CONFIG).clone(),
             next,
             settings,
+            version: env!("CARGO_PKG_VERSION").to_string(),
         },
     ))
 }
@@ -177,6 +178,7 @@ async fn login(
                 message: strings.get("invalid_info"),
                 next,
                 settings,
+                version: env!("CARGO_PKG_VERSION").to_string(),
             },
         )))
     }

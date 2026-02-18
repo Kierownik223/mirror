@@ -56,19 +56,19 @@
 {% endblock content %}
 
 {% block scripts %}
-<script src="/static/polyfills.js"></script>
-<script src="/static/utils.js"></script>
+<script src="/static/polyfills.js?v={{ version }}"></script>
+<script src="/static/utils.js?v={{ version }}"></script>
 {% if config.linkshortener %}
-<script src="/scripts/linkshortener.js?lang={{ lang }}&hires={{ settings.hires }}"></script>
+<script src="/scripts/linkshortener.js?lang={{ lang }}&hires={{ settings.hires }}&v={{ version }}"></script>
 {% endif %}
 {% if settings.use_si %}
-<script src="/static/formatbytessi.js"></script>
+<script src="/static/formatbytessi.js?v={{ version }}"></script>
 {% else %}
-<script src="/static/formatbytes.js"></script>
+<script src="/static/formatbytes.js?v={{ version }}"></script>
 {% endif %}
-<script src="/scripts/share.js?lang={{ lang }}&hires={{ settings.hires }}"></script>
-<script src="/scripts/upload.js?lang={{ lang }}&hires={{ settings.hires }}"></script>
-<script src="/scripts/uploader.js?lang={{ lang }}&hires={{ settings.hires }}"></script>
+<script src="/scripts/share.js?lang={{ lang }}&hires={{ settings.hires }}&v={{ version }}"></script>
+<script src="/scripts/upload.js?lang={{ lang }}&hires={{ settings.hires }}&v={{ version }}"></script>
+<script src="/scripts/uploader.js?lang={{ lang }}&hires={{ settings.hires }}&v={{ version }}"></script>
 
 {% if settings.dir_browser %}
 <div id="browse_dialog" class="dialog">
@@ -82,9 +82,9 @@
     </div>
 </div>
 
-<script src="/static/browser.js"></script>
+<script src="/static/browser.js?v={{ version }}"></script>
 
-<link rel="stylesheet" href="/static/browser.css">
+<link rel="stylesheet" href="/static/browser.css?v={{ version }}">
 {% endif %}
 
 {% endblock scripts %}
