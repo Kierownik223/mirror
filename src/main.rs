@@ -528,7 +528,7 @@ async fn display_file(
 
             let videopath = &Path::new("/").join(file.clone()).display().to_string();
 
-            let metadata = get_video_metadata(&videopath);
+            let metadata = get_video_metadata(&videopath, None);
 
             Ok(IndexResponse::Template(Template::render(
                 if settings.plain {

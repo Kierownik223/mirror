@@ -534,7 +534,7 @@ pub fn add_token_cookie<'a>(token: &str, host: &str, jar: &'a CookieJar<'_>) -> 
     jar
 }
 
-pub fn get_video_metadata(path: &str) -> VideoFile {
+pub fn get_video_metadata(path: &str, file: Option<MirrorFile>) -> VideoFile {
     let mdpath = format!("files/video/metadata{}.md", path.replace("video/", ""));
     let mdpath = Path::new(mdpath.as_str());
 
@@ -559,6 +559,7 @@ pub fn get_video_metadata(path: &str) -> VideoFile {
     };
 
     VideoFile {
+        file,
         title: vidtitle,
         description: details,
     }

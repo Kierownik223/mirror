@@ -55,6 +55,7 @@ pub struct UploadFile {
 
 #[derive(serde::Serialize)]
 pub struct MusicFile {
+    file: Option<MirrorFile>,
     title: String,
     album: Option<String>,
     artist: Option<String>,
@@ -66,6 +67,7 @@ pub struct MusicFile {
 
 #[derive(serde::Serialize)]
 pub struct VideoFile {
+    pub file: Option<MirrorFile>,
     pub title: String,
     pub description: Option<String>,
 }
@@ -252,6 +254,13 @@ async fn file_with_downloads(
             let cover = tag.album_cover().is_some();
 
             return Ok(ApiResponse::MusicFile(Json(MusicFile {
+                file: Some(MirrorFile {
+                    name,
+                    ext,
+                    icon: icon.to_string(),
+                    size: md.len(),
+                    downloads: Some(downloads),
+                }),
                 title,
                 album,
                 artist,
@@ -293,6 +302,13 @@ async fn file_with_downloads(
         };
 
         return Ok(ApiResponse::VideoFile(Json(VideoFile {
+            file: Some(MirrorFile {
+                name,
+                ext,
+                icon: icon.to_string(),
+                size: md.len(),
+                downloads: Some(downloads),
+            }),
             title: vidtitle,
             description: details,
         })));
@@ -346,6 +362,13 @@ async fn file(file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
             let cover = tag.album_cover().is_some();
 
             return Ok(ApiResponse::MusicFile(Json(MusicFile {
+                file: Some(MirrorFile {
+                    name: get_name_from_path(&path),
+                    ext,
+                    icon: icon.to_string(),
+                    size: md.len(),
+                    downloads: None,
+                }),
                 title,
                 album,
                 artist,
@@ -359,7 +382,13 @@ async fn file(file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
 
     if ext == "mp4" || ext == "mkv" || ext == "webm" {
         let videopath = Path::new("/").join(file.clone()).display().to_string();
-        return Ok(ApiResponse::VideoFile(Json(get_video_metadata(&videopath))));
+        return Ok(ApiResponse::VideoFile(Json(get_video_metadata(&videopath, Some(MirrorFile {
+                    name: get_name_from_path(&path),
+                    ext,
+                    icon: icon.to_string(),
+                    size: md.len(),
+                    downloads: None,
+                })))));
     }
 
     Ok(ApiResponse::File(Json(MirrorFile {
