@@ -19,6 +19,8 @@ video.addEventListener("volumechange", function () {
     document.cookie = "audiovolume=" + video.volume + "; path=/"; 
 });
 
+var onLoadedData;
+
 (function () {
     function getQueryParam(name) {
         var match = new RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
@@ -73,7 +75,7 @@ video.addEventListener("volumechange", function () {
     var startTime = parseTimeToSeconds(timeParam);
 
     if (startTime !== null && !isNaN(startTime)) {
-        var onLoadedData = function () {
+        onLoadedData = function () {
             video.currentTime = Math.min(
                 Math.max(0, startTime),
                 video.duration
@@ -83,6 +85,11 @@ video.addEventListener("volumechange", function () {
         };
 
         video.addEventListener("loadedmetadata", onLoadedData);
+
+        video.currentTime = Math.min(
+            Math.max(0, startTime),
+            video.duration
+        );
     }
 })();
 
@@ -217,6 +224,8 @@ fetchJSON("/api/listing" + folderPath, function (err, files) {
 
         var targetFile = fileNames[index];
         var newPath = folderPath + "/" + encodeURIComponent(targetFile);
+
+        video.removeEventListener("loadedmetadata", onLoadedData);
 
         video.src = newPath + "?download";
         video.play();
