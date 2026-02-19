@@ -24,6 +24,8 @@ audio.addEventListener("volumechange", function () {
     document.cookie = "audiovolume=" + audio.volume + "; path=/"; 
 });
 
+var onLoadedData;
+
 (function () {
     function getQueryParam(name) {
         var match = new RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
@@ -78,7 +80,7 @@ audio.addEventListener("volumechange", function () {
     var startTime = parseTimeToSeconds(timeParam);
 
     if (startTime !== null && !isNaN(startTime)) {
-        var onLoadedData = function () {
+        onLoadedData = function () {
             audio.currentTime = Math.min(
                 Math.max(0, startTime),
                 audio.duration
@@ -88,6 +90,11 @@ audio.addEventListener("volumechange", function () {
         };
 
         audio.addEventListener("loadeddata", onLoadedData);
+
+        audio.currentTime = Math.min(
+            Math.max(0, startTime),
+            audio.duration
+        );
     }
 })();
 
@@ -252,6 +259,8 @@ fetchJSON("/api/listing" + folderPath, function (err, files) {
 
         var targetFile = fileNames[index];
         var newPath = folderPath + "/" + encodeURIComponent(targetFile);
+
+        audio.removeEventListener("loadeddata", onLoadedData);
 
         audio.src = newPath + "?download";
         audio.play();
