@@ -186,7 +186,7 @@ function updatePageMetadata(meta, newPath, coverFile, push) {
         decodeURIComponent(newPath.split("/").pop()) + " - MARMAK Mirror";
 
     if (push && window.history && history.pushState) {
-        history.pushState(null, "", newPath);
+        history.pushState({ index: currentIndex }, "", newPath);
     }
 }
 
@@ -243,6 +243,10 @@ fetchJSON("/api/listing" + folderPath, function (err, files) {
     currentIndex = fileNames.indexOf(currentFile);
     if (currentIndex === -1) currentIndex = 0;
 
+    if (!history.state) {
+        history.replaceState({ index: currentIndex }, "", window.location.pathname);
+    }
+
     if (currentIndex == fileNames.length - 1) {
         next.style.display = "none";
     } else {
@@ -255,6 +259,7 @@ fetchJSON("/api/listing" + folderPath, function (err, files) {
     }
 
     function loadTrack(index) {
+        audio.pause();
         if (index < 0 || index >= fileNames.length) return;
 
         var targetFile = fileNames[index];
@@ -263,38 +268,40 @@ fetchJSON("/api/listing" + folderPath, function (err, files) {
         audio.removeEventListener("loadeddata", onLoadedData);
 
         audio.src = newPath + "?download";
-        audio.play();
+        audio.load();
 
         fetchJSON("/api" + newPath, function (err, meta) {
+            audio.play();
+
             if (!err && meta) {
                 updatePageMetadata(meta, newPath, coverFile, true);
             }
         });
     }
 
-    window.addEventListener("popstate", function () {
-        var pathname = window.location.pathname.split("/");
-        var file = decodeURIComponent(pathname.pop());
+    window.addEventListener("popstate", function (event) {
+        var state = event.state;
 
-        var index = fileNames.indexOf(file);
-        if (index !== -1) {
-            currentIndex = index;
-
-            next.style.display = currentIndex >= fileNames.length - 1 ? "none" : "inline";
-            previous.style.display = currentIndex <= 0 ? "none" : "inline";
-
-            var targetFile = fileNames[currentIndex];
-            var newPath = folderPath + "/" + encodeURIComponent(targetFile);
-
-            audio.src = newPath + "?download";
-            audio.play();
-
-            fetchJSON("/api" + newPath, function (err, meta) {
-                if (!err && meta) {
-                    updatePageMetadata(meta, newPath, coverFile, false);
-                }
-            });
+        if (!state || typeof state.index !== "number") {
+            return;
         }
+
+        currentIndex = state.index;
+
+        next.style.display = currentIndex >= fileNames.length - 1 ? "none" : "inline";
+        previous.style.display = currentIndex <= 0 ? "none" : "inline";
+
+        var targetFile = fileNames[currentIndex];
+        var newPath = folderPath + "/" + encodeURIComponent(targetFile);
+
+        audio.src = newPath + "?download";
+        audio.play();
+
+        fetchJSON("/api" + newPath, function (err, meta) {
+            if (!err && meta) {
+                updatePageMetadata(meta, newPath, coverFile, false);
+            }
+        });
     });
 
     previous.onclick = function () {

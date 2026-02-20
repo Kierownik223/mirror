@@ -35,8 +35,8 @@
     <audio id="audio" src="?download" controls style="width: 100%;" poster="{{ poster }}">{{ strings.no_audio }}</audio>
     {% if not share %}
     <div>
-        <a href="#" id="previous" style="float: left;">&lt; {{ strings.previous }}</a>
-        <a href="#" id="next" style="float: right;">{{ strings.next }} &gt;</a>
+        <a href="javascript:;" id="previous" style="float: left;">&lt; {{ strings.previous }}</a>
+        <a href="javascript:;" id="next" style="float: right;">{{ strings.next }} &gt;</a>
         <br>
     </div>
     {% endif %}
