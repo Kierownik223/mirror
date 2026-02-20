@@ -42,8 +42,8 @@
     <video id="video" src="?download" controls style="height: 60vh; width: 100%;" poster="{{ poster | urlencode }}">{{ strings.no_video }}</video>
     {% if not share %}
     <div>
-        <a href="#" id="previous" style="float: left;">&lt; {{ strings.previous }}</a>
-        <a href="#" id="next" style="float: right;">{{ strings.next }} &gt;</a>
+        <a href="javascript:;" id="previous" style="float: left;">&lt; {{ strings.previous }}</a>
+        <a href="javascript:;" id="next" style="float: right;">{{ strings.next }} &gt;</a>
         <br>
     </div>
     {% endif %}

@@ -162,7 +162,7 @@ function updatePageMetadata(meta, newPath, push) {
         decodeURIComponent(newPath.split("/").pop()) + " - MARMAK Mirror";
 
     if (push && window.history && history.pushState) {
-        history.pushState(null, "", newPath);
+        history.pushState({ index: currentIndex }, "", newPath);
     }
 }
 
@@ -208,6 +208,10 @@ fetchJSON("/api/listing" + folderPath, function (err, files) {
     currentIndex = fileNames.indexOf(currentFile);
     if (currentIndex === -1) currentIndex = 0;
 
+    if (!history.state) {
+        history.replaceState({ index: currentIndex }, "", window.location.pathname);
+    }
+
     if (currentIndex == fileNames.length - 1) {
         next.style.display = "none";
     } else {
@@ -220,6 +224,7 @@ fetchJSON("/api/listing" + folderPath, function (err, files) {
     }
 
     function loadVideo(index) {
+        video.pause();
         if (index < 0 || index >= fileNames.length) return;
 
         var targetFile = fileNames[index];
@@ -228,9 +233,11 @@ fetchJSON("/api/listing" + folderPath, function (err, files) {
         video.removeEventListener("loadedmetadata", onLoadedData);
 
         video.src = newPath + "?download";
-        video.play();
+        video.load();
 
         fetchJSON("/api" + newPath, function (err, meta) {
+            video.play();
+
             if (!err && meta) {
                 updatePageMetadata(meta, newPath, true);
             }
@@ -271,29 +278,29 @@ fetchJSON("/api/listing" + folderPath, function (err, files) {
         }
     };
 
-    window.addEventListener("popstate", function () {
-        var pathname = window.location.pathname.split("/");
-        var file = decodeURIComponent(pathname.pop());
+    window.addEventListener("popstate", function (event) {
+        var state = event.state;
 
-        var index = fileNames.indexOf(file);
-        if (index !== -1) {
-            currentIndex = index;
-
-            next.style.display = currentIndex >= fileNames.length - 1 ? "none" : "inline";
-            previous.style.display = currentIndex <= 0 ? "none" : "inline";
-
-            var targetFile = fileNames[currentIndex];
-            var newPath = folderPath + "/" + encodeURIComponent(targetFile);
-
-            video.src = newPath + "?download";
-            video.play();
-
-            fetchJSON("/api" + newPath, function (err, meta) {
-                if (!err && meta) {
-                    updatePageMetadata(meta, newPath, false);
-                }
-            });
+        if (!state || typeof state.index !== "number") {
+            return;
         }
+
+        currentIndex = state.index;
+
+        next.style.display = currentIndex >= fileNames.length - 1 ? "none" : "inline";
+        previous.style.display = currentIndex <= 0 ? "none" : "inline";
+
+        var targetFile = fileNames[currentIndex];
+        var newPath = folderPath + "/" + encodeURIComponent(targetFile);
+
+        video.src = newPath + "?download";
+        video.play();
+
+        fetchJSON("/api" + newPath, function (err, meta) {
+            if (!err && meta) {
+                updatePageMetadata(meta, newPath, false);
+            }
+        });
     });
 
     if (navigator.mediaSession) {
