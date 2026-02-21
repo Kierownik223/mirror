@@ -12,10 +12,5 @@ function formatBytes(bytes) {
 
     bytes = Math.round(bytes * 10) / 10;
 
-    var str = bytes + "";
-    if (str.indexOf(".") == -1) {
-        str += ".0";
-    }
-
-    return str + " " + sizes[i];
+    return bytes + " " + sizes[i];
 }

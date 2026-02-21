@@ -394,7 +394,7 @@ pub fn format_size(bytes: u64, use_si: bool) -> String {
     let i = (bytes_f64.ln() / k.ln()).floor() as usize;
     let value = bytes_f64 / k.powi(i as i32);
 
-    format!("{:.1} {}", value, sizes[i])
+    format!("{:.1} {}", value, sizes[i]).replace(".0", "")
 }
 
 pub fn format_size_filter(
