@@ -51,6 +51,6 @@
         </div>
 {% include "footer" %}
     </div>
-    {%- block scripts %}{% endblock scripts -%}
+    {%- block scripts %}{% endblock scripts %}
 </body>
 </html>

@@ -1,27 +1,31 @@
 {% extends "base" %}
 
 {% block content %}
-<div class="controls">
-    <a href="/">MARMAK Mirror</a>/<a href="/admin/">{{ strings.admin }}</a>/
-</div>
-{{ strings.welcome }}, {{ username }}!
-<br>
-<a href="/upload"><span>{{ macros::icon(name="folder", hires=settings.hires) }}{{ strings.uploader }}</span></a>
-<a href="/admin/sysinfo"><span>{{ macros::icon(name="config", hires=settings.hires) }}{{ strings.sysinfo }}</span></a>
-<a href="http://account.{{ root_domain }}"><span>{{ macros::icon(name="ui/settings", hires=settings.hires) }}{{ strings.manage_account }}</span></a>
-<br>
-<b>{{ macros::icon(name="ui/drive", hires=settings.hires) }}{{ strings.disk_usage }}:</b><br>
-<div id="disks">
-Loading...
-</div>
-{% endblock content %}
+            <div class="controls">
+                <div class="title">
+                    <span class="breadcrumbs">
+                        <a href="/">MARMAK Mirror</a>/<a href="/admin/">{{ strings.admin }}</a>/
+                    </span>
+                </div>
+            </div>
+            {{ strings.welcome }}, {{ username }}!
+            <br>
+            <a href="/upload"><span>{{ macros::icon(name="folder", hires=settings.hires) }}{{ strings.uploader }}</span></a>
+            <a href="/admin/sysinfo"><span>{{ macros::icon(name="config", hires=settings.hires) }}{{ strings.sysinfo }}</span></a>
+            <a href="http://account.{{ root_domain }}"><span>{{ macros::icon(name="ui/settings", hires=settings.hires) }}{{ strings.manage_account }}</span></a>
+            <br>
+            <b>{{ macros::icon(name="ui/drive", hires=settings.hires) }}{{ strings.disk_usage }}:</b><br>
+            <div id="disks">
+            Loading...
+            </div>
+{%- endblock content %}
 
 {% block scripts %}
-{% if settings.use_si %}
-<script src="/static/formatbytessi.js?v={{ version }}"></script>
-{% else %}
-<script src="/static/formatbytes.js?v={{ version }}"></script>
-{% endif %}
-<script src="/static/polyfills.js?v={{ version }}"></script>
-<script src="/static/admin.js?v={{ version }}"></script>
-{% endblock scripts %}
+    {%- if settings.use_si %}
+    <script src="/static/formatbytessi.js?v={{ version }}"></script>
+    {%- else %}
+    <script src="/static/formatbytes.js?v={{ version }}"></script>
+    {%- endif %}
+    <script src="/static/polyfills.js?v={{ version }}"></script>
+    <script src="/static/admin.js?v={{ version }}"></script>
+{%- endblock scripts %}
