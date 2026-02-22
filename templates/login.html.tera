@@ -1,24 +1,24 @@
 {% extends "base" %}
 
 {% block content %}
-<a href="/">MARMAK Mirror</a>/<a href="/account/login">{{ strings.log_in }}</a><br>
-{{ strings.log_in_with_marmak }}
-<form method="post">
-    {% if message %}
-    <p class="message">{{ message }}</p>
-    {% endif %}
-    <label for="username"><span>{{ macros::icon(name="ui/user", hires=settings.hires) }}{{ strings.username }}:</span></label><br>
-    <center><input type="text" name="username" id="username" class="text" required></center><br>
-    <label for="password"><span>{{ macros::icon(name="ui/keys", hires=settings.hires) }}{{ strings.password }}:</span></label><br>
-    <center><input type="password" name="password" id="password" class="text" required></center><br>
-    <label for="remember_me"><input type="checkbox" name="remember_me" id="remember_me" value="true">{{ strings.remember_me }}</label><br>
-    <center>
-        <button type="submit"><span>{{ macros::icon(name="ui/login", hires=settings.hires) }}{{ strings.log_in }}</span></button>
-    </center>
-    {% if next %}
-    {{ strings.login_to_continue }} {{ next }}
-    {% endif %}
-    <p><span>{{ macros::icon(name="info", hires=settings.hires) }}{{ strings.tip }}</span></p>
-    {{ strings.settings_tip1 }} <a href="/settings">{{ macros::icon(name="ui/settings", hires=settings.hires) }}{{ strings.settings }}</a> {{ strings.settings_tip2 }}
-</form>
+            <a href="/">MARMAK Mirror</a>/<a href="/account/login">{{ strings.log_in }}</a><br>
+            {{ strings.log_in_with_marmak }}
+            <form method="post">
+                {%- if message %}
+                <p class="message">{{ message }}</p>
+                {%- endif %}
+                <label for="username"><span>{{ macros::icon(name="ui/user", hires=settings.hires) }}{{ strings.username }}:</span></label><br>
+                <center><input type="text" name="username" id="username" class="text" required></center><br>
+                <label for="password"><span>{{ macros::icon(name="ui/keys", hires=settings.hires) }}{{ strings.password }}:</span></label><br>
+                <center><input type="password" name="password" id="password" class="text" required></center><br>
+                <label for="remember_me"><input type="checkbox" name="remember_me" id="remember_me" value="true">{{ strings.remember_me }}</label><br>
+                <center>
+                    <button type="submit"><span>{{ macros::icon(name="ui/login", hires=settings.hires) }}{{ strings.log_in }}</span></button>
+                </center>
+                {%- if next %}
+                {{ strings.login_to_continue }} {{ next }}
+                {%- endif %}
+                <p><span>{{ macros::icon(name="info", hires=settings.hires) }}{{ strings.tip }}</span></p>
+                {{ strings.settings_tip1 }} <a href="/settings">{{ macros::icon(name="ui/settings", hires=settings.hires) }}{{ strings.settings }}</a> {{ strings.settings_tip2 }}
+            </form>
 {% endblock content %}
