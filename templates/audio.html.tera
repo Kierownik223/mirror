@@ -23,50 +23,51 @@
 {% endblock head %}
 
 {% block content %}
-    <div class="controls">
-        <span class="title">
-            {{ strings.listening }} <span class="breadcrumbs">
-                {{ macros::breadcrumbs(path=path) }}
-            </span>
-        </span>
-        <div class="actions"><a href="?download" id="download" download><span>{{ macros::icon(name="favicon", hires=settings.hires) }}{{ strings.download }}</span></a></div><br>
-        <a href="./">{{ macros::icon(name="folder", hires=settings.hires) }}./</a>
-    </div>
-    <audio id="audio" src="?download" controls style="width: 100%;" poster="{{ poster }}">{{ strings.no_audio }}</audio>
-    {% if not share %}
-    <div>
-        <a href="javascript:;" id="previous" style="float: left;">&lt; {{ strings.previous }}</a>
-        <a href="javascript:;" id="next" style="float: right;">{{ strings.next }} &gt;</a>
-        <br>
-    </div>
-    {% endif %}
-    <span id="artist">{% if artist %}{{ artist }}{% else %}N/A{% endif %}</span> - <span id="track">{% if track %}{{ track }}.{% endif %}</span> <span id="title">{{ audiotitle }}</span>
-    <div class="audio-metadata">
-        <div class="audio-details">
-            {{ strings.album }}: <span id="album">{% if album %}{{ album }}{% else %}N/A{% endif %}</span><br>
-            {{ strings.year }}: <span id="year">{% if year %}{{ year }}{% else %}N/A{% endif %}</span><br>
-            {{ strings.genre }}: <span id="genre">{% if genre %}{{ genre }}{% else %}N/A{% endif %}</span><br>
-        </div>
-        {% if settings.show_cover %}<img id="cover" src="{{ poster }}" alt="{{ strings.album_cover }}">{% endif %}
-    </div>
-    {% if not share %}
-    <label for="autoplay"><input type="checkbox" name="autoplay" id="autoplay" checked>{{ strings.autoplay }}</label><br>
-    {% endif %}
+            <div class="controls">
+                <span class="title">
+                    {{ strings.listening }}
+                    <span class="breadcrumbs">
+                        {{ macros::breadcrumbs(path=path) }}
+                    </span>
+                </span>
+                <div class="actions"><a href="?download" id="download" download><span>{{ macros::icon(name="favicon", hires=settings.hires) }}{{ strings.download }}</span></a></div><br>
+                <a href="./">{{ macros::icon(name="folder", hires=settings.hires) }}./</a>
+            </div>
+            <audio id="audio" src="?download" controls style="width: 100%;" poster="{{ poster }}">{{ strings.no_audio }}</audio>
+            {%- if not share %}
+            <div>
+                <a href="javascript:;" id="previous" style="float: left;">&lt; {{ strings.previous }}</a>
+                <a href="javascript:;" id="next" style="float: right;">{{ strings.next }} &gt;</a>
+                <br>
+            </div>
+            {%- endif %}
+            <span id="artist">{% if artist %}{{ artist }}{% else %}N/A{% endif %}</span> - <span id="track">{% if track %}{{ track }}.{% endif %}</span> <span id="title">{{ audiotitle }}</span>
+            <div class="audio-metadata">
+                <div class="audio-details">
+                    {{ strings.album }}: <span id="album">{% if album %}{{ album }}{% else %}N/A{% endif %}</span><br>
+                    {{ strings.year }}: <span id="year">{% if year %}{{ year }}{% else %}N/A{% endif %}</span><br>
+                    {{ strings.genre }}: <span id="genre">{% if genre %}{{ genre }}{% else %}N/A{% endif %}</span><br>
+                </div>
+                {% if settings.show_cover %}<img id="cover" src="{{ poster }}" alt="{{ strings.album_cover }}">{% endif %}
+            </div>
+            {%- if not share %}
+            <label for="autoplay"><input type="checkbox" name="autoplay" id="autoplay" checked>{{ strings.autoplay }}</label><br>
+            {%- endif -%}
 {% endblock content %}
 
 {% block scripts %}
-{% if not share %}
-<script src="/static/breadcrumbs.js?v={{ version }}"></script>
-<script src="/static/audio.js?v={{ version }}"></script>
-{% endif %}
-<script>
-    if (window.navigator && navigator.mediaSession) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-            title: '{{ audiotitle }}',
-            artist: '{{ artist }}',
-            album: '{{ album }}',
-            artwork: [{src: '{{ poster }}'}],
-        });
-    }
-</script>
+    {%- if not share %}
+    <script src="/static/breadcrumbs.js?v={{ version }}"></script>
+    <script src="/static/audio.js?v={{ version }}"></script>
+    {%- endif %}
+    <script>
+        if (window.navigator && navigator.mediaSession) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: '{{ audiotitle }}',
+                artist: '{{ artist }}',
+                album: '{{ album }}',
+                artwork: [{src: '{{ poster }}'}],
+            });
+        }
+    </script>
 {% endblock scripts %}

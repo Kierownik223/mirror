@@ -30,42 +30,42 @@
 {% endblock head %}
 
 {% block content %}
-    <div class="controls">
-        <span class="title">
-            {{ strings.watching }} <span class="breadcrumbs">
-                {{ macros::breadcrumbs(path=path) }}
-            </span>
-        </span>
-        <div class="actions"><a href="?download" id="download" download><span>{{ macros::icon(name="favicon", hires=settings.hires) }}{{ strings.download }}</span></a></div><br>
-        <a href="./">{{ macros::icon(name="folder", hires=settings.hires) }}./</a>
-    </div>
-    <video id="video" src="?download" controls style="height: 60vh; width: 100%;" poster="{{ poster | urlencode }}">{{ strings.no_video }}</video>
-    {% if not share %}
-    <div>
-        <a href="javascript:;" id="previous" style="float: left;">&lt; {{ strings.previous }}</a>
-        <a href="javascript:;" id="next" style="float: right;">{{ strings.next }} &gt;</a>
-        <br>
-    </div>
-    {% endif %}
-    <span id="title">{{ vidtitle }}</span>
-    <span id="description">{% if details %}{{ details }}{% endif %}</span>
-    {% if not share %}
-    <br>
-    <label for="autoplay"><input type="checkbox" name="autoplay" id="autoplay">{{ strings.autoplay }}</label><br>
-    {% endif %}
+            <div class="controls">
+                <span class="title">
+                    {{ strings.watching }}
+                    <span class="breadcrumbs">
+                        {{ macros::breadcrumbs(path=path) }}
+                    </span>
+                </span>
+                <div class="actions"><a href="?download" id="download" download><span>{{ macros::icon(name="favicon", hires=settings.hires) }}{{ strings.download }}</span></a></div><br>
+                <a href="./">{{ macros::icon(name="folder", hires=settings.hires) }}./</a>
+            </div>
+            <video id="video" src="?download" controls style="height: 60vh; width: 100%;" poster="{{ poster | urlencode }}">{{ strings.no_video }}</video>
+            {%- if not share %}
+            <div>
+                <a href="javascript:;" id="previous" style="float: left;">&lt; {{ strings.previous }}</a>
+                <a href="javascript:;" id="next" style="float: right;">{{ strings.next }} &gt;</a>
+                <br>
+            </div>
+            {%- endif %}
+            <span id="title">{{ vidtitle }}</span>
+            <span id="description">{% if details %}{{ details }}{% endif %}</span>
+            {%- if not share %}
+            <label for="autoplay"><input type="checkbox" name="autoplay" id="autoplay">{{ strings.autoplay }}</label><br>
+            {%- endif -%}
 {% endblock content %}
 
 {% block scripts %}
-{% if not share %}
-<script src="/static/breadcrumbs.js?v={{ version }}"></script>
-<script src="/static/video.js?v={{ version }}"></script>
-{% endif %}
-<script>
-    if (window.navigator && navigator.mediaSession) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-            title: '{{ vidtitle }}',
-            artwork: [{src: '{{ poster | urlencode }}'}],
-        });
-    }
-</script>
+    {%- if not share %}
+    <script src="/static/breadcrumbs.js?v={{ version }}"></script>
+    <script src="/static/video.js?v={{ version }}"></script>
+    {%- endif %}
+    <script>
+        if (window.navigator && navigator.mediaSession) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: '{{ vidtitle }}',
+                artwork: [{src: '{{ poster | urlencode }}'}],
+            });
+        }
+    </script>
 {% endblock scripts %}
