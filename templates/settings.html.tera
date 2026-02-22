@@ -1,97 +1,102 @@
 {% extends "base" %}
 
 {% block content %}
-<div class="controls">
-    <a href="/">MARMAK Mirror</a>/<a href="/settings">{{ strings.settings }}</a>
-    <div class="actions"><a href="/settings/reset"><span>{{ macros::icon(name="ui/settings", hires=settings.hires) }}{{ strings.reset_settings }}</span></a></div><br></div>
-{% if config.enable_login and is_logged_in %}
-{{ strings.welcome }}, {{ username }}!
-<br>
-<a href="/settings/sync"><span>{{ macros::icon(name="ui/settings", hires=settings.hires) }}{{ strings.sync_settings }}</span></a>
-<a href="/settings/fetch"><span>{{ macros::icon(name="ui/settings", hires=settings.hires) }}{{ strings.fetch_settings }}</span></a>
+        <div class="controls">
+            <div class="breadcrumb">
+                <a href="/">MARMAK Mirror</a>/<a href="/settings">{{ strings.settings }}</a>
+            </div>
+            <div class="actions">
+                <a href="/settings/reset"><span>{{ macros::icon(name="ui/settings", hires=settings.hires) }}{{ strings.reset_settings }}</span></a>
+            </div>
+        </div>
+        {%- if config.enable_login and is_logged_in %}
+        {{ strings.welcome }}, {{ username }}!
+        <br>
+        <a href="/settings/sync"><span>{{ macros::icon(name="ui/settings", hires=settings.hires) }}{{ strings.sync_settings }}</span></a>
+        <a href="/settings/fetch"><span>{{ macros::icon(name="ui/settings", hires=settings.hires) }}{{ strings.fetch_settings }}</span></a>
+        {%- endif %}
 
-{% endif %}
-
-{% if show_cookie_notice %}
-<p>{{ strings.cookie_notice }}</p>
-{% endif %}
-
-<form method="get">
-    {{ macros::icon(name="ui/lang", hires=settings.hires) }}{{ strings.change_lang }}<br>
-    <select name="lang">
-        {% for s in language_names %}
-        <option value="{{ s.0 }}"{% if lang==s.0 %} selected{% endif %}>{{ s.1 }} ({{ s.0 }})</option>
-        {% endfor %}
-    </select>
-    <br>
-    {{ macros::icon(name="ui/theme", hires=settings.hires) }}{{ strings.change_theme }}<br>
-    <select name="theme">
-        <option value="default"{% if settings.theme=="default" %} selected{% endif %}>{{ strings.theme_default }}</option>
-        <option value="defaultmobile"{% if settings.theme=="defaultmobile" %} selected{% endif %}>{{ strings.theme_default }} (Mobile)</option>
-        <option value="darkblue"{% if settings.theme=="darkblue" %} selected{% endif %}>{{ strings.theme_darkblue }}</option>
-        <option value="greenish"{% if settings.theme=="greenish" %} selected{% endif %}>{{ strings.theme_greenish }}</option>
-        <option value="antique"{% if settings.theme=="antique" %} selected{% endif %}>{{ strings.theme_antique }}</option>
-        <option value="oled"{% if settings.theme=="oled" %} selected{% endif %}>OLED</option>
-        <option value="oledmatrix"{% if settings.theme=="oledmatrix" %} selected{% endif %}>OLED Matrix</option>
-        <option value="white"{% if settings.theme=="white" %} selected{% endif %}>#fff</option>
-        {% if theme == "venti" %}<option value="venti" selected>Venti by Olek47</option>{% endif %}
-        <option value="silksong"{% if settings.theme=="silksong" %} selected{% endif %}>Silksong by Spaniel</option>
-        <option value="greatness"{% if settings.theme=="greatness" %} selected{% endif %}>Zoteness by maksydab</option>
-        <option value="dopamine"{% if settings.theme=="dopamine" %} selected{% endif %}>Dopamine by maksydab</option>
-    </select>
-    <br>
-    <label for="hires">{{ macros::icon(name="ui/floppy", hires=settings.hires) }}{{ strings.hires }}</label>
-    <br>
-    <label><input type="radio" name="hires" value="true"{% if settings.hires %} checked{% endif %}>{{ strings.enable }}</label>
-    <label><input type="radio" name="hires" value="false"{% if not settings.hires %} checked{% endif %}>{{ strings.disable }}</label>
-    <br>
-    <label for="smallhead">{{ macros::icon(name="favicon", hires=settings.hires) }}{{ strings.smallhead }}</label>
-    <br>
-    <label><input type="radio" name="smallhead" value="true"{% if settings.smallhead %} checked{% endif %}>{{ strings.enable }}</label>
-    <label><input type="radio" name="smallhead" value="false"{% if not settings.smallhead %} checked{% endif %}>{{ strings.disable }}</label>
-    <br>
-    <label for="plain">{{ macros::icon(name="default", hires=settings.hires) }}{{ strings.plain }}</label>
-    <br>
-    <label><input type="radio" name="plain" value="true"{% if plain %} checked{% endif %}>{{ strings.enable }}</label>
-    <label><input type="radio" name="plain" value="false"{% if not plain %} checked{% endif %}>{{ strings.disable }}</label>
-    <br>
-    <label for="nooverride">{{ macros::icon(name="ui/settings", hires=settings.hires) }}{{ strings.dont_override_settings }}</label>
-    <br>
-    <label><input type="radio" name="nooverride" value="true"{% if settings.nooverride %} checked{% endif %}>{{ strings.enable }}</label>
-    <label><input type="radio" name="nooverride" value="false"{% if not settings.nooverride %} checked{% endif %}>{{ strings.disable }}</label>
-    <br>
-    <label for="viewers">{{ macros::icon(name="exe", hires=settings.hires) }}{{ strings.viewers }}</label>
-    <br>
-    <label><input type="radio" name="viewers" value="true"{% if settings.viewers %} checked{% endif %}>{{ strings.enable }}</label>
-    <label><input type="radio" name="viewers" value="false"{% if not settings.viewers %} checked{% endif %}>{{ strings.disable }}</label>
-    <br>
-    <label for="audio_player">{{ macros::icon(name="audio", hires=settings.hires) }}{{ strings.audio_player }}</label>
-    <br>
-    <label><input type="radio" name="audio_player" value="true"{% if settings.audio_player %} checked{% endif %}>{{ strings.enable }}</label>
-    <label><input type="radio" name="audio_player" value="false"{% if not settings.audio_player %} checked{% endif %}>{{ strings.disable }}</label>
-    <br>
-    <label for="show_cover">{{ macros::icon(name="image", hires=settings.hires) }}{{ strings.show_cover }}</label>
-    <br>
-    <label><input type="radio" name="show_cover" value="true"{% if settings.show_cover %} checked{% endif %}>{{ strings.enable }}</label>
-    <label><input type="radio" name="show_cover" value="false"{% if not settings.show_cover %} checked{% endif %}>{{ strings.disable }}</label>
-    <br>
-    <label for="video_player">{{ macros::icon(name="video", hires=settings.hires) }}{{ strings.video_player }}</label>
-    <br>
-    <label><input type="radio" name="video_player" value="true"{% if settings.video_player %} checked{% endif %}>{{ strings.enable }}</label>
-    <label><input type="radio" name="video_player" value="false"{% if not settings.video_player %} checked{% endif %}>{{ strings.disable }}</label>
-    <br>
-    <label for="use_si">{{ macros::icon(name="info", hires=settings.hires) }}{{ strings.use_si_prefixes }}</label>
-    <br>
-    <label><input type="radio" name="use_si" value="true"{% if settings.use_si %} checked{% endif %}>{{ strings.enable }}</label>
-    <label><input type="radio" name="use_si" value="false"{% if not settings.use_si %} checked{% endif %}>{{ strings.disable }}</label>
-    <br>
-    <label for="dir_browser">{{ macros::icon(name="folder", hires=settings.hires) }}{{ strings.directory_browser }}</label>
-    <br>
-    <label><input type="radio" name="dir_browser" value="true"{% if settings.dir_browser %} checked{% endif %}>{{ strings.enable }}</label>
-    <label><input type="radio" name="dir_browser" value="false"{% if not settings.dir_browser %} checked{% endif %}>{{ strings.disable }}</label>
-    <br>
-    <center>
-        <button type="submit" class="submit"><span>{{ macros::icon(name="ui/settings", hires=settings.hires) }}{{ strings.save_settings }}</span></button>
-    </center>
-</form>
-{% endblock content %}
+        {%- if show_cookie_notice %}
+        <p>{{ strings.cookie_notice }}</p>
+        {%- endif %}
+        <form method="get">
+            {{ macros::icon(name="ui/lang", hires=settings.hires) }}{{ strings.change_lang }}<br>
+            <select name="lang">
+                {%- for s in language_names %}
+                <option value="{{ s.0 }}"{% if lang==s.0 %} selected{% endif %}>{{ s.1 }} ({{ s.0 }})</option>
+                {%- endfor %}
+            </select>
+            <br>
+            {{ macros::icon(name="ui/theme", hires=settings.hires) }}{{ strings.change_theme }}<br>
+            <select name="theme">
+                <option value="default"{% if settings.theme=="default" %} selected{% endif %}>{{ strings.theme_default }}</option>
+                <option value="defaultmobile"{% if settings.theme=="defaultmobile" %} selected{% endif %}>{{ strings.theme_default }} (Mobile)</option>
+                <option value="darkblue"{% if settings.theme=="darkblue" %} selected{% endif %}>{{ strings.theme_darkblue }}</option>
+                <option value="greenish"{% if settings.theme=="greenish" %} selected{% endif %}>{{ strings.theme_greenish }}</option>
+                <option value="antique"{% if settings.theme=="antique" %} selected{% endif %}>{{ strings.theme_antique }}</option>
+                <option value="oled"{% if settings.theme=="oled" %} selected{% endif %}>OLED</option>
+                <option value="oledmatrix"{% if settings.theme=="oledmatrix" %} selected{% endif %}>OLED Matrix</option>
+                <option value="white"{% if settings.theme=="white" %} selected{% endif %}>#fff</option>
+                {%- if theme == "venti" %}
+                <option value="venti" selected>Venti by Olek47</option>
+                {%- endif %}
+                <option value="silksong"{% if settings.theme=="silksong" %} selected{% endif %}>Silksong by Spaniel</option>
+                <option value="greatness"{% if settings.theme=="greatness" %} selected{% endif %}>Zoteness by maksydab</option>
+                <option value="dopamine"{% if settings.theme=="dopamine" %} selected{% endif %}>Dopamine by maksydab</option>
+            </select>
+            <br>
+            <label for="hires">{{ macros::icon(name="ui/floppy", hires=settings.hires) }}{{ strings.hires }}</label>
+            <br>
+            <label><input type="radio" name="hires" value="true"{% if settings.hires %} checked{% endif %}>{{ strings.enable }}</label>
+            <label><input type="radio" name="hires" value="false"{% if not settings.hires %} checked{% endif %}>{{ strings.disable }}</label>
+            <br>
+            <label for="smallhead">{{ macros::icon(name="favicon", hires=settings.hires) }}{{ strings.smallhead }}</label>
+            <br>
+            <label><input type="radio" name="smallhead" value="true"{% if settings.smallhead %} checked{% endif %}>{{ strings.enable }}</label>
+            <label><input type="radio" name="smallhead" value="false"{% if not settings.smallhead %} checked{% endif %}>{{ strings.disable }}</label>
+            <br>
+            <label for="plain">{{ macros::icon(name="default", hires=settings.hires) }}{{ strings.plain }}</label>
+            <br>
+            <label><input type="radio" name="plain" value="true"{% if plain %} checked{% endif %}>{{ strings.enable }}</label>
+            <label><input type="radio" name="plain" value="false"{% if not plain %} checked{% endif %}>{{ strings.disable }}</label>
+            <br>
+            <label for="nooverride">{{ macros::icon(name="ui/settings", hires=settings.hires) }}{{ strings.dont_override_settings }}</label>
+            <br>
+            <label><input type="radio" name="nooverride" value="true"{% if settings.nooverride %} checked{% endif %}>{{ strings.enable }}</label>
+            <label><input type="radio" name="nooverride" value="false"{% if not settings.nooverride %} checked{% endif %}>{{ strings.disable }}</label>
+            <br>
+            <label for="viewers">{{ macros::icon(name="exe", hires=settings.hires) }}{{ strings.viewers }}</label>
+            <br>
+            <label><input type="radio" name="viewers" value="true"{% if settings.viewers %} checked{% endif %}>{{ strings.enable }}</label>
+            <label><input type="radio" name="viewers" value="false"{% if not settings.viewers %} checked{% endif %}>{{ strings.disable }}</label>
+            <br>
+            <label for="audio_player">{{ macros::icon(name="audio", hires=settings.hires) }}{{ strings.audio_player }}</label>
+            <br>
+            <label><input type="radio" name="audio_player" value="true"{% if settings.audio_player %} checked{% endif %}>{{ strings.enable }}</label>
+            <label><input type="radio" name="audio_player" value="false"{% if not settings.audio_player %} checked{% endif %}>{{ strings.disable }}</label>
+            <br>
+            <label for="show_cover">{{ macros::icon(name="image", hires=settings.hires) }}{{ strings.show_cover }}</label>
+            <br>
+            <label><input type="radio" name="show_cover" value="true"{% if settings.show_cover %} checked{% endif %}>{{ strings.enable }}</label>
+            <label><input type="radio" name="show_cover" value="false"{% if not settings.show_cover %} checked{% endif %}>{{ strings.disable }}</label>
+            <br>
+            <label for="video_player">{{ macros::icon(name="video", hires=settings.hires) }}{{ strings.video_player }}</label>
+            <br>
+            <label><input type="radio" name="video_player" value="true"{% if settings.video_player %} checked{% endif %}>{{ strings.enable }}</label>
+            <label><input type="radio" name="video_player" value="false"{% if not settings.video_player %} checked{% endif %}>{{ strings.disable }}</label>
+            <br>
+            <label for="use_si">{{ macros::icon(name="info", hires=settings.hires) }}{{ strings.use_si_prefixes }}</label>
+            <br>
+            <label><input type="radio" name="use_si" value="true"{% if settings.use_si %} checked{% endif %}>{{ strings.enable }}</label>
+            <label><input type="radio" name="use_si" value="false"{% if not settings.use_si %} checked{% endif %}>{{ strings.disable }}</label>
+            <br>
+            <label for="dir_browser">{{ macros::icon(name="folder", hires=settings.hires) }}{{ strings.directory_browser }}</label>
+            <br>
+            <label><input type="radio" name="dir_browser" value="true"{% if settings.dir_browser %} checked{% endif %}>{{ strings.enable }}</label>
+            <label><input type="radio" name="dir_browser" value="false"{% if not settings.dir_browser %} checked{% endif %}>{{ strings.disable }}</label>
+            <br>
+            <center>
+                <button type="submit" class="submit"><span>{{ macros::icon(name="ui/settings", hires=settings.hires) }}{{ strings.save_settings }}</span></button>
+            </center>
+        </form>
+{%- endblock content %}
