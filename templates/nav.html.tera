@@ -1,19 +1,21 @@
 <div class="header">
-    <a href="/">{% if not settings.smallhead %}<h1>{% endif %}<span>{{ macros::icon(name="favicon", hires=settings.hires) }}MARMAK Mirror</span>{% if not smallhead %}</h1>{% endif %}</a>
-    {% if not smallhead %}<a href="/"><span>{{ macros::icon(name="ui/home", hires=settings.hires) }}{{ strings.home }}</span></a>{% endif %}
-    <a href="/settings"><span>{{ macros::icon(name="ui/settings", hires=settings.hires) }}{{ strings.settings }}</span></a>
-    <a href="/search"><span>{{ macros::icon(name="ui/search", hires=settings.hires) }}{{ strings.search_engine }}</span></a>
-    {% if config.marmak_link %}<a href="http://{{ root_domain }}"><span>{{ macros::icon(name="ui/marmak", hires=settings.hires) }}{{ config.marmak_link }}</span></a>{% endif %}
-    {% if config.enable_login %}
-    {% if not is_logged_in %}
-    <a href="/account/login"><span>{{ macros::icon(name="ui/login", hires=settings.hires) }}{{ strings.log_in }}</span></a>
-    {% else %}
-    {% if admin %}
-    <a href="/admin/"><span>{{ macros::icon(name="ui/admin", hires=settings.hires) }}{{ strings.admin }}</span></a>
-    {% else %}
-    <a href="http://account.{{ root_domain }}"><span>{{ macros::icon(name="ui/settings", hires=settings.hires) }}{{ strings.manage_account }}</span></a>
-    {% endif %}
-    <a href="/account/logout"><span>{{ macros::icon(name="ui/login", hires=settings.hires) }}{{ strings.log_out }}</span></a>
-    {% endif %}
-    {% endif %}
-</div>
+            <a href="/">{% if not settings.smallhead %}<h1>{% endif %}<span>{{ macros::icon(name="favicon", hires=settings.hires) }}MARMAK Mirror</span>{% if not smallhead %}</h1>{% endif %}</a>
+            {% if not smallhead %}<a href="/"><span>{{ macros::icon(name="ui/home", hires=settings.hires) }}{{ strings.home }}</span></a>{% endif %}
+            <a href="/settings"><span>{{ macros::icon(name="ui/settings", hires=settings.hires) }}{{ strings.settings }}</span></a>
+            <a href="/search"><span>{{ macros::icon(name="ui/search", hires=settings.hires) }}{{ strings.search_engine }}</span></a>
+            {%- if config.marmak_link %}
+            <a href="http://{{ root_domain }}"><span>{{ macros::icon(name="ui/marmak", hires=settings.hires) }}{{ config.marmak_link }}</span></a>
+            {%- endif %}
+            {%- if config.enable_login %}
+            {% if not is_logged_in -%}
+            <a href="/account/login"><span>{{ macros::icon(name="ui/login", hires=settings.hires) }}{{ strings.log_in }}</span></a>
+            {%- else -%}
+            {%- if admin -%}
+            <a href="/admin/"><span>{{ macros::icon(name="ui/admin", hires=settings.hires) }}{{ strings.admin }}</span></a>
+            {%- else -%}
+            <a href="http://account.{{ root_domain }}"><span>{{ macros::icon(name="ui/settings", hires=settings.hires) }}{{ strings.manage_account }}</span></a>
+            {%- endif %}
+            <a href="/account/logout"><span>{{ macros::icon(name="ui/login", hires=settings.hires) }}{{ strings.log_out }}</span></a>
+            {%- endif %}
+            {%- endif %}
+        </div>

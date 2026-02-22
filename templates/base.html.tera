@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="{{ lang }}">
 <head>
-    {% block head %}
+    {%- block head %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#000000">
@@ -30,11 +30,11 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
 
     <title>{{ title }} - MARMAK Mirror</title>
-    {% endblock head %}
+    {%- endblock head %}
     <link rel="stylesheet" href="/static/styles/{{ settings.theme }}.css?v={{ version }}">
     {% if settings.js_present %}
     <script src="/static/styles/{{ settings.theme }}.js?v={{ version }}"></script>
-    {% endif %}
+    {%- endif %}
     <!--[if lt IE 7]>
     <style>
     input.text {
@@ -47,9 +47,9 @@
     <div class="container">
         {% include "nav" %}
         <div class="main">
-            {% block content %}{% endblock content %}
+{% block content %}{% endblock content %}
         </div>
-        {% include "footer" %}
+{% include "footer" %}
     </div>
     {% block scripts %}{% endblock scripts %}
 </body>
