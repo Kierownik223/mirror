@@ -1,18 +1,21 @@
 {% extends "base" %}
 
 {% block content %}
-<link rel="stylesheet" href="/static/print.css?v={{ version }}">
-<div class="controls">
-    <span class="title">
-        {{ strings.reading_markdown }} <span class="breadcrumbs">
-            {{ macros::breadcrumbs(path=path) }}
-        </span>
-    </span>
-    <div class="actions"><a href="?download" id="download" download><span>{{ macros::icon(name="favicon", hires=settings.hires) }}{{ strings.download }}</span></a>
-        <a href="#" onclick="window.print()"><span>{{ macros::icon(name="ui/print", hires=settings.hires) }}{{ strings.print }}</span></a></div><br>
-    <a href="./">{{ macros::icon(name="folder", hires=settings.hires) }}./</a>
-</div>
-<div class="markdown">
+            <link rel="stylesheet" href="/static/print.css?v={{ version }}">
+            <div class="controls">
+                <span class="title">
+                    {{ strings.reading_markdown }} 
+                    <span class="breadcrumbs">
+                        {{ macros::breadcrumbs(path=path) }}
+                    </span>
+                </span>
+                <div class="actions">
+                    <a href="?download" id="download" download><span>{{ macros::icon(name="favicon", hires=settings.hires) }}{{ strings.download }}</span></a>
+                    <a href="#" onclick="window.print()"><span>{{ macros::icon(name="ui/print", hires=settings.hires) }}{{ strings.print }}</span></a>
+                </div>
+                <a href="./">{{ macros::icon(name="folder", hires=settings.hires) }}./</a>
+            </div>
+            <div class="markdown">
 {{ markdown }}
-</div>
+            </div>
 {% endblock content %}
