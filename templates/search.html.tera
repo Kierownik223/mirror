@@ -1,31 +1,30 @@
 {% extends "base" %}
 
 {% block content %}
-<div id="uploadResults"></div>
-<div class="breadcrumb">
-    <a href="/">MARMAK Mirror</a>/<a href="/search">{{ strings.search_engine }}</a>
-</div>
-<form method="get">
-    {% if message %}
-    <p class="message">{{ message }}</p>
-    {% endif %}
-    <label for="search">{{ strings.search_criterion }}:</label>
-    <input type="search" name="q" id="query" class="text" placeholder="{{ strings.search_placeholder }}"{% if query %} value="{{ query }}"{% endif %}>
-    <center>
-        <button type="submit"><span>{{ macros::icon(name="ui/search", hires=settings.hires) }}{{ strings.search }}</span></button>
-    </center>
-</form>
-<table>
-    <tbody>
-        {% if results %}
-        {% for r in results %}
-        <tr>
-            <td><a href="{{ r.full_path | urlencode }}">{{ macros::icon(name=r.icon, hires=settings.hires) }}{{ r.name }}</a></td>
-            <td class="hide-more">{{ r.size | format_size(use_si=settings.use_si) }}</td>
-            <td class="hide">{% if r.icon == "folder" %}{{ strings.folder }}{% else %}{{ strings.file }}{% endif %}</td>
-        </tr>
-        {% endfor %}
-        {% endif %}
-    </tbody>
-</table>
-{% endblock content %}
+            <div class="breadcrumb">
+                <a href="/">MARMAK Mirror</a>/<a href="/search">{{ strings.search_engine }}</a>
+            </div>
+            <form method="get">
+                {%- if message %}
+                <p class="message">{{ message }}</p>
+                {%- endif %}
+                <label for="search">{{ strings.search_criterion }}:</label>
+                <input type="search" name="q" id="query" class="text" placeholder="{{ strings.search_placeholder }}"{% if query %} value="{{ query }}"{% endif %}>
+                <center>
+                    <button type="submit"><span>{{ macros::icon(name="ui/search", hires=settings.hires) }}{{ strings.search }}</span></button>
+                </center>
+            </form>
+            {%- if results %}
+            <table>
+                <tbody>
+                    {%- for r in results %}
+                    <tr>
+                        <td><a href="{{ r.full_path | urlencode }}">{{ macros::icon(name=r.icon, hires=settings.hires) }}{{ r.name }}</a></td>
+                        <td class="hide-more">{{ r.size | format_size(use_si=settings.use_si) }}</td>
+                        <td class="hide">{% if r.icon == "folder" %}{{ strings.folder }}{% else %}{{ strings.file }}{% endif %}</td>
+                    </tr>
+                    {%- endfor %}
+                </tbody>
+            </table>
+            {%- endif %}
+{%- endblock content %}
