@@ -1,99 +1,97 @@
 {% extends "base" %}
 
-{% block content %}
-{% if folder_quota %}
-{% if folder_quota != 0 %}
-<div>
-    <label for="usage">{{ strings.usage }}: <label id="folder_usage">{{ folder_usage | format_size(use_si=settings.use_si) }}</label>/<label id="folder_quota">{{ folder_quota | format_size(use_si=settings.use_si) }}</label>
-    <progress style="width:100%;box-sizing:border-box;" class="disk_usage" max="{{ folder_quota }}" value="{{ folder_usage }}" name="usage" id="usage"></progress>
-</div>
-{% endif %}
-{% endif %}
-<div id="uploadResults"></div>
-<div class="breadcrumb">
-    <span><a href="/">MARMAK Mirror</a></span>{{ macros::breadcrumbs_folder(path=path) }}
-    {% if admin and path != "/" or private %}
-    <div class="actions">
-        <a href="javascript:;" onclick="createFolder()"><span>{{ macros::icon(name="folder", hires=settings.hires) }}{{ strings.create_folder }}</span></a>
-        <a href="/upload?path={{ path }}"><span>{{ macros::icon(name="favicon", hires=settings.hires) }}{{ strings.uploader }}</span></a>
-    </div>
-    {% endif %}
-</div>
-<table>
-    {% if is_logged_in and config.enable_zip_downloads or admin or private %}
-    <thead>
-        <tr>
-            <td style="width: 1em; white-space: nowrap;"><input type="checkbox" id="selectAll" onclick="toggleAllCheckboxes(this)"></td>
-            <td colspan="3">
-                {% if config.enable_zip_downloads %}
-                <a style="cursor: pointer;" href="javascript:;" onclick="downloadAsZip()" id="downloadZip">{{ strings.download_zip }} (BETA)</a>
+{%- block content -%}
+            {%- if folder_quota and folder_quota != 0 %}
+            <div>
+                <label for="usage">{{ strings.usage }}: <label id="folder_usage">{{ folder_usage | format_size(use_si=settings.use_si) }}</label>/<label id="folder_quota">{{ folder_quota | format_size(use_si=settings.use_si) }}</label></label>
+                <progress style="width:100%;box-sizing:border-box;" class="disk_usage" max="{{ folder_quota }}" value="{{ folder_usage }}" name="usage" id="usage"></progress>
+            </div>
+            {%- endif %}
+            <div id="uploadResults"></div>
+            <div class="breadcrumb">
+                <span><a href="/">MARMAK Mirror</a></span>{{ macros::breadcrumbs_folder(path=path) }}
+                {%- if admin and path != "/" or private %}
+                <div class="actions">
+                    <a href="javascript:;" onclick="createFolder()"><span>{{ macros::icon(name="folder", hires=settings.hires) }}{{ strings.create_folder }}</span></a>
+                    <a href="/upload?path={{ path }}"><span>{{ macros::icon(name="favicon", hires=settings.hires) }}{{ strings.uploader }}</span></a>
+                </div>
+                {%- endif %}
+            </div>
+            <table>
+                {%- if is_logged_in and config.enable_zip_downloads or admin or private %}
+                <thead>
+                    <tr>
+                        <td style="width: 1em; white-space: nowrap;"><input type="checkbox" id="selectAll" onclick="toggleAllCheckboxes(this)"></td>
+                        <td colspan="3">
+                            {%- if config.enable_zip_downloads %}
+                            <a style="cursor: pointer;" href="javascript:;" onclick="downloadAsZip()" id="downloadZip">{{ strings.download_zip }} (BETA)</a>
+                            {%- endif %}
+                            {%- if admin or private %}
+                            <a style="cursor: pointer;" href="javascript:;" onclick="renameSelected()">{{ strings.rename }}</a> <a style="cursor: pointer;" href="javascript:;" onclick="shareSelected()">{{ strings.share }}</a> <a style="cursor: pointer;" href="javascript:;" onclick="deleteSelected()">{{ strings.delete }}</a>
+                            {%- endif %}
+                        </td>
+                    </tr>
+                </thead>
                 {% endif %}
-                {% if admin or private %}
-                <a style="cursor: pointer;" href="javascript:;" onclick="renameSelected()">{{ strings.rename }}</a> <a style="cursor: pointer;" href="javascript:;" onclick="shareSelected()">{{ strings.share }}</a> <a style="cursor: pointer;" href="javascript:;" onclick="deleteSelected()">{{ strings.delete }}</a>
-                {% endif %}
-            </td>
-        </tr>
-    </thead>
-    {% endif %}
-    <tbody>
-        {% if path != "/" %}
-        <tr>
-            {% if is_logged_in and config.enable_zip_downloads or admin or private %}<td></td>{% endif %}
-            <td><a href="../">{{ macros::icon(name="folder", hires=settings.hires) }}../</a></td>
-            <td class="hide-more">---</td>
-            <td class="hide">{{ strings.folder }}</td>
-            {% if admin or private %}<td></td>{% endif %}
-        </tr>
-        {% endif %}
+                <tbody>
+                    {%- if path != "/" %}
+                    <tr>
+                        {% if is_logged_in and config.enable_zip_downloads or admin or private %}<td></td>{% endif %}
+                        <td><a href="../">{{ macros::icon(name="folder", hires=settings.hires) }}../</a></td>
+                        <td class="hide-more">---</td>
+                        <td class="hide">{{ strings.folder }}</td>
+                        {% if admin or private %}<td></td>{% endif %}
+                    </tr>
+                    {% endif -%}
 
-        {% for s in dirs %}
-        <tr>
-            {% if is_logged_in and config.enable_zip_downloads or admin or private %}
-            <td><input type="checkbox" class="delete-checkbox" value="{{ s.name | addslashes }}"></td>
-            {% endif %}
-            <td><a href="{{ s.name | urlencode }}/">{{ macros::icon(name=s.icon, hires=settings.hires) }}{{ s.name }}/</a></td>
-            <td class="hide-more">{{ s.size | format_size(use_si=settings.use_si) }}</td>
-            <td class="hide">{{ strings.folder }}</td>
-        </tr>
-        {% endfor %}
-        {% for s in files %}
-        <tr>
-            {% if is_logged_in and config.enable_zip_downloads or admin or private %}
-            <td><input type="checkbox" class="delete-checkbox" value="{{ s.name | addslashes }}"></td>
-            {% endif %}
-            <td><a href="{{ s.name | urlencode }}">{{ macros::icon(name=s.icon, hires=settings.hires) }}{{ s.name }}</a></td>
-            <td class="hide-more">{{ s.size | format_size(use_si=settings.use_si) }}</td>
-            <td class="hide">{{ strings.file }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% if markdown != "" %}
-<p><span>{{ macros::icon(name="info", hires=settings.hires) }}README.md</span></p>
+                    {% for s in dirs %}
+                    <tr>
+                        {%- if is_logged_in and config.enable_zip_downloads or admin or private %}
+                        <td><input type="checkbox" class="delete-checkbox" value="{{ s.name | addslashes }}"></td>
+                        {%- endif %}
+                        <td><a href="{{ s.name | urlencode }}/">{{ macros::icon(name=s.icon, hires=settings.hires) }}{{ s.name }}/</a></td>
+                        <td class="hide-more">{{ s.size | format_size(use_si=settings.use_si) }}</td>
+                        <td class="hide">{{ strings.folder }}</td>
+                    </tr>
+                    {%- endfor -%}
+                    {%- for s in files %}
+                    <tr>
+                        {%- if is_logged_in and config.enable_zip_downloads or admin or private %}
+                        <td><input type="checkbox" class="delete-checkbox" value="{{ s.name | addslashes }}"></td>
+                        {%- endif %}
+                        <td><a href="{{ s.name | urlencode }}">{{ macros::icon(name=s.icon, hires=settings.hires) }}{{ s.name }}</a></td>
+                        <td class="hide-more">{{ s.size | format_size(use_si=settings.use_si) }}</td>
+                        <td class="hide">{{ strings.file }}</td>
+                    </tr>
+                    {%- endfor %}
+                </tbody>
+            </table>
+            {%- if markdown != "" %}
+            <p><span>{{ macros::icon(name="info", hires=settings.hires) }}README.md</span></p>
 {{ markdown }}
-{% endif %}
-{% endblock content %}
+            {%- endif -%}
+{%- endblock content %}
 
 {% block scripts %}
-{% if is_logged_in %}
+{%- if is_logged_in %}
     <script src="/static/polyfills.js?v={{ version }}"></script>
     <script src="/static/utils.js?v={{ version }}"></script>
-    {% if config.linkshortener %}
+    {%- if config.linkshortener %}
     <script src="/scripts/linkshortener.js?lang={{ lang }}&hires={{ settings.hires }}7v={{ version }}"></script>
-    {% endif %}
+    {%- endif %}
     <script src="/scripts/share.js?lang={{ lang }}&hires={{ settings.hires }}&v={{ version }}"></script>
     <script src="/scripts/index.js?lang={{ lang }}&hires={{ settings.hires }}&v={{ version }}"></script>
-    {% if admin and path != "/" or private %}
-    {% if settings.use_si %}
+    {%- if admin and path != "/" or private %}
+    {%- if settings.use_si %}
     <script src="/static/formatbytessi.js?v={{ version }}"></script>
-    {% else %}
+    {%- else %}
     <script src="/static/formatbytes.js?v={{ version }}"></script>
-    {% endif %}
+    {%- endif %}
     <script src="/scripts/upload.js?lang={{ lang }}&hires={{ settings.hires }}&v={{ version }}"></script>
     <script src="/scripts/indexuploader.js?lang={{ lang }}&hires={{ settings.hires }}&v={{ version }}"></script>
-    {% endif %}
-    {% if config.enable_zip_downloads %}
+    {%- endif %}
+    {%- if config.enable_zip_downloads %}
     <script src="/scripts/zip.js?lang={{ lang }}&hires={{ settings.hires }}&v={{ version }}"></script>
     {% endif %}
-{% endif %}
-{% endblock scripts %}
+{% endif -%}
+{%- endblock scripts -%}
