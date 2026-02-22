@@ -47,7 +47,7 @@
     <div class="container">
         {% include "nav" %}
         <div class="main">
-{% block content %}{% endblock content %}
+{%- block content %}{% endblock content %}
         </div>
 {% include "footer" %}
     </div>
