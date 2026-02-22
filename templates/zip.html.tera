@@ -1,33 +1,33 @@
 {% extends "base" %}
 
 {% block content %}
-<div class="controls">
-    <span class="title">
-        {{ strings.viewing_zip }} <span class="breadcrumbs">
-            {{ macros::breadcrumbs(path=path) }}
-        </span>
-    </span>
-    <div class="actions"><a href="?download" id="download" download><span>{{ macros::icon(name="favicon", hires=settings.hires) }}{{ strings.download }}</span></a></div><br>
-</div>
-<table>
-    <tbody>
-        <tr>
-            <td><a href="./">{{ macros::icon(name="folder", hires=settings.hires) }}../</a></td>
-            <td class="hide-more">---</td>
-            <td class="hide">{{ strings.folder }}</td>
-        </tr>
+            <div class="controls">
+                <span class="title">
+                    {{ strings.viewing_zip }} <span class="breadcrumbs">
+                        {{ macros::breadcrumbs(path=path) }}
+                    </span>
+                </span>
+                <div class="actions"><a href="?download" id="download" download><span>{{ macros::icon(name="favicon", hires=settings.hires) }}{{ strings.download }}</span></a></div><br>
+            </div>
+            <table>
+                <tbody>
+                    <tr>
+                        <td><a href="./">{{ macros::icon(name="folder", hires=settings.hires) }}../</a></td>
+                        <td class="hide-more">---</td>
+                        <td class="hide">{{ strings.folder }}</td>
+                    </tr>
 
-        {% for s in files %}
-        <tr>
-            <td>{{ macros::icon(name=s.icon, hires=settings.hires) }}{{ s.name }}</td>
-            <td class="hide-more">{{ s.size | format_size(use_si=settings.use_si) }}</td>
-            {% if s.ext == "Folder" %}
-            <td class="hide">{{ strings.folder }}</td>
-            {% else %}
-            <td class="hide">{{ strings.file }}</td>
-            {% endif %}
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% endblock content %}
+                    {%- for s in files %}
+                    <tr>
+                        <td>{{ macros::icon(name=s.icon, hires=settings.hires) }}{{ s.name }}</td>
+                        <td class="hide-more">{{ s.size | format_size(use_si=settings.use_si) }}</td>
+                        {%- if s.ext == "Folder" %}
+                        <td class="hide">{{ strings.folder }}</td>
+                        {%- else %}
+                        <td class="hide">{{ strings.file }}</td>
+                        {%- endif %}
+                    </tr>
+                    {%- endfor %}
+                </tbody>
+            </table>
+{%- endblock content %}
