@@ -741,7 +741,7 @@ async fn perform_upload(db: Option<Connection<FileDb>>, path: Option<&str>, shar
         .texts
         .get("path")
         .and_then(|paths| paths.first().map(|p| p.text.trim_matches('/').to_string()))
-        .unwrap_or("uploads".to_string());
+        .unwrap_or(String::new());
 
     if user_path.is_empty() {
         user_path = if token.claims.perms == 0 {"uploads"} else {"private"}.to_string();
@@ -941,10 +941,10 @@ async fn perform_upload_chunked(db: Option<Connection<FileDb>>, path: Option<&st
         .texts
         .get("path")
         .and_then(|paths| paths.first().map(|p| p.text.trim_matches('/').to_string()))
-        .unwrap_or("uploads".to_string());
+        .unwrap_or(String::new());
 
     if user_path.is_empty() {
-        user_path = "uploads".to_string();
+        user_path = if token.claims.perms == 0 {"uploads"} else {"private"}.to_string();
     }
 
     if let Some(query_path) = path {
