@@ -1,5 +1,5 @@
 use std::{
-    fs::{self, create_dir, remove_dir, remove_dir_all, remove_file}, io::{Cursor, ErrorKind, Read, Write}, num::NonZero, ops::Deref, path::{Path, PathBuf}
+    fs::{self, create_dir, remove_dir, remove_dir_all, remove_file}, io::{Cursor, ErrorKind, Read, Write}, ops::Deref, path::{Path, PathBuf}
 };
 
 use ::sysinfo::{Disks, RefreshKind, System};
@@ -685,10 +685,27 @@ async fn upload(
     content_type: &ContentType,
     data: Data<'_>,
     host: Host<'_>,
-    path: Option<String>,
+    path: Option<&str>,
     token: Result<JWT, Status>,
     sizes: &State<FileSizes>,
 ) -> ApiResult {
+    perform_upload(None, path, content_type, data, host, token, sizes).await
+}
+
+#[post("/upload?<path>", data = "<data>")]
+async fn upload_db(
+    db: Connection<FileDb>,
+    content_type: &ContentType,
+    data: Data<'_>,
+    host: Host<'_>,
+    path: Option<&str>,
+    token: Result<JWT, Status>,
+    sizes: &State<FileSizes>,
+) -> ApiResult {
+    perform_upload(Some(db), path, content_type, data, host, token, sizes).await
+}
+
+async fn perform_upload(db: Option<Connection<FileDb>>, path: Option<&str>, content_type: &ContentType, data: Data<'_>, host: Host<'_>, token: Result<JWT, Status>, sizes: &State<FileSizes>) -> ApiResult {
     let token = token?;
 
     let max_size = CONFIG
@@ -1099,7 +1116,6 @@ pub fn build_api() -> AdHoc {
                     index,
                     listing,
                     sysinfo,
-                    upload,
                     search,
                     upload_info,
                     create_folder,
@@ -1110,10 +1126,10 @@ pub fn build_api() -> AdHoc {
         if CONFIG.enable_file_db {
             rocket = rocket.mount(
                 "/api",
-                routes![file_with_downloads, share, delete_db, rename_db, upload_chunked_db],
+                routes![file_with_downloads, share, delete_db, rename_db, upload_db, upload_chunked_db],
             )
         } else {
-            rocket = rocket.mount("/api", routes![file, delete, rename, upload_chunked])
+            rocket = rocket.mount("/api", routes![file, delete, rename, upload, upload_chunked])
         }
 
         if CONFIG.enable_zip_downloads {
