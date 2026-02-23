@@ -826,26 +826,6 @@ async fn perform_upload(db: Option<Connection<FileDb>>, path: Option<&str>, shar
                     let mut state_lock = sizes.write().await;
                     *state_lock = refresh_file_sizes().await;
                 }
-                    
-                if let Some(db) = db {
-                    if match share.unwrap_or("true") {
-                        "true" => true,
-                        "false" => false,
-                        _ => true
-                    } {
-                        let result = add_shared_file(db, &format!("{}/{}", user_path, file_name)).await;
-
-                        if let Some(id) = result {
-                            uploaded_files.push(UploadFile {
-                                name: file_name.clone(),
-                                url: Some(format!("http://{}/share/{}", host.0, id)),
-                                icon: Some(get_icon(file_name)),
-                                error: None,
-                                size: Some(file.metadata().unwrap().len()),
-                            });
-                        }
-                    }
-                }
 
                 uploaded_files.push(UploadFile {
                     name: file_name.to_string(),
@@ -857,6 +837,22 @@ async fn perform_upload(db: Option<Connection<FileDb>>, path: Option<&str>, shar
             } else {
                 eprintln!("A file was uploaded without a name, skipping.");
                 continue;
+            }
+        }
+                    
+        if let Some(db) = db {
+            if match share.unwrap_or("true") {
+                "true" => true,
+                "false" => false,
+                _ => true
+            } {
+                if uploaded_files.len() == 1 {
+                    let result = add_shared_file(db, &format!("{}/{}", user_path, uploaded_files[0].name)).await;
+
+                    if let Some(id) = result {
+                        uploaded_files[0].url = Some(format!("http://{}/share/{}", host.0, id));
+                    }
+                }
             }
         }
 
