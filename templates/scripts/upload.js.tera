@@ -64,7 +64,7 @@ function uploadFileInChunks(file, path, ui, onFinish, onError) {
 
 function uploadChunk(options, onFinish, onError) {
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", "/api/upload_chunked", true);
+    xhr.open("POST", "/api/upload_chunked?share=false", true);
 
     if (options.onProgress) {
         xhr.upload.onprogress = options.onProgress;

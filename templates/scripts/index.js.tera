@@ -406,10 +406,6 @@ function deleteFile(element, filePath, message, onComplete) {
                         var progressBar = document.getElementById("usage");
 
                         if (progressBar) {
-                            try {
-                                xhr.open("GET", "/api/upload", true);
-                            } catch (e) {}
-
                             sendRequest({
                                 method: "GET",
                                 url: "/api/upload",

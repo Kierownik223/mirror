@@ -42,7 +42,7 @@ Content-Disposition: form-data; name=\"path\"\r\n\r\n\
 ";
 
     let response = client
-        .post("/api/upload")
+        .post("/api/upload?share=false")
         .header(Header::new(
             "Content-Type",
             "multipart/form-data; boundary=TEST-BOUNDARY",

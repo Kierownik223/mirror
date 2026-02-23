@@ -117,7 +117,7 @@ function uploadViaAPI() {
                         formData.append("path", path);
 
                         var xhr = new XMLHttpRequest();
-                        xhr.open("POST", "/api/upload", true);
+                        xhr.open("POST", "/api/upload?share=false", true);
 
                         var startTime = new Date().getTime();
 
