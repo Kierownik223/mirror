@@ -680,32 +680,34 @@ fn sysinfo(token: Result<JWT, Status>) -> ApiResult {
     })))
 }
 
-#[post("/upload?<path>", data = "<data>")]
+#[post("/upload?<path>&<share>", data = "<data>")]
 async fn upload(
     content_type: &ContentType,
     data: Data<'_>,
     host: Host<'_>,
     path: Option<&str>,
+    share: Option<&str>,
     token: Result<JWT, Status>,
     sizes: &State<FileSizes>,
 ) -> ApiResult {
-    perform_upload(None, path, content_type, data, host, token, sizes).await
+    perform_upload(None, path, share, content_type, data, host, token, sizes).await
 }
 
-#[post("/upload?<path>", data = "<data>")]
+#[post("/upload?<path>&<share>", data = "<data>")]
 async fn upload_db(
     db: Connection<FileDb>,
     content_type: &ContentType,
     data: Data<'_>,
     host: Host<'_>,
     path: Option<&str>,
+    share: Option<&str>,
     token: Result<JWT, Status>,
     sizes: &State<FileSizes>,
 ) -> ApiResult {
-    perform_upload(Some(db), path, content_type, data, host, token, sizes).await
+    perform_upload(Some(db), path, share, content_type, data, host, token, sizes).await
 }
 
-async fn perform_upload(db: Option<Connection<FileDb>>, path: Option<&str>, content_type: &ContentType, data: Data<'_>, host: Host<'_>, token: Result<JWT, Status>, sizes: &State<FileSizes>) -> ApiResult {
+async fn perform_upload(db: Option<Connection<FileDb>>, path: Option<&str>, share: Option<&str>, content_type: &ContentType, data: Data<'_>, host: Host<'_>, token: Result<JWT, Status>, sizes: &State<FileSizes>) -> ApiResult {
     let token = token?;
 
     let max_size = CONFIG
@@ -824,6 +826,26 @@ async fn perform_upload(db: Option<Connection<FileDb>>, path: Option<&str>, cont
                     let mut state_lock = sizes.write().await;
                     *state_lock = refresh_file_sizes().await;
                 }
+                    
+                if let Some(db) = db {
+                    if match share.unwrap_or("true") {
+                        "true" => true,
+                        "false" => false,
+                        _ => true
+                    } {
+                        let result = add_shared_file(db, &format!("{}/{}", user_path, file_name)).await;
+
+                        if let Some(id) = result {
+                            uploaded_files.push(UploadFile {
+                                name: file_name.clone(),
+                                url: Some(format!("http://{}/share/{}", host.0, id)),
+                                icon: Some(get_icon(file_name)),
+                                error: None,
+                                size: Some(file.metadata().unwrap().len()),
+                            });
+                        }
+                    }
+                }
 
                 uploaded_files.push(UploadFile {
                     name: file_name.to_string(),
@@ -876,32 +898,34 @@ async fn upload_info(token: Result<JWT, Status>, sizes: &State<FileSizes>) -> Ap
     })))
 }
 
-#[post("/upload_chunked?<path>", data = "<data>")]
+#[post("/upload_chunked?<path>&<share>", data = "<data>")]
 async fn upload_chunked(
     path: Option<&str>,
+    share: Option<&str>,
     content_type: &ContentType,
     data: Data<'_>,
     host: Host<'_>,
     token: Result<JWT, Status>,
     sizes: &State<FileSizes>,
 ) -> ApiResult {
-    perform_upload_chunked(None, path, content_type, data, host, token, sizes).await
+    perform_upload_chunked(None, path, share, content_type, data, host, token, sizes).await
 }
 
-#[post("/upload_chunked?<path>", data = "<data>")]
+#[post("/upload_chunked?<path>&<share>", data = "<data>")]
 async fn upload_chunked_db(
     db: Connection<FileDb>,
     path: Option<&str>,
+    share: Option<&str>,
     content_type: &ContentType,
     data: Data<'_>,
     host: Host<'_>,
     token: Result<JWT, Status>,
     sizes: &State<FileSizes>,
 ) -> ApiResult {
-    perform_upload_chunked(Some(db), path, content_type, data, host, token, sizes).await
+    perform_upload_chunked(Some(db), path, share, content_type, data, host, token, sizes).await
 }
 
-async fn perform_upload_chunked(db: Option<Connection<FileDb>>, path: Option<&str>, content_type: &ContentType, data: Data<'_>, host: Host<'_>, token: Result<JWT, Status>, sizes: &State<FileSizes>) -> ApiResult {
+async fn perform_upload_chunked(db: Option<Connection<FileDb>>, path: Option<&str>, share: Option<&str>, content_type: &ContentType, data: Data<'_>, host: Host<'_>, token: Result<JWT, Status>, sizes: &State<FileSizes>) -> ApiResult {
     let token = token?;
 
     let options = MultipartFormDataOptions::with_multipart_form_data_fields(vec![
@@ -1037,6 +1061,26 @@ async fn perform_upload_chunked(db: Option<Connection<FileDb>>, path: Option<&st
     {
         let mut state_lock = sizes.write().await;
         *state_lock = refresh_file_sizes().await;
+    }
+
+    if let Some(db) = db {
+        if match share.unwrap_or("true") {
+            "true" => true,
+            "false" => false,
+            _ => true
+        } {
+            let result = add_shared_file(db, &format!("{}/{}", user_path, file_name)).await;
+
+            if let Some(id) = result {
+                return Ok(ApiResponse::UploadFiles(Json(vec![UploadFile {
+                    name: file_name.clone(),
+                    url: Some(format!("http://{}/share/{}", host.0, id)),
+                    icon: Some(get_icon(file_name)),
+                    error: None,
+                    size: Some(final_file.metadata().unwrap().len()),
+                }])))
+            }
+        }
     }
 
     Ok(ApiResponse::UploadFiles(Json(vec![UploadFile {
