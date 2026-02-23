@@ -1,8 +1,5 @@
 use std::{
-    fs::{self, create_dir, remove_dir, remove_dir_all, remove_file},
-    io::{Cursor, ErrorKind, Read, Write},
-    ops::Deref,
-    path::{Path, PathBuf},
+    fs::{self, create_dir, remove_dir, remove_dir_all, remove_file}, io::{Cursor, ErrorKind, Read, Write}, num::NonZero, ops::Deref, path::{Path, PathBuf}
 };
 
 use ::sysinfo::{Disks, RefreshKind, System};
@@ -871,6 +868,23 @@ async fn upload_chunked(
     token: Result<JWT, Status>,
     sizes: &State<FileSizes>,
 ) -> ApiResult {
+    perform_upload_chunked(None, path, content_type, data, host, token, sizes).await
+}
+
+#[post("/upload_chunked?<path>", data = "<data>")]
+async fn upload_chunked_db(
+    db: Connection<FileDb>,
+    path: Option<&str>,
+    content_type: &ContentType,
+    data: Data<'_>,
+    host: Host<'_>,
+    token: Result<JWT, Status>,
+    sizes: &State<FileSizes>,
+) -> ApiResult {
+    perform_upload_chunked(Some(db), path, content_type, data, host, token, sizes).await
+}
+
+async fn perform_upload_chunked(db: Option<Connection<FileDb>>, path: Option<&str>, content_type: &ContentType, data: Data<'_>, host: Host<'_>, token: Result<JWT, Status>, sizes: &State<FileSizes>) -> ApiResult {
     let token = token?;
 
     let options = MultipartFormDataOptions::with_multipart_form_data_fields(vec![
@@ -1087,7 +1101,6 @@ pub fn build_api() -> AdHoc {
                     sysinfo,
                     upload,
                     search,
-                    upload_chunked,
                     upload_info,
                     create_folder,
                 ],
@@ -1097,10 +1110,10 @@ pub fn build_api() -> AdHoc {
         if CONFIG.enable_file_db {
             rocket = rocket.mount(
                 "/api",
-                routes![file_with_downloads, share, delete_db, rename_db],
+                routes![file_with_downloads, share, delete_db, rename_db, upload_chunked_db],
             )
         } else {
-            rocket = rocket.mount("/api", routes![file, delete, rename])
+            rocket = rocket.mount("/api", routes![file, delete, rename, upload_chunked])
         }
 
         if CONFIG.enable_zip_downloads {
