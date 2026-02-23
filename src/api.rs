@@ -744,7 +744,7 @@ async fn perform_upload(db: Option<Connection<FileDb>>, path: Option<&str>, shar
         .unwrap_or("uploads".to_string());
 
     if user_path.is_empty() {
-        user_path = "uploads".to_string();
+        user_path = if token.claims.perms == 0 {"uploads"} else {"private"}.to_string();
     }
 
     if let Some(query_path) = path {
