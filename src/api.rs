@@ -1,5 +1,8 @@
 use std::{
-    fs::{self, create_dir, remove_dir, remove_dir_all, remove_file}, io::{Cursor, ErrorKind, Read, Write}, ops::Deref, path::{Path, PathBuf}
+    fs::{self, create_dir, remove_dir, remove_dir_all, remove_file},
+    io::{Cursor, ErrorKind, Read, Write},
+    ops::Deref,
+    path::{Path, PathBuf},
 };
 
 use ::sysinfo::{Disks, RefreshKind, System};
@@ -704,10 +707,29 @@ async fn upload_db(
     token: Result<JWT, Status>,
     sizes: &State<FileSizes>,
 ) -> ApiResult {
-    perform_upload(Some(db), path, share, content_type, data, host, token, sizes).await
+    perform_upload(
+        Some(db),
+        path,
+        share,
+        content_type,
+        data,
+        host,
+        token,
+        sizes,
+    )
+    .await
 }
 
-async fn perform_upload(db: Option<Connection<FileDb>>, path: Option<&str>, share: Option<&str>, content_type: &ContentType, data: Data<'_>, host: Host<'_>, token: Result<JWT, Status>, sizes: &State<FileSizes>) -> ApiResult {
+async fn perform_upload(
+    db: Option<Connection<FileDb>>,
+    path: Option<&str>,
+    share: Option<&str>,
+    content_type: &ContentType,
+    data: Data<'_>,
+    host: Host<'_>,
+    token: Result<JWT, Status>,
+    sizes: &State<FileSizes>,
+) -> ApiResult {
     let token = token?;
 
     let max_size = CONFIG
@@ -744,7 +766,12 @@ async fn perform_upload(db: Option<Connection<FileDb>>, path: Option<&str>, shar
         .unwrap_or(String::new());
 
     if user_path.is_empty() {
-        user_path = if token.claims.perms == 0 {"uploads"} else {"private"}.to_string();
+        user_path = if token.claims.perms == 0 {
+            "uploads"
+        } else {
+            "private"
+        }
+        .to_string();
     }
 
     if let Some(query_path) = path {
@@ -839,15 +866,17 @@ async fn perform_upload(db: Option<Connection<FileDb>>, path: Option<&str>, shar
                 continue;
             }
         }
-                    
+
         if let Some(db) = db {
             if match share.unwrap_or("true") {
                 "true" => true,
                 "false" => false,
-                _ => true
+                _ => true,
             } {
                 if uploaded_files.len() == 1 {
-                    let result = add_shared_file(db, &format!("{}/{}", user_path, uploaded_files[0].name)).await;
+                    let result =
+                        add_shared_file(db, &format!("{}/{}", user_path, uploaded_files[0].name))
+                            .await;
 
                     if let Some(id) = result {
                         uploaded_files[0].url = Some(format!("http://{}/share/{}", host.0, id));
@@ -918,10 +947,29 @@ async fn upload_chunked_db(
     token: Result<JWT, Status>,
     sizes: &State<FileSizes>,
 ) -> ApiResult {
-    perform_upload_chunked(Some(db), path, share, content_type, data, host, token, sizes).await
+    perform_upload_chunked(
+        Some(db),
+        path,
+        share,
+        content_type,
+        data,
+        host,
+        token,
+        sizes,
+    )
+    .await
 }
 
-async fn perform_upload_chunked(db: Option<Connection<FileDb>>, path: Option<&str>, share: Option<&str>, content_type: &ContentType, data: Data<'_>, host: Host<'_>, token: Result<JWT, Status>, sizes: &State<FileSizes>) -> ApiResult {
+async fn perform_upload_chunked(
+    db: Option<Connection<FileDb>>,
+    path: Option<&str>,
+    share: Option<&str>,
+    content_type: &ContentType,
+    data: Data<'_>,
+    host: Host<'_>,
+    token: Result<JWT, Status>,
+    sizes: &State<FileSizes>,
+) -> ApiResult {
     let token = token?;
 
     let options = MultipartFormDataOptions::with_multipart_form_data_fields(vec![
@@ -944,7 +992,12 @@ async fn perform_upload_chunked(db: Option<Connection<FileDb>>, path: Option<&st
         .unwrap_or(String::new());
 
     if user_path.is_empty() {
-        user_path = if token.claims.perms == 0 {"uploads"} else {"private"}.to_string();
+        user_path = if token.claims.perms == 0 {
+            "uploads"
+        } else {
+            "private"
+        }
+        .to_string();
     }
 
     if let Some(query_path) = path {
@@ -1063,7 +1116,7 @@ async fn perform_upload_chunked(db: Option<Connection<FileDb>>, path: Option<&st
         if match share.unwrap_or("true") {
             "true" => true,
             "false" => false,
-            _ => true
+            _ => true,
         } {
             let result = add_shared_file(db, &format!("{}/{}", user_path, file_name)).await;
 
@@ -1074,7 +1127,7 @@ async fn perform_upload_chunked(db: Option<Connection<FileDb>>, path: Option<&st
                     icon: Some(get_icon(file_name)),
                     error: None,
                     size: Some(final_file.metadata().unwrap().len()),
-                }])))
+                }])));
             }
         }
     }
@@ -1152,24 +1205,27 @@ pub fn build_api() -> AdHoc {
         rocket = rocket
             .mount(
                 "/api",
-                routes![
-                    index,
-                    listing,
-                    sysinfo,
-                    search,
-                    upload_info,
-                    create_folder,
-                ],
+                routes![index, listing, sysinfo, search, upload_info, create_folder,],
             )
             .register("/api", catchers![default]);
 
         if CONFIG.enable_file_db {
             rocket = rocket.mount(
                 "/api",
-                routes![file_with_downloads, share, delete_db, rename_db, upload_db, upload_chunked_db],
+                routes![
+                    file_with_downloads,
+                    share,
+                    delete_db,
+                    rename_db,
+                    upload_db,
+                    upload_chunked_db
+                ],
             )
         } else {
-            rocket = rocket.mount("/api", routes![file, delete, rename, upload, upload_chunked])
+            rocket = rocket.mount(
+                "/api",
+                routes![file, delete, rename, upload, upload_chunked],
+            )
         }
 
         if CONFIG.enable_zip_downloads {
