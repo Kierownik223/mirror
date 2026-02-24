@@ -874,9 +874,16 @@ async fn perform_upload(
                 _ => true,
             } {
                 if uploaded_files.len() == 1 {
-                    let result =
-                        add_shared_file(db, &format!("{}/{}", base_path.trim_start_matches("files/"), uploaded_files[0].name).replace("//", ""))
-                            .await;
+                    let result = add_shared_file(
+                        db,
+                        &format!(
+                            "{}/{}",
+                            base_path.trim_start_matches("files/"),
+                            uploaded_files[0].name
+                        )
+                        .replace("//", ""),
+                    )
+                    .await;
 
                     if let Some(id) = result {
                         uploaded_files[0].url = Some(format!("http://{}/share/{}", host.0, id));
@@ -1118,7 +1125,12 @@ async fn perform_upload_chunked(
             "false" => false,
             _ => true,
         } {
-            let result = add_shared_file(db, &format!("{}/{}", base_path.trim_start_matches("files/"), file_name).replace("//", "")).await;
+            let result = add_shared_file(
+                db,
+                &format!("{}/{}", base_path.trim_start_matches("files/"), file_name)
+                    .replace("//", ""),
+            )
+            .await;
 
             if let Some(id) = result {
                 return Ok(ApiResponse::UploadFiles(Json(vec![UploadFile {
