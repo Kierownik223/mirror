@@ -1,7 +1,11 @@
 {% extends "base" %}
 
 {% block content %}
-            <a href="/">MARMAK Mirror</a>/<a href="/upload">{{ strings.uploader }}</a><br>
+            <div class="controls">
+                <div class="title">
+                    <a href="/">MARMAK Mirror</a><span class="breadcrumbs">/<a href="/upload">{{ strings.uploader }}</a></span>
+                </div>
+            </div>
             {{ strings.welcome }}, {{ username }}!
             {%- if admin %}
             <br>

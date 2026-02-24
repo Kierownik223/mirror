@@ -1,6 +1,10 @@
 {% extends "base" %}
 
 {% block content %}
-<a href="/">MARMAK Mirror</a>/HTTP 403<br>
-{{ strings.error_403 }}
+            <div class="controls">
+                <div class="title">
+                    <a href="/">MARMAK Mirror</a><span class="breadcrumbs">/HTTP 403</span>
+                </div>
+            </div>
+            {{ strings.error_403 }}
 {% endblock content %}

@@ -1,8 +1,10 @@
 {% extends "base" %}
 
 {% block content %}
-            <div class="breadcrumb">
-                <a href="/">MARMAK Mirror</a>/<a href="/search">{{ strings.search_engine }}</a>
+            <div class="controls">
+                <div class="title">
+                    <a href="/">MARMAK Mirror</a><span class="breadcrumbs">/<a href="/search">{{ strings.search_engine }}</a></span>
+                </div>
             </div>
             <form method="get">
                 {%- if message %}

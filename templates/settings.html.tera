@@ -2,8 +2,8 @@
 
 {% block content %}
         <div class="controls">
-            <div class="breadcrumb">
-                <a href="/">MARMAK Mirror</a>/<a href="/settings">{{ strings.settings }}</a>
+            <div class="title">
+                <a href="/">MARMAK Mirror</a><span class="breadcrumbs">/<a href="/settings">{{ strings.settings }}</a></span>
             </div>
             <div class="actions">
                 <a href="/settings/reset"><span>{{ macros::icon(name="ui/settings", hires=settings.hires) }}{{ strings.reset_settings }}</span></a>

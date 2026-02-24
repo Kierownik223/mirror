@@ -1,6 +1,10 @@
 {% extends "base" %}
 
 {% block content %}
-<a href="/">MARMAK Mirror</a>/HTTP 500<br>
-{{ strings.error_50x }}
+            <div class="controls">
+                <div class="title">
+                    <a href="/">MARMAK Mirror</a><span class="breadcrumbs">/HTTP 500</span>
+                </div>
+            </div>
+            {{ strings.error_50x }}
 {% endblock content %}
