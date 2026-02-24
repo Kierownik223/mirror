@@ -1,7 +1,7 @@
 # File extensions to show the details page for
 extensions = ["exe", "cab", "appx", "xap", "appxbundle", "zip", "7z", "apk", "rar"]
 # File and directory names that will be hidden on any directory listing
-hidden_files = ["static", "uploads", "private", "robots.txt", "favicon.ico", "top", "RESTRICTED", "metadata", "HIDDEN"]
+hidden_files = ["uploads", "robots.txt", "favicon.ico", "RESTRICTED", "metadata", "HIDDEN"]
 # Enable login functionality (disable to run with no database)
 enable_login = true
 # Enable /api
