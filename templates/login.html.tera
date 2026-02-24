@@ -2,9 +2,9 @@
 
 {% block content %}
             <div class="controls">
-                <div class="title">
+                <span class="title">
                     <a href="/">MARMAK Mirror</a><span class="breadcrumbs">/<a href="/account/login">{{ strings.log_in }}</a></span>
-                </div>
+                </span>
             </div>
             {{ strings.log_in_with_marmak }}
             <form method="post">

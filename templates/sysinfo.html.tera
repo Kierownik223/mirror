@@ -2,9 +2,9 @@
 
 {% block content %}
             <div class="controls">
-                <div class="title">
+                <span class="title">
                     <a href="/">MARMAK Mirror</a><span class="breadcrumbs">/<a href="/admin/">{{ strings.admin }}</a>/<a href="/admin/sysinfo">{{ strings.sysinfo }}</a></span>
-                </div>
+                </span>
             </div>
             {{ strings.welcome }}, {{ username }}!
             <br>

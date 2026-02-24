@@ -2,9 +2,9 @@
 
 {% block content %}
         <div class="controls">
-            <div class="title">
+            <span class="title">
                 <a href="/">MARMAK Mirror</a><span class="breadcrumbs">/<a href="/settings">{{ strings.settings }}</a></span>
-            </div>
+            </span>
             <div class="actions">
                 <a href="/settings/reset"><span>{{ macros::icon(name="ui/settings", hires=settings.hires) }}{{ strings.reset_settings }}</span></a>
             </div>

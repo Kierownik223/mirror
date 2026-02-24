@@ -2,9 +2,9 @@
 
 {% block content %}
             <div class="controls">
-                <div class="title">
+                <span class="title">
                     <a href="/">MARMAK Mirror</a><span class="breadcrumbs">/HTTP 507</span>
-                </div>
+                </span>
             </div>
             {{ strings.not_enough_space }}
 {% endblock content %}

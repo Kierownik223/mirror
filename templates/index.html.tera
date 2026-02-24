@@ -9,9 +9,9 @@
                 </div>
                 {%- endif %}
                 <div id="uploadResults"></div>
-                <div class="title">
+                <span class="title">
                     <a href="/">MARMAK Mirror</a><span class="breadcrumbs">{{ macros::breadcrumbs_folder(path=path) }}</span>
-                </div>
+                </span>
                 {%- if admin and path != "/" or private %}
                 <div class="actions">
                     <a href="javascript:;" onclick="createFolder()"><span>{{ macros::icon(name="folder", hires=settings.hires) }}{{ strings.create_folder }}</span></a>

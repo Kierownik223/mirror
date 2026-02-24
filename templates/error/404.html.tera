@@ -2,9 +2,9 @@
 
 {% block content %}
             <div class="controls">
-                <div class="title">
+                <span class="title">
                     <a href="/">MARMAK Mirror</a><span class="breadcrumbs">/HTTP 404</span>
-                </div>
+                </span>
             </div>
             {{ strings.error_404 }}
 {% endblock content %}

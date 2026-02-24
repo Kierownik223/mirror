@@ -2,9 +2,9 @@
 
 {% block content %}
             <div class="controls">
-                <div class="title">
+                <span class="title">
                     <a href="/">MARMAK Mirror</a><span class="breadcrumbs">/<a href="/search">{{ strings.search_engine }}</a></span>
-                </div>
+                </span>
             </div>
             <form method="get">
                 {%- if message %}
