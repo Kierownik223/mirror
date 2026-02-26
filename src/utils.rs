@@ -176,6 +176,12 @@ pub fn is_restricted(path: &Path, is_logged_in: bool) -> bool {
     if !CONFIG.enable_login {
         return false;
     }
+    if path.ends_with("cover.png") ||
+       path.ends_with("cover.jpg") ||
+       path.ends_with("folder.png") ||
+       path.ends_with("folder.jpg") {
+        return false;
+    }
     let mut current = Some(path);
 
     while let Some(p) = current {
