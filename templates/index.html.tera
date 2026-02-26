@@ -42,7 +42,6 @@
                         <td><a href="../">{{ macros::icon(name="folder", hires=settings.hires) }}../</a></td>
                         <td class="hide-more">---</td>
                         <td class="hide">{{ strings.folder }}</td>
-                        {% if admin or private %}<td></td>{% endif %}
                     </tr>
                     {% endif -%}
 
