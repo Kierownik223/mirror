@@ -30,7 +30,10 @@
                         {{ macros::breadcrumbs(path=path) }}
                     </span>
                 </span>
-                <div class="actions"><a href="?download" id="download" download><span>{{ macros::icon(name="favicon", hires=settings.hires) }}{{ strings.download }}</span></a></div><br>
+                <div class="actions">
+                    <a href="?download" id="download" download><span>{{ macros::icon(name="favicon", hires=settings.hires) }}{{ strings.download }}</span></a>
+                </div>
+                <br>
                 <a href="./">{{ macros::icon(name="folder", hires=settings.hires) }}./</a>
             </div>
             <audio id="audio" src="?download" controls style="width: 100%;" poster="{{ poster }}">{{ strings.no_audio }}</audio>

@@ -7,7 +7,10 @@
                         {{ macros::breadcrumbs(path=path) }}
                     </span>
                 </span>
-                <div class="actions"><a href="?download" id="download" download><span>{{ macros::icon(name="favicon", hires=settings.hires) }}{{ strings.download }}</span></a></div><br>
+                <div class="actions">
+                    <a href="?download" id="download" download><span>{{ macros::icon(name="favicon", hires=settings.hires) }}{{ strings.download }}</span></a>
+                </div>
+                <br>
             </div>
             <table>
                 <tbody>
