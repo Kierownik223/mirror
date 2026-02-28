@@ -155,7 +155,7 @@ async fn poster(
     };
 
     let file_str = file.display().to_string();
-    let video_file_str = format!("/images/videoposters{}.jpg", file_str.replace("video/", ""));
+    let video_file_str = format!("files/images/videoposters/{}.jpg", file_str.replace("video/", ""));
     let video_path = Path::new(&video_file_str);
 
     if video_path.exists() {
