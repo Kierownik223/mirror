@@ -154,6 +154,18 @@ async fn poster(
         (Path::new("files/").join(&file), false)
     };
 
+    let file_str = file.display().to_string();
+    let video_file_str = format!("/images/videoposters{}.jpg", file_str.replace("video/", ""));
+    let video_path = Path::new(&video_file_str);
+
+    if video_path.exists() {
+        return open_file(
+            video_path.to_path_buf(),
+            &get_cache_control(is_private)
+        )
+        .await
+    }
+
     if let Ok(tag) = Tag::new().read_from_path(&path) {
         if let Some(picture) = tag.album_cover() {
             let mime_type = match picture.mime_type {
