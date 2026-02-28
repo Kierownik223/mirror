@@ -136,7 +136,7 @@ function updatePageMetadata(meta, newPath, push) {
             breadcrumbsEl;
     breadcrumbsEl = document.getElementsByClassName("breadcrumbs")[0];
 
-    video.poster = "/poster" + newPath;
+    video.poster = "/images/videoposters" + newPath.replace("video/", "") + ".jpg";
 
     if (window.navigator && navigator.mediaSession) {
         try {
@@ -144,7 +144,7 @@ function updatePageMetadata(meta, newPath, push) {
                 title: meta.title,
                 artwork: [
                     {
-                        src: "/poster" + newPath,
+                        src: "/images/videoposters" + newPath.replace("video/", "") + ".jpg",
                     },
                 ],
             });
