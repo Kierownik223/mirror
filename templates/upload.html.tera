@@ -19,7 +19,7 @@
                     {%- if s.name != "" %}
                     <div>
                         <div>
-                            <a href="{{ s.ext }}"><span>{{ macros::icon(name=s.icon, hires=settings.hires) }}{{ s.name }}</span></a> {{ strings.upload_success }} <a style="cursor: pointer;" onclick="deleteFile(this, '{{ s.ext }}')">{{ strings.delete }}</a>{% if config.linkshortener %} <a style="cursor: pointer;" onclick="shorten(this, 'http://{{ host }}{{ s.ext | urlencode }}')">{{ strings.shorten }}</a>{% endif %}
+                            <a href="{{ s.ext }}"><span>{{ macros::icon(name=s.icon, hires=settings.hires) }}{{ s.name }}</span></a> {{ strings.upload_success }} <a style="cursor: pointer;" onclick="deleteFile(this, '{{ s.ext }}')">{{ strings.delete }}</a>{% if config.linkshortener %} <a style="cursor: pointer;" onclick="share('{{ s.ext }}')">{{ strings.share }}</a>{% endif %}
                         </div>
                     </div>
                     {%- endif %}
