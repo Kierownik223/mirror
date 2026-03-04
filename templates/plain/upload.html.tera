@@ -10,11 +10,11 @@
 <a href="/uploads/">Uploads</a>
 {% endif %}
 <br>
-{% for s in uploadedfiles %}
-{% if s.name != "" %}
+{%- for s in uploadedfiles -%}
+{%- if s.name != "" -%}
 <a href="{{ s.ext }}">{{ s.name }}</a> {{ strings.upload_success }}<br>
-{% endif %}
-{% endfor %}
+{%- endif -%}
+{%- endfor -%}
 
 <form method="post" enctype="multipart/form-data">
     <label for="file">

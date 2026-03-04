@@ -16,11 +16,11 @@
 </form>
 <table>
     <tbody>
-        {% if results %}
-        {% for r in results %}
+        {%- if results -%}
+        {%- for r in results -%}
         <a href="{{ r.full_path | urlencode }}">{{ r.name }}</a><br>
-        {% endfor %}
-        {% endif %}
+        {%- endfor -%}
+        {%- endif -%}
     </tbody>
 </table>
 {% endblock content %}
