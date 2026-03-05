@@ -59,6 +59,13 @@ impl<'r> Responder<'r, 'r> for IndexResponse {
             IndexResponse::NamedFile(f, cache_control) => {
                 let mut res = f.respond_to(req)?;
                 res.set_raw_header("Cache-Control", cache_control);
+
+                if let Some(content_type) = res.headers().get_one("Content-Type") {
+                    if content_type.contains("text/html") {
+                        res.set_raw_header("Content-Type", "text/plain");
+                    }
+                }
+
                 Ok(res)
             }
             IndexResponse::Redirect(r) => r.respond_to(req),
