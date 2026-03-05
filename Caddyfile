@@ -38,6 +38,30 @@
 			header @appx Content-Type "application/appx"
 			header @appxbundle Content-Type "application/appxbundle"
 		}
+
+		# Carry over Content-Type from backend if sent
+		@content_type {
+			header Content-Type *
+			header X-Send-File *
+		}
+
+		handle_response @content_type {
+			# Change this path to reflect your configuration
+			root * /path/to/mirror
+
+			rewrite * /{rp.header.X-Send-File}
+			method * GET
+
+			header * Cache-Control {rp.header.Cache-Control}
+
+			file_server
+
+			# Extra support for Windows package files
+			header @xap Content-Type "application/x-silverlight-app"
+			header @appx Content-Type "application/appx"
+			header @appxbundle Content-Type "application/appxbundle"
+			header * Content-Type {rp.header.Content-Type}
+		}
 	}
 
 	# Allow direct
