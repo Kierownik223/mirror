@@ -3,13 +3,17 @@
 {% block content %}
 <span class="title">
     {{ strings.listening }} <span class="breadcrumbs">
+        {%- if share %}
+        {{ macros::breadcrumbs_nolink(path=path) }}
+        {% else %}
         {{ macros::breadcrumbs(path=path) }}
+        {%- endif %}
     </span>
 </span>
 &nbsp;
 <a href="?download" download>{{ strings.download }}</a><br>
 <hr>
-<a href="./">./</a>
+{% if not share %}<a href="./">./</a>{% endif %}
 <audio src="?download" controls style="width: 100%;" poster="/poster{{ path | urlencode }}">{{ strings.no_audio }}</audio>
 {%- if artist %}{{ artist }} - {% endif %}<b style="font-size: 24px;">{% if track %}{{ track }}. {% endif %}{{ audiotitle }}</b><br>
 {%- if album %}{{ strings.album }}: <b>{{ album }}</b><br>{% endif %}

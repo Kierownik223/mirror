@@ -4,14 +4,18 @@
 <div>
     <span class="title">
         {{ strings.watching }} <span class="breadcrumbs">
+            {%- if share %}
+            {{ macros::breadcrumbs_nolink(path=path) }}
+            {% else %}
             {{ macros::breadcrumbs(path=path) }}
+            {%- endif %}
         </span>
     </span>
     &nbsp;
     <a href="?download" download>{{ strings.download }}</a><br>
 </div>
 <hr>
-<a href="./">./</a>
+{% if not share %}<a href="./">./</a>{% endif %}
 <video src="?download" controls style="height: 60vh; width: 100%;" poster="{{ poster | urlencode }}">{{ strings.no_video }}</video>
 {% if displaydetails %}
 <b style="font-size: 24px;">{{ vidtitle }}</b>

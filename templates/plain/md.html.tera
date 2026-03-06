@@ -4,13 +4,17 @@
 <div>
     <span>
         {{ strings.reading_markdown }} <span>
+            {%- if share %}
+            {{ macros::breadcrumbs_nolink(path=path) }}
+            {% else %}
             {{ macros::breadcrumbs(path=path) }}
+            {%- endif %}
         </span>
     </span>
     &nbsp;
     <a href="?download" download>{{ strings.download }}</a><br>
 </div>
 <hr>
-<a href="./">./</a>
+{% if not share %}<a href="./">./</a>{% endif %}
 {{ markdown }}
 {% endblock content %}

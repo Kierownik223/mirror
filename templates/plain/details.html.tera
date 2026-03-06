@@ -4,14 +4,18 @@
 <div class="controls">
     <span class="title">
         {{ strings.reading_markdown }} <span class="breadcrumbs">
+            {%- if share %}
+            {{ macros::breadcrumbs_nolink(path=path) }}
+            {% else %}
             {{ macros::breadcrumbs(path=path) }}
+            {%- endif %}
         </span>
     </span>
     &nbsp;
     <a href="?download">{{ strings.download }}</a>
 </div>
 <hr>
-<a href="./">./</a>
+{% if not share %}<a href="./">./</a>{% endif %}
 <p><strong>{{ strings.file_name }}:</strong> {{ filename }}</p>
 <p><strong>{{ strings.file_size }}:</strong> {{ filesize | format_size(use_si=settings.use_si) }}</p>
 <a href="?download">{{ strings.download }}</a>

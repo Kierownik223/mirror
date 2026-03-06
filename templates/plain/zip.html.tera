@@ -4,14 +4,18 @@
 <div>
     <span>
         {{ strings.viewing_zip }} <span>
+            {%- if share %}
+            {{ macros::breadcrumbs_nolink(path=path) }}
+            {% else %}
             {{ macros::breadcrumbs(path=path) }}
+            {%- endif %}
         </span>
     </span>
     &nbsp;
     <a href="?download" download>{{ strings.download }}</a><br>
 </div>
 <hr>
-<a href="./">./</a><br>
+{% if not share %}<a href="./">./</a>{% endif %}<br>
 {% for s in files %}
 {{ s.name }}<br>
 {% endfor %}
