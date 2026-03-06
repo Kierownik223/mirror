@@ -155,15 +155,14 @@ async fn poster(
     };
 
     let file_str = file.display().to_string();
-    let video_file_str = format!("files/images/videoposters/{}.jpg", file_str.replace("video/", ""));
+    let video_file_str = format!(
+        "files/images/videoposters/{}.jpg",
+        file_str.replace("video/", "")
+    );
     let video_path = Path::new(&video_file_str);
 
     if video_path.exists() {
-        return open_file(
-            video_path.to_path_buf(),
-            &get_cache_control(is_private)
-        )
-        .await
+        return open_file(video_path.to_path_buf(), &get_cache_control(is_private)).await;
     }
 
     if let Ok(tag) = Tag::new().read_from_path(&path) {

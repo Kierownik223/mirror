@@ -8,10 +8,13 @@ use rocket::{
 use rocket_dyn_templates::Template;
 
 use crate::{
-    MirrorFile, Sysinfo, api::{
+    api::{
         ApiInfoResponse, MirrorFileWrapper, MusicFile, SearchFile, UploadFile, UploadLimits,
         VideoFile,
-    }, guards::HeaderFile, utils::get_extension_from_filename
+    },
+    guards::HeaderFile,
+    utils::get_extension_from_filename,
+    MirrorFile, Sysinfo,
 };
 
 pub struct Cached<R> {
@@ -68,7 +71,7 @@ impl<'r> Responder<'r, 'r> for IndexResponse {
                 }
 
                 Ok(res)
-            },
+            }
             IndexResponse::NamedFile(f, cache_control) => {
                 let mut res = f.respond_to(req)?;
                 res.set_raw_header("Cache-Control", cache_control);
