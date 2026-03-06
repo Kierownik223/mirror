@@ -5,7 +5,11 @@
                 <span class="title">
                     {{ strings.file_details }}
                     <span class="breadcrumbs">
+                        {%- if share %}
+                        {{ macros::breadcrumbs_nolink(path=path) }}
+                        {% else %}
                         {{ macros::breadcrumbs(path=path) }}
+                        {%- endif %}
                     </span>
                 </span>
                 <div class="actions">

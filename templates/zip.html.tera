@@ -4,7 +4,11 @@
             <div class="controls">
                 <span class="title">
                     {{ strings.viewing_zip }} <span class="breadcrumbs">
+                        {%- if share %}
+                        {{ macros::breadcrumbs_nolink(path=path) }}
+                        {% else %}
                         {{ macros::breadcrumbs(path=path) }}
+                        {%- endif %}
                     </span>
                 </span>
                 <div class="actions">
