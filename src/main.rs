@@ -91,6 +91,31 @@ impl Ord for MirrorFile {
     }
 }
 
+impl MirrorFile {
+    pub fn is_dir(&self) -> bool {
+        if self.ext == "folder" || self.ext == "privatefolder" {
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn create(path: &PathBuf) -> Option<Self> {
+        let md = fs::metadata(&path).ok()?;
+        let name = get_name_from_path(&path);
+        let ext = if md.is_file() { get_extension_from_path(&path) } else { "folder".into() };
+        let icon = get_icon(&get_name_from_path(&path));
+
+        Some(MirrorFile {
+            name,
+            ext,
+            icon,
+            size: md.len(),
+            downloads: None,
+        })
+    }
+}
+
 #[derive(serde::Serialize)]
 struct Disk {
     fs: String,

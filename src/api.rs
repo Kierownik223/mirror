@@ -228,22 +228,14 @@ async fn file_with_downloads(
     let path = get_real_path(&file, username.to_string())?.0;
     let file = file.display().to_string();
 
-    if !&path.exists() {
-        return Err(Status::NotFound);
-    }
+    let mut mirror_file = MirrorFile::create(&path).ok_or(Status::NotFound)?;
+    mirror_file.downloads = get_downloads(db, &file).await;
 
-    let md = fs::metadata(&path).map_err(|_| Status::InternalServerError)?;
-
-    if md.is_dir() {
+    if mirror_file.is_dir() {
         return Err(Status::NotAcceptable);
     }
 
-    let name = get_name_from_path(&path);
-    let downloads = get_downloads(db, &file).await.unwrap_or(0);
-    let ext = get_extension_from_path(&path);
-    let icon = get_icon(&get_name_from_path(&path));
-
-    if ext == "mp3" || ext == "m4a" || ext == "m4b" || ext == "flac" {
+    if mirror_file.ext == "mp3" || mirror_file.ext == "m4a" || mirror_file.ext == "m4b" || mirror_file.ext == "flac" {
         if let Ok(tag) = Tag::new().read_from_path(&path) {
             let title = tag
                 .title()
@@ -259,13 +251,7 @@ async fn file_with_downloads(
             let cover = tag.album_cover().is_some();
 
             return Ok(ApiResponse::MusicFile(Json(MusicFile {
-                file: Some(MirrorFile {
-                    name,
-                    ext,
-                    icon: icon.to_string(),
-                    size: md.len(),
-                    downloads: Some(downloads),
-                }),
+                file: Some(mirror_file),
                 title,
                 album,
                 artist,
@@ -277,7 +263,7 @@ async fn file_with_downloads(
         }
     }
 
-    if ext == "mp4" || ext == "mkv" || ext == "webm" {
+    if mirror_file.ext == "mp4" || mirror_file.ext == "mkv" || mirror_file.ext == "webm" {
         let videopath = Path::new("/").join(file.clone()).display().to_string();
         let videopath = videopath.as_str();
 
@@ -307,26 +293,14 @@ async fn file_with_downloads(
         };
 
         return Ok(ApiResponse::VideoFile(Json(VideoFile {
-            file: Some(MirrorFile {
-                name,
-                ext,
-                icon: icon.to_string(),
-                size: md.len(),
-                downloads: Some(downloads),
-            }),
+            file: Some(mirror_file),
             title: vidtitle,
             description: details,
         })));
     }
 
     Ok(ApiResponse::File(Json(MirrorFileWrapper {
-        file: MirrorFile {
-            name,
-            ext,
-            icon: icon.to_string(),
-            size: md.len(),
-            downloads: Some(downloads),
-        },
+        file: mirror_file,
     })))
 }
 
@@ -339,21 +313,13 @@ async fn file(file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
 
     let path = get_real_path(&file, username.to_string())?.0;
 
-    if !&path.exists() {
-        return Err(Status::NotFound);
-    }
+    let mirror_file = MirrorFile::create(&path).ok_or(Status::NotFound)?;
 
-    let md = fs::metadata(&path).map_err(|_| Status::InternalServerError)?;
-
-    if md.is_dir() {
+    if mirror_file.is_dir() {
         return Err(Status::NotAcceptable);
     }
 
-    let ext = get_extension_from_path(&path);
-
-    let icon = get_icon(&get_name_from_path(&path));
-
-    if ext == "mp3" || ext == "m4a" || ext == "m4b" || ext == "flac" {
+    if mirror_file.ext == "mp3" || mirror_file.ext == "m4a" || mirror_file.ext == "m4b" || mirror_file.ext == "flac" {
         if let Ok(tag) = Tag::new().read_from_path(&path) {
             let title = tag
                 .title()
@@ -369,13 +335,7 @@ async fn file(file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
             let cover = tag.album_cover().is_some();
 
             return Ok(ApiResponse::MusicFile(Json(MusicFile {
-                file: Some(MirrorFile {
-                    name: get_name_from_path(&path),
-                    ext,
-                    icon: icon.to_string(),
-                    size: md.len(),
-                    downloads: None,
-                }),
+                file: Some(mirror_file),
                 title,
                 album,
                 artist,
@@ -387,28 +347,16 @@ async fn file(file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
         }
     }
 
-    if ext == "mp4" || ext == "mkv" || ext == "webm" {
+    if mirror_file.ext == "mp4" || mirror_file.ext == "mkv" || mirror_file.ext == "webm" {
         let videopath = Path::new("/").join(file.clone()).display().to_string();
         return Ok(ApiResponse::VideoFile(Json(get_video_metadata(
             &videopath,
-            Some(MirrorFile {
-                name: get_name_from_path(&path),
-                ext,
-                icon: icon.to_string(),
-                size: md.len(),
-                downloads: None,
-            }),
+            Some(mirror_file),
         ))));
     }
 
     Ok(ApiResponse::File(Json(MirrorFileWrapper {
-        file: MirrorFile {
-            name: get_name_from_path(&path),
-            ext,
-            icon,
-            size: md.len(),
-            downloads: None,
-        },
+        file: mirror_file,
     })))
 }
 
@@ -454,22 +402,10 @@ async fn perform_rename(
 
     fs::rename(&path, &new_path).map_err(map_io_error_to_status)?;
 
-    let md = fs::metadata(&new_path).map_err(map_io_error_to_status)?;
-
-    let icon = if md.is_dir() {
-        "folder"
-    } else {
-        &get_icon(&get_name_from_path(&new_path))
-    };
+    let mirror_file = MirrorFile::create(&new_path).ok_or(Status::NotFound)?;
 
     Ok(ApiResponse::File(Json(MirrorFileWrapper {
-        file: MirrorFile {
-            name: get_name_from_path(&new_path),
-            ext: get_extension_from_path(&new_path),
-            icon: icon.into(),
-            size: md.len(),
-            downloads: None,
-        },
+        file: mirror_file,
     })))
 }
 
