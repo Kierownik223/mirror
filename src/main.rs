@@ -91,6 +91,18 @@ impl Ord for MirrorFile {
     }
 }
 
+impl Default for MirrorFile {
+    fn default() -> Self {
+        MirrorFile {
+            name: "".into(),
+            ext: "".into(),
+            icon: "default".into(),
+            size: 0,
+            downloads: None,
+        }
+    }
+}
+
 impl MirrorFile {
     pub fn is_dir(&self) -> bool {
         if self.ext == "folder" || self.ext == "privatefolder" {
@@ -1342,7 +1354,7 @@ fn uploader(
             username: token.claims.sub,
             admin: token.claims.perms == 0,
             path: path.unwrap_or_default(),
-            uploadedfiles: vec![MirrorFile { name: "".to_string(), ext: "".to_string(), icon: "default".to_string(), size: 0, downloads: None }],
+            uploadedfiles: vec![MirrorFile::default()],
             max_size: CONFIG.max_upload_sizes.get(&token.claims.perms.to_string()).unwrap_or(&(104857600 as u64)),
             settings,
             version: env!("CARGO_PKG_VERSION").to_string(),
