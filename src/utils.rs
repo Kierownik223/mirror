@@ -32,9 +32,8 @@ pub fn read_dirs(path: &str) -> Result<Vec<MirrorFile>, Error> {
 
     for file_path in paths {
         let file_path = file_path?;
-        let md = fs::metadata(file_path.path())?;
 
-        if md.is_dir() {
+        if file_path.path().is_dir() {
             if let Some(file_name) = file_path.file_name().to_str() {
                 dir_list.push(MirrorFile::new_folder(file_name));
             }
@@ -59,9 +58,8 @@ pub async fn read_dirs_async(
 
     'main: for file_path in paths {
         let file_path = file_path?;
-        let metadata = fs::metadata(file_path.path())?;
 
-        if metadata.is_dir() {
+        if file_path.path().is_dir() {
             let full_path = file_path.path();
 
             let subdir_paths = match fs::read_dir(&full_path) {
@@ -118,9 +116,8 @@ pub fn read_files(path: &str) -> Result<Vec<MirrorFile>, Error> {
 
     for file_path in paths {
         let file_path = file_path?;
-        let md = fs::metadata(file_path.path())?;
 
-        if md.is_file() {
+        if file_path.path().is_file() {
             if let Some(file) = MirrorFile::load(&file_path.path()) {
                 file_list.push(file);
             } else {
