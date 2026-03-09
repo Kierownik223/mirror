@@ -343,7 +343,7 @@ pub fn parse_7z_output(output: &str) -> Vec<MirrorFile> {
             if size == 0 {
                 continue;
             }
-            
+
             let mut mirror_file = MirrorFile::new(&filename);
             mirror_file.size = size;
 

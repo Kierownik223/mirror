@@ -27,7 +27,6 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::{responders::{Cached, IndexResponse, IndexResult}, utils::get_extension_from_filename};
 use crate::utils::{
     format_size_filter, get_cache_control, get_extension_from_path, get_genre, get_name_from_path,
     get_real_path, get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output,
@@ -50,6 +49,10 @@ use crate::{
 use crate::{
     i18n::{Language, TranslationStore},
     utils::get_video_metadata,
+};
+use crate::{
+    responders::{Cached, IndexResponse, IndexResult},
+    utils::get_extension_from_filename,
 };
 
 mod account;
@@ -115,7 +118,11 @@ impl MirrorFile {
     pub fn load(path: &PathBuf) -> Option<Self> {
         let md = fs::metadata(&path).ok()?;
         let name = get_name_from_path(&path);
-        let ext = if md.is_file() { get_extension_from_path(&path) } else { "folder".into() };
+        let ext = if md.is_file() {
+            get_extension_from_path(&path)
+        } else {
+            "folder".into()
+        };
         let icon = get_icon(&get_name_from_path(&path));
 
         Some(MirrorFile {
@@ -1481,31 +1488,29 @@ async fn upload(
                             let _ = file.write_all(&buffer);
 
                             if token.claims.perms == 0 {
-                                let mut mirror_file = MirrorFile::load(&Path::new(&upload_path).to_path_buf()).unwrap_or(MirrorFile::new(&file_name));
+                                let mut mirror_file =
+                                    MirrorFile::load(&Path::new(&upload_path).to_path_buf())
+                                        .unwrap_or(MirrorFile::new(&file_name));
                                 mirror_file.ext = format!(
-                                        "/{}/{}",
-                                        user_path,
-                                        get_name_from_path(
-                                            &Path::new(&normalized_path).to_path_buf()
-                                        )
-                                    );
-
+                                    "/{}/{}",
+                                    user_path,
+                                    get_name_from_path(&Path::new(&normalized_path).to_path_buf())
+                                );
 
                                 uploaded_files.push(mirror_file);
                             } else {
-                                let mut mirror_file = MirrorFile::load(&Path::new(&upload_path).to_path_buf()).unwrap_or(MirrorFile::new(&file_name));
+                                let mut mirror_file =
+                                    MirrorFile::load(&Path::new(&upload_path).to_path_buf())
+                                        .unwrap_or(MirrorFile::new(&file_name));
                                 mirror_file.ext = format!(
-                                        "/{}/{}",
-                                        user_path.replacen(
-                                            format!("/{}", &token.claims.sub).as_str(),
-                                            "",
-                                            1
-                                        ),
-                                        get_name_from_path(
-                                            &Path::new(&normalized_path).to_path_buf()
-                                        )
-                                    );
-
+                                    "/{}/{}",
+                                    user_path.replacen(
+                                        format!("/{}", &token.claims.sub).as_str(),
+                                        "",
+                                        1
+                                    ),
+                                    get_name_from_path(&Path::new(&normalized_path).to_path_buf())
+                                );
 
                                 uploaded_files.push(mirror_file);
                             }
