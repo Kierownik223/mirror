@@ -27,7 +27,7 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::responders::{Cached, IndexResponse, IndexResult};
+use crate::{responders::{Cached, IndexResponse, IndexResult}, utils::get_extension_from_filename};
 use crate::utils::{
     format_size_filter, get_cache_control, get_extension_from_path, get_genre, get_name_from_path,
     get_real_path, get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output,
@@ -100,7 +100,7 @@ impl MirrorFile {
         }
     }
 
-    pub fn create(path: &PathBuf) -> Option<Self> {
+    pub fn load(path: &PathBuf) -> Option<Self> {
         let md = fs::metadata(&path).ok()?;
         let name = get_name_from_path(&path);
         let ext = if md.is_file() { get_extension_from_path(&path) } else { "folder".into() };
@@ -113,6 +113,19 @@ impl MirrorFile {
             size: md.len(),
             downloads: None,
         })
+    }
+
+    pub fn new(file_name: &str) -> Self {
+        let ext = get_extension_from_filename(file_name).unwrap_or_default();
+        let icon = get_icon(file_name);
+
+        MirrorFile {
+            name: file_name.into(),
+            ext: ext.into(),
+            icon,
+            size: 0,
+            downloads: None,
+        }
     }
 }
 
@@ -1444,26 +1457,22 @@ async fn upload(
                             let _ = temp_file.read_to_end(&mut buffer);
 
                             let _ = file.write_all(&buffer);
-                            let icon = get_icon(&file_name);
 
                             if token.claims.perms == 0 {
-                                uploaded_files.push(MirrorFile {
-                                    name: file_name,
-                                    ext: format!(
+                                let mut mirror_file = MirrorFile::load(&Path::new(&upload_path).to_path_buf()).unwrap_or(MirrorFile::new(&file_name));
+                                mirror_file.ext = format!(
                                         "/{}/{}",
                                         user_path,
                                         get_name_from_path(
                                             &Path::new(&normalized_path).to_path_buf()
                                         )
-                                    ),
-                                    size: 0,
-                                    icon: icon,
-                                    downloads: None,
-                                });
+                                    );
+
+
+                                uploaded_files.push(mirror_file);
                             } else {
-                                uploaded_files.push(MirrorFile {
-                                    name: file_name,
-                                    ext: format!(
+                                let mut mirror_file = MirrorFile::load(&Path::new(&upload_path).to_path_buf()).unwrap_or(MirrorFile::new(&file_name));
+                                mirror_file.ext = format!(
                                         "/{}/{}",
                                         user_path.replacen(
                                             format!("/{}", &token.claims.sub).as_str(),
@@ -1473,11 +1482,10 @@ async fn upload(
                                         get_name_from_path(
                                             &Path::new(&normalized_path).to_path_buf()
                                         )
-                                    ),
-                                    size: 0,
-                                    icon: icon,
-                                    downloads: None,
-                                });
+                                    );
+
+
+                                uploaded_files.push(mirror_file);
                             }
                         } else {
                             eprintln!("Failed to open temp file for: {}", file_name);

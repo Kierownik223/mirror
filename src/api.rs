@@ -228,7 +228,7 @@ async fn file_with_downloads(
     let path = get_real_path(&file, username.to_string())?.0;
     let file = file.display().to_string();
 
-    let mut mirror_file = MirrorFile::create(&path).ok_or(Status::NotFound)?;
+    let mut mirror_file = MirrorFile::load(&path).ok_or(Status::NotFound)?;
     mirror_file.downloads = get_downloads(db, &file).await;
 
     if mirror_file.is_dir() {
@@ -313,7 +313,7 @@ async fn file(file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
 
     let path = get_real_path(&file, username.to_string())?.0;
 
-    let mirror_file = MirrorFile::create(&path).ok_or(Status::NotFound)?;
+    let mirror_file = MirrorFile::load(&path).ok_or(Status::NotFound)?;
 
     if mirror_file.is_dir() {
         return Err(Status::NotAcceptable);
@@ -402,7 +402,7 @@ async fn perform_rename(
 
     fs::rename(&path, &new_path).map_err(map_io_error_to_status)?;
 
-    let mirror_file = MirrorFile::create(&new_path).ok_or(Status::NotFound)?;
+    let mirror_file = MirrorFile::load(&new_path).ok_or(Status::NotFound)?;
 
     Ok(ApiResponse::File(Json(MirrorFileWrapper {
         file: mirror_file,
