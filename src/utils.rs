@@ -98,6 +98,7 @@ pub async fn read_dirs_async(
 
             if let Some(file_name) = file_path.file_name().to_str() {
                 let mut mirror_file = MirrorFile::new_folder(file_name);
+                mirror_file.icon = icon.into();
                 mirror_file.size = folder_size;
                 dir_list.push(mirror_file);
             }
