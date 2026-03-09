@@ -36,15 +36,7 @@ pub fn read_dirs(path: &str) -> Result<Vec<MirrorFile>, Error> {
 
         if md.is_dir() {
             if let Some(file_name) = file_path.file_name().to_str() {
-                let file: MirrorFile = MirrorFile {
-                    name: file_name.to_owned(),
-                    ext: "folder".to_string(),
-                    icon: "folder".to_string(),
-                    size: 0,
-                    downloads: None,
-                };
-
-                dir_list.push(file);
+                dir_list.push(MirrorFile::new_folder(file_name));
             }
         }
     }
@@ -105,13 +97,9 @@ pub async fn read_dirs_async(
                 .unwrap_or(0);
 
             if let Some(file_name) = file_path.file_name().to_str() {
-                dir_list.push(MirrorFile {
-                    name: file_name.to_string(),
-                    ext: "folder".to_string(),
-                    icon: icon.to_string(),
-                    size: folder_size,
-                    downloads: None,
-                });
+                let mut mirror_file = MirrorFile::new_folder(file_name);
+                mirror_file.size = folder_size;
+                dir_list.push(mirror_file);
             }
         }
     }
@@ -132,22 +120,10 @@ pub fn read_files(path: &str) -> Result<Vec<MirrorFile>, Error> {
         let md = fs::metadata(file_path.path())?;
 
         if md.is_file() {
-            if let Some(file_name) = file_path.file_name().to_str() {
-                let ext = get_extension_from_filename(file_name)
-                    .unwrap_or_else(|| "")
-                    .to_lowercase();
-
-                let icon = get_icon(file_name);
-
-                let file: MirrorFile = MirrorFile {
-                    name: file_name.to_owned(),
-                    ext: ext.to_string(),
-                    icon: icon.to_string(),
-                    size: md.len(),
-                    downloads: None,
-                };
-
+            if let Some(file) = MirrorFile::load(&file_path.path()) {
                 file_list.push(file);
+            } else {
+                continue;
             }
         }
     }
@@ -366,20 +342,11 @@ pub fn parse_7z_output(output: &str) -> Vec<MirrorFile> {
             if size == 0 {
                 continue;
             }
+            
+            let mut mirror_file = MirrorFile::new(&filename);
+            mirror_file.size = size;
 
-            let name = filename.to_string();
-
-            let icon = get_icon(&filename);
-
-            files.push(MirrorFile {
-                name,
-                ext: get_extension_from_filename(&filename)
-                    .unwrap_or_default()
-                    .into(),
-                icon,
-                size,
-                downloads: None,
-            });
+            files.push(mirror_file);
         }
     }
 

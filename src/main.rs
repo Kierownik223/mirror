@@ -139,6 +139,16 @@ impl MirrorFile {
             downloads: None,
         }
     }
+
+    pub fn new_folder(file_name: &str) -> Self {
+        MirrorFile {
+            name: file_name.into(),
+            ext: "folder".into(),
+            icon: "folder".into(),
+            size: 0,
+            downloads: None,
+        }
+    }
 }
 
 #[derive(serde::Serialize)]
