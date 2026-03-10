@@ -60,7 +60,7 @@ pub struct UploadFile {
 
 #[derive(serde::Serialize)]
 pub struct MusicFile {
-    file: Option<MirrorFile>,
+    file: MirrorFile,
     title: String,
     album: Option<String>,
     artist: Option<String>,
@@ -72,7 +72,7 @@ pub struct MusicFile {
 
 #[derive(serde::Serialize)]
 pub struct VideoFile {
-    pub file: Option<MirrorFile>,
+    pub file: MirrorFile,
     pub title: String,
     pub description: Option<String>,
 }
@@ -255,7 +255,7 @@ async fn file_with_downloads(
             let cover = tag.album_cover().is_some();
 
             return Ok(ApiResponse::MusicFile(Json(MusicFile {
-                file: Some(mirror_file),
+                file: mirror_file,
                 title,
                 album,
                 artist,
@@ -297,7 +297,7 @@ async fn file_with_downloads(
         };
 
         return Ok(ApiResponse::VideoFile(Json(VideoFile {
-            file: Some(mirror_file),
+            file: mirror_file,
             title: vidtitle,
             description: details,
         })));
@@ -343,7 +343,7 @@ async fn file(file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
             let cover = tag.album_cover().is_some();
 
             return Ok(ApiResponse::MusicFile(Json(MusicFile {
-                file: Some(mirror_file),
+                file: mirror_file,
                 title,
                 album,
                 artist,
