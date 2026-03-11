@@ -234,8 +234,8 @@ async fn display_file(db: Option<Connection<FileDb>>, path: PathBuf, token: Resu
         Err(_) => &"Nobody".into(),
     };
 
+    let file = path.display().to_string();
     let path = get_real_path(&path, username.to_string())?.0;
-    let file = file.display().to_string();
 
     let mut mirror_file = MirrorFile::load(&path).ok_or(Status::NotFound)?;
     if let Some(db) = db {
@@ -280,38 +280,8 @@ async fn display_file(db: Option<Connection<FileDb>>, path: PathBuf, token: Resu
 
     if mirror_file.ext == "mp4" || mirror_file.ext == "mkv" || mirror_file.ext == "webm" {
         let videopath = Path::new("/").join(file.clone()).display().to_string();
-        let videopath = videopath.as_str();
 
-        let mdpath = format!("files/video/metadata{}.md", videopath.replace("video/", ""));
-        let mdpath = Path::new(mdpath.as_str());
-
-        let vidtitle = path.file_name();
-        let vidtitle = vidtitle.unwrap_or_default().to_str();
-        let mut vidtitle = vidtitle.unwrap_or("title").to_string();
-
-        let details = if mdpath.exists() {
-            let markdown_text = fs::read_to_string(mdpath.display().to_string())
-                .unwrap_or_else(|err| err.to_string());
-            let mut lines = markdown_text.lines();
-
-            vidtitle = lines
-                .next()
-                .unwrap_or("")
-                .trim_start_matches('#')
-                .trim()
-                .to_string();
-            let markdown = lines.collect::<Vec<&str>>().join("\n");
-
-            Some(markdown::to_html(&markdown))
-        } else {
-            None
-        };
-
-        return Ok(ApiResponse::VideoFile(Json(VideoFile {
-            file: mirror_file,
-            title: vidtitle,
-            description: details,
-        })));
+        return Ok(ApiResponse::VideoFile(Json(get_video_metadata(&videopath, Some(mirror_file)))));
     }
 
     Ok(ApiResponse::File(Json(MirrorFileWrapper {

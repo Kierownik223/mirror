@@ -531,7 +531,7 @@ pub fn get_video_metadata(path: &str, file: Option<MirrorFile>) -> VideoFile {
     };
 
     VideoFile {
-        file,
+        file: file.unwrap_or_default(),
         title: vidtitle,
         description: details,
     }
