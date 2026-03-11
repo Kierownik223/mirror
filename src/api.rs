@@ -220,16 +220,27 @@ async fn file_with_downloads(
     file: PathBuf,
     token: Result<JWT, Status>,
 ) -> ApiResult {
+    display_file(Some(db), file, token).await
+}
+
+#[get("/<file..>", rank = 1)]
+async fn file(file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
+    display_file(None, file, token).await
+}
+
+async fn display_file(db: Option<Connection<FileDb>>, path: PathBuf, token: Result<JWT, Status>) -> ApiResult {
     let username = match token.as_ref() {
         Ok(token) => &token.claims.sub,
         Err(_) => &"Nobody".into(),
     };
 
-    let path = get_real_path(&file, username.to_string())?.0;
+    let path = get_real_path(&path, username.to_string())?.0;
     let file = file.display().to_string();
 
     let mut mirror_file = MirrorFile::load(&path).ok_or(Status::NotFound)?;
-    mirror_file.downloads = get_downloads(db, &file).await;
+    if let Some(db) = db {
+        mirror_file.downloads = get_downloads(db, &file).await;
+    }
 
     if mirror_file.is_dir() {
         return Err(Status::NotAcceptable);
@@ -301,66 +312,6 @@ async fn file_with_downloads(
             title: vidtitle,
             description: details,
         })));
-    }
-
-    Ok(ApiResponse::File(Json(MirrorFileWrapper {
-        file: mirror_file,
-    })))
-}
-
-#[get("/<file..>", rank = 1)]
-async fn file(file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
-    let username = match token.as_ref() {
-        Ok(token) => &token.claims.sub,
-        Err(_) => &"Nobody".into(),
-    };
-
-    let path = get_real_path(&file, username.to_string())?.0;
-
-    let mirror_file = MirrorFile::load(&path).ok_or(Status::NotFound)?;
-
-    if mirror_file.is_dir() {
-        return Err(Status::NotAcceptable);
-    }
-
-    if mirror_file.ext == "mp3"
-        || mirror_file.ext == "m4a"
-        || mirror_file.ext == "m4b"
-        || mirror_file.ext == "flac"
-    {
-        if let Ok(tag) = Tag::new().read_from_path(&path) {
-            let title = tag
-                .title()
-                .map(|s| s.to_string())
-                .unwrap_or(get_name_from_path(&path));
-
-            let artist = tag.artist().map(|s| s.replace("\x00", "/"));
-            let album = tag.album_title().map(|s| s.to_string());
-            let genre = tag.genre().map(|s| get_genre(s).unwrap_or(s.to_string()));
-            let year = tag.year();
-            let track = tag.track_number();
-
-            let cover = tag.album_cover().is_some();
-
-            return Ok(ApiResponse::MusicFile(Json(MusicFile {
-                file: mirror_file,
-                title,
-                album,
-                artist,
-                year,
-                genre,
-                track,
-                cover,
-            })));
-        }
-    }
-
-    if mirror_file.ext == "mp4" || mirror_file.ext == "mkv" || mirror_file.ext == "webm" {
-        let videopath = Path::new("/").join(file.clone()).display().to_string();
-        return Ok(ApiResponse::VideoFile(Json(get_video_metadata(
-            &videopath,
-            Some(mirror_file),
-        ))));
     }
 
     Ok(ApiResponse::File(Json(MirrorFileWrapper {
