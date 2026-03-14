@@ -228,7 +228,11 @@ async fn file(file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
     display_file(None, file, token).await
 }
 
-async fn display_file(db: Option<Connection<FileDb>>, path: PathBuf, token: Result<JWT, Status>) -> ApiResult {
+async fn display_file(
+    db: Option<Connection<FileDb>>,
+    path: PathBuf,
+    token: Result<JWT, Status>,
+) -> ApiResult {
     let username = match token.as_ref() {
         Ok(token) => &token.claims.sub,
         Err(_) => &"Nobody".into(),
@@ -281,7 +285,10 @@ async fn display_file(db: Option<Connection<FileDb>>, path: PathBuf, token: Resu
     if mirror_file.ext == "mp4" || mirror_file.ext == "mkv" || mirror_file.ext == "webm" {
         let videopath = Path::new("/").join(file.clone()).display().to_string();
 
-        return Ok(ApiResponse::VideoFile(Json(get_video_metadata(&videopath, Some(mirror_file)))));
+        return Ok(ApiResponse::VideoFile(Json(get_video_metadata(
+            &videopath,
+            Some(mirror_file),
+        ))));
     }
 
     Ok(ApiResponse::File(Json(MirrorFileWrapper {
