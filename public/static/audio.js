@@ -161,7 +161,7 @@ function updatePageMetadata(meta, newPath, coverFile, push) {
     if (window.navigator && navigator.mediaSession) {
         try {
             navigator.mediaSession.metadata = new MediaMetadata({
-                title: meta.title,
+                title: meta.title || decodeURIComponent(newPath.split("/").pop()),
                 artist: meta.artist,
                 album: meta.album,
                 artwork: [
