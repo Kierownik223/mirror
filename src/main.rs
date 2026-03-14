@@ -680,7 +680,7 @@ async fn display_file(
             if let Ok(tag) = Tag::new().read_from_path(&path) {
                 let audiotitle = tag
                     .title()
-                    .map(|s| s.to_string())
+                    .map(|s| if s.is_empty() { get_name_from_path(&path) } else { s.to_string() })
                     .unwrap_or(get_name_from_path(&path));
 
                 let artist = tag.artist().map(|s| s.replace("\x00", "/"));
