@@ -6,7 +6,7 @@ use rocket::{
     time::{Duration, OffsetDateTime},
     Data, Request, State,
 };
-use rocket_db_pools::{Connection, Database};
+use rocket_db_pools::{Connection, Database, sqlx::{self, Row}};
 use rocket_multipart_form_data::{
     MultipartFormData, MultipartFormDataField, MultipartFormDataOptions, Repetition,
 };
@@ -37,7 +37,7 @@ use crate::{
     config::CONFIG,
     utils::{get_icon, get_virtual_path, is_hidden_path_str},
 };
-use crate::{db::get_file_by_id, jwt::JWT};
+use crate::jwt::JWT;
 use crate::{
     db::{add_download, FileDb},
     utils::get_static_cache_control,
@@ -78,6 +78,7 @@ pub struct MirrorFile {
     icon: String,
     size: u64,
     downloads: Option<i32>,
+    path: Option<String>
 }
 
 impl Eq for MirrorFile {}
@@ -102,6 +103,7 @@ impl Default for MirrorFile {
             icon: "default".into(),
             size: 0,
             downloads: None,
+            path: None,
         }
     }
 }
@@ -131,7 +133,29 @@ impl MirrorFile {
             icon,
             size: md.len(),
             downloads: None,
+            path: Some(path.display().to_string().replacen("files/", "/", 1)),
         })
+    }
+
+    pub async fn get_by_id(mut db: Connection<FileDb>, id: &str) -> Option<Self> {
+        let query_result = sqlx::query("SELECT path FROM files WHERE id = ?")
+            .bind(id)
+            .fetch_one(&mut **db)
+            .await;
+
+        match query_result {
+            Ok(row) => {
+                if let Some(path) = row.try_get::<String, _>("path").ok() {
+                    MirrorFile::load(&Path::new(&path).to_path_buf())
+                } else {
+                    None
+                }
+            }
+            Err(error) => {
+                eprintln!("Database error (MirrorFile::get_by_id): {:?}", error);
+                None
+            }
+        }
     }
 
     pub fn new(file_name: &str) -> Self {
@@ -144,6 +168,7 @@ impl MirrorFile {
             icon,
             size: 0,
             downloads: None,
+            path: None,
         }
     }
 
@@ -154,6 +179,7 @@ impl MirrorFile {
             icon: "folder".into(),
             size: 0,
             downloads: None,
+            path: None,
         }
     }
 }
@@ -296,17 +322,21 @@ async fn share(
     let file_parts: Vec<&str> = file.split(".").collect();
     let id = file_parts.iter().next().ok_or(Status::BadRequest)?;
 
-    if let Some(file) = get_file_by_id(db, id).await {
-        display_file(
-            Path::new("/").join(&file).to_path_buf(),
-            strings,
-            lang.0,
-            host,
-            token,
-            settings,
-            true,
-        )
-        .await
+    if let Some(file) = MirrorFile::get_by_id(db, id).await {
+        if let Some(path) = file.path {
+            display_file(
+                Path::new(&path).to_path_buf(),
+                strings,
+                lang.0,
+                host,
+                token,
+                settings,
+                true,
+            )
+            .await
+        } else {
+            Err(Status::InternalServerError)
+        }
     } else {
         Err(Status::NotFound)
     }
@@ -321,13 +351,17 @@ async fn download_share(
     let file_parts: Vec<&str> = file.split(".").collect();
     let id = file_parts.iter().next().ok_or(Status::BadRequest)?;
 
-    if let Some(file) = get_file_by_id(db, id).await {
-        add_download(db2, &file).await;
-        open_file(
-            Path::new("files/").join(&file).to_path_buf(),
-            &get_cache_control(false),
-        )
-        .await
+    if let Some(file) = MirrorFile::get_by_id(db, id).await {
+        if let Some(path) = file.path {
+            add_download(db2, &path).await;
+            open_file(
+                Path::new("files/").join(&path).to_path_buf(),
+                &get_cache_control(false),
+            )
+            .await
+        } else {
+            Err(Status::InternalServerError)
+        }
     } else {
         Err(Status::NotFound)
     }

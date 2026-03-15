@@ -163,28 +163,6 @@ pub async fn delete_file(mut db: Connection<FileDb>, path: &str) -> () {
     }
 }
 
-pub async fn get_file_by_id(mut db: Connection<FileDb>, path: &str) -> Option<String> {
-    let query_result = sqlx::query("SELECT path FROM files WHERE path = ? OR id = ?")
-        .bind(path)
-        .bind(path)
-        .fetch_one(&mut **db)
-        .await;
-
-    match query_result {
-        Ok(row) => {
-            if let Some(path) = row.try_get::<String, _>("path").ok() {
-                Some(path)
-            } else {
-                None
-            }
-        }
-        Err(error) => {
-            eprintln!("Database error (get_file_by_id): {:?}", error);
-            None
-        }
-    }
-}
-
 pub async fn add_shared_file(mut db: Connection<FileDb>, path: &str) -> Option<String> {
     let id = Uuid::new_v4().to_string();
 
