@@ -27,11 +27,11 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::utils::{
+use crate::{db::get_downloads, utils::{
     format_size_filter, get_cache_control, get_extension_from_path, get_genre, get_name_from_path,
     get_real_path, get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output,
     read_dirs_async,
-};
+}};
 use crate::{
     api::SearchFile,
     config::CONFIG,
@@ -277,6 +277,7 @@ async fn poster(
 #[get("/share/<file>")]
 async fn share(
     db: Connection<FileDb>,
+    db2: Connection<FileDb>,
     file: &str,
     translations: &rocket::State<TranslationStore>,
     lang: Language,
@@ -298,6 +299,7 @@ async fn share(
 
     if let Some(file) = get_file_by_id(db, id).await {
         display_file(
+            Some(db2),
             Path::new("/").join(&file).to_path_buf(),
             strings,
             lang.0,
@@ -419,6 +421,72 @@ async fn static_files(file: PathBuf) -> IndexResult {
 }
 
 #[get("/<file..>", rank = 10)]
+async fn index_db(
+    db: Connection<FileDb>,
+    file: PathBuf,
+    jar: &CookieJar<'_>,
+    translations: &rocket::State<TranslationStore>,
+    lang: Language,
+    host: Host<'_>,
+    sizes: &State<FileSizes>,
+    token: Result<JWT, Status>,
+    uri: FullUri,
+    settings: Settings<'_>,
+) -> IndexResult {
+    if !Path::new("files").join(&file).exists()
+        && (&file.display().to_string() == "robots.txt"
+            || &file.display().to_string() == "favicon.ico")
+    {
+        let path = Path::new("public").join(file);
+
+        return open_file(path, &get_static_cache_control()).await;
+    }
+
+    let jwt = token.clone().unwrap_or_default();
+
+    if let Some(t) = jwt.token {
+        add_token_cookie(&t, &host.0, jar);
+    }
+
+    let path: PathBuf;
+
+    let strings = translations.get_translation(&lang.0);
+
+    if let Ok((p, _)) = get_real_path(&file, jwt.claims.sub.clone()) {
+        path = p;
+    } else if let Err(e) = get_real_path(&file, jwt.claims.sub.clone()) {
+        if e == Status::Forbidden {
+            return Err(Status::Unauthorized);
+        } else {
+            return Err(e);
+        }
+    } else {
+        return Err(Status::UnprocessableEntity);
+    }
+
+    if !path.exists() {
+        return Err(Status::NotFound);
+    }
+
+    if is_restricted(&path, token.is_ok()) {
+        return Err(Status::Unauthorized);
+    }
+
+    if path.is_dir() && !uri.0.ends_with("/") {
+        return Ok(IndexResponse::Redirect(Redirect::moved(format!(
+            "{}/",
+            uri.0
+        ))));
+    }
+
+    if path.is_dir() {
+        display_folder(file, strings, lang.0, host, token, settings, sizes).await
+    } else {
+        display_file(Some(db), file, strings, lang.0, host, token, settings, false).await
+    }
+}
+
+#[get("/<file..>", rank = 10)]
 async fn index(
     file: PathBuf,
     jar: &CookieJar<'_>,
@@ -479,11 +547,12 @@ async fn index(
     if path.is_dir() {
         display_folder(file, strings, lang.0, host, token, settings, sizes).await
     } else {
-        display_file(file, strings, lang.0, host, token, settings, false).await
+        display_file(None, file, strings, lang.0, host, token, settings, false).await
     }
 }
 
 async fn display_file(
+    db: Option<Connection<FileDb>>,
     file: PathBuf,
     strings: &HashMap<String, String>,
     lang: String,
@@ -1916,7 +1985,6 @@ async fn rocket() -> _ {
             routes![
                 settings,
                 reset_settings,
-                index,
                 iframe,
                 poster,
                 sitemap,
@@ -1939,9 +2007,9 @@ async fn rocket() -> _ {
     if CONFIG.enable_file_db {
         rocket = rocket
             .attach(FileDb::init())
-            .mount("/", routes![share, download_share, download_db])
+            .mount("/", routes![share, download_share, download_db, index_db])
     } else {
-        rocket = rocket.mount("/", routes![download])
+        rocket = rocket.mount("/", routes![download, index])
     }
 
     if CONFIG.enable_api {
