@@ -449,31 +449,11 @@ async fn index(
 
     let strings = translations.get_translation(&lang.0);
 
-    let root_domain = get_root_domain(host.0);
-
     if let Ok((p, _)) = get_real_path(&file, jwt.claims.sub.clone()) {
         path = p;
     } else if let Err(e) = get_real_path(&file, jwt.claims.sub.clone()) {
         if e == Status::Forbidden {
-            return Ok(IndexResponse::Template(Template::render(
-                if settings.plain {
-                    "plain/error/private"
-                } else {
-                    "error/private"
-                },
-                context! {
-                    title: "/private",
-                    lang,
-                    strings,
-                    root_domain,
-                    host: host.0,
-                    config: (*CONFIG).clone(),
-                    is_logged_in: token.is_ok(),
-                    admin: jwt.claims.perms == 0,
-                    settings,
-                    version: env!("CARGO_PKG_VERSION").to_string(),
-                },
-            )));
+            return Err(Status::Unauthorized);
         } else {
             return Err(e);
         }
