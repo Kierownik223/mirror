@@ -837,7 +837,7 @@ async fn display_file(
         _ => {
             if CONFIG.extensions.contains(&ext) {
                 let downloads = if let Some(db) = db {
-                    get_downloads(db, &Path::new("files/").join(&file).display().to_string()).await
+                    get_downloads(db, &Path::new(&file).display().to_string()).await
                 } else {
                     None
                 };
