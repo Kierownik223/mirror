@@ -836,6 +836,11 @@ async fn display_file(
         }
         _ => {
             if CONFIG.extensions.contains(&ext) {
+                let downloads = if let Some(db) = db {
+                    get_downloads(db, &Path::new("files/").join(&file).display().to_string()).await
+                } else {
+                    None
+                };
                 Ok(IndexResponse::Template(Template::render(
                     if settings.plain {
                         "plain/details"
@@ -857,6 +862,7 @@ async fn display_file(
                         settings,
                         share,
                         version: env!("CARGO_PKG_VERSION").to_string(),
+                        downloads,
                     },
                 )))
             } else {
