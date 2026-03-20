@@ -406,7 +406,7 @@ async fn perform_download(
         add_download(db, &file).await;
     }
 
-    open_file(path, &get_cache_control(is_private)).await
+    open_file(path, "private").await
 }
 
 #[get("/static/<file..>")]
