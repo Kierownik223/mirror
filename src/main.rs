@@ -589,6 +589,12 @@ async fn display_file(
 
     let root_domain = get_root_domain(&host.0);
 
+    let downloads = if let Some(db) = db {
+        get_downloads(db, &Path::new(&file).display().to_string()).await
+    } else {
+        None
+    };
+
     match ext.as_str() {
         "md" => {
             let markdown_text = fs::read_to_string(&path).unwrap_or_else(|e| {
@@ -617,6 +623,7 @@ async fn display_file(
                     settings,
                     share,
                     version: env!("CARGO_PKG_VERSION").to_string(),
+                    downloads,
                 },
             )))
         }
@@ -648,6 +655,7 @@ async fn display_file(
                     settings,
                     share,
                     version: env!("CARGO_PKG_VERSION").to_string(),
+                    downloads,
                 },
             )))
         }
@@ -682,6 +690,7 @@ async fn display_file(
                     settings,
                     share,
                     version: env!("CARGO_PKG_VERSION").to_string(),
+                    downloads,
                 },
             )))
         }
@@ -719,6 +728,7 @@ async fn display_file(
                     settings: &settings,
                     share,
                     version: env!("CARGO_PKG_VERSION").to_string(),
+                    downloads,
                 },
             );
 
@@ -828,6 +838,7 @@ async fn display_file(
                         settings,
                         share,
                         version: env!("CARGO_PKG_VERSION").to_string(),
+                        downloads,
                     },
                 )))
             } else {
@@ -836,11 +847,6 @@ async fn display_file(
         }
         _ => {
             if CONFIG.extensions.contains(&ext) {
-                let downloads = if let Some(db) = db {
-                    get_downloads(db, &Path::new(&file).display().to_string()).await
-                } else {
-                    None
-                };
                 Ok(IndexResponse::Template(Template::render(
                     if settings.plain {
                         "plain/details"
