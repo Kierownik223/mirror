@@ -18,5 +18,5 @@
 {% if not share %}<a href="./">./</a>{% endif %}
 <p><strong>{{ strings.file_name }}:</strong> {{ filename }}</p>
 <p><strong>{{ strings.file_size }}:</strong> {{ filesize | format_size(use_si=settings.use_si) }}</p>
-<a href="?download">{{ strings.download }}</a>
+<a href="?download">{{ strings.download }}{% if downloads %} ({{ downloads }}){% endif %}</a>
 {% endblock content %}

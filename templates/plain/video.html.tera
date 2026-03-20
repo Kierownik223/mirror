@@ -12,7 +12,7 @@
         </span>
     </span>
     &nbsp;
-    <a href="?download" download>{{ strings.download }}</a><br>
+    <a href="?download" download>{{ strings.download }}{% if downloads %} ({{ downloads }}){% endif %}</a><br>
 </div>
 <hr>
 {% if not share %}<a href="./">./</a>{% endif %}

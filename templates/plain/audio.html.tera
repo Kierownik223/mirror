@@ -11,7 +11,7 @@
     </span>
 </span>
 &nbsp;
-<a href="?download" download>{{ strings.download }}</a><br>
+<a href="?download" download>{{ strings.download }}{% if downloads %} ({{ downloads }}){% endif %}</a><br>
 <hr>
 {% if not share %}<a href="./">./</a>{% endif %}
 <audio src="?download" controls style="width: 100%;" poster="/poster{{ path | urlencode }}">{{ strings.no_audio }}</audio>
