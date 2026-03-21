@@ -232,6 +232,10 @@ pub fn get_root_domain<'a>(host: &str) -> String {
         return CONFIG.fallback_root_domain.to_string();
     }
 
+    if host.contains(":") {
+        return CONFIG.fallback_root_domain.to_string();
+    }
+
     return host
         .splitn(2, '.')
         .nth(1)
