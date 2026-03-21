@@ -1,8 +1,7 @@
+use std::collections::HashMap;
+
 use rocket::{
-    http::CookieJar,
-    request::{FromRequest, Outcome},
-    response::{self, Responder},
-    Request, Response,
+    Request, Response, http::{Cookie, CookieJar, SameSite}, request::{FromRequest, Outcome}, response::{self, Responder}, time::{Duration, OffsetDateTime}
 };
 
 use crate::config::CONFIG;
@@ -123,6 +122,152 @@ impl<'r> Settings<'r> {
             video_player,
             show_cover,
         }
+    }
+
+    pub fn from_hashmap(settings: &'r HashMap<String, String>) -> Self {
+        let mut theme = settings
+            .get("theme")
+            .map(|s| s.as_str())
+            .unwrap_or("default");
+
+        if !std::path::Path::new(&format!("public/static/styles/{}.css", &theme)).exists() {
+            theme = "default";
+        }
+
+        let lang = if let Some(cookie_lang) = settings.get("lang").map(|s| s.as_str()) {
+            cookie_lang
+        } else {
+            "en"
+        };
+
+        let hires = settings
+            .get("hires")
+            .map(|s| s.as_str() == "true")
+            .unwrap_or(false);
+
+        let smallhead = settings
+            .get("smallhead")
+            .map(|s| s.as_str() == "true")
+            .unwrap_or(false);
+
+        let plain = settings
+            .get("plain")
+            .map(|s| s.as_str() == "true")
+            .unwrap_or(false);
+
+        let nooverride = settings
+            .get("nooverride")
+            .map(|s| s.as_str() == "true")
+            .unwrap_or(false);
+
+        let viewers = settings
+            .get("viewers")
+            .map(|s| s.as_str() == "true")
+            .unwrap_or(true);
+
+        let dir_browser = settings
+            .get("dir_browser")
+            .map(|s| s.as_str() == "true")
+            .unwrap_or(true);
+
+        let use_si = settings
+            .get("use_si")
+            .map(|s| s.as_str() == "true")
+            .unwrap_or(true);
+
+        let audio_player = settings
+            .get("audio_player")
+            .map(|s| s.as_str() == "true")
+            .unwrap_or(true);
+
+        let video_player = settings
+            .get("video_player")
+            .map(|s| s.as_str() == "true")
+            .unwrap_or(true);
+
+        let show_cover: bool = settings
+            .get("show_cover")
+            .map(|s| s.as_str() == "true")
+            .unwrap_or(true);
+
+        Self {
+            theme,
+            js_present: std::path::Path::new(&format!("public/static/styles/{}.js", &theme))
+                .exists(),
+            lang: lang,
+            hires,
+            smallhead,
+            plain,
+            nooverride,
+            viewers,
+            dir_browser,
+            use_si,
+            audio_player,
+            video_player,
+            show_cover,
+        }
+    }
+
+    pub fn to_cookies(&self, jar: &'r CookieJar<'_>) -> &'r CookieJar<'_> {
+        let mut now = OffsetDateTime::now_utc();
+        now += Duration::days(365);
+
+        let mut theme = Cookie::new("theme", self.theme.to_owned());
+        theme.set_expires(now);
+        theme.set_same_site(SameSite::Lax);
+        jar.add(theme);
+
+        let mut lang = Cookie::new("lang", self.lang.to_owned());
+        lang.set_expires(now);
+        lang.set_same_site(SameSite::Lax);
+        jar.add(lang);
+
+        let mut hires = Cookie::new("hires", self.hires.to_string());
+        hires.set_expires(now);
+        hires.set_same_site(SameSite::Lax);
+        jar.add(hires);
+
+        let mut smallhead = Cookie::new("smallhead", self.smallhead.to_string());
+        smallhead.set_expires(now);
+        smallhead.set_same_site(SameSite::Lax);
+        jar.add(smallhead);
+
+        let mut plain = Cookie::new("plain", self.plain.to_string());
+        plain.set_expires(now);
+        plain.set_same_site(SameSite::Lax);
+        jar.add(plain);
+
+        let mut nooverride = Cookie::new("nooverride", self.nooverride.to_string());
+        nooverride.set_expires(now);
+        nooverride.set_same_site(SameSite::Lax);
+        jar.add(nooverride);
+
+        let mut dir_browser = Cookie::new("dir_browser", self.dir_browser.to_string());
+        dir_browser.set_expires(now);
+        dir_browser.set_same_site(SameSite::Lax);
+        jar.add(dir_browser);
+
+        let mut use_si = Cookie::new("use_si", self.use_si.to_string());
+        use_si.set_expires(now);
+        use_si.set_same_site(SameSite::Lax);
+        jar.add(use_si);
+
+        let mut audio_player = Cookie::new("audio_player", self.audio_player.to_string());
+        audio_player.set_expires(now);
+        audio_player.set_same_site(SameSite::Lax);
+        jar.add(audio_player);
+
+        let mut video_player = Cookie::new("video_player", self.video_player.to_string());
+        video_player.set_expires(now);
+        video_player.set_same_site(SameSite::Lax);
+        jar.add(video_player);
+
+        let mut show_cover = Cookie::new("show_cover", self.show_cover.to_string());
+        show_cover.set_expires(now);
+        show_cover.set_same_site(SameSite::Lax);
+        jar.add(show_cover);
+
+        jar
     }
 }
 

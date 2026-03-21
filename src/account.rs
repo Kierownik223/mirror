@@ -99,15 +99,8 @@ async fn login(
             if let Some(mirror_settings) = db_user.mirror_settings.as_ref() {
                 let decoded: HashMap<String, String> =
                     serde_json::from_str(&mirror_settings).unwrap_or_default();
-
-                for (key, value) in decoded {
-                    let mut now = OffsetDateTime::now_utc();
-                    now += Duration::days(365);
-                    let mut cookie = Cookie::new(key, value);
-                    cookie.set_expires(now);
-                    cookie.set_same_site(SameSite::Lax);
-                    jar.add(cookie);
-                }
+                    
+                Settings::from_hashmap(&decoded).to_cookies(jar);
             }
         }
 
