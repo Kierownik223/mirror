@@ -21,11 +21,17 @@ use rocket_multipart_form_data::{
 use zip::write::SimpleFileOptions;
 
 use crate::{
-    Disk, FileSizes, Host, MirrorFile, MirrorFileInternal, Sysinfo, config::CONFIG, db::{FileDb, add_shared_file, delete_file}, jwt::JWT, read_files, refresh_file_sizes, responders::{ApiResponse, ApiResult}, utils::{
+    config::CONFIG,
+    db::{add_shared_file, delete_file, FileDb},
+    jwt::JWT,
+    read_files, refresh_file_sizes,
+    responders::{ApiResponse, ApiResult},
+    utils::{
         add_path_to_zip, get_genre, get_icon, get_name_from_path, get_real_path,
-        get_real_path_with_perms, get_virtual_path, is_hidden_path_str,
-        is_restricted, map_io_error_to_status, read_dirs_async,
-    }
+        get_real_path_with_perms, get_virtual_path, is_hidden_path_str, is_restricted,
+        map_io_error_to_status, read_dirs_async,
+    },
+    Disk, FileSizes, Host, MirrorFile, MirrorFileInternal, Sysinfo,
 };
 
 #[derive(serde::Serialize)]
@@ -79,8 +85,8 @@ impl VideoFile {
         let mut vidtitle = get_name_from_path(&Path::new(path).to_path_buf());
 
         let details = if mdpath.exists() {
-            let markdown_text =
-                fs::read_to_string(mdpath.display().to_string()).unwrap_or_else(|err| err.to_string());
+            let markdown_text = fs::read_to_string(mdpath.display().to_string())
+                .unwrap_or_else(|err| err.to_string());
             let mut lines = markdown_text.lines();
 
             vidtitle = lines
@@ -269,7 +275,10 @@ async fn display_file(
     let path = get_real_path(&path, username.to_string())?.0;
 
     let mirror_file = if let Some(db) = db {
-        MirrorFileInternal::load(db, &path).await.ok_or(Status::NotFound)?.mirror_file
+        MirrorFileInternal::load(db, &path)
+            .await
+            .ok_or(Status::NotFound)?
+            .mirror_file
     } else {
         MirrorFile::load(&path).ok_or(Status::NotFound)?
     };

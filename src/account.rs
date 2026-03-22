@@ -99,7 +99,7 @@ async fn login(
             if let Some(mirror_settings) = db_user.mirror_settings.as_ref() {
                 let decoded: HashMap<String, String> =
                     serde_json::from_str(&mirror_settings).unwrap_or_default();
-                    
+
                 Settings::from_hashmap(&decoded).to_cookies(jar);
             }
         }

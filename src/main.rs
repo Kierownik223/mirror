@@ -6,7 +6,10 @@ use rocket::{
     time::{Duration, OffsetDateTime},
     Data, Request, State,
 };
-use rocket_db_pools::{Connection, Database, sqlx::{self, Row}};
+use rocket_db_pools::{
+    sqlx::{self, Row},
+    Connection, Database,
+};
 use rocket_multipart_form_data::{
     MultipartFormData, MultipartFormDataField, MultipartFormDataOptions, Repetition,
 };
@@ -27,15 +30,19 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::{api::VideoFile, utils::{
-    format_size_filter, get_cache_control, get_extension_from_path, get_genre, get_name_from_path,
-    get_real_path, get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output,
-    read_dirs_async,
-}};
+use crate::i18n::{Language, TranslationStore};
 use crate::{
     api::SearchFile,
     config::CONFIG,
     utils::{get_icon, get_virtual_path, is_hidden_path_str},
+};
+use crate::{
+    api::VideoFile,
+    utils::{
+        format_size_filter, get_cache_control, get_extension_from_path, get_genre,
+        get_name_from_path, get_real_path, get_root_domain, is_hidden, map_io_error_to_status,
+        parse_7z_output, read_dirs_async,
+    },
 };
 use crate::{db::get_file_by_id, jwt::JWT};
 use crate::{
@@ -45,9 +52,6 @@ use crate::{
 use crate::{
     guards::{FormSettings, FullUri, HeaderFile, Host, Settings},
     utils::add_token_cookie,
-};
-use crate::{
-    i18n::{Language, TranslationStore},
 };
 use crate::{
     responders::{Cached, IndexResponse, IndexResult},
@@ -81,7 +85,8 @@ impl Eq for MirrorFileInternal {}
 
 impl PartialEq for MirrorFileInternal {
     fn eq(&self, other: &Self) -> bool {
-        (&self.mirror_file.name, &self.mirror_file.ext) == (&other.mirror_file.name, &other.mirror_file.ext)
+        (&self.mirror_file.name, &self.mirror_file.ext)
+            == (&other.mirror_file.name, &other.mirror_file.ext)
     }
 }
 
@@ -124,22 +129,27 @@ impl MirrorFileInternal {
             .await;
 
         let (id, downloads) = match query_result {
-            Ok(row) => {
-                (row.try_get::<String, _>("id").ok(), row.try_get::<i32, _>("downloads").ok())
-            }
+            Ok(row) => (
+                row.try_get::<String, _>("id").ok(),
+                row.try_get::<i32, _>("downloads").ok(),
+            ),
             Err(error) => {
                 eprintln!("Database error (get_file_by_id): {:?}", error);
                 (None, None)
             }
         };
 
-        Some(MirrorFileInternal { mirror_file: MirrorFile {
-            name,
-            ext,
-            icon,
-            size: md.len(),
-            downloads,
-        }, id, path: path.display().to_string().replacen("files/", "/", 1) })
+        Some(MirrorFileInternal {
+            mirror_file: MirrorFile {
+                name,
+                ext,
+                icon,
+                size: md.len(),
+                downloads,
+            },
+            id,
+            path: path.display().to_string().replacen("files/", "/", 1),
+        })
     }
 
     pub async fn load_by_id(mut db: Connection<FileDb>, id: &str) -> Option<Self> {
@@ -149,15 +159,17 @@ impl MirrorFileInternal {
             .await;
 
         let (path, downloads) = match query_result {
-            Ok(row) => {
-                Some((row.try_get::<String, _>("path").ok().map(|f| format!("!{}", f))?, row.try_get::<i32, _>("downloads").ok()))
-            }
+            Ok(row) => Some((
+                row.try_get::<String, _>("path")
+                    .ok()
+                    .map(|f| format!("!{}", f))?,
+                row.try_get::<i32, _>("downloads").ok(),
+            )),
             Err(error) => {
                 eprintln!("Database error (get_file_by_id): {:?}", error);
                 None
             }
-        }
-        ?;
+        }?;
 
         let file_path = Path::new(&path);
 
@@ -170,13 +182,16 @@ impl MirrorFileInternal {
         };
         let icon = get_icon(&get_name_from_path(&file_path.to_path_buf()));
 
-        Some(MirrorFileInternal { mirror_file: MirrorFile {
+        Some(MirrorFileInternal {
+            mirror_file: MirrorFile {
                 name,
                 ext,
                 icon,
                 size: md.len(),
                 downloads,
-            }, id: Some(id.to_string()), path
+            },
+            id: Some(id.to_string()),
+            path,
         })
     }
 
@@ -189,7 +204,7 @@ impl MirrorFileInternal {
         {
             eprintln!("Database error (add_download): {:?}", error);
         }
-        }
+    }
 }
 
 #[derive(serde::Serialize, PartialOrd, serde::Deserialize)]
@@ -603,7 +618,17 @@ async fn index_db(
     if path.is_dir() {
         display_folder(file, strings, lang.0, host, token, settings, sizes).await
     } else {
-        display_file(Some(db), file, strings, lang.0, host, token, settings, false).await
+        display_file(
+            Some(db),
+            file,
+            strings,
+            lang.0,
+            host,
+            token,
+            settings,
+            false,
+        )
+        .await
     }
 }
 
@@ -709,9 +734,12 @@ async fn display_file(
     let cache_control = &get_cache_control(is_private);
 
     let root_domain = get_root_domain(&host.0);
-    
+
     let mirror_file = if let Some(db) = db {
-        MirrorFileInternal::load(db, &path).await.ok_or(Status::NotFound)?.mirror_file
+        MirrorFileInternal::load(db, &path)
+            .await
+            .ok_or(Status::NotFound)?
+            .mirror_file
     } else {
         MirrorFile::load(&path).ok_or(Status::NotFound)?
     };

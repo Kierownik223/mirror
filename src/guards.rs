@@ -1,7 +1,11 @@
 use std::collections::HashMap;
 
 use rocket::{
-    Request, Response, http::{Cookie, CookieJar, SameSite}, request::{FromRequest, Outcome}, response::{self, Responder}, time::{Duration, OffsetDateTime}
+    http::{Cookie, CookieJar, SameSite},
+    request::{FromRequest, Outcome},
+    response::{self, Responder},
+    time::{Duration, OffsetDateTime},
+    Request, Response,
 };
 
 use crate::config::CONFIG;
