@@ -27,7 +27,7 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::{api::VideoFile, db::get_downloads, utils::{
+use crate::{api::VideoFile, utils::{
     format_size_filter, get_cache_control, get_extension_from_path, get_genre, get_name_from_path,
     get_real_path, get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output,
     read_dirs_async,
@@ -444,10 +444,10 @@ async fn download_share(
     let file_parts: Vec<&str> = file.split(".").collect();
     let id = file_parts.iter().next().ok_or(Status::BadRequest)?;
 
-    if let Some(file) = get_file_by_id(db, id).await {
-        add_download(db2, &file).await;
+    if let Some(file) = MirrorFileInternal::load_by_id(db, id).await {
+        file.add_download(db2).await;
         open_file(
-            Path::new("files/").join(&file).to_path_buf(),
+            Path::new("files").join(&file.path).to_path_buf(),
             &get_cache_control(false),
         )
         .await
@@ -709,11 +709,11 @@ async fn display_file(
     let cache_control = &get_cache_control(is_private);
 
     let root_domain = get_root_domain(&host.0);
-
-    let downloads = if let Some(db) = db {
-        get_downloads(db, &Path::new(&file).display().to_string()).await
+    
+    let mirror_file = if let Some(db) = db {
+        MirrorFileInternal::load(db, &path).await.ok_or(Status::NotFound)?.mirror_file
     } else {
-        None
+        MirrorFile::load(&path).ok_or(Status::NotFound)?
     };
 
     match ext.as_str() {
@@ -744,7 +744,7 @@ async fn display_file(
                     settings,
                     share,
                     version: env!("CARGO_PKG_VERSION").to_string(),
-                    downloads,
+                    downloads: mirror_file.downloads,
                 },
             )))
         }
@@ -776,7 +776,7 @@ async fn display_file(
                     settings,
                     share,
                     version: env!("CARGO_PKG_VERSION").to_string(),
-                    downloads,
+                    downloads: mirror_file.downloads,
                 },
             )))
         }
@@ -811,7 +811,7 @@ async fn display_file(
                     settings,
                     share,
                     version: env!("CARGO_PKG_VERSION").to_string(),
-                    downloads,
+                    downloads: mirror_file.downloads,
                 },
             )))
         }
@@ -849,7 +849,7 @@ async fn display_file(
                     settings: &settings,
                     share,
                     version: env!("CARGO_PKG_VERSION").to_string(),
-                    downloads,
+                    downloads: mirror_file.downloads,
                 },
             );
 
@@ -959,7 +959,7 @@ async fn display_file(
                         settings,
                         share,
                         version: env!("CARGO_PKG_VERSION").to_string(),
-                        downloads,
+                        downloads: mirror_file.downloads,
                     },
                 )))
             } else {
@@ -989,7 +989,7 @@ async fn display_file(
                         settings,
                         share,
                         version: env!("CARGO_PKG_VERSION").to_string(),
-                        downloads,
+                        downloads: mirror_file.downloads,
                     },
                 )))
             } else {
