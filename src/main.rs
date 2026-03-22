@@ -118,7 +118,7 @@ impl MirrorFileInternal {
         };
         let icon = get_icon(&get_name_from_path(&path));
 
-        let query_result = sqlx::query("SELECT path FROM files WHERE path = ?")
+        let query_result = sqlx::query("SELECT id FROM files WHERE path = ?")
             .bind(path.display().to_string().replacen("files/", "/", 1))
             .fetch_one(&mut **db)
             .await;
@@ -140,6 +140,44 @@ impl MirrorFileInternal {
             size: md.len(),
             downloads: None,
         }, id, path: path.display().to_string().replacen("files/", "/", 1) })
+    }
+
+    pub async fn load_by_id(mut db: Connection<FileDb>, id: &str) -> Option<Self> {
+        let query_result = sqlx::query("SELECT path FROM files WHERE id = ?")
+            .bind(id)
+            .fetch_one(&mut **db)
+            .await;
+
+        let path = match query_result {
+            Ok(row) => {
+                row.try_get::<String, _>("path").ok()
+            }
+            Err(error) => {
+                eprintln!("Database error (get_file_by_id): {:?}", error);
+                None
+            }
+        }
+        .map(|f| format!("!{}", f))?;
+
+        let file_path = Path::new(&path);
+
+        let md = fs::metadata(&file_path).ok()?;
+        let name = get_name_from_path(&file_path.to_path_buf());
+        let ext = if md.is_file() {
+            get_extension_from_path(&file_path.to_path_buf())
+        } else {
+            "folder".into()
+        };
+        let icon = get_icon(&get_name_from_path(&file_path.to_path_buf()));
+
+        Some(MirrorFileInternal { mirror_file: MirrorFile {
+                name,
+                ext,
+                icon,
+                size: md.len(),
+                downloads: None,
+            }, id: Some(id.to_string()), path
+        })
     }
 }
 
