@@ -27,7 +27,7 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::{db::get_downloads, utils::{
+use crate::{api::VideoFile, db::get_downloads, utils::{
     format_size_filter, get_cache_control, get_extension_from_path, get_genre, get_name_from_path,
     get_real_path, get_root_domain, is_hidden, map_io_error_to_status, parse_7z_output,
     read_dirs_async,
@@ -48,7 +48,6 @@ use crate::{
 };
 use crate::{
     i18n::{Language, TranslationStore},
-    utils::get_video_metadata,
 };
 use crate::{
     responders::{Cached, IndexResponse, IndexResult},
@@ -666,7 +665,7 @@ async fn display_file(
 
             let videopath = &Path::new("/").join(file.clone()).display().to_string();
 
-            let metadata = get_video_metadata(&videopath, None);
+            let metadata = VideoFile::load(&videopath, None);
 
             Ok(IndexResponse::Template(Template::render(
                 if settings.plain {

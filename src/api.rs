@@ -28,7 +28,7 @@ use crate::{
     responders::{ApiResponse, ApiResult},
     utils::{
         add_path_to_zip, get_genre, get_icon, get_name_from_path, get_real_path,
-        get_real_path_with_perms, get_video_metadata, get_virtual_path, is_hidden_path_str,
+        get_real_path_with_perms, get_virtual_path, is_hidden_path_str,
         is_restricted, map_io_error_to_status, read_dirs_async,
     },
     Disk, FileSizes, Host, MirrorFile, Sysinfo,
@@ -75,6 +75,39 @@ pub struct VideoFile {
     pub file: MirrorFile,
     pub title: String,
     pub description: Option<String>,
+}
+
+impl VideoFile {
+    pub fn load(path: &str, file: Option<MirrorFile>) -> Self {
+        let mdpath = format!("files/video/metadata{}.md", path.replace("video/", ""));
+        let mdpath = Path::new(mdpath.as_str());
+
+        let mut vidtitle = get_name_from_path(&Path::new(path).to_path_buf());
+
+        let details = if mdpath.exists() {
+            let markdown_text =
+                fs::read_to_string(mdpath.display().to_string()).unwrap_or_else(|err| err.to_string());
+            let mut lines = markdown_text.lines();
+
+            vidtitle = lines
+                .next()
+                .unwrap_or("")
+                .trim_start_matches('#')
+                .trim()
+                .to_string();
+            let markdown = lines.collect::<Vec<&str>>().join("\n");
+
+            Some(markdown::to_html(&markdown))
+        } else {
+            None
+        };
+
+        Self {
+            file: file.unwrap_or_default(),
+            title: vidtitle,
+            description: details,
+        }
+    }
 }
 
 #[derive(serde::Serialize)]
@@ -285,7 +318,7 @@ async fn display_file(
     if mirror_file.ext == "mp4" || mirror_file.ext == "mkv" || mirror_file.ext == "webm" {
         let videopath = Path::new("/").join(file.clone()).display().to_string();
 
-        return Ok(ApiResponse::VideoFile(Json(get_video_metadata(
+        return Ok(ApiResponse::VideoFile(Json(VideoFile::load(
             &videopath,
             Some(mirror_file),
         ))));
