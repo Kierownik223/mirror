@@ -70,6 +70,43 @@ mod utils;
 #[macro_use]
 extern crate rocket;
 
+#[derive(PartialOrd)]
+pub struct MirrorFileInternal {
+    mirror_file: MirrorFile,
+    id: String,
+    path: String,
+}
+
+impl Eq for MirrorFileInternal {}
+
+impl PartialEq for MirrorFileInternal {
+    fn eq(&self, other: &Self) -> bool {
+        (&self.mirror_file.name, &self.mirror_file.ext) == (&other.mirror_file.name, &other.mirror_file.ext)
+    }
+}
+
+impl Ord for MirrorFileInternal {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.mirror_file.name.cmp(&other.mirror_file.name)
+    }
+}
+
+impl Default for MirrorFileInternal {
+    fn default() -> Self {
+        MirrorFileInternal {
+            mirror_file: MirrorFile {
+                name: "".into(),
+                ext: "".into(),
+                icon: "default".into(),
+                size: 0,
+                downloads: None,
+            },
+            id: String::new(),
+            path: "files/".into(),
+        }
+    }
+}
+
 #[derive(serde::Serialize, PartialOrd, serde::Deserialize)]
 pub struct MirrorFile {
     name: String,
