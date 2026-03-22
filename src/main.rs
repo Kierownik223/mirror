@@ -6,7 +6,7 @@ use rocket::{
     time::{Duration, OffsetDateTime},
     Data, Request, State,
 };
-use rocket_db_pools::{Connection, Database};
+use rocket_db_pools::{Connection, Database, sqlx::{self, Row}};
 use rocket_multipart_form_data::{
     MultipartFormData, MultipartFormDataField, MultipartFormDataOptions, Repetition,
 };
@@ -73,7 +73,7 @@ extern crate rocket;
 #[derive(PartialOrd)]
 pub struct MirrorFileInternal {
     mirror_file: MirrorFile,
-    id: String,
+    id: Option<String>,
     path: String,
 }
 
@@ -101,9 +101,45 @@ impl Default for MirrorFileInternal {
                 size: 0,
                 downloads: None,
             },
-            id: String::new(),
+            id: None,
             path: "files/".into(),
         }
+    }
+}
+
+impl MirrorFileInternal {
+    pub async fn load(mut db: Connection<FileDb>, path: &PathBuf) -> Option<Self> {
+        let md = fs::metadata(&path).ok()?;
+        let name = get_name_from_path(&path);
+        let ext = if md.is_file() {
+            get_extension_from_path(&path)
+        } else {
+            "folder".into()
+        };
+        let icon = get_icon(&get_name_from_path(&path));
+
+        let query_result = sqlx::query("SELECT path FROM files WHERE path = ?")
+            .bind(path.display().to_string().replacen("files/", "/", 1))
+            .fetch_one(&mut **db)
+            .await;
+
+        let id = match query_result {
+            Ok(row) => {
+                row.try_get::<String, _>("id").ok()
+            }
+            Err(error) => {
+                eprintln!("Database error (get_file_by_id): {:?}", error);
+                None
+            }
+        };
+
+        Some(MirrorFileInternal { mirror_file: MirrorFile {
+            name,
+            ext,
+            icon,
+            size: md.len(),
+            downloads: None,
+        }, id, path: path.display().to_string().replacen("files/", "/", 1) })
     }
 }
 
