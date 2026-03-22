@@ -124,7 +124,7 @@ impl MirrorFileInternal {
         let icon = get_icon(&get_name_from_path(&path));
 
         let query_result = sqlx::query("SELECT id, downloads FROM files WHERE path = ?")
-            .bind(path.display().to_string().replacen("files/", "/", 1))
+            .bind(path.display().to_string().replacen("files/", "", 1))
             .fetch_one(&mut **db)
             .await;
 
