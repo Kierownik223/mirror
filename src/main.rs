@@ -179,6 +179,17 @@ impl MirrorFileInternal {
             }, id: Some(id.to_string()), path
         })
     }
+
+    async fn add_download(&self, mut db: Connection<FileDb>) -> () {
+        if let Err(error) = sqlx::query("INSERT INTO files (id, path, downloads) VALUES (?, ?, 1) ON DUPLICATE KEY UPDATE downloads = downloads + 1")
+            .bind(&self.id)
+            .bind(&self.path)
+            .execute(&mut **db)
+            .await
+        {
+            eprintln!("Database error (add_download): {:?}", error);
+        }
+        }
 }
 
 #[derive(serde::Serialize, PartialOrd, serde::Deserialize)]
