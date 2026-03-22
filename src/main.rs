@@ -118,18 +118,18 @@ impl MirrorFileInternal {
         };
         let icon = get_icon(&get_name_from_path(&path));
 
-        let query_result = sqlx::query("SELECT id FROM files WHERE path = ?")
+        let query_result = sqlx::query("SELECT id, downloads FROM files WHERE path = ?")
             .bind(path.display().to_string().replacen("files/", "/", 1))
             .fetch_one(&mut **db)
             .await;
 
-        let id = match query_result {
+        let (id, downloads) = match query_result {
             Ok(row) => {
-                row.try_get::<String, _>("id").ok()
+                (row.try_get::<String, _>("id").ok(), row.try_get::<i32, _>("downloads").ok())
             }
             Err(error) => {
                 eprintln!("Database error (get_file_by_id): {:?}", error);
-                None
+                (None, None)
             }
         };
 
@@ -138,26 +138,26 @@ impl MirrorFileInternal {
             ext,
             icon,
             size: md.len(),
-            downloads: None,
+            downloads,
         }, id, path: path.display().to_string().replacen("files/", "/", 1) })
     }
 
     pub async fn load_by_id(mut db: Connection<FileDb>, id: &str) -> Option<Self> {
-        let query_result = sqlx::query("SELECT path FROM files WHERE id = ?")
+        let query_result = sqlx::query("SELECT path, downloads FROM files WHERE id = ?")
             .bind(id)
             .fetch_one(&mut **db)
             .await;
 
-        let path = match query_result {
+        let (path, downloads) = match query_result {
             Ok(row) => {
-                row.try_get::<String, _>("path").ok()
+                Some((row.try_get::<String, _>("path").ok().map(|f| format!("!{}", f))?, row.try_get::<i32, _>("downloads").ok()))
             }
             Err(error) => {
                 eprintln!("Database error (get_file_by_id): {:?}", error);
                 None
             }
         }
-        .map(|f| format!("!{}", f))?;
+        ?;
 
         let file_path = Path::new(&path);
 
@@ -175,7 +175,7 @@ impl MirrorFileInternal {
                 ext,
                 icon,
                 size: md.len(),
-                downloads: None,
+                downloads,
             }, id: Some(id.to_string()), path
         })
     }
