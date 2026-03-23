@@ -14,6 +14,7 @@ use rocket_multipart_form_data::{
     MultipartFormData, MultipartFormDataField, MultipartFormDataOptions, Repetition,
 };
 use serde::Serialize;
+use uuid::Uuid;
 use std::{
     cmp::Ordering,
     collections::HashMap,
@@ -152,6 +153,54 @@ impl MirrorFileInternal {
         })
     }
 
+    pub async fn load_and_share(mut db: Connection<FileDb>, path: &PathBuf) -> Option<Self> {
+        let md = fs::metadata(&path).ok()?;
+        let name = get_name_from_path(&path);
+        let ext = if md.is_file() {
+            get_extension_from_path(&path)
+        } else {
+            "folder".into()
+        };
+        let icon = get_icon(&get_name_from_path(&path));
+
+        let query_result = sqlx::query("SELECT id, downloads FROM files WHERE path = ?")
+            .bind(path.display().to_string().replacen("files/", "", 1))
+            .fetch_one(&mut **db)
+            .await;
+
+        let (id, downloads) = match query_result {
+            Ok(row) => (
+                row.try_get::<String, _>("id").ok().unwrap_or(Uuid::new_v4().to_string()),
+                row.try_get::<i32, _>("downloads").ok(),
+            ),
+            Err(error) => {
+                eprintln!("Database error (MirrorFile::load_and_share [get_file_by_id]): {:?}", error);
+                (Uuid::new_v4().to_string(), None)
+            }
+        };
+
+        if let Err(error) = sqlx::query("INSERT INTO files (id, path, downloads, shared) VALUES (?, ?, 0, 1) ON DUPLICATE KEY UPDATE downloads = downloads + 1")
+            .bind(&id)
+            .bind(&path.display().to_string().trim_start_matches("files/"))
+            .execute(&mut **db)
+            .await
+        {
+            eprintln!("Database error (MirrorFile::load_and_share [share]): {:?}", error);
+        }
+
+        Some(MirrorFileInternal {
+            mirror_file: MirrorFile {
+                name,
+                ext,
+                icon,
+                size: md.len(),
+                downloads,
+            },
+            id: Some(id),
+            path: path.display().to_string().replacen("files/", "/", 1),
+        })
+    }
+
     pub async fn load_by_id(mut db: Connection<FileDb>, id: &str) -> Option<Self> {
         let query_result = sqlx::query("SELECT path, downloads FROM files WHERE id = ?")
             .bind(id)
@@ -203,6 +252,31 @@ impl MirrorFileInternal {
             .await
         {
             eprintln!("Database error (add_download): {:?}", error);
+        }
+    }
+
+    #[allow(unused)] // Reserved for future use
+    async fn share(&mut self, mut db: Connection<FileDb>) -> bool {
+        self.id = if let Ok(result) = sqlx::query("SELECT id FROM files WHERE path = ?")
+            .bind(&self.path)
+            .fetch_one(&mut **db)
+            .await
+        {
+            result.try_get::<String, _>("id").ok()
+        } else {
+            Some(Uuid::new_v4().to_string())
+        };
+
+        if let Err(error) = sqlx::query("INSERT INTO files (id, path, downloads, shared) VALUES (?, ?, 0, 1) ON DUPLICATE KEY UPDATE downloads = downloads + 1")
+            .bind(&self.id)
+            .bind(&self.path)
+            .execute(&mut **db)
+            .await
+        {
+            eprintln!("Database error (add_shared_file): {:?}", error);
+            false
+        } else {
+            true
         }
     }
 }

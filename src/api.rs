@@ -22,7 +22,7 @@ use zip::write::SimpleFileOptions;
 
 use crate::{
     config::CONFIG,
-    db::{add_shared_file, delete_file, FileDb},
+    db::{delete_file, FileDb},
     jwt::JWT,
     read_files, refresh_file_sizes,
     responders::{ApiResponse, ApiResult},
@@ -498,13 +498,15 @@ async fn share(db: Connection<FileDb>, file: PathBuf, token: Result<JWT, Status>
         return Err(Status::NotFound);
     }
 
-    let result = add_shared_file(db, &path.display().to_string().replace("files/", "")).await;
-
-    if let Some(id) = result {
-        Ok(ApiResponse::MessageStatus((
-            Status::Created,
-            Json(ApiInfoResponse { message: id }),
-        )))
+    if let Some(mirror_file) = MirrorFileInternal::load_and_share(db, &path).await {
+        if let Some(id) = mirror_file.id {
+            Ok(ApiResponse::MessageStatus((
+                Status::Created,
+                Json(ApiInfoResponse { message: id }),
+            )))
+        } else {
+            Err(Status::InternalServerError)
+        }
     } else {
         Err(Status::InternalServerError)
     }
@@ -783,19 +785,10 @@ async fn perform_upload(
                 _ => true,
             } {
                 if uploaded_files.len() == 1 {
-                    let result = add_shared_file(
-                        db,
-                        &format!(
-                            "{}/{}",
-                            base_path.trim_start_matches("files/"),
-                            uploaded_files[0].name
-                        )
-                        .replace("//", ""),
-                    )
-                    .await;
-
-                    if let Some(id) = result {
-                        uploaded_files[0].url = Some(format!("http://{}/share/{}", host.0, id));
+                    if let Some(mirror_file) = MirrorFileInternal::load_and_share(db, &Path::new(&base_path).join(&uploaded_files[0].name).to_path_buf()).await {
+                        if let Some(id) = mirror_file.id {
+                            uploaded_files[0].url = Some(format!("http://{}/share/{}", host.0, id));
+                        }
                     }
                 }
             }
@@ -1034,21 +1027,16 @@ async fn perform_upload_chunked(
             "false" => false,
             _ => true,
         } {
-            let result = add_shared_file(
-                db,
-                &format!("{}/{}", base_path.trim_start_matches("files/"), file_name)
-                    .replace("//", ""),
-            )
-            .await;
-
-            if let Some(id) = result {
-                return Ok(ApiResponse::UploadFiles(Json(vec![UploadFile {
-                    name: file_name.clone(),
-                    url: Some(format!("http://{}/share/{}", host.0, id)),
-                    icon: Some(get_icon(file_name)),
-                    error: None,
-                    size: Some(final_file.metadata().unwrap().len()),
-                }])));
+            if let Some(mirror_file) = MirrorFileInternal::load_and_share(db, &Path::new(&base_path).join(&file_name).to_path_buf()).await {
+                if let Some(id) = mirror_file.id {
+                    return Ok(ApiResponse::UploadFiles(Json(vec![UploadFile {
+                        name: file_name.clone(),
+                        url: Some(format!("http://{}/share/{}", host.0, id)),
+                        icon: Some(get_icon(file_name)),
+                        error: None,
+                        size: Some(final_file.metadata().unwrap().len()),
+                    }])));
+                }
             }
         }
     }
