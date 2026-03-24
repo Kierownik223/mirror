@@ -2,10 +2,7 @@ use rand::{distributions::Alphanumeric, Rng};
 use rocket_db_pools::{sqlx, Connection, Database};
 use sqlx::Row;
 
-use bcrypt::verify;
 use uuid::Uuid;
-
-use crate::account::MarmakUser;
 
 #[derive(Database)]
 #[database("marmak")]
@@ -14,87 +11,6 @@ pub struct Db(sqlx::MySqlPool);
 #[derive(Database)]
 #[database("mirror")]
 pub struct FileDb(sqlx::MySqlPool);
-
-pub async fn login_user(
-    mut db: Connection<Db>,
-    username: &str,
-    password: &str,
-    ip: &str,
-) -> Option<MarmakUser> {
-    let query_result = sqlx::query(
-        "SELECT username, password, perms, mirror_settings, email FROM users WHERE username = ? AND verified = 1",
-    )
-    .bind(username)
-    .fetch_one(&mut **db)
-    .await;
-
-    if username == "Nobody" {
-        return None;
-    }
-
-    match query_result {
-        Ok(row) => {
-            let stored_hash = row.try_get::<String, _>("password").ok()?;
-            let username = row.try_get::<String, _>("username").ok()?;
-            if verify(password, &stored_hash).unwrap_or(false) {
-                let perms = row.try_get::<i32, _>("perms").ok()?;
-
-                add_login(db, username.as_str(), ip).await;
-
-                return Some(MarmakUser {
-                    username: username,
-                    password: password.to_string(),
-                    perms,
-                    mirror_settings: row.try_get::<String, _>("mirror_settings").ok(),
-                    email: row.try_get::<String, _>("email").ok(),
-                });
-            } else {
-                None
-            }
-        }
-        Err(error) => {
-            eprintln!("Database error (login_user): {:?}", error);
-            None
-        }
-    }
-}
-
-pub async fn get_user(mut db: Connection<Db>, username: &str) -> Option<MarmakUser> {
-    let query_result = sqlx::query(
-        "SELECT username, password, perms, mirror_settings, email FROM users WHERE username = ? AND verified = 1",
-    )
-    .bind(username)
-    .fetch_one(&mut **db)
-    .await;
-
-    if username == "Nobody" {
-        return None;
-    }
-
-    match query_result {
-        Ok(row) => {
-            let perms = row.try_get::<i32, _>("perms").ok()?;
-
-            return Some(MarmakUser {
-                username: row
-                    .try_get::<String, _>("username")
-                    .ok()
-                    .unwrap_or_default(),
-                password: row
-                    .try_get::<String, _>("password")
-                    .ok()
-                    .unwrap_or_default(),
-                perms,
-                mirror_settings: row.try_get::<String, _>("mirror_settings").ok(),
-                email: row.try_get::<String, _>("email").ok(),
-            });
-        }
-        Err(error) => {
-            eprintln!("Database error (get_user): {:?}", error);
-            None
-        }
-    }
-}
 
 pub async fn update_settings(mut db: Connection<Db>, username: &str, settings: &str) -> () {
     if let Err(error) = sqlx::query("UPDATE users SET mirror_settings = ? WHERE username = ?")

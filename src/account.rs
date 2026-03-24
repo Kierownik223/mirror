@@ -1,5 +1,6 @@
 use std::{collections::HashMap, fs, path::Path};
 
+use bcrypt::verify;
 use rocket::{
     fairing::AdHoc,
     form::Form,
@@ -8,17 +9,11 @@ use rocket::{
     time::{Duration, OffsetDateTime},
     State,
 };
-use rocket_db_pools::Connection;
+use rocket_db_pools::{Connection, sqlx::{self, Row}};
 use rocket_dyn_templates::{context, Template};
 
 use crate::{
-    config::CONFIG,
-    db::{add_rememberme_token, delete_session, login_user, Db},
-    guards::{Settings, XForwardedFor},
-    jwt::{create_jwt, JWT},
-    responders::IndexResult,
-    utils::{add_token_cookie, get_root_domain},
-    Host, IndexResponse, Language, TranslationStore,
+    Host, IndexResponse, Language, TranslationStore, config::CONFIG, db::{Db, add_login, add_rememberme_token, delete_session}, guards::{Settings, XForwardedFor}, jwt::{JWT, create_jwt}, responders::IndexResult, utils::{add_token_cookie, get_root_domain}
 };
 
 #[derive(Debug, PartialEq, Eq, FromForm)]
@@ -28,6 +23,89 @@ pub struct MarmakUser {
     pub perms: i32,
     pub mirror_settings: Option<String>,
     pub email: Option<String>,
+}
+
+impl MarmakUser {
+    pub async fn login(
+        mut db: Connection<Db>,
+        username: &str,
+        password: &str,
+        ip: &str,
+    ) -> Option<Self> {
+        let query_result = sqlx::query(
+            "SELECT username, password, perms, mirror_settings, email FROM users WHERE username = ? AND verified = 1",
+        )
+        .bind(username)
+        .fetch_one(&mut **db)
+        .await;
+
+        if username == "Nobody" {
+            return None;
+        }
+
+        match query_result {
+            Ok(row) => {
+                let stored_hash = row.try_get::<String, _>("password").ok()?;
+                let username = row.try_get::<String, _>("username").ok()?;
+                if verify(password, &stored_hash).unwrap_or(false) {
+                    let perms = row.try_get::<i32, _>("perms").ok()?;
+
+                    add_login(db, username.as_str(), ip).await;
+
+                    return Some(Self {
+                        username: username,
+                        password: password.to_string(),
+                        perms,
+                        mirror_settings: row.try_get::<String, _>("mirror_settings").ok(),
+                        email: row.try_get::<String, _>("email").ok(),
+                    });
+                } else {
+                    None
+                }
+            }
+            Err(error) => {
+                eprintln!("Database error (login_user): {:?}", error);
+                None
+            }
+        }
+    }
+
+    pub async fn get(mut db: Connection<Db>, username: &str) -> Option<MarmakUser> {
+        let query_result = sqlx::query(
+            "SELECT username, password, perms, mirror_settings, email FROM users WHERE username = ? AND verified = 1",
+        )
+        .bind(username)
+        .fetch_one(&mut **db)
+        .await;
+
+        if username == "Nobody" {
+            return None;
+        }
+
+        match query_result {
+            Ok(row) => {
+                let perms = row.try_get::<i32, _>("perms").ok()?;
+
+                return Some(MarmakUser {
+                    username: row
+                        .try_get::<String, _>("username")
+                        .ok()
+                        .unwrap_or_default(),
+                    password: row
+                        .try_get::<String, _>("password")
+                        .ok()
+                        .unwrap_or_default(),
+                    perms,
+                    mirror_settings: row.try_get::<String, _>("mirror_settings").ok(),
+                    email: row.try_get::<String, _>("email").ok(),
+                });
+            }
+            Err(error) => {
+                eprintln!("Database error (get_user): {:?}", error);
+                None
+            }
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, FromForm)]
@@ -94,7 +172,7 @@ async fn login(
     host: Host<'_>,
     settings: Settings<'_>,
 ) -> IndexResult {
-    if let Some(db_user) = login_user(db, &user.username, &user.password, &ip.0).await {
+    if let Some(db_user) = MarmakUser::login(db, &user.username, &user.password, &ip.0).await {
         if !settings.nooverride {
             if let Some(mirror_settings) = db_user.mirror_settings.as_ref() {
                 let decoded: HashMap<String, String> =

@@ -1,5 +1,5 @@
 use audiotags::{MimeType, Tag};
-use db::{get_user, Db};
+use db::Db;
 use rocket::{
     http::{ContentType, Cookie, CookieJar, SameSite, Status},
     response::{content::RawHtml, Redirect},
@@ -31,7 +31,7 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::i18n::{Language, TranslationStore};
+use crate::{account::MarmakUser, i18n::{Language, TranslationStore}};
 use crate::{
     api::SearchFile,
     config::CONFIG,
@@ -1421,7 +1421,7 @@ async fn fetch_settings(
 
     let strings = translations.get_translation(&lang.0);
 
-    if let Some(db_user) = get_user(db, &token.claims.sub).await {
+    if let Some(db_user) = MarmakUser::get(db, &token.claims.sub).await {
         let decoded: HashMap<String, String> =
             serde_json::from_str(&db_user.mirror_settings.unwrap_or("{}".to_string()))
                 .expect("Failed to parse JSON");
