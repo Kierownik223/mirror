@@ -4,6 +4,9 @@ use sqlx::Row;
 
 use uuid::Uuid;
 
+#[cfg(not(test))]
+use crate::account::MarmakUser;
+
 #[derive(Database)]
 #[database("marmak")]
 pub struct Db(sqlx::MySqlPool);
@@ -119,7 +122,7 @@ pub async fn get_user_by_session(mut db: Connection<Db>, id: &str) -> Option<Mar
     match query_result {
         Ok(row) => {
             if let Some(user) = row.try_get::<String, _>("user").ok() {
-                get_user(db, &user).await
+                MarmakUser::get(db, &user).await
             } else {
                 None
             }
