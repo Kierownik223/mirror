@@ -211,7 +211,7 @@ impl MirrorFileInternal {
             Ok(row) => Some((
                 row.try_get::<String, _>("path")
                     .ok()
-                    .map(|f| format!("!{}", f))?,
+                    .map(|f| format!("files/{}", f))?,
                 row.try_get::<i32, _>("downloads").ok(),
             )),
             Err(error) => {
@@ -220,16 +220,16 @@ impl MirrorFileInternal {
             }
         }?;
 
-        let file_path = Path::new(&path);
+        let file_path = Path::new(&path).to_path_buf();
 
         let md = fs::metadata(&file_path).ok()?;
-        let name = get_name_from_path(&file_path.to_path_buf());
+        let name = get_name_from_path(&file_path);
         let ext = if md.is_file() {
-            get_extension_from_path(&file_path.to_path_buf())
+            get_extension_from_path(&file_path)
         } else {
             "folder".into()
         };
-        let icon = get_icon(&get_name_from_path(&file_path.to_path_buf()));
+        let icon = get_icon(&get_name_from_path(&file_path));
 
         Some(MirrorFileInternal {
             mirror_file: MirrorFile {
