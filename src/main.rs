@@ -240,7 +240,7 @@ impl MirrorFileInternal {
                 downloads,
             },
             id: Some(id.to_string()),
-            path,
+            path: file_path.display().to_string().replacen("files/", "/", 1),
         })
     }
 
@@ -536,7 +536,7 @@ async fn download_share(
     if let Some(file) = MirrorFileInternal::load_by_id(db, id).await {
         file.add_download(db2).await;
         open_file(
-            Path::new(&file.path).to_path_buf(),
+            Path::new("files/").join(&file.path).to_path_buf(),
             &get_cache_control(false),
         )
         .await
