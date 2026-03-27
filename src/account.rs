@@ -13,7 +13,7 @@ use rocket_db_pools::{Connection, sqlx::{self, Row}};
 use rocket_dyn_templates::{context, Template};
 
 use crate::{
-    Host, IndexResponse, Language, TranslationStore, config::CONFIG, db::{Db, add_login, add_rememberme_token, delete_session}, guards::{Settings, XForwardedFor}, jwt::{JWT, create_jwt}, responders::IndexResult, utils::{add_token_cookie, get_root_domain}
+    Host, IndexResponse, Language, TranslationStore, config::CONFIG, db::{Db, add_rememberme_token, delete_session}, guards::{Settings, XForwardedFor}, jwt::{JWT, create_jwt}, responders::IndexResult, utils::{add_token_cookie, get_root_domain}
 };
 
 #[derive(Debug, PartialEq, Eq, FromForm)]
@@ -50,8 +50,14 @@ impl MarmakUser {
                 if verify(password, &stored_hash).unwrap_or(false) {
                     let perms = row.try_get::<i32, _>("perms").ok()?;
 
-                    add_login(db, username.as_str(), ip).await;
-
+                    if let Err(error) = sqlx::query("INSERT INTO logins (account, time, ip, via) VALUES (?, CURRENT_TIMESTAMP, ?, 'MARMAK Mirror')")
+                        .bind(&username)
+                        .bind(ip)
+                        .execute(&mut **db)
+                        .await
+                    {
+                        eprintln!("Database error (MarmakUser::login [add_login]): {:?}", error);
+                    }
                     return Some(Self {
                         username: username,
                         password: password.to_string(),
@@ -64,7 +70,7 @@ impl MarmakUser {
                 }
             }
             Err(error) => {
-                eprintln!("Database error (login_user): {:?}", error);
+                eprintln!("Database error (MarmakUser::login): {:?}", error);
                 None
             }
         }

@@ -26,17 +26,6 @@ pub async fn update_settings(mut db: Connection<Db>, username: &str, settings: &
     }
 }
 
-pub async fn add_login(mut db: Connection<Db>, username: &str, ip: &str) -> () {
-    if let Err(error) = sqlx::query("INSERT INTO logins (account, time, ip, via) VALUES (?, CURRENT_TIMESTAMP, ?, 'MARMAK Mirror')")
-        .bind(username)
-        .bind(ip)
-        .execute(&mut **db)
-        .await
-    {
-        eprintln!("Database error (add_login): {:?}", error);
-    }
-}
-
 pub async fn add_download(mut db: Connection<FileDb>, path: &str) -> () {
     let id = Uuid::new_v4().to_string();
 
