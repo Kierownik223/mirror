@@ -125,7 +125,7 @@ impl MirrorFileInternal {
         let icon = get_icon(&get_name_from_path(&path));
 
         let query_result = sqlx::query("SELECT id, downloads FROM files WHERE path = ?")
-            .bind(path.display().to_string().replacen("files/", "", 1))
+            .bind(path.display().to_string().trim_start_matches("files/").trim_start_matches("/"))
             .fetch_one(&mut **db)
             .await;
 
@@ -135,7 +135,7 @@ impl MirrorFileInternal {
                 row.try_get::<i32, _>("downloads").ok(),
             ),
             Err(error) => {
-                eprintln!("Database error (get_file_by_id): {:?}", error);
+                eprintln!("Database error (MirrorFileInternal::load): {:?}", error);
                 (None, None)
             }
         };
@@ -164,7 +164,7 @@ impl MirrorFileInternal {
         let icon = get_icon(&get_name_from_path(&path));
 
         let query_result = sqlx::query("SELECT id, downloads FROM files WHERE path = ?")
-            .bind(path.display().to_string().replacen("files/", "", 1))
+            .bind(path.display().to_string().trim_start_matches("files/").trim_start_matches("/"))
             .fetch_one(&mut **db)
             .await;
 
@@ -174,21 +174,21 @@ impl MirrorFileInternal {
                 row.try_get::<i32, _>("downloads").ok(),
             ),
             Err(error) => {
-                eprintln!("Database error (MirrorFile::load_and_share [get_file_by_id]): {:?}", error);
+                eprintln!("Database error (MirrorFileInternal::load_and_share [get_file_by_id]): {:?}", error);
                 (Uuid::new_v4().to_string(), None)
             }
         };
 
         if let Err(error) = sqlx::query("INSERT INTO files (id, path, downloads, shared) VALUES (?, ?, 0, 1) ON DUPLICATE KEY UPDATE downloads = downloads + 1")
             .bind(&id)
-            .bind(&path.display().to_string().trim_start_matches("files/"))
+            .bind(&path.display().to_string().trim_start_matches("files/").trim_start_matches("/"))
             .execute(&mut **db)
             .await
         {
-            eprintln!("Database error (MirrorFile::load_and_share [share]): {:?}", error);
+            eprintln!("Database error (MirrorFileInternal::load_and_share [share]): {:?}", error);
         }
 
-        Some(MirrorFileInternal {
+        Some(Self {
             mirror_file: MirrorFile {
                 name,
                 ext,
@@ -215,7 +215,7 @@ impl MirrorFileInternal {
                 row.try_get::<i32, _>("downloads").ok(),
             )),
             Err(error) => {
-                eprintln!("Database error (get_file_by_id): {:?}", error);
+                eprintln!("Database error (MirrorFileInternal::load_by_id): {:?}", error);
                 None
             }
         }?;
@@ -231,7 +231,7 @@ impl MirrorFileInternal {
         };
         let icon = get_icon(&get_name_from_path(&file_path));
 
-        Some(MirrorFileInternal {
+        Some(Self {
             mirror_file: MirrorFile {
                 name,
                 ext,
@@ -251,7 +251,7 @@ impl MirrorFileInternal {
             .execute(&mut **db)
             .await
         {
-            eprintln!("Database error (add_download): {:?}", error);
+            eprintln!("Database error (MirrorFileInternal::add_download): {:?}", error);
         }
     }
 
@@ -273,7 +273,7 @@ impl MirrorFileInternal {
             .execute(&mut **db)
             .await
         {
-            eprintln!("Database error (add_shared_file): {:?}", error);
+            eprintln!("Database error (MirrorFileInternal::share): {:?}", error);
             false
         } else {
             true
