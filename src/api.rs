@@ -785,7 +785,14 @@ async fn perform_upload(
                 _ => true,
             } {
                 if uploaded_files.len() == 1 {
-                    if let Some(mirror_file) = MirrorFileInternal::load_and_share(db, &Path::new(&base_path).join(&uploaded_files[0].name).to_path_buf()).await {
+                    if let Some(mirror_file) = MirrorFileInternal::load_and_share(
+                        db,
+                        &Path::new(&base_path)
+                            .join(&uploaded_files[0].name)
+                            .to_path_buf(),
+                    )
+                    .await
+                    {
                         if let Some(id) = mirror_file.id {
                             uploaded_files[0].url = Some(format!("http://{}/share/{}", host.0, id));
                         }
@@ -1027,7 +1034,12 @@ async fn perform_upload_chunked(
             "false" => false,
             _ => true,
         } {
-            if let Some(mirror_file) = MirrorFileInternal::load_and_share(db, &Path::new(&base_path).join(&file_name).to_path_buf()).await {
+            if let Some(mirror_file) = MirrorFileInternal::load_and_share(
+                db,
+                &Path::new(&base_path).join(&file_name).to_path_buf(),
+            )
+            .await
+            {
                 if let Some(id) = mirror_file.id {
                     return Ok(ApiResponse::UploadFiles(Json(vec![UploadFile {
                         name: file_name.clone(),

@@ -14,7 +14,6 @@ use rocket_multipart_form_data::{
     MultipartFormData, MultipartFormDataField, MultipartFormDataOptions, Repetition,
 };
 use serde::Serialize;
-use uuid::Uuid;
 use std::{
     cmp::Ordering,
     collections::HashMap,
@@ -27,11 +26,15 @@ use std::{
 };
 use tokio::{sync::RwLock, time::sleep};
 use utils::{create_cookie, get_theme, is_restricted, open_file, read_dirs, read_files};
+use uuid::Uuid;
 use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::{account::MarmakUser, i18n::{Language, TranslationStore}};
+use crate::{
+    account::MarmakUser,
+    i18n::{Language, TranslationStore},
+};
 use crate::{
     api::SearchFile,
     config::CONFIG,
@@ -125,7 +128,12 @@ impl MirrorFileInternal {
         let icon = get_icon(&get_name_from_path(&path));
 
         let query_result = sqlx::query("SELECT id, downloads FROM files WHERE path = ?")
-            .bind(path.display().to_string().trim_start_matches("files/").trim_start_matches("/"))
+            .bind(
+                path.display()
+                    .to_string()
+                    .trim_start_matches("files/")
+                    .trim_start_matches("/"),
+            )
             .fetch_one(&mut **db)
             .await;
 
@@ -164,17 +172,27 @@ impl MirrorFileInternal {
         let icon = get_icon(&get_name_from_path(&path));
 
         let query_result = sqlx::query("SELECT id, downloads FROM files WHERE path = ?")
-            .bind(path.display().to_string().trim_start_matches("files/").trim_start_matches("/"))
+            .bind(
+                path.display()
+                    .to_string()
+                    .trim_start_matches("files/")
+                    .trim_start_matches("/"),
+            )
             .fetch_one(&mut **db)
             .await;
 
         let (id, downloads) = match query_result {
             Ok(row) => (
-                row.try_get::<String, _>("id").ok().unwrap_or(Uuid::new_v4().to_string()),
+                row.try_get::<String, _>("id")
+                    .ok()
+                    .unwrap_or(Uuid::new_v4().to_string()),
                 row.try_get::<i32, _>("downloads").ok(),
             ),
             Err(error) => {
-                eprintln!("Database error (MirrorFileInternal::load_and_share [get_file_by_id]): {:?}", error);
+                eprintln!(
+                    "Database error (MirrorFileInternal::load_and_share [get_file_by_id]): {:?}",
+                    error
+                );
                 (Uuid::new_v4().to_string(), None)
             }
         };
@@ -215,7 +233,10 @@ impl MirrorFileInternal {
                 row.try_get::<i32, _>("downloads").ok(),
             )),
             Err(error) => {
-                eprintln!("Database error (MirrorFileInternal::load_by_id): {:?}", error);
+                eprintln!(
+                    "Database error (MirrorFileInternal::load_by_id): {:?}",
+                    error
+                );
                 None
             }
         }?;
@@ -536,7 +557,9 @@ async fn download_share(
     if let Some(file) = MirrorFileInternal::load_by_id(db, id).await {
         file.add_download(db2).await;
         open_file(
-            Path::new("files/").join(&file.path.trim_start_matches("/")).to_path_buf(),
+            Path::new("files/")
+                .join(&file.path.trim_start_matches("/"))
+                .to_path_buf(),
             &get_cache_control(false),
         )
         .await
@@ -1460,7 +1483,7 @@ async fn sync_settings(
     }
 
     let strings = translations.get_translation(&lang.0);
-    
+
     let mut marmak_user = MarmakUser {
         username: token.claims.sub,
         password: "".into(),
@@ -1469,7 +1492,9 @@ async fn sync_settings(
         email: None,
     };
 
-    marmak_user.update_settings(db, Settings::from_cookies(jar)).await;
+    marmak_user
+        .update_settings(db, Settings::from_cookies(jar))
+        .await;
 
     return Ok(RawHtml(format!(
         "<script>alert(\"{}\");window.location.replace(\"/settings\");</script>",
