@@ -1,9 +1,8 @@
 use audiotags::{MimeType, Tag};
 use db::Db;
 use rocket::{
-    http::{ContentType, Cookie, CookieJar, SameSite, Status},
+    http::{ContentType, CookieJar, Status},
     response::{content::RawHtml, Redirect},
-    time::{Duration, OffsetDateTime},
     Data, Request, State,
 };
 use rocket_db_pools::{
@@ -1445,17 +1444,12 @@ async fn fetch_settings(
     let strings = translations.get_translation(&lang.0);
 
     if let Some(db_user) = MarmakUser::get(db, &token.claims.sub).await {
-        let decoded: HashMap<String, String> =
-            serde_json::from_str(&db_user.mirror_settings.unwrap_or("{}".to_string()))
-                .expect("Failed to parse JSON");
-
-        for (key, value) in decoded {
-            let mut now = OffsetDateTime::now_utc();
-            now += Duration::days(365);
-            let mut cookie = Cookie::new(key, value);
-            cookie.set_expires(now);
-            cookie.set_same_site(SameSite::Lax);
-            jar.add(cookie);
+        if let Some(settings) = db_user.mirror_settings {
+            let decoded: Settings =
+                serde_json::from_str(&settings)
+                    .expect("Failed to parse JSON");
+                
+            decoded.to_cookies(jar);
         }
     }
 
