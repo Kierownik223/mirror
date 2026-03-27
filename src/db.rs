@@ -15,17 +15,6 @@ pub struct Db(sqlx::MySqlPool);
 #[database("mirror")]
 pub struct FileDb(sqlx::MySqlPool);
 
-pub async fn update_settings(mut db: Connection<Db>, username: &str, settings: &str) -> () {
-    if let Err(error) = sqlx::query("UPDATE users SET mirror_settings = ? WHERE username = ?")
-        .bind(settings)
-        .bind(username)
-        .execute(&mut **db)
-        .await
-    {
-        eprintln!("Database error (update_settings): {:?}", error);
-    }
-}
-
 pub async fn add_download(mut db: Connection<FileDb>, path: &str) -> () {
     let id = Uuid::new_v4().to_string();
 

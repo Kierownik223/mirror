@@ -13,7 +13,7 @@ use rocket_db_pools::{Connection, sqlx::{self, Row}};
 use rocket_dyn_templates::{context, Template};
 
 use crate::{
-    Host, IndexResponse, Language, TranslationStore, config::CONFIG, db::{Db, add_rememberme_token, delete_session}, guards::{Settings, XForwardedFor}, jwt::{JWT, create_jwt}, responders::IndexResult, utils::{add_token_cookie, get_root_domain}
+    Host, IndexResponse, Language, TranslationStore, config::CONFIG, db::{Db, add_rememberme_token, delete_session}, guards::{Settings, XForwardedFor}, jwt::{JWT, create_jwt}, responders::IndexResult, settings, utils::{add_token_cookie, get_root_domain}
 };
 
 #[derive(Debug, PartialEq, Eq, FromForm)]
@@ -26,6 +26,23 @@ pub struct MarmakUser {
 }
 
 impl MarmakUser {
+    pub async fn update_settings(&mut self, mut db: Connection<Db>, settings: Settings<'_>) -> bool {
+        let settings = serde_json::to_string(&settings).expect("Failed to serialize cookie data");
+
+        if let Err(error) = sqlx::query("UPDATE users SET mirror_settings = ? WHERE username = ?")
+            .bind(&settings)
+            .bind(&self.username)
+            .execute(&mut **db)
+            .await
+        {
+            eprintln!("Database error (MarmakUser::update_settings): {:?}", error);
+            false
+        } else {
+            self.mirror_settings = Some(settings);
+            true
+        }
+    }
+
     pub async fn login(
         mut db: Connection<Db>,
         username: &str,

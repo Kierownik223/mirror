@@ -1460,28 +1460,16 @@ async fn sync_settings(
     }
 
     let strings = translations.get_translation(&lang.0);
+    
+    let mut marmak_user = MarmakUser {
+        username: token.claims.sub,
+        password: "".into(),
+        perms: token.claims.perms,
+        mirror_settings: None,
+        email: None,
+    };
 
-    let keys = vec![
-        "lang",
-        "hires",
-        "smallhead",
-        "theme",
-        "nooverride",
-        "viewers",
-        "use_si",
-        "audio_player",
-        "video_player",
-    ];
-
-    let mut cookie_map: HashMap<String, Option<String>> = HashMap::new();
-    for key in keys {
-        let value = jar.get(key).map(|cookie| cookie.value().to_string());
-        cookie_map.insert(key.to_string(), value);
-    }
-
-    let settings = serde_json::to_string(&cookie_map).expect("Failed to serialize cookie data");
-
-    db::update_settings(db, &token.claims.sub, settings.as_str()).await;
+    marmak_user.update_settings(db, Settings::from_cookies(jar)).await;
 
     return Ok(RawHtml(format!(
         "<script>alert(\"{}\");window.location.replace(\"/settings\");</script>",
