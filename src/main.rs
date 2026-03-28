@@ -1,10 +1,7 @@
 use audiotags::{MimeType, Tag};
 use db::Db;
 use rocket::{
-    http::{ContentType, Cookie, CookieJar, SameSite, Status},
-    response::{content::RawHtml, Redirect},
-    time::{Duration, OffsetDateTime},
-    Data, Request, State,
+    Data, Request, State, fs::NamedFile, http::{ContentType, Cookie, CookieJar, SameSite, Status}, response::{Redirect, content::RawHtml}, time::{Duration, OffsetDateTime}
 };
 use rocket_db_pools::{
     sqlx::{self, Row},
@@ -26,7 +23,7 @@ use std::{
     sync::Arc,
 };
 use tokio::{sync::RwLock, time::sleep};
-use utils::{create_cookie, get_theme, is_restricted, open_file, read_dirs, read_files};
+use utils::{create_cookie, get_theme, is_restricted, read_dirs, read_files};
 use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
@@ -255,6 +252,24 @@ impl MirrorFileInternal {
         }
     }
 
+    pub async fn open_file(path: PathBuf, cache_control: &str) -> IndexResult {
+        if !path.exists() {
+            return Err(Status::NotFound);
+        }
+
+        if CONFIG.standalone {
+            match NamedFile::open(&path).await {
+                Ok(f) => Ok(IndexResponse::NamedFile(f, cache_control.to_string())),
+                Err(_) => Err(Status::InternalServerError),
+            }
+        } else {
+            Ok(IndexResponse::HeaderFile(HeaderFile(
+                path.display().to_string(),
+                cache_control.to_string(),
+            )))
+        }
+    }
+
     #[allow(unused)] // Reserved for future use
     async fn share(&mut self, mut db: Connection<FileDb>) -> bool {
         self.id = if let Ok(result) = sqlx::query("SELECT id FROM files WHERE path = ?")
@@ -411,7 +426,7 @@ async fn poster(
     let (path, is_private) = if let Ok(rest) = file.strip_prefix("private") {
         if username == "Nobody" {
             if get_extension_from_path(&rest.to_path_buf()) == "mp3" {
-                return open_file(
+                return MirrorFileInternal::open_file(
                     Path::new(&"public/static/images/icons/256x256/audio.png").to_path_buf(),
                     "private",
                 )
@@ -439,7 +454,7 @@ async fn poster(
     let video_path = Path::new(&video_file_str);
 
     if video_path.exists() {
-        return open_file(video_path.to_path_buf(), &get_cache_control(is_private)).await;
+        return MirrorFileInternal::open_file(video_path.to_path_buf(), &get_cache_control(is_private)).await;
     }
 
     if let Ok(tag) = Tag::new().read_from_path(&path) {
@@ -459,7 +474,7 @@ async fn poster(
                 get_cache_control(is_private),
             ));
         } else {
-            return open_file(
+            return MirrorFileInternal::open_file(
                 Path::new(&"public/static/images/icons/256x256/audio.png").to_path_buf(),
                 &get_cache_control(is_private),
             )
@@ -476,7 +491,7 @@ async fn poster(
             get_icon(&get_name_from_path(&path))
         };
 
-        open_file(
+        MirrorFileInternal::open_file(
             Path::new(&format!("public/static/images/icons/256x256/{}.png", icon)).to_path_buf(),
             if is_private { "private" } else { "public" },
         )
@@ -535,7 +550,7 @@ async fn download_share(
 
     if let Some(file) = MirrorFileInternal::load_by_id(db, id).await {
         file.add_download(db2).await;
-        open_file(
+        MirrorFileInternal::open_file(
             Path::new("files/").join(&file.path.trim_start_matches("/")).to_path_buf(),
             &get_cache_control(false),
         )
@@ -586,7 +601,7 @@ async fn perform_download(
     let (path, is_private) = get_real_path(&file, username.to_string())?;
 
     if is_private {
-        return open_file(path, "private").await;
+        return MirrorFileInternal::open_file(path, "private").await;
     }
 
     let file = file.display().to_string();
@@ -607,7 +622,7 @@ async fn perform_download(
     .to_lowercase();
 
     if !CONFIG.extensions.contains(&ext) {
-        return open_file(path, &get_cache_control(is_private)).await;
+        return MirrorFileInternal::open_file(path, &get_cache_control(is_private)).await;
     } else if &ext == "folder" {
         return Err(Status::Forbidden);
     }
@@ -616,7 +631,7 @@ async fn perform_download(
         add_download(db, &file).await;
     }
 
-    open_file(path, "private").await
+    MirrorFileInternal::open_file(path, "private").await
 }
 
 #[get("/static/<file..>")]
@@ -627,7 +642,7 @@ async fn static_files(file: PathBuf) -> IndexResult {
         return Err(Status::NotFound);
     }
 
-    open_file(path, &get_static_cache_control()).await
+    MirrorFileInternal::open_file(path, &get_static_cache_control()).await
 }
 
 #[get("/<file..>", rank = 10)]
@@ -649,7 +664,7 @@ async fn index_db(
     {
         let path = Path::new("public").join(file);
 
-        return open_file(path, &get_static_cache_control()).await;
+        return MirrorFileInternal::open_file(path, &get_static_cache_control()).await;
     }
 
     let jwt = token.clone().unwrap_or_default();
@@ -724,7 +739,7 @@ async fn index(
     {
         let path = Path::new("public").join(file);
 
-        return open_file(path, &get_static_cache_control()).await;
+        return MirrorFileInternal::open_file(path, &get_static_cache_control()).await;
     }
 
     let jwt = token.clone().unwrap_or_default();
@@ -852,7 +867,7 @@ async fn display_file(
         }
         "7z" | "rar" | "zip" => {
             if !settings.viewers {
-                return open_file(path, "private").await;
+                return MirrorFileInternal::open_file(path, "private").await;
             }
 
             let output = Command::new("7z")
@@ -884,7 +899,7 @@ async fn display_file(
         }
         "mp4" | "mkv" | "webm" => {
             if !settings.video_player {
-                return open_file(path, "private").await;
+                return MirrorFileInternal::open_file(path, "private").await;
             }
 
             let videopath = &Path::new("/").join(file.clone()).display().to_string();
@@ -919,7 +934,7 @@ async fn display_file(
         }
         "mp3" | "m4a" | "m4b" | "flac" | "wav" => {
             if !settings.audio_player {
-                return open_file(path, "private").await;
+                return MirrorFileInternal::open_file(path, "private").await;
             }
 
             let audiopath = Path::new("/").join(file.clone()).display().to_string();
@@ -1095,7 +1110,7 @@ async fn display_file(
                     },
                 )))
             } else {
-                open_file(path, cache_control).await
+                MirrorFileInternal::open_file(path, cache_control).await
             }
         }
     }

@@ -10,7 +10,6 @@ use std::{
 
 use once_cell::sync::Lazy;
 use rocket::{
-    fs::NamedFile,
     http::{Cookie, CookieJar, SameSite, Status},
     time::{Duration, OffsetDateTime},
 };
@@ -18,7 +17,7 @@ use rocket_dyn_templates::tera::{to_value, try_get_value, Value};
 use tokio::sync::RwLock;
 use zip::write::SimpleFileOptions;
 
-use crate::{config::CONFIG, FileEntry, HeaderFile, IndexResponse, MirrorFile};
+use crate::{config::CONFIG, FileEntry, MirrorFile};
 
 static SHARED_ICONS: Lazy<HashMap<String, String>> = Lazy::new(load_shared_icons);
 
@@ -184,24 +183,6 @@ pub fn is_hidden(path: &Path, perms: Option<i32>) -> bool {
     }
 
     false
-}
-
-pub async fn open_file(path: PathBuf, cache_control: &str) -> Result<IndexResponse, Status> {
-    if !path.exists() {
-        return Err(Status::NotFound);
-    }
-
-    if CONFIG.standalone {
-        match NamedFile::open(&path).await {
-            Ok(f) => Ok(IndexResponse::NamedFile(f, cache_control.to_string())),
-            Err(_) => Err(Status::InternalServerError),
-        }
-    } else {
-        Ok(IndexResponse::HeaderFile(HeaderFile(
-            path.display().to_string(),
-            cache_control.to_string(),
-        )))
-    }
 }
 
 pub fn create_cookie<'a>(name: &'a str, value: &str) -> Cookie<'a> {
