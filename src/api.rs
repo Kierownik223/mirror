@@ -27,8 +27,8 @@ use crate::{
     read_files, refresh_file_sizes,
     responders::{ApiResponse, ApiResult},
     utils::{
-        add_path_to_zip, get_genre, get_icon, get_name_from_path, get_real_path,
-        get_real_path_with_perms, get_virtual_path, is_hidden_path_str, is_restricted,
+        add_path_to_zip, get_genre, get_real_path,
+        get_real_path_with_perms, is_hidden_path_str, is_restricted,
         map_io_error_to_status, read_dirs_async,
     },
     Disk, FileSizes, Host, MirrorFile, MirrorFileInternal, Sysinfo,
@@ -82,7 +82,7 @@ impl VideoFile {
         let mdpath = format!("files/video/metadata{}.md", path.replace("video/", ""));
         let mdpath = Path::new(mdpath.as_str());
 
-        let mut vidtitle = get_name_from_path(&Path::new(path).to_path_buf());
+        let mut vidtitle = MirrorFile::get_name_from_path(&Path::new(path).to_path_buf());
 
         let details = if mdpath.exists() {
             let markdown_text = fs::read_to_string(mdpath.display().to_string())
@@ -211,12 +211,12 @@ async fn search(
             .await
             .iter()
             .map(|x| SearchFile {
-                name: get_name_from_path(&Path::new(&x.file).to_path_buf()),
-                full_path: get_virtual_path(&x.file),
+                name: MirrorFile::get_name_from_path(&Path::new(&x.file).to_path_buf()),
+                full_path: MirrorFile::get_virtual_path(&x.file),
                 icon: if Path::new(&x.file).is_dir() {
                     "folder".into()
                 } else {
-                    get_icon(&get_name_from_path(&Path::new(&x.file).to_path_buf()))
+                    MirrorFile::get_icon(&MirrorFile::get_name_from_path(&Path::new(&x.file).to_path_buf()))
                 },
                 size: x.size,
             })
@@ -296,7 +296,7 @@ async fn display_file(
             let title = tag
                 .title()
                 .map(|s| s.to_string())
-                .unwrap_or(get_name_from_path(&path));
+                .unwrap_or(MirrorFile::get_name_from_path(&path));
 
             let artist = tag.artist().map(|s| s.replace("\x00", "/"));
             let album = tag.album_title().map(|s| s.to_string());
@@ -741,7 +741,7 @@ async fn perform_upload(
         for file_field in file_fields {
             if let Some(file_name) = &file_field.file_name {
                 let normalized_path = file_name.replace('\\', "/");
-                let file_name = &get_name_from_path(&Path::new(&normalized_path).to_path_buf());
+                let file_name = &MirrorFile::get_name_from_path(&Path::new(&normalized_path).to_path_buf());
 
                 let upload_path = format!("{}/{}", base_path, file_name);
 
@@ -768,7 +768,7 @@ async fn perform_upload(
                 uploaded_files.push(UploadFile {
                     name: file_name.to_string(),
                     url: Some(format!("http://{}/{}/{}", host.0, user_path, file_name)),
-                    icon: Some(get_icon(file_name)),
+                    icon: Some(MirrorFile::get_icon(file_name)),
                     error: None,
                     size: Some(file.metadata().unwrap().len()),
                 });
@@ -1032,7 +1032,7 @@ async fn perform_upload_chunked(
                     return Ok(ApiResponse::UploadFiles(Json(vec![UploadFile {
                         name: file_name.clone(),
                         url: Some(format!("http://{}/share/{}", host.0, id)),
-                        icon: Some(get_icon(file_name)),
+                        icon: Some(MirrorFile::get_icon(file_name)),
                         error: None,
                         size: Some(final_file.metadata().unwrap().len()),
                     }])));
@@ -1044,7 +1044,7 @@ async fn perform_upload_chunked(
     Ok(ApiResponse::UploadFiles(Json(vec![UploadFile {
         name: file_name.clone(),
         url: Some(format!("http://{}/{}/{}", host.0, user_path, file_name)),
-        icon: Some(get_icon(file_name)),
+        icon: Some(MirrorFile::get_icon(file_name)),
         error: None,
         size: Some(final_file.metadata().unwrap().len()),
     }])))

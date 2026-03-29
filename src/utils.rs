@@ -8,7 +8,6 @@ use std::{
     sync::Arc,
 };
 
-use once_cell::sync::Lazy;
 use rocket::{
     http::{Cookie, CookieJar, SameSite, Status},
     time::{Duration, OffsetDateTime},
@@ -18,8 +17,6 @@ use tokio::sync::RwLock;
 use zip::write::SimpleFileOptions;
 
 use crate::{config::CONFIG, FileEntry, MirrorFile};
-
-static SHARED_ICONS: Lazy<HashMap<String, String>> = Lazy::new(load_shared_icons);
 
 pub fn read_dirs(path: &str) -> Result<Vec<MirrorFile>, Error> {
     let mut dir_list = Vec::new();
@@ -387,53 +384,13 @@ pub fn get_genre(genre: &str) -> Result<String, Status> {
     }
 }
 
-pub fn get_cache_control(is_private: bool) -> String {
-    if is_private {
-        "private".into()
-    } else if CONFIG.max_age == 0 {
-        "public".into()
-    } else {
-        format!("public, max-age={}", CONFIG.max_age)
-    }
-}
-
-pub fn get_static_cache_control() -> String {
-    if CONFIG.static_max_age == 0 {
-        "public".into()
-    } else {
-        format!("public, max-age={}", CONFIG.static_max_age)
-    }
-}
-
-pub fn get_name_from_path(path: &PathBuf) -> String {
-    path.file_name()
-        .unwrap_or_default()
-        .to_str()
-        .unwrap_or_default()
-        .to_string()
-}
-
-pub fn get_extension_from_path(path: &PathBuf) -> String {
-    path.extension()
-        .unwrap_or_default()
-        .to_str()
-        .unwrap_or_default()
-        .to_string()
-}
-
-pub fn get_virtual_path(path: &str) -> String {
-    Path::new(&path.replace("files/", "/"))
-        .display()
-        .to_string()
-}
-
 pub fn is_hidden_path(path: &Path, perms: Option<i32>) -> bool {
     let mut current = Some(path);
 
     while let Some(p) = current {
         if CONFIG
             .hidden_files
-            .contains(&get_name_from_path(&p.to_path_buf()))
+            .contains(&MirrorFile::get_name_from_path(&p.to_path_buf()))
         {
             if let Some(perms) = perms {
                 return perms != 0;
@@ -462,20 +419,6 @@ pub fn is_hidden_path_str(path: &str, perms: Option<i32>) -> bool {
     is_hidden_path(Path::new(path), perms)
 }
 
-pub fn get_icon(file_name: &str) -> String {
-    let ext = get_extension_from_filename(file_name)
-        .unwrap_or_else(|| "")
-        .to_lowercase();
-
-    let mut icon = get_shared_icon(&ext);
-
-    if !Path::new(&format!("public/static/images/icons/{}.png", &icon)).exists() {
-        icon = "default";
-    }
-
-    icon.to_string()
-}
-
 pub fn add_token_cookie<'a>(token: &str, host: &str, jar: &'a CookieJar<'_>) -> &'a CookieJar<'a> {
     let mut jwt_cookie = Cookie::new("matoken", token.to_string());
     jwt_cookie.set_domain(format!(".{}", get_root_domain(host)));
@@ -497,25 +440,4 @@ pub fn parse_bool(input: &str) -> bool {
         "false" => false,
         _ => false,
     }
-}
-
-fn load_shared_icons() -> HashMap<String, String> {
-    let toml_str =
-        fs::read_to_string("shared_icons.toml").expect("Failed to load shared_icons.toml");
-
-    let parsed: toml::Value = toml::from_str(&toml_str).expect("Failed to parse shared_icons.toml");
-
-    let table = parsed
-        .get("shared_icons")
-        .and_then(|v| v.as_table())
-        .expect("Failed to parse shared_icons.toml");
-
-    table
-        .iter()
-        .map(|(k, v)| (k.clone(), v.as_str().unwrap().to_string()))
-        .collect()
-}
-
-fn get_shared_icon<'a>(ext: &'a str) -> &'a str {
-    SHARED_ICONS.get(ext).map(|s| s.as_str()).unwrap_or(ext)
 }

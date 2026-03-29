@@ -1,5 +1,6 @@
 use audiotags::{MimeType, Tag};
 use db::Db;
+use once_cell::sync::Lazy;
 use rocket::{
     Data, Request, State, fs::NamedFile, http::{ContentType, Cookie, CookieJar, SameSite, Status}, response::{Redirect, content::RawHtml}, time::{Duration, OffsetDateTime}
 };
@@ -32,20 +33,18 @@ use crate::{account::MarmakUser, i18n::{Language, TranslationStore}};
 use crate::{
     api::SearchFile,
     config::CONFIG,
-    utils::{get_icon, get_virtual_path, is_hidden_path_str},
+    utils::is_hidden_path_str,
 };
 use crate::{
     api::VideoFile,
     utils::{
-        format_size_filter, get_cache_control, get_extension_from_path, get_genre,
-        get_name_from_path, get_real_path, get_root_domain, is_hidden, map_io_error_to_status,
+        format_size_filter, get_genre, get_real_path, get_root_domain, is_hidden, map_io_error_to_status,
         parse_7z_output, read_dirs_async,
     },
 };
 use crate::{db::get_file_by_id, jwt::JWT};
 use crate::{
     db::{add_download, FileDb},
-    utils::get_static_cache_control,
 };
 use crate::{
     guards::{FormSettings, FullUri, HeaderFile, Host, Settings},
@@ -71,6 +70,8 @@ mod utils;
 
 #[macro_use]
 extern crate rocket;
+
+static SHARED_ICONS: Lazy<HashMap<String, String>> = Lazy::new(load_shared_icons);
 
 #[derive(PartialOrd)]
 pub struct MirrorFileInternal {
@@ -113,13 +114,13 @@ impl Default for MirrorFileInternal {
 impl MirrorFileInternal {
     pub async fn load(mut db: Connection<FileDb>, path: &PathBuf) -> Option<Self> {
         let md = fs::metadata(&path).ok()?;
-        let name = get_name_from_path(&path);
+        let name = MirrorFile::get_name_from_path(&path);
         let ext = if md.is_file() {
-            get_extension_from_path(&path)
+            MirrorFile::get_extension_from_path(&path)
         } else {
             "folder".into()
         };
-        let icon = get_icon(&get_name_from_path(&path));
+        let icon = MirrorFile::get_icon(&MirrorFile::get_name_from_path(&path));
 
         let query_result = sqlx::query("SELECT id, downloads FROM files WHERE path = ?")
             .bind(path.display().to_string().replacen("files/", "", 1))
@@ -152,13 +153,13 @@ impl MirrorFileInternal {
 
     pub async fn load_and_share(mut db: Connection<FileDb>, path: &PathBuf) -> Option<Self> {
         let md = fs::metadata(&path).ok()?;
-        let name = get_name_from_path(&path);
+        let name = MirrorFile::get_name_from_path(&path);
         let ext = if md.is_file() {
-            get_extension_from_path(&path)
+            MirrorFile::get_extension_from_path(&path)
         } else {
             "folder".into()
         };
-        let icon = get_icon(&get_name_from_path(&path));
+        let icon = MirrorFile::get_icon(&MirrorFile::get_name_from_path(&path));
 
         let query_result = sqlx::query("SELECT id, downloads FROM files WHERE path = ?")
             .bind(path.display().to_string().replacen("files/", "", 1))
@@ -220,13 +221,13 @@ impl MirrorFileInternal {
         let file_path = Path::new(&path).to_path_buf();
 
         let md = fs::metadata(&file_path).ok()?;
-        let name = get_name_from_path(&file_path);
+        let name = MirrorFile::get_name_from_path(&file_path);
         let ext = if md.is_file() {
-            get_extension_from_path(&file_path)
+            MirrorFile::get_extension_from_path(&file_path)
         } else {
             "folder".into()
         };
-        let icon = get_icon(&get_name_from_path(&file_path));
+        let icon = MirrorFile::get_icon(&MirrorFile::get_name_from_path(&file_path));
 
         Some(MirrorFileInternal {
             mirror_file: MirrorFile {
@@ -342,13 +343,13 @@ impl MirrorFile {
 
     pub fn load(path: &PathBuf) -> Option<Self> {
         let md = fs::metadata(&path).ok()?;
-        let name = get_name_from_path(&path);
+        let name = MirrorFile::get_name_from_path(&path);
         let ext = if md.is_file() {
-            get_extension_from_path(&path)
+            MirrorFile::get_extension_from_path(&path)
         } else {
             "folder".into()
         };
-        let icon = get_icon(&get_name_from_path(&path));
+        let icon = MirrorFile::get_icon(&MirrorFile::get_name_from_path(&path));
 
         Some(MirrorFile {
             name,
@@ -361,7 +362,7 @@ impl MirrorFile {
 
     pub fn new(file_name: &str) -> Self {
         let ext = get_extension_from_filename(file_name).unwrap_or_default();
-        let icon = get_icon(file_name);
+        let icon = MirrorFile::get_icon(file_name);
 
         MirrorFile {
             name: file_name.into(),
@@ -380,6 +381,68 @@ impl MirrorFile {
             size: 0,
             downloads: None,
         }
+    }
+
+    fn get_shared_icon<'a>(ext: &'a str) -> &'a str {
+        SHARED_ICONS.get(ext).map(|s| s.as_str()).unwrap_or(ext)
+    }
+
+    pub fn get_extension_from_filename(filename: &str) -> Option<&str> {
+        Path::new(filename).extension().and_then(OsStr::to_str)
+    }
+
+    pub fn get_icon(file_name: &str) -> String {
+        let ext = get_extension_from_filename(file_name)
+            .unwrap_or_else(|| "")
+            .to_lowercase();
+
+        let mut icon = Self::get_shared_icon(&ext);
+
+        if !Path::new(&format!("public/static/images/icons/{}.png", &icon)).exists() {
+            icon = "default";
+        }
+
+        icon.to_string()
+    }
+
+    pub fn get_cache_control(is_private: bool) -> String {
+        if is_private {
+            "private".into()
+        } else if CONFIG.max_age == 0 {
+            "public".into()
+        } else {
+            format!("public, max-age={}", CONFIG.max_age)
+        }
+    }
+
+    pub fn get_static_cache_control() -> String {
+        if CONFIG.static_max_age == 0 {
+            "public".into()
+        } else {
+            format!("public, max-age={}", CONFIG.static_max_age)
+        }
+    }
+
+    pub fn get_name_from_path(path: &PathBuf) -> String {
+        path.file_name()
+            .unwrap_or_default()
+            .to_str()
+            .unwrap_or_default()
+            .to_string()
+    }
+
+    pub fn get_extension_from_path(path: &PathBuf) -> String {
+        path.extension()
+            .unwrap_or_default()
+            .to_str()
+            .unwrap_or_default()
+            .to_string()
+    }
+
+    pub fn get_virtual_path(path: &str) -> String {
+        Path::new(&path.replace("files/", "/"))
+            .display()
+            .to_string()
     }
 }
 
@@ -425,7 +488,7 @@ async fn poster(
 
     let (path, is_private) = if let Ok(rest) = file.strip_prefix("private") {
         if username == "Nobody" {
-            if get_extension_from_path(&rest.to_path_buf()) == "mp3" {
+            if MirrorFile::get_extension_from_path(&rest.to_path_buf()) == "mp3" {
                 return MirrorFileInternal::open_file(
                     Path::new(&"public/static/images/icons/256x256/audio.png").to_path_buf(),
                     "private",
@@ -454,7 +517,7 @@ async fn poster(
     let video_path = Path::new(&video_file_str);
 
     if video_path.exists() {
-        return MirrorFileInternal::open_file(video_path.to_path_buf(), &get_cache_control(is_private)).await;
+        return MirrorFileInternal::open_file(video_path.to_path_buf(), &MirrorFile::get_cache_control(is_private)).await;
     }
 
     if let Ok(tag) = Tag::new().read_from_path(&path) {
@@ -471,12 +534,12 @@ async fn poster(
                     ContentType::new(mime_type.0, mime_type.1),
                     picture.data.to_vec(),
                 ),
-                get_cache_control(is_private),
+                MirrorFile::get_cache_control(is_private),
             ));
         } else {
             return MirrorFileInternal::open_file(
                 Path::new(&"public/static/images/icons/256x256/audio.png").to_path_buf(),
-                &get_cache_control(is_private),
+                &MirrorFile::get_cache_control(is_private),
             )
             .await;
         }
@@ -488,7 +551,7 @@ async fn poster(
         let icon = if path.is_dir() {
             "folder".into()
         } else {
-            get_icon(&get_name_from_path(&path))
+            MirrorFile::get_icon(&MirrorFile::get_name_from_path(&path))
         };
 
         MirrorFileInternal::open_file(
@@ -552,7 +615,7 @@ async fn download_share(
         file.add_download(db2).await;
         MirrorFileInternal::open_file(
             Path::new("files/").join(&file.path.trim_start_matches("/")).to_path_buf(),
-            &get_cache_control(false),
+            &MirrorFile::get_cache_control(false),
         )
         .await
     } else {
@@ -622,7 +685,7 @@ async fn perform_download(
     .to_lowercase();
 
     if !CONFIG.extensions.contains(&ext) {
-        return MirrorFileInternal::open_file(path, &get_cache_control(is_private)).await;
+        return MirrorFileInternal::open_file(path, &MirrorFile::get_cache_control(is_private)).await;
     } else if &ext == "folder" {
         return Err(Status::Forbidden);
     }
@@ -642,7 +705,7 @@ async fn static_files(file: PathBuf) -> IndexResult {
         return Err(Status::NotFound);
     }
 
-    MirrorFileInternal::open_file(path, &get_static_cache_control()).await
+    MirrorFileInternal::open_file(path, &MirrorFile::get_static_cache_control()).await
 }
 
 #[get("/<file..>", rank = 10)]
@@ -664,7 +727,7 @@ async fn index_db(
     {
         let path = Path::new("public").join(file);
 
-        return MirrorFileInternal::open_file(path, &get_static_cache_control()).await;
+        return MirrorFileInternal::open_file(path, &MirrorFile::get_static_cache_control()).await;
     }
 
     let jwt = token.clone().unwrap_or_default();
@@ -739,7 +802,7 @@ async fn index(
     {
         let path = Path::new("public").join(file);
 
-        return MirrorFileInternal::open_file(path, &get_static_cache_control()).await;
+        return MirrorFileInternal::open_file(path, &MirrorFile::get_static_cache_control()).await;
     }
 
     let jwt = token.clone().unwrap_or_default();
@@ -820,7 +883,7 @@ async fn display_file(
     }
     .to_lowercase();
 
-    let cache_control = &get_cache_control(is_private);
+    let cache_control = &MirrorFile::get_cache_control(is_private);
 
     let root_domain = get_root_domain(&host.0);
 
@@ -954,7 +1017,7 @@ async fn display_file(
                     host: host.0,
                     config: (*CONFIG).clone(),
                     path: audiopath,
-                    audiotitle: get_name_from_path(&path),
+                    audiotitle: MirrorFile::get_name_from_path(&path),
                     is_logged_in: token.is_ok(),
                     admin: jwt.claims.perms == 0,
                     artist: "N/A",
@@ -970,7 +1033,7 @@ async fn display_file(
                 },
             );
 
-            if get_extension_from_path(&path) == "wav" {
+            if MirrorFile::get_extension_from_path(&path) == "wav" {
                 return Ok(IndexResponse::Template(generic_template));
             }
 
@@ -979,12 +1042,12 @@ async fn display_file(
                     .title()
                     .map(|s| {
                         if s.is_empty() {
-                            get_name_from_path(&path)
+                            MirrorFile::get_name_from_path(&path)
                         } else {
                             s.to_string()
                         }
                     })
-                    .unwrap_or(get_name_from_path(&path));
+                    .unwrap_or(MirrorFile::get_name_from_path(&path));
 
                 let artist = tag.artist().map(|s| s.replace("\x00", "/"));
                 let album = tag.album_title().map(|s| s.to_string());
@@ -1101,7 +1164,7 @@ async fn display_file(
                         path: Path::new("/").join(&file).display().to_string(),
                         is_logged_in: token.is_ok(),
                         admin: jwt.claims.perms == 0,
-                        filename: get_name_from_path(&path),
+                        filename: MirrorFile::get_name_from_path(&path),
                         filesize: fs::metadata(&path).unwrap().len(),
                         settings,
                         share,
@@ -1774,7 +1837,7 @@ async fn upload(
         for file_field in file_fields {
             if let Some(file_name) = &file_field.file_name {
                 let normalized_path = file_name.replace('\\', "/");
-                let file_name = get_name_from_path(&Path::new(&normalized_path).to_path_buf());
+                let file_name = MirrorFile::get_name_from_path(&Path::new(&normalized_path).to_path_buf());
 
                 let upload_path = format!("{}/{}", base_path, file_name);
 
@@ -1799,7 +1862,7 @@ async fn upload(
                                 mirror_file.ext = format!(
                                     "/{}/{}",
                                     user_path,
-                                    get_name_from_path(&Path::new(&normalized_path).to_path_buf())
+                                    MirrorFile::get_name_from_path(&Path::new(&normalized_path).to_path_buf())
                                 );
 
                                 uploaded_files.push(mirror_file);
@@ -1814,7 +1877,7 @@ async fn upload(
                                         "",
                                         1
                                     ),
-                                    get_name_from_path(&Path::new(&normalized_path).to_path_buf())
+                                    MirrorFile::get_name_from_path(&Path::new(&normalized_path).to_path_buf())
                                 );
 
                                 uploaded_files.push(mirror_file);
@@ -1921,12 +1984,12 @@ async fn search(
             .await
             .iter()
             .map(|x| SearchFile {
-                name: get_name_from_path(&Path::new(&x.file).to_path_buf()),
-                full_path: get_virtual_path(&x.file),
+                name: MirrorFile::get_name_from_path(&Path::new(&x.file).to_path_buf()),
+                full_path: MirrorFile::get_virtual_path(&x.file),
                 icon: if Path::new(&x.file).is_dir() {
                     "folder".into()
                 } else {
-                    get_icon(&get_name_from_path(&Path::new(&x.file).to_path_buf()))
+                    MirrorFile::get_icon(&MirrorFile::get_name_from_path(&Path::new(&x.file).to_path_buf()))
                 },
                 size: x.size,
             })
@@ -2209,6 +2272,23 @@ fn mount_extra_routes(rocket: rocket::Rocket<rocket::Build>) -> rocket::Rocket<r
 #[cfg(not(test))]
 fn mount_extra_routes(rocket: rocket::Rocket<rocket::Build>) -> rocket::Rocket<rocket::Build> {
     rocket
+}
+
+fn load_shared_icons() -> HashMap<String, String> {
+    let toml_str =
+        fs::read_to_string("shared_icons.toml").expect("Failed to load shared_icons.toml");
+
+    let parsed: toml::Value = toml::from_str(&toml_str).expect("Failed to parse shared_icons.toml");
+
+    let table = parsed
+        .get("shared_icons")
+        .and_then(|v| v.as_table())
+        .expect("Failed to parse shared_icons.toml");
+
+    table
+        .iter()
+        .map(|(k, v)| (k.clone(), v.as_str().unwrap().to_string()))
+        .collect()
 }
 
 #[launch]
