@@ -366,24 +366,6 @@ pub fn format_size_filter(
         .expect("json serializing should always be possible for a string"))
 }
 
-pub fn get_genre(genre: &str) -> Result<String, Status> {
-    let toml_str = fs::read_to_string("genres.toml").map_err(map_io_error_to_status)?;
-    let parsed: toml::Value = toml::from_str(&toml_str).map_err(|_| Status::InternalServerError)?;
-    let genres: HashMap<String, String> = parsed
-        .get("genres")
-        .unwrap()
-        .as_table()
-        .unwrap()
-        .iter()
-        .map(|(k, v)| (k.clone(), v.as_str().unwrap().to_string()))
-        .collect();
-
-    match genres.get(genre) {
-        Some(genre) => Ok(genre.to_string()),
-        None => Ok(genre.to_string()),
-    }
-}
-
 pub fn is_hidden_path(path: &Path, perms: Option<i32>) -> bool {
     let mut current = Some(path);
 

@@ -1,8 +1,5 @@
 use std::{
-    fs::{self, create_dir, remove_dir, remove_dir_all, remove_file},
-    io::{Cursor, ErrorKind, Read, Write},
-    ops::Deref,
-    path::{Path, PathBuf},
+    collections::HashMap, fs::{self, create_dir, remove_dir, remove_dir_all, remove_file}, io::{Cursor, ErrorKind, Read, Write}, ops::Deref, path::{Path, PathBuf}
 };
 
 use ::sysinfo::{Disks, RefreshKind, System};
@@ -27,7 +24,7 @@ use crate::{
     read_files, refresh_file_sizes,
     responders::{ApiResponse, ApiResult},
     utils::{
-        add_path_to_zip, get_genre, get_real_path,
+        add_path_to_zip, get_real_path,
         get_real_path_with_perms, is_hidden_path_str, is_restricted,
         map_io_error_to_status, read_dirs_async,
     },
@@ -68,6 +65,26 @@ pub struct MusicFile {
     genre: Option<String>,
     track: Option<u16>,
     cover: bool,
+}
+
+impl MusicFile {
+    pub fn get_genre(genre: &str) -> Result<String, Status> {
+        let toml_str = fs::read_to_string("genres.toml").map_err(map_io_error_to_status)?;
+        let parsed: toml::Value = toml::from_str(&toml_str).map_err(|_| Status::InternalServerError)?;
+        let genres: HashMap<String, String> = parsed
+            .get("genres")
+            .unwrap()
+            .as_table()
+            .unwrap()
+            .iter()
+            .map(|(k, v)| (k.clone(), v.as_str().unwrap().to_string()))
+            .collect();
+
+        match genres.get(genre) {
+            Some(genre) => Ok(genre.to_string()),
+            None => Ok(genre.to_string()),
+        }
+    }
 }
 
 #[derive(serde::Serialize)]
@@ -300,7 +317,7 @@ async fn display_file(
 
             let artist = tag.artist().map(|s| s.replace("\x00", "/"));
             let album = tag.album_title().map(|s| s.to_string());
-            let genre = tag.genre().map(|s| get_genre(s).unwrap_or(s.to_string()));
+            let genre = tag.genre().map(|s| MusicFile::get_genre(s).unwrap_or(s.to_string()));
             let year = tag.year();
             let track = tag.track_number();
 

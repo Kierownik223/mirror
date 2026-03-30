@@ -29,7 +29,7 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::{account::MarmakUser, i18n::{Language, TranslationStore}};
+use crate::{account::MarmakUser, api::MusicFile, i18n::{Language, TranslationStore}};
 use crate::{
     api::SearchFile,
     config::CONFIG,
@@ -38,7 +38,7 @@ use crate::{
 use crate::{
     api::VideoFile,
     utils::{
-        format_size_filter, get_genre, get_real_path, get_root_domain, is_hidden, map_io_error_to_status,
+        format_size_filter, get_real_path, get_root_domain, is_hidden, map_io_error_to_status,
         parse_7z_output, read_dirs_async,
     },
 };
@@ -1051,7 +1051,7 @@ async fn display_file(
 
                 let artist = tag.artist().map(|s| s.replace("\x00", "/"));
                 let album = tag.album_title().map(|s| s.to_string());
-                let genre = tag.genre().map(|s| get_genre(s).unwrap_or(s.to_string()));
+                let genre = tag.genre().map(|s| MusicFile::get_genre(s).unwrap_or(s.to_string()));
                 let year = tag.year();
                 let track = tag.track_number();
 
