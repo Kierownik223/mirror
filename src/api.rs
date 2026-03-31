@@ -24,8 +24,7 @@ use crate::{
     read_files, refresh_file_sizes,
     responders::{ApiResponse, ApiResult},
     utils::{
-        add_path_to_zip, get_real_path,
-        get_real_path_with_perms, is_hidden_path_str, is_restricted,
+        add_path_to_zip, is_hidden_path_str,
         map_io_error_to_status, read_dirs_async,
     },
     Disk, FileSizes, Host, MirrorFile, MirrorFileInternal, Sysinfo,
@@ -172,7 +171,7 @@ async fn listing(file: PathBuf, sizes: &State<FileSizes>, token: Result<JWT, Sta
         Err(_) => &"Nobody".into(),
     };
 
-    let path = get_real_path(&file, username.to_string())?.0;
+    let path = MirrorFile::get_real_path(&file, username.to_string())?.0;
 
     if path.is_file() {
         return Err(Status::NotAcceptable);
@@ -186,7 +185,7 @@ async fn listing(file: PathBuf, sizes: &State<FileSizes>, token: Result<JWT, Sta
         .map_err(map_io_error_to_status)?;
 
     if CONFIG.enable_login {
-        if is_restricted(&Path::new("files/").join(&file), token.is_ok()) {
+        if MirrorFile::is_restricted(&Path::new("files/").join(&file), token.is_ok()) {
             return Err(Status::Forbidden);
         }
     }
@@ -289,7 +288,7 @@ async fn display_file(
     };
 
     let file = path.display().to_string();
-    let path = get_real_path(&path, username.to_string())?.0;
+    let path = MirrorFile::get_real_path(&path, username.to_string())?.0;
 
     let mirror_file = if let Some(db) = db {
         MirrorFileInternal::load(db, &path)
@@ -377,7 +376,7 @@ async fn perform_rename(
 ) -> ApiResult {
     let token = token?;
 
-    let path = get_real_path_with_perms(&file, token.claims.sub, token.claims.perms)?.0;
+    let path = MirrorFile::get_real_path_with_perms(&file, token.claims.sub, token.claims.perms)?.0;
 
     if !path.exists() {
         return Err(Status::NotFound);
@@ -429,7 +428,7 @@ async fn perform_delete(
 ) -> ApiResult {
     let token = token?;
 
-    let path = get_real_path_with_perms(&file, token.claims.sub, token.claims.perms)?.0;
+    let path = MirrorFile::get_real_path_with_perms(&file, token.claims.sub, token.claims.perms)?.0;
 
     if !path.exists() {
         return Err(Status::NotFound);
@@ -509,7 +508,7 @@ async fn perform_delete(
 async fn share(db: Connection<FileDb>, file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
     let token = token?;
 
-    let path = get_real_path_with_perms(&file, token.claims.sub, token.claims.perms)?.0;
+    let path = MirrorFile::get_real_path_with_perms(&file, token.claims.sub, token.claims.perms)?.0;
 
     if !path.exists() {
         return Err(Status::NotFound);
@@ -537,7 +536,7 @@ async fn create_folder<'a>(
 ) -> ApiResult {
     let token = token?;
 
-    let path = get_real_path_with_perms(&file, token.claims.sub, token.claims.perms)?.0;
+    let path = MirrorFile::get_real_path_with_perms(&file, token.claims.sub, token.claims.perms)?.0;
 
     if !path.exists() && !name_req.is_some() {
         return match create_dir(path) {

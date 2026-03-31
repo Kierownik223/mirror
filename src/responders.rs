@@ -13,7 +13,6 @@ use crate::{
         VideoFile,
     },
     guards::HeaderFile,
-    utils::get_extension_from_filename,
     MirrorFile, Sysinfo,
 };
 
@@ -60,7 +59,7 @@ impl<'r> Responder<'r, 'r> for IndexResponse {
                 let file_name = h.0.to_string();
                 let mut res = h.respond_to(req)?;
 
-                if let Some(ext) = get_extension_from_filename(&file_name) {
+                if let Some(ext) = MirrorFile::get_extension_from_filename(&file_name) {
                     if let Some(content_type) = ContentType::from_extension(ext) {
                         if content_type.is_html() {
                             res.set_raw_header("Content-Type", "text/plain");

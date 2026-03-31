@@ -24,7 +24,7 @@ use std::{
     sync::Arc,
 };
 use tokio::{sync::RwLock, time::sleep};
-use utils::{create_cookie, get_theme, is_restricted, read_dirs, read_files};
+use utils::{create_cookie, get_theme, read_dirs, read_files};
 use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
@@ -38,7 +38,7 @@ use crate::{
 use crate::{
     api::VideoFile,
     utils::{
-        format_size_filter, get_real_path, get_root_domain, is_hidden, map_io_error_to_status,
+        format_size_filter, get_root_domain, map_io_error_to_status,
         parse_7z_output, read_dirs_async,
     },
 };
@@ -52,7 +52,6 @@ use crate::{
 };
 use crate::{
     responders::{Cached, IndexResponse, IndexResult},
-    utils::get_extension_from_filename,
 };
 
 mod account;
@@ -361,7 +360,7 @@ impl MirrorFile {
     }
 
     pub fn new(file_name: &str) -> Self {
-        let ext = get_extension_from_filename(file_name).unwrap_or_default();
+        let ext = MirrorFile::get_extension_from_filename(file_name).unwrap_or_default();
         let icon = MirrorFile::get_icon(file_name);
 
         MirrorFile {
@@ -392,7 +391,7 @@ impl MirrorFile {
     }
 
     pub fn get_icon(file_name: &str) -> String {
-        let ext = get_extension_from_filename(file_name)
+        let ext = Self::get_extension_from_filename(file_name)
             .unwrap_or_else(|| "")
             .to_lowercase();
 
@@ -443,6 +442,90 @@ impl MirrorFile {
         Path::new(&path.replace("files/", "/"))
             .display()
             .to_string()
+    }
+
+    pub fn is_restricted(path: &Path, is_logged_in: bool) -> bool {
+        if !CONFIG.enable_login {
+            return false;
+        }
+        if path.ends_with("cover.png")
+            || path.ends_with("cover.jpg")
+            || path.ends_with("folder.png")
+            || path.ends_with("folder.jpg")
+        {
+            return false;
+        }
+        let mut current = Some(path);
+
+        while let Some(p) = current {
+            if p.join("RESTRICTED").exists() {
+                return !is_logged_in;
+            }
+            current = p.parent();
+        }
+
+        false
+    }
+
+    pub fn is_hidden(path: &Path, perms: Option<i32>) -> bool {
+        let mut current = Some(path);
+
+        while let Some(p) = current {
+            if p.join("HIDDEN").exists() {
+                if let Some(perms) = perms {
+                    return perms != 0;
+                } else {
+                    return true;
+                }
+            }
+            current = p.parent();
+        }
+
+        false
+    }
+
+    pub fn get_real_path(file: &PathBuf, username: String) -> Result<(PathBuf, bool), Status> {
+        if let Ok(rest) = file.strip_prefix("private") {
+            if username == "Nobody" {
+                return Err(Status::Forbidden);
+            }
+
+            Ok((
+                Path::new("files/")
+                    .join("private")
+                    .join(&username)
+                    .join(rest),
+                true,
+            ))
+        } else {
+            Ok((Path::new("files/").join(&file), false))
+        }
+    }
+
+    pub fn get_real_path_with_perms(
+        file: &PathBuf,
+        username: String,
+        perms: i32,
+    ) -> Result<(PathBuf, bool), Status> {
+        if let Ok(rest) = file.strip_prefix("private") {
+            if username == "Nobody" {
+                return Err(Status::Forbidden);
+            }
+
+            Ok((
+                Path::new("files/")
+                    .join("private")
+                    .join(&username)
+                    .join(rest),
+                true,
+            ))
+        } else {
+            if perms != 0 {
+                Err(Status::Forbidden)
+            } else {
+                Ok((Path::new("files/").join(&file), false))
+            }
+        }
     }
 }
 
@@ -661,7 +744,7 @@ async fn perform_download(
         &"Nobody".into()
     };
 
-    let (path, is_private) = get_real_path(&file, username.to_string())?;
+    let (path, is_private) = MirrorFile::get_real_path(&file, username.to_string())?;
 
     if is_private {
         return MirrorFileInternal::open_file(path, "private").await;
@@ -673,7 +756,7 @@ async fn perform_download(
         return Err(Status::NotFound);
     }
 
-    if is_restricted(&path, token.is_ok()) {
+    if MirrorFile::is_restricted(&path, token.is_ok()) {
         return Err(Status::Unauthorized);
     }
 
@@ -740,9 +823,9 @@ async fn index_db(
 
     let strings = translations.get_translation(&lang.0);
 
-    if let Ok((p, _)) = get_real_path(&file, jwt.claims.sub.clone()) {
+    if let Ok((p, _)) = MirrorFile::get_real_path(&file, jwt.claims.sub.clone()) {
         path = p;
-    } else if let Err(e) = get_real_path(&file, jwt.claims.sub.clone()) {
+    } else if let Err(e) = MirrorFile::get_real_path(&file, jwt.claims.sub.clone()) {
         if e == Status::Forbidden {
             return Err(Status::Unauthorized);
         } else {
@@ -756,7 +839,7 @@ async fn index_db(
         return Err(Status::NotFound);
     }
 
-    if is_restricted(&path, token.is_ok()) {
+    if MirrorFile::is_restricted(&path, token.is_ok()) {
         return Err(Status::Unauthorized);
     }
 
@@ -815,9 +898,9 @@ async fn index(
 
     let strings = translations.get_translation(&lang.0);
 
-    if let Ok((p, _)) = get_real_path(&file, jwt.claims.sub.clone()) {
+    if let Ok((p, _)) = MirrorFile::get_real_path(&file, jwt.claims.sub.clone()) {
         path = p;
-    } else if let Err(e) = get_real_path(&file, jwt.claims.sub.clone()) {
+    } else if let Err(e) = MirrorFile::get_real_path(&file, jwt.claims.sub.clone()) {
         if e == Status::Forbidden {
             return Err(Status::Unauthorized);
         } else {
@@ -831,7 +914,7 @@ async fn index(
         return Err(Status::NotFound);
     }
 
-    if is_restricted(&path, token.is_ok()) {
+    if MirrorFile::is_restricted(&path, token.is_ok()) {
         return Err(Status::Unauthorized);
     }
 
@@ -869,7 +952,7 @@ async fn display_file(
             false,
         )
     } else {
-        get_real_path(&file, jwt.claims.sub.clone())?
+        MirrorFile::get_real_path(&file, jwt.claims.sub.clone())?
     };
 
     let ext = if path.is_file() {
@@ -1190,7 +1273,7 @@ async fn display_folder(
 ) -> IndexResult {
     let jwt = token.clone().unwrap_or_default();
 
-    let (path, is_private) = get_real_path(&file, jwt.claims.sub.clone())?;
+    let (path, is_private) = MirrorFile::get_real_path(&file, jwt.claims.sub.clone())?;
 
     let ext = if is_private {
         "privatefolder"
@@ -1203,7 +1286,7 @@ async fn display_folder(
 
     match ext.as_str() {
         "folder" => {
-            if is_hidden(
+            if MirrorFile::is_hidden(
                 &path,
                 if let Ok(token) = token.clone() {
                     Some(token.claims.perms)
@@ -1609,9 +1692,9 @@ async fn iframe(
         (&"Nobody".into(), 1)
     };
 
-    let path = get_real_path(&file, username.to_string())?.0;
+    let path = MirrorFile::get_real_path(&file, username.to_string())?.0;
 
-    if is_restricted(&path, token.is_ok()) {
+    if MirrorFile::is_restricted(&path, token.is_ok()) {
         return Err(Status::Unauthorized);
     }
 

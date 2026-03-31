@@ -1,10 +1,9 @@
 use std::{
     collections::HashMap,
-    ffi::OsStr,
     fs,
     io::{Cursor, Error, ErrorKind},
     net::{Ipv4Addr, Ipv6Addr},
-    path::{Path, PathBuf},
+    path::Path,
     sync::Arc,
 };
 
@@ -125,10 +124,6 @@ pub fn read_files(path: &str) -> Result<Vec<MirrorFile>, Error> {
     Ok(file_list)
 }
 
-pub fn get_extension_from_filename(filename: &str) -> Option<&str> {
-    Path::new(filename).extension().and_then(OsStr::to_str)
-}
-
 pub fn get_theme<'a>(jar: &CookieJar<'_>) -> String {
     let mut theme = jar
         .get("theme")
@@ -140,46 +135,6 @@ pub fn get_theme<'a>(jar: &CookieJar<'_>) -> String {
     }
 
     theme.to_string()
-}
-
-pub fn is_restricted(path: &Path, is_logged_in: bool) -> bool {
-    if !CONFIG.enable_login {
-        return false;
-    }
-    if path.ends_with("cover.png")
-        || path.ends_with("cover.jpg")
-        || path.ends_with("folder.png")
-        || path.ends_with("folder.jpg")
-    {
-        return false;
-    }
-    let mut current = Some(path);
-
-    while let Some(p) = current {
-        if p.join("RESTRICTED").exists() {
-            return !is_logged_in;
-        }
-        current = p.parent();
-    }
-
-    false
-}
-
-pub fn is_hidden(path: &Path, perms: Option<i32>) -> bool {
-    let mut current = Some(path);
-
-    while let Some(p) = current {
-        if p.join("HIDDEN").exists() {
-            if let Some(perms) = perms {
-                return perms != 0;
-            } else {
-                return true;
-            }
-        }
-        current = p.parent();
-    }
-
-    false
 }
 
 pub fn create_cookie<'a>(name: &'a str, value: &str) -> Cookie<'a> {
@@ -253,50 +208,6 @@ pub fn map_io_error_to_status(e: Error) -> Status {
         ErrorKind::PermissionDenied => Status::Forbidden,
         ErrorKind::StorageFull => Status::InsufficientStorage,
         _ => Status::InternalServerError,
-    }
-}
-
-pub fn get_real_path(file: &PathBuf, username: String) -> Result<(PathBuf, bool), Status> {
-    if let Ok(rest) = file.strip_prefix("private") {
-        if username == "Nobody" {
-            return Err(Status::Forbidden);
-        }
-
-        Ok((
-            Path::new("files/")
-                .join("private")
-                .join(&username)
-                .join(rest),
-            true,
-        ))
-    } else {
-        Ok((Path::new("files/").join(&file), false))
-    }
-}
-
-pub fn get_real_path_with_perms(
-    file: &PathBuf,
-    username: String,
-    perms: i32,
-) -> Result<(PathBuf, bool), Status> {
-    if let Ok(rest) = file.strip_prefix("private") {
-        if username == "Nobody" {
-            return Err(Status::Forbidden);
-        }
-
-        Ok((
-            Path::new("files/")
-                .join("private")
-                .join(&username)
-                .join(rest),
-            true,
-        ))
-    } else {
-        if perms != 0 {
-            Err(Status::Forbidden)
-        } else {
-            Ok((Path::new("files/").join(&file), false))
-        }
     }
 }
 
