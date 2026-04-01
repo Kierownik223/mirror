@@ -9,11 +9,20 @@ use rocket::{
     time::{Duration, OffsetDateTime},
     State,
 };
-use rocket_db_pools::{Connection, sqlx::{self, Row}};
+use rocket_db_pools::{
+    sqlx::{self, Row},
+    Connection,
+};
 use rocket_dyn_templates::{context, Template};
 
 use crate::{
-    Host, IndexResponse, Language, TranslationStore, config::CONFIG, db::{Db, add_login, add_rememberme_token, delete_session}, guards::{Settings, XForwardedFor}, jwt::{JWT, create_jwt}, responders::IndexResult, utils::{add_token_cookie, get_root_domain}
+    config::CONFIG,
+    db::{add_login, add_rememberme_token, delete_session, Db},
+    guards::{Settings, XForwardedFor},
+    jwt::{create_jwt, JWT},
+    responders::IndexResult,
+    utils::{add_token_cookie, get_root_domain},
+    Host, IndexResponse, Language, TranslationStore,
 };
 
 #[derive(Debug, PartialEq, Eq, FromForm)]

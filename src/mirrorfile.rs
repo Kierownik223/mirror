@@ -1,11 +1,25 @@
-use std::{cmp::Ordering, collections::HashMap, ffi::OsStr, fs, path::{Path, PathBuf}};
+use std::{
+    cmp::Ordering,
+    collections::HashMap,
+    ffi::OsStr,
+    fs,
+    path::{Path, PathBuf},
+};
 
 use once_cell::sync::Lazy;
 use rocket::{fs::NamedFile, http::Status};
-use rocket_db_pools::{Connection, sqlx::{self, Row}};
+use rocket_db_pools::{
+    sqlx::{self, Row},
+    Connection,
+};
 use uuid::Uuid;
 
-use crate::{config::CONFIG, db::FileDb, guards::HeaderFile, responders::{IndexResponse, IndexResult}};
+use crate::{
+    config::CONFIG,
+    db::FileDb,
+    guards::HeaderFile,
+    responders::{IndexResponse, IndexResult},
+};
 
 static SHARED_ICONS: Lazy<HashMap<String, String>> = Lazy::new(crate::load_shared_icons);
 
@@ -104,11 +118,16 @@ impl MirrorFileInternal {
 
         let (id, downloads) = match query_result {
             Ok(row) => (
-                row.try_get::<String, _>("id").ok().unwrap_or(Uuid::new_v4().to_string()),
+                row.try_get::<String, _>("id")
+                    .ok()
+                    .unwrap_or(Uuid::new_v4().to_string()),
                 row.try_get::<i32, _>("downloads").ok(),
             ),
             Err(error) => {
-                eprintln!("Database error (MirrorFile::load_and_share [get_file_by_id]): {:?}", error);
+                eprintln!(
+                    "Database error (MirrorFile::load_and_share [get_file_by_id]): {:?}",
+                    error
+                );
                 (Uuid::new_v4().to_string(), None)
             }
         };
@@ -497,6 +516,6 @@ impl MirrorFile {
     }
 
     pub fn is_hidden_path_str(path: &str, perms: Option<i32>) -> bool {
-        is_hidden_path(Path::new(path), perms)
+        Self::is_hidden_path(Path::new(path), perms)
     }
 }

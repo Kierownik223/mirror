@@ -1,11 +1,12 @@
 use audiotags::{MimeType, Tag};
 use db::Db;
 use rocket::{
-    Data, Request, State, http::{ContentType, Cookie, CookieJar, SameSite, Status}, response::{Redirect, content::RawHtml}, time::{Duration, OffsetDateTime}
+    http::{ContentType, Cookie, CookieJar, SameSite, Status},
+    response::{content::RawHtml, Redirect},
+    time::{Duration, OffsetDateTime},
+    Data, Request, State,
 };
-use rocket_db_pools::{
-    Connection, Database,
-};
+use rocket_db_pools::{Connection, Database};
 use rocket_multipart_form_data::{
     MultipartFormData, MultipartFormDataField, MultipartFormDataOptions, Repetition,
 };
@@ -25,28 +26,26 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::{account::MarmakUser, api::MusicFile, i18n::{Language, TranslationStore}, mirrorfile::{MirrorFile, MirrorFileInternal}};
+use crate::db::{add_download, FileDb};
+use crate::responders::{Cached, IndexResponse, IndexResult};
 use crate::{
-    api::SearchFile,
-    config::CONFIG,
+    account::MarmakUser,
+    api::MusicFile,
+    i18n::{Language, TranslationStore},
+    mirrorfile::{MirrorFile, MirrorFileInternal},
 };
+use crate::{api::SearchFile, config::CONFIG};
 use crate::{
     api::VideoFile,
     utils::{
-        format_size_filter, get_root_domain, map_io_error_to_status,
-        parse_7z_output, read_dirs_async,
+        format_size_filter, get_root_domain, map_io_error_to_status, parse_7z_output,
+        read_dirs_async,
     },
 };
 use crate::{db::get_file_by_id, jwt::JWT};
 use crate::{
-    db::{add_download, FileDb},
-};
-use crate::{
     guards::{FormSettings, FullUri, Host, Settings},
     utils::add_token_cookie,
-};
-use crate::{
-    responders::{Cached, IndexResponse, IndexResult},
 };
 
 mod account;
@@ -137,7 +136,11 @@ async fn poster(
     let video_path = Path::new(&video_file_str);
 
     if video_path.exists() {
-        return MirrorFileInternal::open_file(video_path.to_path_buf(), &MirrorFile::get_cache_control(is_private)).await;
+        return MirrorFileInternal::open_file(
+            video_path.to_path_buf(),
+            &MirrorFile::get_cache_control(is_private),
+        )
+        .await;
     }
 
     if let Ok(tag) = Tag::new().read_from_path(&path) {
@@ -234,7 +237,9 @@ async fn download_share(
     if let Some(file) = MirrorFileInternal::load_by_id(db, id).await {
         file.add_download(db2).await;
         MirrorFileInternal::open_file(
-            Path::new("files/").join(&file.path.trim_start_matches("/")).to_path_buf(),
+            Path::new("files/")
+                .join(&file.path.trim_start_matches("/"))
+                .to_path_buf(),
             &MirrorFile::get_cache_control(false),
         )
         .await
@@ -305,7 +310,8 @@ async fn perform_download(
     .to_lowercase();
 
     if !CONFIG.extensions.contains(&ext) {
-        return MirrorFileInternal::open_file(path, &MirrorFile::get_cache_control(is_private)).await;
+        return MirrorFileInternal::open_file(path, &MirrorFile::get_cache_control(is_private))
+            .await;
     } else if &ext == "folder" {
         return Err(Status::Forbidden);
     }
@@ -671,7 +677,9 @@ async fn display_file(
 
                 let artist = tag.artist().map(|s| s.replace("\x00", "/"));
                 let album = tag.album_title().map(|s| s.to_string());
-                let genre = tag.genre().map(|s| MusicFile::get_genre(s).unwrap_or(s.to_string()));
+                let genre = tag
+                    .genre()
+                    .map(|s| MusicFile::get_genre(s).unwrap_or(s.to_string()));
                 let year = tag.year();
                 let track = tag.track_number();
 
@@ -1457,7 +1465,8 @@ async fn upload(
         for file_field in file_fields {
             if let Some(file_name) = &file_field.file_name {
                 let normalized_path = file_name.replace('\\', "/");
-                let file_name = MirrorFile::get_name_from_path(&Path::new(&normalized_path).to_path_buf());
+                let file_name =
+                    MirrorFile::get_name_from_path(&Path::new(&normalized_path).to_path_buf());
 
                 let upload_path = format!("{}/{}", base_path, file_name);
 
@@ -1482,7 +1491,9 @@ async fn upload(
                                 mirror_file.ext = format!(
                                     "/{}/{}",
                                     user_path,
-                                    MirrorFile::get_name_from_path(&Path::new(&normalized_path).to_path_buf())
+                                    MirrorFile::get_name_from_path(
+                                        &Path::new(&normalized_path).to_path_buf()
+                                    )
                                 );
 
                                 uploaded_files.push(mirror_file);
@@ -1497,7 +1508,9 @@ async fn upload(
                                         "",
                                         1
                                     ),
-                                    MirrorFile::get_name_from_path(&Path::new(&normalized_path).to_path_buf())
+                                    MirrorFile::get_name_from_path(
+                                        &Path::new(&normalized_path).to_path_buf()
+                                    )
                                 );
 
                                 uploaded_files.push(mirror_file);
@@ -1609,7 +1622,9 @@ async fn search(
                 icon: if Path::new(&x.file).is_dir() {
                     "folder".into()
                 } else {
-                    MirrorFile::get_icon(&MirrorFile::get_name_from_path(&Path::new(&x.file).to_path_buf()))
+                    MirrorFile::get_icon(&MirrorFile::get_name_from_path(
+                        &Path::new(&x.file).to_path_buf(),
+                    ))
                 },
                 size: x.size,
             })

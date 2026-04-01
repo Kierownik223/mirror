@@ -1,5 +1,9 @@
 use std::{
-    collections::HashMap, fs::{self, create_dir, remove_dir, remove_dir_all, remove_file}, io::{Cursor, ErrorKind, Read, Write}, ops::Deref, path::{Path, PathBuf}
+    collections::HashMap,
+    fs::{self, create_dir, remove_dir, remove_dir_all, remove_file},
+    io::{Cursor, ErrorKind, Read, Write},
+    ops::Deref,
+    path::{Path, PathBuf},
 };
 
 use ::sysinfo::{Disks, RefreshKind, System};
@@ -23,10 +27,7 @@ use crate::{
     jwt::JWT,
     read_files, refresh_file_sizes,
     responders::{ApiResponse, ApiResult},
-    utils::{
-        add_path_to_zip, is_hidden_path_str,
-        map_io_error_to_status, read_dirs_async,
-    },
+    utils::{add_path_to_zip, map_io_error_to_status, read_dirs_async},
     Disk, FileSizes, Host, MirrorFile, MirrorFileInternal, Sysinfo,
 };
 
@@ -69,7 +70,8 @@ pub struct MusicFile {
 impl MusicFile {
     pub fn get_genre(genre: &str) -> Result<String, Status> {
         let toml_str = fs::read_to_string("genres.toml").map_err(map_io_error_to_status)?;
-        let parsed: toml::Value = toml::from_str(&toml_str).map_err(|_| Status::InternalServerError)?;
+        let parsed: toml::Value =
+            toml::from_str(&toml_str).map_err(|_| Status::InternalServerError)?;
         let genres: HashMap<String, String> = parsed
             .get("genres")
             .unwrap()
@@ -232,7 +234,9 @@ async fn search(
                 icon: if Path::new(&x.file).is_dir() {
                     "folder".into()
                 } else {
-                    MirrorFile::get_icon(&MirrorFile::get_name_from_path(&Path::new(&x.file).to_path_buf()))
+                    MirrorFile::get_icon(&MirrorFile::get_name_from_path(
+                        &Path::new(&x.file).to_path_buf(),
+                    ))
                 },
                 size: x.size,
             })
@@ -240,7 +244,7 @@ async fn search(
 
         results.retain(|x| !CONFIG.hidden_files.contains(&x.name));
         results.retain(|x| x.name.contains(q));
-        results.retain(|x| !is_hidden_path_str(&x.full_path, perms));
+        results.retain(|x| !MirrorFile::is_hidden_path_str(&x.full_path, perms));
         results.retain(|x| !x.full_path.starts_with("/private/"));
 
         if results.len() == 0 {
@@ -316,7 +320,9 @@ async fn display_file(
 
             let artist = tag.artist().map(|s| s.replace("\x00", "/"));
             let album = tag.album_title().map(|s| s.to_string());
-            let genre = tag.genre().map(|s| MusicFile::get_genre(s).unwrap_or(s.to_string()));
+            let genre = tag
+                .genre()
+                .map(|s| MusicFile::get_genre(s).unwrap_or(s.to_string()));
             let year = tag.year();
             let track = tag.track_number();
 
@@ -757,7 +763,8 @@ async fn perform_upload(
         for file_field in file_fields {
             if let Some(file_name) = &file_field.file_name {
                 let normalized_path = file_name.replace('\\', "/");
-                let file_name = &MirrorFile::get_name_from_path(&Path::new(&normalized_path).to_path_buf());
+                let file_name =
+                    &MirrorFile::get_name_from_path(&Path::new(&normalized_path).to_path_buf());
 
                 let upload_path = format!("{}/{}", base_path, file_name);
 
@@ -801,7 +808,14 @@ async fn perform_upload(
                 _ => true,
             } {
                 if uploaded_files.len() == 1 {
-                    if let Some(mirror_file) = MirrorFileInternal::load_and_share(db, &Path::new(&base_path).join(&uploaded_files[0].name).to_path_buf()).await {
+                    if let Some(mirror_file) = MirrorFileInternal::load_and_share(
+                        db,
+                        &Path::new(&base_path)
+                            .join(&uploaded_files[0].name)
+                            .to_path_buf(),
+                    )
+                    .await
+                    {
                         if let Some(id) = mirror_file.id {
                             uploaded_files[0].url = Some(format!("http://{}/share/{}", host.0, id));
                         }
@@ -1043,7 +1057,12 @@ async fn perform_upload_chunked(
             "false" => false,
             _ => true,
         } {
-            if let Some(mirror_file) = MirrorFileInternal::load_and_share(db, &Path::new(&base_path).join(&file_name).to_path_buf()).await {
+            if let Some(mirror_file) = MirrorFileInternal::load_and_share(
+                db,
+                &Path::new(&base_path).join(&file_name).to_path_buf(),
+            )
+            .await
+            {
                 if let Some(id) = mirror_file.id {
                     return Ok(ApiResponse::UploadFiles(Json(vec![UploadFile {
                         name: file_name.clone(),
