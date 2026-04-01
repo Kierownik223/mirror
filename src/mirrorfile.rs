@@ -464,4 +464,39 @@ impl MirrorFile {
             }
         }
     }
+
+    pub fn is_hidden_path(path: &Path, perms: Option<i32>) -> bool {
+        let mut current = Some(path);
+
+        while let Some(p) = current {
+            if CONFIG
+                .hidden_files
+                .contains(&MirrorFile::get_name_from_path(&p.to_path_buf()))
+            {
+                if let Some(perms) = perms {
+                    return perms != 0;
+                } else {
+                    return true;
+                }
+            }
+            if Path::new("files/")
+                .join(
+                    p.join("RESTRICTED")
+                        .display()
+                        .to_string()
+                        .replacen("/", "", 1),
+                )
+                .exists()
+            {
+                return !perms.is_some();
+            }
+            current = p.parent();
+        }
+
+        false
+    }
+
+    pub fn is_hidden_path_str(path: &str, perms: Option<i32>) -> bool {
+        is_hidden_path(Path::new(path), perms)
+    }
 }

@@ -29,7 +29,6 @@ use crate::{account::MarmakUser, api::MusicFile, i18n::{Language, TranslationSto
 use crate::{
     api::SearchFile,
     config::CONFIG,
-    utils::is_hidden_path_str,
 };
 use crate::{
     api::VideoFile,
@@ -1619,7 +1618,7 @@ async fn search(
         results.retain(|x| !CONFIG.hidden_files.contains(&x.name));
         results.retain(|x| x.name.to_lowercase().contains(&q.to_lowercase()));
         results.retain(|x| {
-            !is_hidden_path_str(
+            !MirrorFile::is_hidden_path_str(
                 &x.full_path,
                 if token.is_ok() {
                     Some(jwt.claims.perms)
