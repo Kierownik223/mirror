@@ -1,9 +1,8 @@
 use audiotags::{MimeType, Tag};
 use db::Db;
 use rocket::{
-    http::{ContentType, Cookie, CookieJar, SameSite, Status},
+    http::{ContentType, CookieJar, Status},
     response::{content::RawHtml, Redirect},
-    time::{Duration, OffsetDateTime},
     Data, Request, State,
 };
 use rocket_db_pools::{Connection, Database};
@@ -1128,17 +1127,12 @@ async fn fetch_settings(
     let strings = translations.get_translation(&lang.0);
 
     if let Some(db_user) = MarmakUser::get(db, &token.claims.sub).await {
-        let decoded: HashMap<String, String> =
-            serde_json::from_str(&db_user.mirror_settings.unwrap_or("{}".to_string()))
-                .expect("Failed to parse JSON");
-
-        for (key, value) in decoded {
-            let mut now = OffsetDateTime::now_utc();
-            now += Duration::days(365);
-            let mut cookie = Cookie::new(key, value);
-            cookie.set_expires(now);
-            cookie.set_same_site(SameSite::Lax);
-            jar.add(cookie);
+        if let Some(settings) = db_user.mirror_settings {
+            let decoded: Settings =
+                serde_json::from_str(&settings)
+                    .expect("Failed to parse JSON");
+                
+            decoded.to_cookies(jar);
         }
     }
 
@@ -1167,27 +1161,17 @@ async fn sync_settings(
 
     let strings = translations.get_translation(&lang.0);
 
-    let keys = vec![
-        "lang",
-        "hires",
-        "smallhead",
-        "theme",
-        "nooverride",
-        "viewers",
-        "use_si",
-        "audio_player",
-        "video_player",
-    ];
+    let mut marmak_user = MarmakUser {
+        username: token.claims.sub,
+        password: "".into(),
+        perms: token.claims.perms,
+        mirror_settings: None,
+        email: None,
+    };
 
-    let mut cookie_map: HashMap<String, Option<String>> = HashMap::new();
-    for key in keys {
-        let value = jar.get(key).map(|cookie| cookie.value().to_string());
-        cookie_map.insert(key.to_string(), value);
-    }
-
-    let settings = serde_json::to_string(&cookie_map).expect("Failed to serialize cookie data");
-
-    db::update_settings(db, &token.claims.sub, settings.as_str()).await;
+    marmak_user
+        .update_settings(db, Settings::from_cookies(jar))
+        .await;
 
     return Ok(RawHtml(format!(
         "<script>alert(\"{}\");window.location.replace(\"/settings\");</script>",

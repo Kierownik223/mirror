@@ -26,7 +26,7 @@ pub struct FormSettings<'r> {
     pub show_cover: Option<&'r str>,
 }
 
-#[derive(serde::Serialize)]
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct Settings<'r> {
     pub theme: &'r str,
     pub js_present: bool,

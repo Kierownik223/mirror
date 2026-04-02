@@ -17,7 +17,7 @@ use rocket_dyn_templates::{context, Template};
 
 use crate::{
     config::CONFIG,
-    db::{add_login, add_rememberme_token, delete_session, Db},
+    db::{add_rememberme_token, delete_session, Db},
     guards::{Settings, XForwardedFor},
     jwt::{create_jwt, JWT},
     responders::IndexResult,
@@ -35,6 +35,27 @@ pub struct MarmakUser {
 }
 
 impl MarmakUser {
+    pub async fn update_settings(
+        &mut self,
+        mut db: Connection<Db>,
+        settings: Settings<'_>,
+    ) -> bool {
+        let settings = serde_json::to_string(&settings).expect("Failed to serialize cookie data");
+
+        if let Err(error) = sqlx::query("UPDATE users SET mirror_settings = ? WHERE username = ?")
+            .bind(&settings)
+            .bind(&self.username)
+            .execute(&mut **db)
+            .await
+        {
+            eprintln!("Database error (MarmakUser::update_settings): {:?}", error);
+            false
+        } else {
+            self.mirror_settings = Some(settings);
+            true
+        }
+    }
+
     pub async fn login(
         mut db: Connection<Db>,
         username: &str,
@@ -59,8 +80,14 @@ impl MarmakUser {
                 if verify(password, &stored_hash).unwrap_or(false) {
                     let perms = row.try_get::<i32, _>("perms").ok()?;
 
-                    add_login(db, username.as_str(), ip).await;
-
+                    if let Err(error) = sqlx::query("INSERT INTO logins (account, time, ip, via) VALUES (?, CURRENT_TIMESTAMP, ?, 'MARMAK Mirror')")
+                        .bind(&username)
+                        .bind(ip)
+                        .execute(&mut **db)
+                        .await
+                    {
+                        eprintln!("Database error (MarmakUser::login [add_login]): {:?}", error);
+                    }
                     return Some(Self {
                         username: username,
                         password: password.to_string(),
@@ -73,7 +100,7 @@ impl MarmakUser {
                 }
             }
             Err(error) => {
-                eprintln!("Database error (login_user): {:?}", error);
+                eprintln!("Database error (MarmakUser::login): {:?}", error);
                 None
             }
         }
