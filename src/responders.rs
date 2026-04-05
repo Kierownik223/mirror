@@ -62,9 +62,7 @@ impl<'r> Responder<'r, 'r> for IndexResponse {
                 if let Some(ext) = MirrorFile::get_extension_from_filename(&file_name) {
                     if let Some(content_type) = ContentType::from_extension(ext) {
                         if content_type.is_html() {
-                            res.set_raw_header("Content-Type", "text/plain");
-                        } else {
-                            res.set_header(content_type);
+                            res.set_raw_header("X-Is-Html", "1");
                         }
                     }
                 }
