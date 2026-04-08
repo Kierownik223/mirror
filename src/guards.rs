@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use rocket::{
     http::{Cookie, CookieJar, SameSite},
     request::{FromRequest, Outcome},
@@ -108,90 +106,6 @@ impl<'r> Settings<'r> {
         let show_cover: bool = jar
             .get("show_cover")
             .map(|c| c.value() == "true")
-            .unwrap_or(true);
-
-        Self {
-            theme,
-            js_present: std::path::Path::new(&format!("public/static/styles/{}.js", &theme))
-                .exists(),
-            lang: lang,
-            hires,
-            smallhead,
-            plain,
-            nooverride,
-            viewers,
-            dir_browser,
-            use_si,
-            audio_player,
-            video_player,
-            show_cover,
-        }
-    }
-
-    pub fn from_hashmap(settings: &'r HashMap<String, String>) -> Self {
-        let mut theme = settings
-            .get("theme")
-            .map(|s| s.as_str())
-            .unwrap_or("default");
-
-        if !std::path::Path::new(&format!("public/static/styles/{}.css", &theme)).exists() {
-            theme = "default";
-        }
-
-        let lang = if let Some(cookie_lang) = settings.get("lang").map(|s| s.as_str()) {
-            cookie_lang
-        } else {
-            "en"
-        };
-
-        let hires = settings
-            .get("hires")
-            .map(|s| s.as_str() == "true")
-            .unwrap_or(false);
-
-        let smallhead = settings
-            .get("smallhead")
-            .map(|s| s.as_str() == "true")
-            .unwrap_or(false);
-
-        let plain = settings
-            .get("plain")
-            .map(|s| s.as_str() == "true")
-            .unwrap_or(false);
-
-        let nooverride = settings
-            .get("nooverride")
-            .map(|s| s.as_str() == "true")
-            .unwrap_or(false);
-
-        let viewers = settings
-            .get("viewers")
-            .map(|s| s.as_str() == "true")
-            .unwrap_or(true);
-
-        let dir_browser = settings
-            .get("dir_browser")
-            .map(|s| s.as_str() == "true")
-            .unwrap_or(true);
-
-        let use_si = settings
-            .get("use_si")
-            .map(|s| s.as_str() == "true")
-            .unwrap_or(true);
-
-        let audio_player = settings
-            .get("audio_player")
-            .map(|s| s.as_str() == "true")
-            .unwrap_or(true);
-
-        let video_player = settings
-            .get("video_player")
-            .map(|s| s.as_str() == "true")
-            .unwrap_or(true);
-
-        let show_cover: bool = settings
-            .get("show_cover")
-            .map(|s| s.as_str() == "true")
             .unwrap_or(true);
 
         Self {
