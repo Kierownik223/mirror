@@ -89,7 +89,10 @@ impl MarmakUser {
                         eprintln!("Database error (MarmakUser::login [add_login]): {:?}", error);
                     }
 
-                    println!("asd: {:?}", row.try_get::<String, _>("mirror_settings").ok());
+                    println!(
+                        "asd: {:?}",
+                        row.try_get::<String, _>("mirror_settings").ok()
+                    );
 
                     return Some(Self {
                         username: username,
@@ -215,9 +218,8 @@ async fn login(
         if !settings.nooverride {
             if let Some(ref settings) = db_user.mirror_settings {
                 let decoded: Settings =
-                    serde_json::from_str(&settings)
-                        .expect("Failed to parse JSON");
-                    
+                    serde_json::from_str(&settings).expect("Failed to parse JSON");
+
                 decoded.to_cookies(jar);
             }
         }

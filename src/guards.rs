@@ -308,7 +308,11 @@ impl<'r> Responder<'r, 'r> for HeaderFile {
 
         builder.raw_header(
             &CONFIG.x_sendfile_header,
-            format!("{}{}", CONFIG.x_sendfile_prefix, urlencoding::encode(&self.0).replace("%2F", "/")),
+            format!(
+                "{}{}",
+                CONFIG.x_sendfile_prefix,
+                urlencoding::encode(&self.0).replace("%2F", "/")
+            ),
         );
 
         builder.raw_header("Cache-Control", self.1);

@@ -1128,10 +1128,8 @@ async fn fetch_settings(
 
     if let Some(db_user) = MarmakUser::get(db, &token.claims.sub).await {
         if let Some(settings) = db_user.mirror_settings {
-            let decoded: Settings =
-                serde_json::from_str(&settings)
-                    .expect("Failed to parse JSON");
-                
+            let decoded: Settings = serde_json::from_str(&settings).expect("Failed to parse JSON");
+
             decoded.to_cookies(jar);
         }
     }
