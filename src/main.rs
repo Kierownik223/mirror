@@ -608,7 +608,7 @@ async fn display_file(
                     host: host.0,
                     config: (*CONFIG).clone(),
                     path: videopath,
-                    poster: urlencoding::encode(&format!("/images/videoposters{}.jpg", videopath.replace("video/", ""))),
+                    poster: urlencoding::encode(&format!("/images/videoposters{}.jpg", videopath.replace("video/", ""))).replace("%2F", "/"),
                     vidtitle: metadata.title,
                     is_logged_in: token.is_ok(),
                     admin: jwt.claims.perms == 0,
@@ -650,7 +650,7 @@ async fn display_file(
                     album: "N/A",
                     genre: "N/A",
                     track: None::<u16>,
-                    poster: urlencoding::encode(&format!("/poster{}", audiopath)),
+                    poster: urlencoding::encode(&format!("/poster{}", audiopath)).replace("%2F", "/"),
                     settings: &settings,
                     share,
                     version: env!("CARGO_PKG_VERSION").to_string(),
@@ -740,7 +740,7 @@ async fn display_file(
                         .to_string();
                 }
 
-                poster = urlencoding::encode(&poster).into_owned();
+                poster = urlencoding::encode(&poster).replace("%2F", "/").into_owned();
 
                 Ok(IndexResponse::Template(Template::render(
                     if settings.plain {
