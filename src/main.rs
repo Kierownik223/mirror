@@ -740,7 +740,7 @@ async fn display_file(
                         .to_string();
                 }
 
-                poster = urlencoding::encode(&poster).replace("%2F", "/").into_owned();
+                poster = urlencoding::encode(&poster).replace("%2F", "/");
 
                 Ok(IndexResponse::Template(Template::render(
                     if settings.plain {
