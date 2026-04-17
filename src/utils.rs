@@ -124,19 +124,6 @@ pub fn read_files(path: &str) -> Result<Vec<MirrorFile>, Error> {
     Ok(file_list)
 }
 
-pub fn get_theme<'a>(jar: &CookieJar<'_>) -> String {
-    let mut theme = jar
-        .get("theme")
-        .map(|cookie| cookie.value())
-        .unwrap_or("default");
-
-    if !Path::new(&format!("public/static/styles/{}.css", &theme)).exists() {
-        theme = "default";
-    }
-
-    theme.to_string()
-}
-
 pub fn create_cookie<'a>(name: &'a str, value: &str) -> Cookie<'a> {
     let year = OffsetDateTime::now_utc() + Duration::days(365);
     let mut cookie = Cookie::new(name, value.to_string());

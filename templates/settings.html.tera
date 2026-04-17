@@ -37,7 +37,7 @@
                 <option value="oled"{% if settings.theme=="oled" %} selected{% endif %}>OLED</option>
                 <option value="oledmatrix"{% if settings.theme=="oledmatrix" %} selected{% endif %}>OLED Matrix</option>
                 <option value="white"{% if settings.theme=="white" %} selected{% endif %}>#fff</option>
-                {%- if theme == "venti" %}
+                {%- if settings.theme == "venti" %}
                 <option value="venti" selected>Venti by Olek47</option>
                 {%- endif %}
                 <option value="silksong"{% if settings.theme=="silksong" %} selected{% endif %}>Silksong by Spaniel</option>

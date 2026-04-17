@@ -20,7 +20,7 @@ use std::{
     sync::Arc,
 };
 use tokio::{sync::RwLock, time::sleep};
-use utils::{create_cookie, get_theme, read_dirs, read_files};
+use utils::{create_cookie, read_dirs, read_files};
 use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
@@ -1023,7 +1023,6 @@ fn settings(
     };
 
     let mut lang = lang.0;
-    let theme = get_theme(jar);
     let strings = translations.get_translation(&lang);
 
     let language_names = translations.available_languages();
@@ -1093,7 +1092,6 @@ fn settings(
         },
         context! {
             title: strings.get("settings").unwrap_or(&("settings".into())),
-            theme,
             lang,
             strings,
             root_domain: get_root_domain(host.0),
@@ -1535,7 +1533,6 @@ async fn upload(
                 root_domain: get_root_domain(host.0),
                 host: host.0,
                 config: (*CONFIG).clone(),
-                theme: get_theme(jar),
                 is_logged_in: true,
                 username: token.claims.sub,
                 admin: token.claims.perms == 0,
@@ -1585,7 +1582,6 @@ async fn search(
                     root_domain: get_root_domain(host.0),
                     host: host.0,
                     config: (*CONFIG).clone(),
-                    theme: get_theme(jar),
                     is_logged_in: token.is_ok(),
                     username: &jwt.claims.sub,
                     admin: jwt.claims.perms == 0,
@@ -1642,7 +1638,6 @@ async fn search(
                     root_domain: get_root_domain(host.0),
                     host: host.0,
                     config: (*CONFIG).clone(),
-                    theme: get_theme(jar),
                     is_logged_in: token.is_ok(),
                     username: &jwt.claims.sub,
                     admin: jwt.claims.perms == 0,
@@ -1666,7 +1661,6 @@ async fn search(
                 root_domain: get_root_domain(host.0),
                 host: host.0,
                 config: (*CONFIG).clone(),
-                theme: get_theme(jar),
                 is_logged_in: token.is_ok(),
                 username: &jwt.claims.sub,
                 admin: jwt.claims.perms == 0,
@@ -1690,7 +1684,6 @@ async fn search(
                 root_domain: get_root_domain(host.0),
                 host: host.0,
                 config: (*CONFIG).clone(),
-                theme: get_theme(jar),
                 is_logged_in: token.is_ok(),
                 username: &jwt.claims.sub,
                 admin: jwt.claims.perms == 0,
