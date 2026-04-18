@@ -7,8 +7,6 @@ use rocket::{
 };
 use toml::Value;
 
-use crate::utils::parse_language;
-
 type Translations = HashMap<String, HashMap<String, String>>;
 
 pub struct TranslationStore {
@@ -102,4 +100,19 @@ impl<'r> FromRequest<'r> for Language {
 
         Outcome::Success(Language("en".to_string()))
     }
+}
+
+pub fn parse_language(header: &str) -> Option<String> {
+    let lang_dir = "lang/";
+
+    for lang in header.split(',') {
+        let code = lang.split(';').next()?.trim();
+        let short_code = code.split('-').next()?.to_lowercase();
+
+        if Path::new(&format!("{}/{}.toml", lang_dir, short_code)).exists() {
+            return Some(short_code);
+        }
+    }
+
+    None
 }

@@ -132,21 +132,6 @@ pub fn create_cookie<'a>(name: &'a str, value: &str) -> Cookie<'a> {
     cookie
 }
 
-pub fn parse_language(header: &str) -> Option<String> {
-    let lang_dir = "lang/";
-
-    for lang in header.split(',') {
-        let code = lang.split(';').next()?.trim();
-        let short_code = code.split('-').next()?.to_lowercase();
-
-        if Path::new(&format!("{}/{}.toml", lang_dir, short_code)).exists() {
-            return Some(short_code);
-        }
-    }
-
-    None
-}
-
 pub fn get_root_domain<'a>(host: &str) -> String {
     if host.parse::<Ipv4Addr>().is_ok() || host.parse::<Ipv6Addr>().is_ok() {
         return CONFIG.fallback_root_domain.to_string();
