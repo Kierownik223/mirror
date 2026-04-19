@@ -1,6 +1,6 @@
 <div class="header">
             <a href="/">{% if not settings.smallhead %}<h1>{% endif %}<span>{{ macros::icon(name="favicon", hires=settings.hires) }}MARMAK Mirror</span>{% if not smallhead %}</h1>{% endif %}</a>
-            {% if not smallhead %}<a href="/"><span>{{ macros::icon(name="ui/home", hires=settings.hires) }}{{ strings.home }}</span></a>{% endif %}
+            {% if not settings.smallhead %}<a href="/"><span>{{ macros::icon(name="ui/home", hires=settings.hires) }}{{ strings.home }}</span></a>{% endif %}
             <a href="/settings"><span>{{ macros::icon(name="ui/settings", hires=settings.hires) }}{{ strings.settings }}</span></a>
             <a href="/search"><span>{{ macros::icon(name="ui/search", hires=settings.hires) }}{{ strings.search_engine }}</span></a>
             {%- if config.marmak_link %}
