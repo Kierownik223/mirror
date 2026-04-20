@@ -3,9 +3,13 @@
 {% block content %}
             <div class="controls">
                 <span class="title">
-                    <a href="/">MARMAK Mirror</a><span class="breadcrumbs">/<a href="/upload">{{ strings.uploader }}</a></span>
+                    <a href="/">MARMAK Mirror</a><span class="breadcrumbs">{% if path %}{{ macros::breadcrumbs_folder(path=path) }}{% else %}/{% endif %}<a href="/upload">{{ strings.uploader }}</a></span>
                 </span>
-            </div>
+            </div>                        {%- if share %}
+                        {{ macros::breadcrumbs_nolink(path=path) }}
+                        {% else %}
+                        {{ macros::breadcrumbs(path=path) }}
+                        {%- endif %}
             {{ strings.welcome }}, {{ username }}!
             {%- if admin %}
             <br>
