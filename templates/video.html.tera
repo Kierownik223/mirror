@@ -33,9 +33,9 @@
             <div class="controls">
                 <span class="title">
                     <a href="/">MARMAK Mirror</a><span class="breadcrumbs">
-                        {%- if share %}
+                        {%- if share -%}
                         {{ macros::breadcrumbs_nolink(path=path) }}
-                        {% else %}
+                        {% else -%}
                         {{ macros::breadcrumbs(path=path) }}
                         {%- endif %}
                     </span>
