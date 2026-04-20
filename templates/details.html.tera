@@ -3,7 +3,7 @@
 {% block content %}
             <div class="controls">
                 <span class="title">
-                    {{ strings.file_details }}
+                    <a href="/">MARMAK Mirror</a>
                     <span class="breadcrumbs">
                         {%- if share %}
                         {{ macros::breadcrumbs_nolink(path=path) }}

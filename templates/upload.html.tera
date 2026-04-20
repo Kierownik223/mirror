@@ -3,7 +3,7 @@
 {% block content %}
             <div class="controls">
                 <span class="title">
-                    <a href="/">MARMAK Mirror</a><span class="breadcrumbs">/<a href="/upload">{{ strings.uploader }}</a></span>
+                    <a href="/">MARMAK Mirror</a><span class="breadcrumbs">{{ macros::breadcrumbs_folder(path=path) }}/<a href="/upload">{{ strings.uploader }}</a></span>
                 </span>
             </div>
             {{ strings.welcome }}, {{ username }}!

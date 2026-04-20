@@ -4,7 +4,7 @@
             <link rel="stylesheet" href="/static/print.css?v={{ version }}">
             <div class="controls">
                 <span class="title">
-                    {{ strings.reading_markdown }} 
+                    <a href="/">MARMAK Mirror</a>
                     <span class="breadcrumbs">
                         {%- if share %}
                         {{ macros::breadcrumbs_nolink(path=path) }}
