@@ -3,7 +3,7 @@
 {% block content %}
             <div class="controls">
                 <span class="title">
-                    <a href="/">MARMAK Mirror</a><span class="breadcrumbs">{% if path %}{{ macros::breadcrumbs_folder(path=path) }}{% else %}/{% endif %}<a href="/upload">{{ strings.uploader }}</a></span>
+                    <a href="/">MARMAK Mirror</a><span class="breadcrumbs">/<a href="/upload{% if path %}?path={{ path }}{% endif %}">{{ strings.uploader }}</a>{% if path %}{{ macros::breadcrumbs_folder(path=path) }}{% endif %}</span>
                 </span>
             </div>
             {{ strings.welcome }}, {{ username }}!
