@@ -2,17 +2,17 @@
 
 {% block content %}
 <div>
-    <span class="title">
-        {{ strings.watching }} <span class="breadcrumbs">
-            {%- if share %}
+    <span>
+        <a href="/">MARMAK Mirror</a><span>
+            {%- if share -%}
             {{ macros::breadcrumbs_nolink(path=path) }}
-            {% else %}
+            {% else -%}
             {{ macros::breadcrumbs(path=path) }}
             {%- endif %}
         </span>
     </span>
     &nbsp;
-    <a href="?download" download>{{ strings.download }}{% if downloads %} ({{ downloads }}){% endif %}</a><br>
+    <a href="?download">{{ strings.download }}{% if downloads %} ({{ downloads }}){% endif %}</a>
 </div>
 <hr>
 {% if not share %}<a href="./">./</a>{% endif %}

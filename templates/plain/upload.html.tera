@@ -1,7 +1,7 @@
 {% extends "plain/base" %}
 
 {% block content %}
-<a href="/">MARMAK Mirror</a>/<a href="/upload">{{ strings.uploader }}</a><br>
+<a href="/">MARMAK Mirror</a><span>/<a href="/upload{% if path %}?path={{ path }}{% endif %}">{{ strings.uploader }}</a>{% if path %}{{ macros::breadcrumbs_folder(path=path) }}{% endif %}</span><br>
 {{ strings.welcome }}, {{ username }}!
 {% if admin %}
 <br>

@@ -1,17 +1,19 @@
 {% extends "plain/base" %}
 
 {% block content %}
-<span class="title">
-    {{ strings.listening }} <span class="breadcrumbs">
-        {%- if share %}
-        {{ macros::breadcrumbs_nolink(path=path) }}
-        {% else %}
-        {{ macros::breadcrumbs(path=path) }}
-        {%- endif %}
+<div class="controls">
+    <span>
+        <a href="/">MARMAK Mirror</a><span>
+            {%- if share -%}
+            {{ macros::breadcrumbs_nolink(path=path) }}
+            {% else -%}
+            {{ macros::breadcrumbs(path=path) }}
+            {%- endif %}
+        </span>
     </span>
-</span>
-&nbsp;
-<a href="?download" download>{{ strings.download }}{% if downloads %} ({{ downloads }}){% endif %}</a><br>
+    &nbsp;
+    <a href="?download">{{ strings.download }}{% if downloads %} ({{ downloads }}){% endif %}</a>
+</div>
 <hr>
 {% if not share %}<a href="./">./</a>{% endif %}
 <audio src="?download" controls style="width: 100%;" poster="/poster{{ path | urlencode }}">{{ strings.no_audio }}</audio>

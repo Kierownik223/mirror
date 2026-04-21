@@ -1,12 +1,12 @@
 {% extends "plain/base" %}
 
 {% block content %}
-<div class="controls">
-    <span class="title">
-        {{ strings.reading_markdown }} <span class="breadcrumbs">
-            {%- if share %}
+<div>
+    <span>
+        <a href="/">MARMAK Mirror</a><span>
+            {%- if share -%}
             {{ macros::breadcrumbs_nolink(path=path) }}
-            {% else %}
+            {% else -%}
             {{ macros::breadcrumbs(path=path) }}
             {%- endif %}
         </span>
