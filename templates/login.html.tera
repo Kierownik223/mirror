@@ -20,7 +20,10 @@
                     <button type="submit"><span>{{ macros::icon(name="ui/login", hires=settings.hires) }}{{ strings.log_in }}</span></button>
                 </center>
                 {%- if next %}
-                {{ strings.login_to_continue }} {{ next }}
+                <p>{{ strings.login_to_continue }} {{ next }}</p>
+                {%- endif %}
+                {%- if config.show_account_link %}
+                <p><a href="http://account.{{ root_domain }}">{{ macros::icon(name="ui/key", hires=settings.hires) }}MARMAK Account</a></p>
                 {%- endif %}
                 <p><span>{{ macros::icon(name="info", hires=settings.hires) }}{{ strings.tip }}</span></p>
                 {{ strings.settings_tip1 }} <a href="/settings">{{ macros::icon(name="ui/settings", hires=settings.hires) }}{{ strings.settings }}</a> {{ strings.settings_tip2 }}

@@ -27,6 +27,7 @@ pub struct Config {
     pub jwt_secret: String,
     pub linkshortener: bool,
     pub linkshortener_url: String,
+    pub show_account_link: bool,
     pub max_upload_sizes: HashMap<String, u64>,
     pub private_folder_quotas: HashMap<String, u64>,
 }
@@ -78,6 +79,7 @@ impl Default for Config {
             jwt_secret: env::var("MIRROR_JWT_SECRET").unwrap_or("".into()),
             linkshortener: parse_bool(&env::var("MIRROR_LINKSHORTENER").unwrap_or("true".into())),
             linkshortener_url: env::var("MIRROR_JWT_SECRET").unwrap_or("https://short.marmak.net.pl/api/url".into()),
+            show_account_link: parse_bool(&env::var("MIRROR_SHOW_ACCOUNT_LINK").unwrap_or("false".into())),
             max_upload_sizes: HashMap::from([
                 ("0".into(), 5.gigabytes().as_u64()),
                 ("1".into(), 500.megabytes().as_u64()),
