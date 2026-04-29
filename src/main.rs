@@ -1,9 +1,7 @@
 use audiotags::{MimeType, Tag};
 use db::Db;
 use rocket::{
-    http::{ContentType, CookieJar, Status},
-    response::{content::RawHtml, Redirect},
-    Data, Request, State,
+    Data, Request, State, http::{ContentType, CookieJar, Status, uri::Segments}, response::{Redirect, content::RawHtml}
 };
 use rocket_db_pools::{Connection, Database};
 use rocket_multipart_form_data::{
@@ -87,9 +85,9 @@ pub struct FileEntry {
     pub file: String,
 }
 
-#[get("/poster/<file..>")]
+#[get("/poster/<segments..>")]
 async fn poster(
-    file: PathBuf,
+    segments: Segments<'_, rocket::http::uri::fmt::Path>,
     token: Result<JWT, Status>,
     host: Host<'_>,
     jar: &CookieJar<'_>,
@@ -103,6 +101,8 @@ async fn poster(
     } else {
         "Nobody".into()
     };
+
+    let file = segments.to_path_buf(true).map_err(|_| Status::BadRequest)?;
 
     let (path, is_private) = if let Ok(rest) = file.strip_prefix("private") {
         if username == "Nobody" {
@@ -247,24 +247,26 @@ async fn download_share(
     }
 }
 
-#[get("/<file..>?download")]
+#[get("/<segments..>?download")]
 async fn download_db(
     db: Connection<FileDb>,
-    file: PathBuf,
+    segments: Segments<'_, rocket::http::uri::fmt::Path>,
     token: Result<JWT, Status>,
     host: Host<'_>,
     jar: &CookieJar<'_>,
 ) -> IndexResult {
+    let file = segments.to_path_buf(true).map_err(|_| Status::BadRequest)?;
     perform_download(Some(db), file, token, host, jar).await
 }
 
-#[get("/<file..>?download")]
+#[get("/<segments..>?download")]
 async fn download(
-    file: PathBuf,
+    segments: Segments<'_, rocket::http::uri::fmt::Path>,
     token: Result<JWT, Status>,
     host: Host<'_>,
     jar: &CookieJar<'_>,
 ) -> IndexResult {
+    let file = segments.to_path_buf(true).map_err(|_| Status::BadRequest)?;
     perform_download(None, file, token, host, jar).await
 }
 
@@ -333,10 +335,10 @@ async fn static_files(file: PathBuf) -> IndexResult {
     MirrorFileInternal::open_file(path, &MirrorFile::get_static_cache_control()).await
 }
 
-#[get("/<file..>", rank = 10)]
+#[get("/<segments..>", rank = 10)]
 async fn index_db(
     db: Connection<FileDb>,
-    file: PathBuf,
+    segments: Segments<'_, rocket::http::uri::fmt::Path>,
     jar: &CookieJar<'_>,
     translations: &rocket::State<TranslationStore>,
     lang: Language,
@@ -346,6 +348,7 @@ async fn index_db(
     uri: FullUri,
     settings: Settings<'_>,
 ) -> IndexResult {
+    let file = segments.to_path_buf(true).map_err(|_| Status::BadRequest)?;
     if !Path::new("files").join(&file).exists()
         && (&file.display().to_string() == "robots.txt"
             || &file.display().to_string() == "favicon.ico")
@@ -409,9 +412,9 @@ async fn index_db(
     }
 }
 
-#[get("/<file..>", rank = 10)]
+#[get("/<segments..>", rank = 10)]
 async fn index(
-    file: PathBuf,
+    segments: Segments<'_, rocket::http::uri::fmt::Path>,
     jar: &CookieJar<'_>,
     translations: &rocket::State<TranslationStore>,
     lang: Language,
@@ -421,6 +424,7 @@ async fn index(
     uri: FullUri,
     settings: Settings<'_>,
 ) -> IndexResult {
+    let file = segments.to_path_buf(true).map_err(|_| Status::BadRequest)?;
     if !Path::new("files").join(&file).exists()
         && (&file.display().to_string() == "robots.txt"
             || &file.display().to_string() == "favicon.ico")
@@ -1201,9 +1205,9 @@ async fn reset_settings(jar: &CookieJar<'_>) -> Redirect {
     return Redirect::to("/");
 }
 
-#[get("/iframe/<file..>")]
+#[get("/iframe/<segments..>")]
 async fn iframe(
-    file: PathBuf,
+    segments: Segments<'_, rocket::http::uri::fmt::Path>,
     jar: &CookieJar<'_>,
     host: Host<'_>,
     token: Result<JWT, Status>,
@@ -1218,6 +1222,8 @@ async fn iframe(
     } else {
         (&"Nobody".into(), 1)
     };
+
+    let file = segments.to_path_buf(true).map_err(|_| Status::BadRequest)?;
 
     let path = MirrorFile::get_real_path(&file, username.to_string())?.0;
 

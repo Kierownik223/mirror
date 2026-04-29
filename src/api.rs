@@ -9,11 +9,7 @@ use std::{
 use ::sysinfo::{Disks, RefreshKind, System};
 use audiotags::Tag;
 use rocket::{
-    data::ToByteUnit,
-    fairing::AdHoc,
-    http::{ContentType, Status},
-    serde::json::Json,
-    Data, Request, State,
+    Data, Request, State, data::ToByteUnit, fairing::AdHoc, http::{ContentType, Status, uri::Segments}, serde::json::Json
 };
 use rocket_db_pools::Connection;
 use rocket_multipart_form_data::{
@@ -166,12 +162,14 @@ impl Ord for SearchFile {
     }
 }
 
-#[get("/listing/<file..>")]
-async fn listing(file: PathBuf, sizes: &State<FileSizes>, token: Result<JWT, Status>) -> ApiResult {
+#[get("/listing/<segments..>")]
+async fn listing(segments: Segments<'_, rocket::http::uri::fmt::Path>, sizes: &State<FileSizes>, token: Result<JWT, Status>) -> ApiResult {
     let username = match token.as_ref() {
         Ok(token) => &token.claims.sub,
         Err(_) => &"Nobody".into(),
     };
+
+    let file = segments.to_path_buf(true).map_err(|_| Status::BadRequest)?;
 
     let path = MirrorFile::get_real_path(&file, username.to_string())?.0;
 
@@ -267,17 +265,19 @@ async fn search(
     }
 }
 
-#[get("/<file..>", rank = 1)]
+#[get("/<segments..>", rank = 1)]
 async fn file_with_downloads(
     db: Connection<FileDb>,
-    file: PathBuf,
+    segments: Segments<'_, rocket::http::uri::fmt::Path>,
     token: Result<JWT, Status>,
 ) -> ApiResult {
+    let file = segments.to_path_buf(true).map_err(|_| Status::BadRequest)?;
     display_file(Some(db), file, token).await
 }
 
-#[get("/<file..>", rank = 1)]
-async fn file(file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
+#[get("/<segments..>", rank = 1)]
+async fn file(segments: Segments<'_, rocket::http::uri::fmt::Path>, token: Result<JWT, Status>) -> ApiResult {
+    let file = segments.to_path_buf(true).map_err(|_| Status::BadRequest)?;
     display_file(None, file, token).await
 }
 
@@ -355,22 +355,24 @@ async fn display_file(
     })))
 }
 
-#[patch("/<file..>", data = "<rename_req>")]
+#[patch("/<segments..>", data = "<rename_req>")]
 async fn rename_db(
     db: Connection<FileDb>,
-    file: PathBuf,
+    segments: Segments<'_, rocket::http::uri::fmt::Path>,
     rename_req: Json<NameRequest>,
     token: Result<JWT, Status>,
 ) -> ApiResult {
+    let file = segments.to_path_buf(true).map_err(|_| Status::BadRequest)?;
     perform_rename(Some(db), file, rename_req, token).await
 }
 
-#[patch("/<file..>", data = "<rename_req>")]
+#[patch("/<segments..>", data = "<rename_req>")]
 async fn rename(
-    file: PathBuf,
+    segments: Segments<'_, rocket::http::uri::fmt::Path>,
     rename_req: Json<NameRequest>,
     token: Result<JWT, Status>,
 ) -> ApiResult {
+    let file = segments.to_path_buf(true).map_err(|_| Status::BadRequest)?;
     perform_rename(None, file, rename_req, token).await
 }
 
@@ -404,24 +406,26 @@ async fn perform_rename(
     })))
 }
 
-#[delete("/<file..>?<recurse>")]
+#[delete("/<segments..>?<recurse>")]
 async fn delete_db<'a>(
     db: Connection<FileDb>,
-    file: PathBuf,
+    segments: Segments<'_, rocket::http::uri::fmt::Path>,
     token: Result<JWT, Status>,
     sizes: &State<FileSizes>,
     recurse: Option<bool>,
 ) -> ApiResult {
+    let file = segments.to_path_buf(true).map_err(|_| Status::BadRequest)?;
     perform_delete(Some(db), file, token, sizes, recurse).await
 }
 
-#[delete("/<file..>?<recurse>")]
+#[delete("/<segments..>?<recurse>")]
 async fn delete<'a>(
-    file: PathBuf,
+    segments: Segments<'_, rocket::http::uri::fmt::Path>,
     token: Result<JWT, Status>,
     sizes: &State<FileSizes>,
     recurse: Option<bool>,
 ) -> ApiResult {
+    let file = segments.to_path_buf(true).map_err(|_| Status::BadRequest)?;
     perform_delete(None, file, token, sizes, recurse).await
 }
 
@@ -510,9 +514,11 @@ async fn perform_delete(
     };
 }
 
-#[post("/<file..>")]
-async fn share(db: Connection<FileDb>, file: PathBuf, token: Result<JWT, Status>) -> ApiResult {
+#[post("/<segments..>")]
+async fn share(db: Connection<FileDb>, segments: Segments<'_, rocket::http::uri::fmt::Path>, token: Result<JWT, Status>) -> ApiResult {
     let token = token?;
+    
+    let file = segments.to_path_buf(true).map_err(|_| Status::BadRequest)?;
 
     let path = MirrorFile::get_real_path_with_perms(&file, token.claims.sub, token.claims.perms)?.0;
 
@@ -534,13 +540,15 @@ async fn share(db: Connection<FileDb>, file: PathBuf, token: Result<JWT, Status>
     }
 }
 
-#[put("/<file..>", data = "<name_req>")]
+#[put("/<segments..>", data = "<name_req>")]
 async fn create_folder<'a>(
-    file: PathBuf,
+    segments: Segments<'_, rocket::http::uri::fmt::Path>,
     token: Result<JWT, Status>,
     name_req: Option<Json<NameRequest>>,
 ) -> ApiResult {
     let token = token?;
+    
+    let file = segments.to_path_buf(true).map_err(|_| Status::BadRequest)?;
 
     let path = MirrorFile::get_real_path_with_perms(&file, token.claims.sub, token.claims.perms)?.0;
 
