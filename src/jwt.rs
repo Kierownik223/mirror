@@ -11,6 +11,7 @@ use rocket::{
 };
 #[cfg(not(test))]
 use rocket_db_pools::Connection;
+use rustls::crypto::CryptoProvider;
 use serde::{Deserialize, Serialize};
 
 use crate::{account::MarmakUser, config::CONFIG};
@@ -146,6 +147,8 @@ impl Default for JWT {
 }
 
 pub fn create_jwt(user: &MarmakUser) -> Result<String, Error> {
+    let _ = CryptoProvider::install_default(rustls::crypto::aws_lc_rs::default_provider());
+
     let secret = &CONFIG.jwt_secret;
 
     let expiration = SystemTime::now()
