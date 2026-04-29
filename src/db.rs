@@ -1,4 +1,4 @@
-use rand::{distributions::Alphanumeric, Rng};
+use rand::{RngExt, distr::Alphanumeric};
 use rocket_db_pools::{sqlx, Connection, Database};
 use sqlx::Row;
 
@@ -61,7 +61,7 @@ pub async fn get_file_by_id(mut db: Connection<FileDb>, path: &str) -> Option<St
 }
 
 pub async fn add_rememberme_token(mut db: Connection<Db>, username: &str) -> Option<String> {
-    let token: String = rand::thread_rng()
+    let token: String = rand::rng()
         .sample_iter(&Alphanumeric)
         .take(64)
         .map(char::from)

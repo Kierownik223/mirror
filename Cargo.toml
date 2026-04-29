@@ -7,10 +7,10 @@ publish = false
 [dependencies]
 audiotags = "0"
 bcrypt = "0"
-jsonwebtoken = "9"
+jsonwebtoken = "10"
 markdown = "1"
 once_cell = "1"
-rand = "0.8"
+rand = "0.10"
 rocket = { version = "0.5", features = ["json"] }
 rocket-multipart-form-data = "0.10"
 rocket_dyn_templates = { version = "0.2", features = ["tera"] }
