@@ -9,7 +9,11 @@ use std::{
 use ::sysinfo::{Disks, RefreshKind, System};
 use audiotags::Tag;
 use rocket::{
-    Data, Request, State, data::ToByteUnit, fairing::AdHoc, http::{ContentType, Status, uri::Segments}, serde::json::Json
+    data::ToByteUnit,
+    fairing::AdHoc,
+    http::{uri::Segments, ContentType, Status},
+    serde::json::Json,
+    Data, Request, State,
 };
 use rocket_db_pools::Connection;
 use rocket_multipart_form_data::{
@@ -163,7 +167,11 @@ impl Ord for SearchFile {
 }
 
 #[get("/listing/<segments..>")]
-async fn listing(segments: Segments<'_, rocket::http::uri::fmt::Path>, sizes: &State<FileSizes>, token: Result<JWT, Status>) -> ApiResult {
+async fn listing(
+    segments: Segments<'_, rocket::http::uri::fmt::Path>,
+    sizes: &State<FileSizes>,
+    token: Result<JWT, Status>,
+) -> ApiResult {
     let username = match token.as_ref() {
         Ok(token) => &token.claims.sub,
         Err(_) => &"Nobody".into(),
@@ -276,7 +284,10 @@ async fn file_with_downloads(
 }
 
 #[get("/<segments..>", rank = 1)]
-async fn file(segments: Segments<'_, rocket::http::uri::fmt::Path>, token: Result<JWT, Status>) -> ApiResult {
+async fn file(
+    segments: Segments<'_, rocket::http::uri::fmt::Path>,
+    token: Result<JWT, Status>,
+) -> ApiResult {
     let file = segments.to_path_buf(true).map_err(|_| Status::BadRequest)?;
     display_file(None, file, token).await
 }
@@ -515,9 +526,13 @@ async fn perform_delete(
 }
 
 #[post("/<segments..>")]
-async fn share(db: Connection<FileDb>, segments: Segments<'_, rocket::http::uri::fmt::Path>, token: Result<JWT, Status>) -> ApiResult {
+async fn share(
+    db: Connection<FileDb>,
+    segments: Segments<'_, rocket::http::uri::fmt::Path>,
+    token: Result<JWT, Status>,
+) -> ApiResult {
     let token = token?;
-    
+
     let file = segments.to_path_buf(true).map_err(|_| Status::BadRequest)?;
 
     let path = MirrorFile::get_real_path_with_perms(&file, token.claims.sub, token.claims.perms)?.0;
@@ -547,7 +562,7 @@ async fn create_folder<'a>(
     name_req: Option<Json<NameRequest>>,
 ) -> ApiResult {
     let token = token?;
-    
+
     let file = segments.to_path_buf(true).map_err(|_| Status::BadRequest)?;
 
     let path = MirrorFile::get_real_path_with_perms(&file, token.claims.sub, token.claims.perms)?.0;

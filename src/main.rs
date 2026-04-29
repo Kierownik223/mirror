@@ -1,7 +1,9 @@
 use audiotags::{MimeType, Tag};
 use db::Db;
 use rocket::{
-    Data, Request, State, http::{ContentType, CookieJar, Status, uri::Segments}, response::{Redirect, content::RawHtml}
+    http::{uri::Segments, ContentType, CookieJar, Status},
+    response::{content::RawHtml, Redirect},
+    Data, Request, State,
 };
 use rocket_db_pools::{Connection, Database};
 use rocket_multipart_form_data::{
