@@ -89,11 +89,6 @@ impl MarmakUser {
                         eprintln!("Database error (MarmakUser::login [add_login]): {:?}", error);
                     }
 
-                    println!(
-                        "asd: {:?}",
-                        row.try_get::<String, _>("mirror_settings").ok()
-                    );
-
                     return Some(Self {
                         username: username,
                         password: password.to_string(),
