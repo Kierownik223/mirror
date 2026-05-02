@@ -1198,6 +1198,8 @@ async fn reset_settings(jar: &CookieJar<'_>) -> Redirect {
         "use_si",
         "audio_player",
         "video_player",
+        "show_cover",
+        "dir_browser",
     ];
 
     for key in keys {
