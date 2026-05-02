@@ -27,7 +27,7 @@ pub struct FormSettings<'r> {
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct Settings<'r> {
     pub theme: &'r str,
-    pub js_present: bool,
+    pub js_present: Option<bool>,
     pub lang: &'r str,
     pub hires: bool,
     pub smallhead: bool,
@@ -110,8 +110,8 @@ impl<'r> Settings<'r> {
 
         Self {
             theme,
-            js_present: std::path::Path::new(&format!("public/static/styles/{}.js", &theme))
-                .exists(),
+            js_present: Some(std::path::Path::new(&format!("public/static/styles/{}.js", &theme))
+                .exists()),
             lang: lang,
             hires,
             smallhead,
@@ -193,7 +193,7 @@ impl Default for Settings<'_> {
     fn default() -> Self {
         Settings {
             theme: "default",
-            js_present: false,
+            js_present: None,
             lang: "en",
             hires: false,
             smallhead: false,

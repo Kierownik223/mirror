@@ -217,10 +217,9 @@ async fn login(
     if let Some(db_user) = MarmakUser::login(db, &user.username, &user.password, &ip.0).await {
         if !settings.nooverride {
             if let Some(ref settings) = db_user.mirror_settings {
-                let decoded: Settings =
-                    serde_json::from_str(&settings).expect("Failed to parse JSON");
-
-                decoded.to_cookies(jar);
+                if let Ok(set) = serde_json::from_str::<Settings>(&settings) {
+                    set.to_cookies(jar);
+                }
             }
         }
 
