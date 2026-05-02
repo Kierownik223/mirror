@@ -24,22 +24,39 @@ pub struct FormSettings<'r> {
     pub show_cover: Option<&'r str>,
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct Settings<'r> {
+    #[serde(default = "default")]
     pub theme: &'r str,
-    pub js_present: Option<bool>,
+    #[serde(default)]
+    pub js_present: bool,
+    #[serde(default = "en")]
     pub lang: &'r str,
+    #[serde(default)]
     pub hires: bool,
+    #[serde(default)]
     pub smallhead: bool,
+    #[serde(default)]
     pub plain: bool,
+    #[serde(default)]
     pub nooverride: bool,
+    #[serde(default = "yes")]
     pub viewers: bool,
+    #[serde(default = "yes")]
     pub dir_browser: bool,
+    #[serde(default = "yes")]
     pub use_si: bool,
+    #[serde(default = "yes")]
     pub audio_player: bool,
+    #[serde(default = "yes")]
     pub video_player: bool,
+    #[serde(default = "yes")]
     pub show_cover: bool,
 }
+
+fn yes() -> bool { true }
+fn default<'r>() -> &'r str { "default" }
+fn en<'r>() -> &'r str { "en" }
 
 impl<'r> Settings<'r> {
     pub fn from_cookies(jar: &'r CookieJar<'_>) -> Self {
@@ -110,8 +127,8 @@ impl<'r> Settings<'r> {
 
         Self {
             theme,
-            js_present: Some(std::path::Path::new(&format!("public/static/styles/{}.js", &theme))
-                .exists()),
+            js_present: std::path::Path::new(&format!("public/static/styles/{}.js", &theme))
+                .exists(),
             lang: lang,
             hires,
             smallhead,
@@ -193,7 +210,7 @@ impl Default for Settings<'_> {
     fn default() -> Self {
         Settings {
             theme: "default",
-            js_present: None,
+            js_present: false,
             lang: "en",
             hires: false,
             smallhead: false,
