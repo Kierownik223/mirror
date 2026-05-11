@@ -25,7 +25,7 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::db::{add_download, FileDb};
+use crate::{db::{FileDb, add_download}, settings::{FormSettings, Settings}};
 use crate::responders::{Cached, IndexResponse, IndexResult};
 use crate::{
     account::MarmakUser,
@@ -43,7 +43,7 @@ use crate::{
 };
 use crate::{db::get_file_by_id, jwt::JWT};
 use crate::{
-    guards::{FormSettings, FullUri, Host, Settings},
+    guards::{FullUri, Host},
     utils::add_token_cookie,
 };
 
@@ -57,6 +57,7 @@ mod i18n;
 mod jwt;
 mod mirrorfile;
 mod responders;
+mod settings;
 #[cfg(test)]
 mod tests;
 mod utils;
@@ -1009,7 +1010,7 @@ async fn display_folder(
 }
 
 #[get("/settings?<opt..>")]
-fn settings(
+fn settings_route(
     jar: &CookieJar<'_>,
     opt: FormSettings<'_>,
     lang: Language,
@@ -1935,7 +1936,7 @@ async fn rocket() -> _ {
         .mount(
             "/",
             routes![
-                settings,
+                settings_route,
                 reset_settings,
                 iframe,
                 poster,

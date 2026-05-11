@@ -1,0 +1,310 @@
+use rocket::{Request, http::{Cookie, CookieJar, SameSite}, request::{FromRequest, Outcome}, time::{Duration, OffsetDateTime}};
+
+#[derive(FromForm, serde::Serialize)]
+pub struct FormSettings<'r> {
+    pub theme: Option<&'r str>,
+    pub lang: Option<&'r str>,
+    pub hires: Option<&'r str>,
+    pub smallhead: Option<&'r str>,
+    pub plain: Option<&'r str>,
+    pub nooverride: Option<&'r str>,
+    pub viewers: Option<&'r str>,
+    pub dir_browser: Option<&'r str>,
+    pub use_si: Option<&'r str>,
+    pub audio_player: Option<&'r str>,
+    pub video_player: Option<&'r str>,
+    pub show_cover: Option<&'r str>,
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
+pub struct Settings<'r> {
+    #[serde(default = "default")]
+    pub theme: &'r str,
+    #[serde(default)]
+    pub js_present: bool,
+    #[serde(default = "en")]
+    pub lang: &'r str,
+    #[serde(default)]
+    pub hires: bool,
+    #[serde(default)]
+    pub smallhead: bool,
+    #[serde(default)]
+    pub plain: bool,
+    #[serde(default)]
+    pub nooverride: bool,
+    #[serde(default = "yes")]
+    pub viewers: bool,
+    #[serde(default = "yes")]
+    pub dir_browser: bool,
+    #[serde(default = "yes")]
+    pub use_si: bool,
+    #[serde(default = "yes")]
+    pub audio_player: bool,
+    #[serde(default = "yes")]
+    pub video_player: bool,
+    #[serde(default = "yes")]
+    pub show_cover: bool,
+}
+
+fn yes() -> bool { true }
+fn default<'r>() -> &'r str { "default" }
+fn en<'r>() -> &'r str { "en" }
+
+impl<'r> Settings<'r> {
+    pub fn from_cookies(jar: &'r CookieJar<'_>) -> Self {
+        let mut theme = jar
+            .get("theme")
+            .map(|cookie| cookie.value())
+            .unwrap_or("default");
+
+        if !std::path::Path::new(&format!("public/static/styles/{}.css", &theme)).exists() {
+            theme = "default";
+        }
+
+        let lang = if let Some(cookie_lang) = jar.get("lang").map(|c| c.value()) {
+            cookie_lang
+        } else {
+            "en"
+        };
+
+        let hires = jar
+            .get("hires")
+            .map(|c| c.value() == "true")
+            .unwrap_or(false);
+
+        let smallhead = jar
+            .get("smallhead")
+            .map(|c| c.value() == "true")
+            .unwrap_or(false);
+
+        let plain = jar
+            .get("plain")
+            .map(|c| c.value() == "true")
+            .unwrap_or(false);
+
+        let nooverride = jar
+            .get("nooverride")
+            .map(|c| c.value() == "true")
+            .unwrap_or(false);
+
+        let viewers = jar
+            .get("viewers")
+            .map(|c| c.value() == "true")
+            .unwrap_or(true);
+
+        let dir_browser = jar
+            .get("dir_browser")
+            .map(|c| c.value() == "true")
+            .unwrap_or(true);
+
+        let use_si = jar
+            .get("use_si")
+            .map(|c| c.value() == "true")
+            .unwrap_or(true);
+
+        let audio_player = jar
+            .get("audio_player")
+            .map(|c| c.value() == "true")
+            .unwrap_or(true);
+
+        let video_player = jar
+            .get("video_player")
+            .map(|c| c.value() == "true")
+            .unwrap_or(true);
+
+        let show_cover: bool = jar
+            .get("show_cover")
+            .map(|c| c.value() == "true")
+            .unwrap_or(true);
+
+        Self {
+            theme,
+            js_present: std::path::Path::new(&format!("public/static/styles/{}.js", &theme))
+                .exists(),
+            lang: lang,
+            hires,
+            smallhead,
+            plain,
+            nooverride,
+            viewers,
+            dir_browser,
+            use_si,
+            audio_player,
+            video_player,
+            show_cover,
+        }
+    }
+
+    pub fn to_cookies(&self, jar: &'r CookieJar<'_>) -> &'r CookieJar<'_> {
+        let mut now = OffsetDateTime::now_utc();
+        now += Duration::days(365);
+
+        let mut theme = Cookie::new("theme", self.theme.to_owned());
+        theme.set_expires(now);
+        theme.set_same_site(SameSite::Lax);
+        jar.add(theme);
+
+        let mut lang = Cookie::new("lang", self.lang.to_owned());
+        lang.set_expires(now);
+        lang.set_same_site(SameSite::Lax);
+        jar.add(lang);
+
+        let mut hires = Cookie::new("hires", self.hires.to_string());
+        hires.set_expires(now);
+        hires.set_same_site(SameSite::Lax);
+        jar.add(hires);
+
+        let mut smallhead = Cookie::new("smallhead", self.smallhead.to_string());
+        smallhead.set_expires(now);
+        smallhead.set_same_site(SameSite::Lax);
+        jar.add(smallhead);
+
+        let mut plain = Cookie::new("plain", self.plain.to_string());
+        plain.set_expires(now);
+        plain.set_same_site(SameSite::Lax);
+        jar.add(plain);
+
+        let mut nooverride = Cookie::new("nooverride", self.nooverride.to_string());
+        nooverride.set_expires(now);
+        nooverride.set_same_site(SameSite::Lax);
+        jar.add(nooverride);
+
+        let mut dir_browser = Cookie::new("dir_browser", self.dir_browser.to_string());
+        dir_browser.set_expires(now);
+        dir_browser.set_same_site(SameSite::Lax);
+        jar.add(dir_browser);
+
+        let mut use_si = Cookie::new("use_si", self.use_si.to_string());
+        use_si.set_expires(now);
+        use_si.set_same_site(SameSite::Lax);
+        jar.add(use_si);
+
+        let mut audio_player = Cookie::new("audio_player", self.audio_player.to_string());
+        audio_player.set_expires(now);
+        audio_player.set_same_site(SameSite::Lax);
+        jar.add(audio_player);
+
+        let mut video_player = Cookie::new("video_player", self.video_player.to_string());
+        video_player.set_expires(now);
+        video_player.set_same_site(SameSite::Lax);
+        jar.add(video_player);
+
+        let mut show_cover = Cookie::new("show_cover", self.show_cover.to_string());
+        show_cover.set_expires(now);
+        show_cover.set_same_site(SameSite::Lax);
+        jar.add(show_cover);
+
+        jar
+    }
+}
+
+impl Default for Settings<'_> {
+    fn default() -> Self {
+        Settings {
+            theme: "default",
+            js_present: false,
+            lang: "en",
+            hires: false,
+            smallhead: false,
+            plain: false,
+            nooverride: false,
+            viewers: true,
+            dir_browser: true,
+            use_si: true,
+            audio_player: true,
+            video_player: true,
+            show_cover: true,
+        }
+    }
+}
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for Settings<'r> {
+    type Error = ();
+
+    async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
+        let mut settings = Settings::from_cookies(request.cookies());
+
+        settings.plain = match (
+            request.cookies().get("plain").map(|c| c.value() == "true"),
+            request.headers().get_one("User-Agent"),
+        ) {
+            (Some(value), _) => value,
+
+            (None, Some(ua)) => {
+                ua.starts_with("Mozilla/1")
+                    || ua.starts_with("Mozilla/2")
+                    || ua.starts_with("Links")
+                    || ua.starts_with("Lynx")
+            }
+
+            (None, None) => true,
+        };
+
+        settings.viewers = match (
+            request
+                .cookies()
+                .get("viewers")
+                .map(|c| c.value() == "true"),
+            request.headers().get_one("User-Agent"),
+        ) {
+            (Some(value), _) => value,
+
+            (None, Some(ua)) => {
+                !(ua.starts_with("Mozilla/1")
+                    || ua.starts_with("Mozilla/2")
+                    || ua.starts_with("Links")
+                    || ua.starts_with("Lynx")
+                    || ua.starts_with("Winamp")
+                    || ua.starts_with("VLC")
+                    || ua.starts_with("curl"))
+            }
+
+            (None, None) => false,
+        };
+        settings.audio_player = match (
+            request
+                .cookies()
+                .get("audio_player")
+                .map(|c| c.value() == "true"),
+            request.headers().get_one("User-Agent"),
+        ) {
+            (Some(value), _) => value,
+
+            (None, Some(ua)) => {
+                !(ua.starts_with("Mozilla/1")
+                    || ua.starts_with("Mozilla/2")
+                    || ua.starts_with("Links")
+                    || ua.starts_with("Lynx")
+                    || ua.starts_with("Winamp")
+                    || ua.starts_with("VLC")
+                    || ua.starts_with("curl"))
+            }
+
+            (None, None) => false,
+        };
+        settings.video_player = match (
+            request
+                .cookies()
+                .get("video_player")
+                .map(|c| c.value() == "true"),
+            request.headers().get_one("User-Agent"),
+        ) {
+            (Some(value), _) => value,
+
+            (None, Some(ua)) => {
+                !(ua.starts_with("Mozilla/1")
+                    || ua.starts_with("Mozilla/2")
+                    || ua.starts_with("Links")
+                    || ua.starts_with("Lynx")
+                    || ua.starts_with("Winamp")
+                    || ua.starts_with("VLC")
+                    || ua.starts_with("curl"))
+            }
+
+            (None, None) => false,
+        };
+
+        rocket::outcome::Outcome::Success(settings)
+    }
+}
