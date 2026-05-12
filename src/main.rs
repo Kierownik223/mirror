@@ -28,16 +28,16 @@ use crate::{
     account::MarmakUser,
     api::{MusicFile, SearchFile, VideoFile},
     config::CONFIG,
+    db::{add_download, get_file_by_id, Db, FileDb},
     guards::{FullUri, Host},
     i18n::{Language, TranslationStore},
     jwt::JWT,
-    db::{Db, FileDb, add_download, get_file_by_id},
     mirrorfile::{MirrorFile, MirrorFileInternal},
-    settings::{FormSettings, Settings},
     responders::{Cached, IndexResponse, IndexResult},
+    settings::{FormSettings, Settings},
     utils::{
-        format_size_filter, get_root_domain, map_io_error_to_status, parse_7z_output,
-        read_dirs_async, add_token_cookie,
+        add_token_cookie, format_size_filter, get_root_domain, map_io_error_to_status,
+        parse_7z_output, read_dirs_async,
     },
 };
 

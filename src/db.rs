@@ -1,4 +1,4 @@
-use rand::{RngExt, distr::Alphanumeric};
+use rand::{distr::Alphanumeric, RngExt};
 use rocket_db_pools::{sqlx, Connection, Database};
 use sqlx::Row;
 

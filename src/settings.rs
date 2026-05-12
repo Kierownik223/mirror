@@ -1,4 +1,9 @@
-use rocket::{Request, http::{Cookie, CookieJar, SameSite}, request::{FromRequest, Outcome}, time::{Duration, OffsetDateTime}};
+use rocket::{
+    http::{Cookie, CookieJar, SameSite},
+    request::{FromRequest, Outcome},
+    time::{Duration, OffsetDateTime},
+    Request,
+};
 
 #[derive(FromForm, serde::Serialize)]
 pub struct FormSettings<'r> {
@@ -46,9 +51,15 @@ pub struct Settings<'r> {
     pub show_cover: bool,
 }
 
-fn yes() -> bool { true }
-fn default<'r>() -> &'r str { "default" }
-fn en<'r>() -> &'r str { "en" }
+fn yes() -> bool {
+    true
+}
+fn default<'r>() -> &'r str {
+    "default"
+}
+fn en<'r>() -> &'r str {
+    "en"
+}
 
 impl<'r> Settings<'r> {
     pub fn from_cookies(jar: &'r CookieJar<'_>) -> Self {
