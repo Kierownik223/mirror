@@ -1,5 +1,4 @@
 use audiotags::{MimeType, Tag};
-use db::Db;
 use rocket::{
     http::{uri::Segments, ContentType, CookieJar, Status},
     response::{content::RawHtml, Redirect},
@@ -25,26 +24,21 @@ use walkdir::WalkDir;
 
 use rocket_dyn_templates::{context, Template};
 
-use crate::{db::{FileDb, add_download}, settings::{FormSettings, Settings}};
-use crate::responders::{Cached, IndexResponse, IndexResult};
 use crate::{
     account::MarmakUser,
-    api::MusicFile,
+    api::{MusicFile, SearchFile, VideoFile},
+    config::CONFIG,
+    guards::{FullUri, Host},
     i18n::{Language, TranslationStore},
+    jwt::JWT,
+    db::{Db, FileDb, add_download, get_file_by_id},
     mirrorfile::{MirrorFile, MirrorFileInternal},
-};
-use crate::{api::SearchFile, config::CONFIG};
-use crate::{
-    api::VideoFile,
+    settings::{FormSettings, Settings},
+    responders::{Cached, IndexResponse, IndexResult},
     utils::{
         format_size_filter, get_root_domain, map_io_error_to_status, parse_7z_output,
-        read_dirs_async,
+        read_dirs_async, add_token_cookie,
     },
-};
-use crate::{db::get_file_by_id, jwt::JWT};
-use crate::{
-    guards::{FullUri, Host},
-    utils::add_token_cookie,
 };
 
 mod account;
