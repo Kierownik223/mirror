@@ -7,9 +7,9 @@ use rocket_dyn_templates::{context, Template};
 
 use crate::{
     config::CONFIG,
-    guards::Settings,
     jwt::JWT,
     responders::IndexResult,
+    settings::Settings,
     utils::{add_token_cookie, get_root_domain},
     Disk, Host, IndexResponse, Language, TranslationStore,
 };

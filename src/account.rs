@@ -18,9 +18,10 @@ use rocket_dyn_templates::{context, Template};
 use crate::{
     config::CONFIG,
     db::{add_rememberme_token, delete_session, Db},
-    guards::{Settings, XForwardedFor},
+    guards::XForwardedFor,
     jwt::{create_jwt, JWT},
     responders::IndexResult,
+    settings::{Settings},
     utils::{add_token_cookie, get_root_domain},
     Host, IndexResponse, Language, TranslationStore,
 };
