@@ -280,7 +280,10 @@ function uploadViaAPI(files, path) {
                                                 continue;
                                             }
 
-                                            existingName = existingName.trim().toLowerCase();
+                                            if (existingRow.classList && existingRow.classList.contains("folder"))
+                                                continue;
+
+                                            existingName = existingName.trim();
 
                                             if (normalizedNew.localeCompare(existingName) < 0) {
                                                 tableBody.insertBefore(row, existingRow);
