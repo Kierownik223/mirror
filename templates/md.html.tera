@@ -16,8 +16,10 @@
                     <a href="?download" id="download" download><span>{{ macros::icon(name="favicon", hires=settings.hires) }}{{ strings.download }}{% if downloads %} ({{ downloads }}){% endif %}</span></a>
                     <a href="#" onclick="window.print()"><span>{{ macros::icon(name="ui/print", hires=settings.hires) }}{{ strings.print }}</span></a>
                 </div>
+                {%- if not share %}
                 <br>
                 <a href="./">{{ macros::icon(name="folder", hires=settings.hires) }}./</a>
+                {%- endif %}
             </div>
             <div class="markdown">
 {{ markdown }}
