@@ -36,8 +36,10 @@
                 <div class="actions">
                     <a href="?download" id="download" download><span>{{ macros::icon(name="favicon", hires=settings.hires) }}{{ strings.download }}{% if downloads %} ({{ downloads }}){% endif %}</span></a>
                 </div>
+                {%- if not share %}
                 <br>
                 <a href="./">{{ macros::icon(name="folder", hires=settings.hires) }}./</a>
+                {%- endif %}
             </div>
             <audio id="audio" src="?download" controls style="width: 100%;" poster="{{ poster }}">{{ strings.no_audio }}</audio>
             {%- if not share %}
