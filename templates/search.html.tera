@@ -11,7 +11,7 @@
                 <p class="message">{{ message }}</p>
                 {%- endif %}
                 <label for="search">{{ strings.search_criterion }}:</label>
-                <input type="search" name="q" id="query" class="text" placeholder="{{ strings.search_placeholder }}"{% if query %} value="{{ query }}"{% endif %}>
+                <input type="search" name="q" id="query" class="text" placeholder="{{ strings.search_placeholder }}"{% if query %} value="{{ query | escape }}"{% endif %}>
                 <center>
                     <button type="submit"><span>{{ macros::icon(name="ui/search", hires=settings.hires) }}{{ strings.search }}</span></button>
                 </center>
