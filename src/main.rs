@@ -192,6 +192,7 @@ async fn share(
     host: Host<'_>,
     jar: &CookieJar<'_>,
     settings: Settings<'_>,
+    sizes: &rocket::State<FileSizes>,
 ) -> IndexResult {
     let jwt = token.clone().unwrap_or_default();
 
@@ -205,18 +206,33 @@ async fn share(
     let id = file_parts.iter().next().ok_or(Status::BadRequest)?;
 
     if let Some(file) = get_file_by_id(db, id).await {
-        display_file(
-            Some(db2),
-            Path::new("/").join(&file).to_path_buf(),
-            strings,
-            lang.0,
-            host,
-            token,
-            settings,
-            true,
-        )
-        .await
+        if Path::new("files/").join(&file).is_file() {
+            display_file(
+                Some(db2),
+                Path::new("/").join(&file).to_path_buf(),
+                strings,
+                lang.0,
+                host,
+                token,
+                settings,
+                true,
+            )
+            .await
+        } else {
+            display_folder(
+                Path::new(&file).to_path_buf(),
+                strings,
+                lang.0,
+                host,
+                token,
+                settings,
+                sizes,
+                false,
+            )
+            .await
+        }
     } else {
+        println!("æ");
         Err(Status::NotFound)
     }
 }
@@ -231,11 +247,17 @@ async fn download_share(
     let id = file_parts.iter().next().ok_or(Status::BadRequest)?;
 
     if let Some(file) = MirrorFileInternal::load_by_id(db, id).await {
+        let real_path = Path::new("files/")
+            .join(&file.path.trim_start_matches("/"))
+            .to_path_buf();
+
+        if !real_path.is_dir() {
+            return Err(Status::NotAcceptable);
+        }
+
         file.add_download(db2).await;
         MirrorFileInternal::open_file(
-            Path::new("files/")
-                .join(&file.path.trim_start_matches("/"))
-                .to_path_buf(),
+            real_path,
             &MirrorFile::get_cache_control(false),
         )
         .await
@@ -393,7 +415,7 @@ async fn index_db(
     }
 
     if path.is_dir() {
-        display_folder(file, strings, lang.0, host, token, settings, sizes).await
+        display_folder(file, strings, lang.0, host, token, settings, sizes, false).await
     } else {
         display_file(
             Some(db),
@@ -469,7 +491,7 @@ async fn index(
     }
 
     if path.is_dir() {
-        display_folder(file, strings, lang.0, host, token, settings, sizes).await
+        display_folder(file, strings, lang.0, host, token, settings, sizes, false).await
     } else {
         display_file(None, file, strings, lang.0, host, token, settings, false).await
     }
@@ -817,6 +839,7 @@ async fn display_folder(
     token: Result<JWT, Status>,
     settings: Settings<'_>,
     sizes: &State<FileSizes>,
+    share: bool,
 ) -> IndexResult {
     let jwt = token.clone().unwrap_or_default();
 
@@ -907,6 +930,7 @@ async fn display_folder(
                     private: is_private,
                     settings,
                     version: env!("CARGO_PKG_VERSION").to_string(),
+                    share,
                 },
             )))
         }
