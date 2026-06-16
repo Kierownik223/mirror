@@ -203,14 +203,23 @@ async fn share(
 
     let strings = translations.get_translation(&lang.0);
 
-    let file = segments.to_path_buf(true).map_err(|_| Status::BadRequest)?;
+    let file_path = segments.to_path_buf(true).map_err(|_| Status::BadRequest)?;
 
-    let mut iter = file.iter();
+    let mut iter = file_path.iter();
     let file_name = iter.next().ok_or(Status::NotFound)?.to_str().ok_or(Status::BadRequest)?;
     let file_parts: Vec<&str> = file_name.split(".").collect();
     let id = file_parts.iter().next().ok_or(Status::BadRequest)?;
 
-    if let Some(file) = get_file_by_id(db, id).await {
+    if let Some(mut file) = get_file_by_id(db, id).await {
+        if file_path.components().count() > 1 {
+            let mut path = PathBuf::from(file);
+            for segment in iter {
+                path.push(segment);
+            }
+
+            file = path.to_string_lossy().into_owned();
+        }
+
         if Path::new("files/").join(&file).is_file() {
             display_file(
                 Some(db2),
