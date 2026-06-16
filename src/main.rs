@@ -181,11 +181,11 @@ async fn poster(
     }
 }
 
-#[get("/share/<file>")]
+#[get("/share/<segments..>")]
 async fn share(
     db: Connection<FileDb>,
     db2: Connection<FileDb>,
-    file: &str,
+    segments: Segments<'_, rocket::http::uri::fmt::Path>,
     translations: &rocket::State<TranslationStore>,
     lang: Language,
     token: Result<JWT, Status>,
@@ -193,6 +193,7 @@ async fn share(
     jar: &CookieJar<'_>,
     settings: Settings<'_>,
     sizes: &rocket::State<FileSizes>,
+    uri: FullUri,
 ) -> IndexResult {
     let jwt = token.clone().unwrap_or_default();
 
@@ -202,7 +203,11 @@ async fn share(
 
     let strings = translations.get_translation(&lang.0);
 
-    let file_parts: Vec<&str> = file.split(".").collect();
+    let file = segments.to_path_buf(true).map_err(|_| Status::BadRequest)?;
+
+    let mut iter = file.iter();
+    let file_name = iter.next().ok_or(Status::NotFound)?.to_str().ok_or(Status::BadRequest)?;
+    let file_parts: Vec<&str> = file_name.split(".").collect();
     let id = file_parts.iter().next().ok_or(Status::BadRequest)?;
 
     if let Some(file) = get_file_by_id(db, id).await {
@@ -219,6 +224,13 @@ async fn share(
             )
             .await
         } else {
+            if !uri.0.ends_with("/") {
+                return Ok(IndexResponse::Redirect(Redirect::moved(format!(
+                    "{}/",
+                    uri.0
+                ))));
+            }
+
             display_folder(
                 Path::new(&file).to_path_buf(),
                 strings,
@@ -232,7 +244,6 @@ async fn share(
             .await
         }
     } else {
-        println!("æ");
         Err(Status::NotFound)
     }
 }
@@ -251,7 +262,7 @@ async fn download_share(
             .join(&file.path.trim_start_matches("/"))
             .to_path_buf();
 
-        if !real_path.is_dir() {
+        if real_path.is_dir() {
             return Err(Status::NotAcceptable);
         }
 
