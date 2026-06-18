@@ -211,11 +211,13 @@ async fn share(
     let id = file_parts.iter().next().ok_or(Status::BadRequest)?;
 
     if let Some(mut file) = get_file_by_id(db, id).await {
+        let mut use_share_template = true;
         if file_path.components().count() > 1 {
             let mut path = PathBuf::from(file);
             for segment in iter {
                 path.push(segment);
             }
+            use_share_template = false;
 
             file = path.to_string_lossy().into_owned();
         }
@@ -230,6 +232,7 @@ async fn share(
                 token,
                 settings,
                 true,
+                use_share_template,
             )
             .await
         } else {
@@ -257,18 +260,33 @@ async fn share(
     }
 }
 
-#[get("/share/<file>?download")]
+#[get("/share/<segments..>?download")]
 async fn download_share(
     db: Connection<FileDb>,
     db2: Connection<FileDb>,
-    file: &str,
+    segments: Segments<'_, rocket::http::uri::fmt::Path>,
 ) -> IndexResult {
-    let file_parts: Vec<&str> = file.split(".").collect();
+    let file_path = segments.to_path_buf(true).map_err(|_| Status::BadRequest)?;
+
+    let mut iter = file_path.iter();
+    let file_name = iter.next().ok_or(Status::NotFound)?.to_str().ok_or(Status::BadRequest)?;
+    let file_parts: Vec<&str> = file_name.split(".").collect();
     let id = file_parts.iter().next().ok_or(Status::BadRequest)?;
 
     if let Some(file) = MirrorFileInternal::load_by_id(db, id).await {
+        let full_path = if file_path.components().count() > 1 {
+            let mut path = PathBuf::from(&file.path);
+            for segment in iter {
+                path.push(segment);
+            }
+
+            &path.to_string_lossy().into_owned()
+        } else {
+            &file.path
+        };
+
         let real_path = Path::new("files/")
-            .join(&file.path.trim_start_matches("/"))
+            .join(&full_path.trim_start_matches("/"))
             .to_path_buf();
 
         if real_path.is_dir() {
@@ -446,6 +464,7 @@ async fn index_db(
             token,
             settings,
             false,
+            false,
         )
         .await
     }
@@ -513,7 +532,7 @@ async fn index(
     if path.is_dir() {
         display_folder(file, strings, lang.0, host, token, settings, sizes, false).await
     } else {
-        display_file(None, file, strings, lang.0, host, token, settings, false).await
+        display_file(None, file, strings, lang.0, host, token, settings, false, false).await
     }
 }
 
@@ -526,6 +545,7 @@ async fn display_file(
     token: Result<JWT, Status>,
     settings: Settings<'_>,
     share: bool,
+    use_share_template: bool,
 ) -> IndexResult {
     let jwt = token.clone().unwrap_or_default();
 
@@ -590,7 +610,7 @@ async fn display_file(
                     admin: jwt.claims.perms == 0,
                     markdown,
                     settings,
-                    share,
+                    share: use_share_template,
                     version: env!("CARGO_PKG_VERSION").to_string(),
                     downloads: mirror_file.downloads,
                 },
@@ -622,7 +642,7 @@ async fn display_file(
                     is_logged_in: token.is_ok(),
                     admin: jwt.claims.perms == 0,
                     settings,
-                    share,
+                    share: use_share_template,
                     version: env!("CARGO_PKG_VERSION").to_string(),
                     downloads: mirror_file.downloads,
                 },
@@ -657,7 +677,7 @@ async fn display_file(
                     admin: jwt.claims.perms == 0,
                     details: metadata.description,
                     settings,
-                    share,
+                    share: use_share_template,
                     version: env!("CARGO_PKG_VERSION").to_string(),
                     downloads: mirror_file.downloads,
                 },
@@ -695,7 +715,7 @@ async fn display_file(
                     track: None::<u16>,
                     poster: urlencoding::encode(&format!("/poster{}", audiopath)).replace("%2F", "/"),
                     settings: &settings,
-                    share,
+                    share: use_share_template,
                     version: env!("CARGO_PKG_VERSION").to_string(),
                     downloads: mirror_file.downloads,
                 },
@@ -809,7 +829,7 @@ async fn display_file(
                         track,
                         poster,
                         settings,
-                        share,
+                        share: use_share_template,
                         version: env!("CARGO_PKG_VERSION").to_string(),
                         downloads: mirror_file.downloads,
                     },
@@ -839,7 +859,7 @@ async fn display_file(
                         filename: MirrorFile::get_name_from_path(&path),
                         filesize: fs::metadata(&path).unwrap().len(),
                         settings,
-                        share,
+                        share: use_share_template,
                         version: env!("CARGO_PKG_VERSION").to_string(),
                         downloads: mirror_file.downloads,
                     },
