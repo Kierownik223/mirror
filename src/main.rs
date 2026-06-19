@@ -251,7 +251,8 @@ async fn share(
                 token,
                 settings,
                 sizes,
-                false,
+                true,
+                Some(uri.0.strip_suffix("/").unwrap_or(&uri.0).to_string()),
             )
             .await
         }
@@ -453,7 +454,7 @@ async fn index_db(
     }
 
     if path.is_dir() {
-        display_folder(file, strings, lang.0, host, token, settings, sizes, false).await
+        display_folder(file, strings, lang.0, host, token, settings, sizes, false, None).await
     } else {
         display_file(
             Some(db),
@@ -530,7 +531,7 @@ async fn index(
     }
 
     if path.is_dir() {
-        display_folder(file, strings, lang.0, host, token, settings, sizes, false).await
+        display_folder(file, strings, lang.0, host, token, settings, sizes, false, None).await
     } else {
         display_file(None, file, strings, lang.0, host, token, settings, false, false).await
     }
@@ -880,6 +881,7 @@ async fn display_folder(
     settings: Settings<'_>,
     sizes: &State<FileSizes>,
     share: bool,
+    share_path: Option<String>,
 ) -> IndexResult {
     let jwt = token.clone().unwrap_or_default();
 
@@ -971,6 +973,7 @@ async fn display_folder(
                     settings,
                     version: env!("CARGO_PKG_VERSION").to_string(),
                     share,
+                    share_path,
                 },
             )))
         }
@@ -1060,6 +1063,8 @@ async fn display_folder(
                     folder_quota,
                     folder_usage,
                     version: env!("CARGO_PKG_VERSION").to_string(),
+                    share,
+                    share_path,
                 },
             )))
         }

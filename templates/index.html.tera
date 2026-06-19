@@ -10,17 +10,20 @@
                 {%- endif %}
                 <div id="uploadResults"></div>
                 <span class="title">
-                    <a href="/">MARMAK Mirror</a><span class="breadcrumbs">{{ macros::breadcrumbs_folder(path=path) }}</span>
+                    <a href="/">MARMAK Mirror</a><span class="breadcrumbs">{% if share %}{{ macros::breadcrumbs_folder(path=share_path) }}{% else %}{{ macros::breadcrumbs_folder(path=share_path) }}{% endif %}</span>
                 </span>
                 {%- if admin and path != "/" or private %}
+                {%- if not share %}
                 <div class="actions">
                     <a href="javascript:;" onclick="createFolder()"><span>{{ macros::icon(name="folder", hires=settings.hires) }}{{ strings.create_folder }}</span></a>
                     <a href="/upload?path={{ path }}"><span>{{ macros::icon(name="favicon", hires=settings.hires) }}{{ strings.uploader }}</span></a>
                 </div>
                 {%- endif %}
+                {%- endif %}
             </div>
             <table>
                 {%- if is_logged_in and config.enable_zip_downloads or admin and path != "/" or private %}
+                {%- if not share %}
                 <thead>
                     <tr>
                         <td style="width: 1em; white-space: nowrap;"><input type="checkbox" id="selectAll" onclick="toggleAllCheckboxes(this)"></td>
@@ -34,21 +37,27 @@
                         </td>
                     </tr>
                 </thead>
-                {% endif %}
+                {%- endif %}
+                {%- endif %}
                 <tbody>
                     {%- if path != "/" %}
                     <tr>
-                        {%- if is_logged_in and config.enable_zip_downloads or admin and path != "/" or private %}<td></td>{% endif %}
+                        {%- if is_logged_in and config.enable_zip_downloads or admin and path != "/" or private %}
+                        {%- if not share %}
+                        <td></td>
+                        {%- endif %}
+                        {%- endif %}
                         <td><a href="../">{{ macros::icon(name="folder", hires=settings.hires) }}../</a></td>
                         <td class="hide-more">---</td>
                         <td class="hide">{{ strings.folder }}</td>
                     </tr>
-                    {% endif -%}
-
-                    {% for s in dirs %}
+                    {%- endif %}
+                    {%- for s in dirs %}
                     <tr class="dir">
                         {%- if is_logged_in and config.enable_zip_downloads or admin and path != "/" or private %}
+                        {%- if not share %}
                         <td><input type="checkbox" class="delete-checkbox" value="{{ s.name | addslashes }}"></td>
+                        {%- endif %}
                         {%- endif %}
                         <td><a href="{{ s.name | urlencode }}/">{{ macros::icon(name=s.icon, hires=settings.hires) }}{{ s.name }}/</a></td>
                         <td class="hide-more">{{ s.size | format_size(use_si=settings.use_si) }}</td>
@@ -58,7 +67,9 @@
                     {%- for s in files %}
                     <tr class="folder">
                         {%- if is_logged_in and config.enable_zip_downloads or admin and path != "/" or private %}
+                        {%- if not share %}
                         <td><input type="checkbox" class="delete-checkbox" value="{{ s.name | addslashes }}"></td>
+                        {%- endif %}
                         {%- endif %}
                         <td><a href="{{ s.name | urlencode }}">{{ macros::icon(name=s.icon, hires=settings.hires) }}{{ s.name }}</a></td>
                         <td class="hide-more">{{ s.size | format_size(use_si=settings.use_si) }}</td>
@@ -78,7 +89,7 @@
     <script src="/static/polyfills.js?v={{ version }}"></script>
     <script src="/static/utils.js?v={{ version }}"></script>
     {%- if config.linkshortener %}
-    <script src="/scripts/linkshortener.js?lang={{ lang }}&hires={{ settings.hires }}7v={{ version }}"></script>
+    <script src="/scripts/linkshortener.js?lang={{ lang }}&hires={{ settings.hires }}&v={{ version }}"></script>
     {%- endif %}
     <script src="/scripts/share.js?lang={{ lang }}&hires={{ settings.hires }}&v={{ version }}"></script>
     <script src="/scripts/index.js?lang={{ lang }}&hires={{ settings.hires }}&v={{ version }}"></script>
