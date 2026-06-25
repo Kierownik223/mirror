@@ -1021,7 +1021,7 @@ async fn display_folder(
             }
 
             let path_str = if let Ok(rest) = file.strip_prefix("private") {
-                if jwt.claims.sub.is_empty() {
+                if jwt.claims.sub.is_empty() && !share {
                     return Err(Status::Forbidden);
                 }
 
