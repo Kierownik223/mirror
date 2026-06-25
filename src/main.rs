@@ -885,7 +885,11 @@ async fn display_folder(
 ) -> IndexResult {
     let jwt = token.clone().unwrap_or_default();
 
-    let (path, is_private) = MirrorFile::get_real_path(&file, jwt.claims.sub.clone())?;
+    let (path, is_private) = if share {
+        (PathBuf::new().join("files/").join(&file), true)
+    } else {
+        MirrorFile::get_real_path(&file, jwt.claims.sub.clone())?
+    };
 
     let ext = if is_private {
         "privatefolder"
