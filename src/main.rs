@@ -233,7 +233,7 @@ async fn share(
                 settings,
                 true,
                 use_share_template,
-                Some(uri.0.strip_suffix("/").unwrap_or(&uri.0).to_string()),
+                Some(urlencoding::decode(uri.0.strip_suffix("/").unwrap_or(&uri.0)).unwrap_or_default().to_string()),
             )
             .await
         } else {
@@ -253,7 +253,7 @@ async fn share(
                 settings,
                 sizes,
                 true,
-                Some(uri.0.strip_suffix("/").unwrap_or(&uri.0).to_string()),
+                Some(urlencoding::decode(uri.0.strip_suffix("/").unwrap_or(&uri.0)).unwrap_or_default().to_string()),
             )
             .await
         }
@@ -535,7 +535,7 @@ async fn index(
     if path.is_dir() {
         display_folder(file, strings, lang.0, host, token, settings, sizes, false, None).await
     } else {
-        display_file(None, file, strings, lang.0, host, token, settings, false, false, Some(uri.0.strip_suffix("/").unwrap_or(&uri.0).to_string()),).await
+        display_file(None, file, strings, lang.0, host, token, settings, false, false, None).await
     }
 }
 
