@@ -4,7 +4,7 @@
 <div>
     <span>
         <a href="/">MARMAK Mirror</a><span>
-            {%- if share -%}
+            {%- if share_path -%}
             {{ macros::breadcrumbs_nolink(path=share_path) }}
             {% else -%}
             {{ macros::breadcrumbs(path=path) }}
