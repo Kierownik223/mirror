@@ -233,6 +233,7 @@ async fn share(
                 settings,
                 true,
                 use_share_template,
+                Some(uri.0.strip_suffix("/").unwrap_or(&uri.0).to_string()),
             )
             .await
         } else {
@@ -466,6 +467,7 @@ async fn index_db(
             settings,
             false,
             false,
+            Some(uri.0.strip_suffix("/").unwrap_or(&uri.0).to_string()),
         )
         .await
     }
@@ -533,7 +535,7 @@ async fn index(
     if path.is_dir() {
         display_folder(file, strings, lang.0, host, token, settings, sizes, false, None).await
     } else {
-        display_file(None, file, strings, lang.0, host, token, settings, false, false).await
+        display_file(None, file, strings, lang.0, host, token, settings, false, false, Some(uri.0.strip_suffix("/").unwrap_or(&uri.0).to_string()),).await
     }
 }
 
@@ -547,6 +549,7 @@ async fn display_file(
     settings: Settings<'_>,
     share: bool,
     use_share_template: bool,
+    share_path: Option<String>,
 ) -> IndexResult {
     let jwt = token.clone().unwrap_or_default();
 
@@ -614,6 +617,7 @@ async fn display_file(
                     share: use_share_template,
                     version: env!("CARGO_PKG_VERSION").to_string(),
                     downloads: mirror_file.downloads,
+                    share_path,
                 },
             )))
         }
@@ -646,6 +650,7 @@ async fn display_file(
                     share: use_share_template,
                     version: env!("CARGO_PKG_VERSION").to_string(),
                     downloads: mirror_file.downloads,
+                    share_path,
                 },
             )))
         }
@@ -681,6 +686,7 @@ async fn display_file(
                     share: use_share_template,
                     version: env!("CARGO_PKG_VERSION").to_string(),
                     downloads: mirror_file.downloads,
+                    share_path,
                 },
             )))
         }
@@ -719,6 +725,7 @@ async fn display_file(
                     share: use_share_template,
                     version: env!("CARGO_PKG_VERSION").to_string(),
                     downloads: mirror_file.downloads,
+                    share_path: &share_path,
                 },
             );
 
@@ -833,6 +840,7 @@ async fn display_file(
                         share: use_share_template,
                         version: env!("CARGO_PKG_VERSION").to_string(),
                         downloads: mirror_file.downloads,
+                        share_path,
                     },
                 )))
             } else {
@@ -863,6 +871,7 @@ async fn display_file(
                         share: use_share_template,
                         version: env!("CARGO_PKG_VERSION").to_string(),
                         downloads: mirror_file.downloads,
+                        share_path,
                     },
                 )))
             } else {

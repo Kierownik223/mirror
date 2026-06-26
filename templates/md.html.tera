@@ -6,7 +6,7 @@
                 <span class="title">
                     <a href="/">MARMAK Mirror</a><span class="breadcrumbs">
                         {%- if share -%}
-                        {{ macros::breadcrumbs_nolink(path=path) }}
+                        {{ macros::breadcrumbs_nolink(path=share_path) }}
                         {% else -%}
                         {{ macros::breadcrumbs(path=path) }}
                         {%- endif %}
