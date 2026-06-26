@@ -10,7 +10,7 @@
                 {%- endif %}
                 <div id="uploadResults"></div>
                 <span class="title">
-                    <a href="/">MARMAK Mirror</a><span class="breadcrumbs">{% if share %}{{ macros::breadcrumbs_folder(path=share_path) }}{% else %}{{ macros::breadcrumbs_folder(path=path) }}{% endif %}</span>
+                    <a href="/">MARMAK Mirror</a><span class="breadcrumbs">{% if share %}{{ macros::breadcrumbs_folder_nolink(path=share_path) }}{% else %}{{ macros::breadcrumbs_folder(path=path) }}{% endif %}</span>
                 </span>
                 {%- if admin and path != "/" or private %}
                 {%- if not share %}

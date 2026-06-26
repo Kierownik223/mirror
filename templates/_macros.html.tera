@@ -15,7 +15,22 @@
         {%- endfor -%}
     {%- endif -%}
     {%- endfilter -%}
-{%- endmacro icon -%}
+{%- endmacro breadcrumbs_folder -%}
+{%- macro breadcrumbs_folder_nolink(path) -%}
+    {%- filter spaceless -%}
+    <span>/</span><span class="seg"> </span>
+    {%- if path != "/" -%}
+        {% set segments = path | split(pat="/") %}
+        {% for i in range(end=segments | length) %}
+            {% set subpath = segments | slice(start=0, end=i+1) %}
+            {% set url = subpath | join(sep="/") %}
+            {%- if url != "" -%}
+                <span>{{ segments[i] }}/</span><span class="seg"> </span>
+            {%- endif -%}
+        {%- endfor -%}
+    {%- endif -%}
+    {%- endfilter -%}
+{%- endmacro breadcrumbs_folder -%}
 {%- macro breadcrumbs(path) -%}
     {%- filter spaceless -%}
     <span>/</span><span class="seg"> </span>
