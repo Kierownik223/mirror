@@ -467,7 +467,7 @@ async fn index_db(
             settings,
             false,
             false,
-            Some(uri.0.strip_suffix("/").unwrap_or(&uri.0).to_string()),
+            None,
         )
         .await
     }
