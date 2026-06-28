@@ -42,13 +42,19 @@ function share(filePath) {
                     var ext = parts[parts.length - 1];
                     var response = JSON.parse(xhr.responseText);
 
-                    var url = "https://{{ host }}/share/" + response.message;
+                    var url = "https://{{ host }}/share/" + response.id;
+
+                    if (response.ext != "folder") {
+                        url += "." + response.ext;
+                    } else {
+                        url += "/";
+                    }
 
                     //{% if config.linkshortener %}
                     sendRequest({
                         method: "POST",
                         url: "{{ config.linkshortener_url }}",
-                        body: '{"url":"https://{{ host }}/share/' + response.message + '"}',
+                        body: '{"url":"' + url + '"}',
                         contentType: "application/json",
                         onInitError: function () {
                             alert("{{ strings.error_shortening }} {{ strings.full_url_copied }}");
