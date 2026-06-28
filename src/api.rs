@@ -42,6 +42,12 @@ pub struct ApiInfoResponse {
 }
 
 #[derive(serde::Serialize)]
+pub struct ApiShareResponse {
+    id: String,
+    ext: String,
+}
+
+#[derive(serde::Serialize)]
 pub struct MirrorFileWrapper {
     file: MirrorFile,
 }
@@ -541,11 +547,13 @@ async fn share(
         return Err(Status::NotFound);
     }
 
+    let ext = if path.is_dir() { "folder".to_string() } else { MirrorFile::get_extension_from_path(&path) };
+
     if let Some(mirror_file) = MirrorFileInternal::load_and_share(db, &path).await {
         if let Some(id) = mirror_file.id {
-            Ok(ApiResponse::MessageStatus((
+            Ok(ApiResponse::ShareResponse((
                 Status::Created,
-                Json(ApiInfoResponse { message: id }),
+                Json(ApiShareResponse { id, ext }),
             )))
         } else {
             Err(Status::InternalServerError)
