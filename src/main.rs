@@ -588,6 +588,8 @@ async fn display_file(
         MirrorFile::load(&path).ok_or(Status::NotFound)?
     };
 
+    let title_path = if let Some(ref p) = share_path { Path::new("/").join(&p) } else { Path::new("/").join(&file) };
+
     match ext.as_str() {
         "md" => {
             let markdown_text = fs::read_to_string(&path).unwrap_or_else(|e| {
@@ -603,7 +605,7 @@ async fn display_file(
             Ok(IndexResponse::Template(Template::render(
                 if settings.plain { "plain/md" } else { "md" },
                 context! {
-                    title: format!("{} {}", strings.get("reading_markdown").unwrap_or(&("reading_markdown".into())), Path::new("/").join(&file).display()),
+                    title: format!("{} {}", strings.get("reading_markdown").unwrap_or(&("reading_markdown".into())), title_path.display()),
                     lang,
                     strings,
                     root_domain,
@@ -636,7 +638,7 @@ async fn display_file(
             Ok(IndexResponse::Template(Template::render(
                 if settings.plain { "plain/zip" } else { "zip" },
                 context! {
-                    title: format!("{} {}", strings.get("viewing_zip").unwrap_or(&("viewing_zip".into())), Path::new("/").join(&file).display()),
+                    title: format!("{} {}", strings.get("viewing_zip").unwrap_or(&("viewing_zip".into())), title_path.display()),
                     lang,
                     strings,
                     root_domain,
@@ -670,7 +672,7 @@ async fn display_file(
                     "video"
                 },
                 context! {
-                    title: format!("{} {}", strings.get("watching").unwrap_or(&("watching".into())), Path::new("/").join(file.clone()).display().to_string().as_str()),
+                    title: format!("{} {}", strings.get("watching").unwrap_or(&("watching".into())), title_path.display()),
                     lang,
                     strings,
                     root_domain,
@@ -705,7 +707,7 @@ async fn display_file(
                     "audio"
                 },
                 context! {
-                    title: format!("{} {}", strings.get("listening").unwrap_or(&("listening".into())), Path::new("/").join(file.clone()).display().to_string().as_str()),
+                    title: format!("{} {}", strings.get("listening").unwrap_or(&("listening".into())), title_path.display()),
                     lang: &lang,
                     strings,
                     root_domain: &root_domain,
@@ -820,7 +822,7 @@ async fn display_file(
                         "audio"
                     },
                     context! {
-                        title: format!("{} {}", strings.get("listening").unwrap_or(&("listening".into())), Path::new("/").join(file.clone()).display().to_string().as_str()),
+                        title: format!("{} {}", strings.get("listening").unwrap_or(&("listening".into())), title_path.display()),
                         lang,
                         strings,
                         root_domain,
@@ -856,7 +858,7 @@ async fn display_file(
                         "details"
                     },
                     context! {
-                        title: format!("{} {}", strings.get("file_details").unwrap_or(&("file_details".into())), Path::new("/").join(&file).display()),
+                        title: format!("{} {}", strings.get("file_details").unwrap_or(&("file_details".into())), title_path.display()),
                         lang,
                         strings,
                         root_domain,
