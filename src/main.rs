@@ -923,7 +923,7 @@ async fn display_folder(
             }
 
             let mut markdown = String::new();
-            let path_str = Path::new("/").join(&file).display().to_string();
+            let path_str = Path::new("/").join(if let Some(ref p) = share_path {Path::new(p).to_path_buf()} else {file}).display().to_string();
 
             let mut files =
                 read_files(&path.display().to_string()).map_err(map_io_error_to_status)?;
@@ -1033,21 +1033,22 @@ async fn display_folder(
                 markdown = markdown::to_html(&md);
             }
 
-            let path_str = if let Ok(rest) = file.strip_prefix("private") {
-                if jwt.claims.sub.is_empty() && !share {
-                    return Err(Status::Forbidden);
-                }
-
-                Path::new("/").join(format!(
-                    "private{}",
-                    if rest.display().to_string() != String::new() {
-                        format!("/{}", rest.display().to_string())
-                    } else {
-                        String::new()
+            let path_str = if let Some(ref p) = share_path {Path::new(p).to_path_buf()} else { if let Ok(rest) = file.strip_prefix("private") {
+                    if jwt.claims.sub.is_empty() && !share {
+                        return Err(Status::Forbidden);
                     }
-                ))
-            } else {
-                Path::new("/").join(&file)
+
+                    Path::new("/").join(format!(
+                        "private{}",
+                        if rest.display().to_string() != String::new() {
+                            format!("/{}", rest.display().to_string())
+                        } else {
+                            String::new()
+                        }
+                    ))
+                } else {
+                    Path::new("/").join(&file)
+                }
             }
             .display()
             .to_string();
