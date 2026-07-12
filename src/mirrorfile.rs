@@ -441,7 +441,7 @@ impl MirrorFile {
     }
 
     pub fn get_real_path(file: &PathBuf, username: String) -> Result<(PathBuf, bool), Status> {
-        let prefix = if file.iter().any(|f| { *f == *username }) {
+        let prefix = if file.iter().any(|f| *f == *username) {
             format!("private/{}", username)
         } else {
             "private".to_string()

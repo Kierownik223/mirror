@@ -547,7 +547,11 @@ async fn share(
         return Err(Status::NotFound);
     }
 
-    let ext = if path.is_dir() { "folder".to_string() } else { MirrorFile::get_extension_from_path(&path) };
+    let ext = if path.is_dir() {
+        "folder".to_string()
+    } else {
+        MirrorFile::get_extension_from_path(&path)
+    };
 
     if let Some(mirror_file) = MirrorFileInternal::load_and_share(db, &path).await {
         if let Some(id) = mirror_file.id {

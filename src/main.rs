@@ -206,7 +206,11 @@ async fn share(
     let file_path = segments.to_path_buf(true).map_err(|_| Status::BadRequest)?;
 
     let mut iter = file_path.iter();
-    let file_name = iter.next().ok_or(Status::NotFound)?.to_str().ok_or(Status::BadRequest)?;
+    let file_name = iter
+        .next()
+        .ok_or(Status::NotFound)?
+        .to_str()
+        .ok_or(Status::BadRequest)?;
     let file_parts: Vec<&str> = file_name.split(".").collect();
     let id = file_parts.iter().next().ok_or(Status::BadRequest)?;
 
@@ -233,7 +237,11 @@ async fn share(
                 settings,
                 true,
                 use_share_template,
-                Some(urlencoding::decode(uri.0.strip_suffix("/").unwrap_or(&uri.0)).unwrap_or_default().to_string()),
+                Some(
+                    urlencoding::decode(uri.0.strip_suffix("/").unwrap_or(&uri.0))
+                        .unwrap_or_default()
+                        .to_string(),
+                ),
             )
             .await
         } else {
@@ -253,7 +261,11 @@ async fn share(
                 settings,
                 sizes,
                 true,
-                Some(urlencoding::decode(uri.0.strip_suffix("/").unwrap_or(&uri.0)).unwrap_or_default().to_string()),
+                Some(
+                    urlencoding::decode(uri.0.strip_suffix("/").unwrap_or(&uri.0))
+                        .unwrap_or_default()
+                        .to_string(),
+                ),
             )
             .await
         }
@@ -271,7 +283,11 @@ async fn download_share(
     let file_path = segments.to_path_buf(true).map_err(|_| Status::BadRequest)?;
 
     let mut iter = file_path.iter();
-    let file_name = iter.next().ok_or(Status::NotFound)?.to_str().ok_or(Status::BadRequest)?;
+    let file_name = iter
+        .next()
+        .ok_or(Status::NotFound)?
+        .to_str()
+        .ok_or(Status::BadRequest)?;
     let file_parts: Vec<&str> = file_name.split(".").collect();
     let id = file_parts.iter().next().ok_or(Status::BadRequest)?;
 
@@ -296,11 +312,7 @@ async fn download_share(
         }
 
         file.add_download(db2).await;
-        MirrorFileInternal::open_file(
-            real_path,
-            &MirrorFile::get_cache_control(false),
-        )
-        .await
+        MirrorFileInternal::open_file(real_path, &MirrorFile::get_cache_control(false)).await
     } else {
         Err(Status::NotFound)
     }
@@ -455,7 +467,10 @@ async fn index_db(
     }
 
     if path.is_dir() {
-        display_folder(file, strings, lang.0, host, token, settings, sizes, false, None).await
+        display_folder(
+            file, strings, lang.0, host, token, settings, sizes, false, None,
+        )
+        .await
     } else {
         display_file(
             Some(db),
@@ -533,9 +548,15 @@ async fn index(
     }
 
     if path.is_dir() {
-        display_folder(file, strings, lang.0, host, token, settings, sizes, false, None).await
+        display_folder(
+            file, strings, lang.0, host, token, settings, sizes, false, None,
+        )
+        .await
     } else {
-        display_file(None, file, strings, lang.0, host, token, settings, false, false, None).await
+        display_file(
+            None, file, strings, lang.0, host, token, settings, false, false, None,
+        )
+        .await
     }
 }
 
@@ -588,7 +609,11 @@ async fn display_file(
         MirrorFile::load(&path).ok_or(Status::NotFound)?
     };
 
-    let title_path = if let Some(ref p) = share_path { Path::new("/").join(&p) } else { Path::new("/").join(&file) };
+    let title_path = if let Some(ref p) = share_path {
+        Path::new("/").join(&p)
+    } else {
+        Path::new("/").join(&file)
+    };
 
     match ext.as_str() {
         "md" => {
@@ -925,7 +950,14 @@ async fn display_folder(
             }
 
             let mut markdown = String::new();
-            let path_str = Path::new("/").join(if let Some(ref p) = share_path {Path::new(p).to_path_buf()} else {file}).display().to_string();
+            let path_str = Path::new("/")
+                .join(if let Some(ref p) = share_path {
+                    Path::new(p).to_path_buf()
+                } else {
+                    file
+                })
+                .display()
+                .to_string();
 
             let mut files =
                 read_files(&path.display().to_string()).map_err(map_io_error_to_status)?;
@@ -1035,7 +1067,10 @@ async fn display_folder(
                 markdown = markdown::to_html(&md);
             }
 
-            let path_str = if let Some(ref p) = share_path {Path::new(p).to_path_buf()} else { if let Ok(rest) = file.strip_prefix("private") {
+            let path_str = if let Some(ref p) = share_path {
+                Path::new(p).to_path_buf()
+            } else {
+                if let Ok(rest) = file.strip_prefix("private") {
                     if jwt.claims.sub.is_empty() && !share {
                         return Err(Status::Forbidden);
                     }

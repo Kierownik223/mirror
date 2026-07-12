@@ -21,7 +21,7 @@ use crate::{
     guards::XForwardedFor,
     jwt::{create_jwt, JWT},
     responders::IndexResult,
-    settings::{Settings},
+    settings::Settings,
     utils::{add_token_cookie, get_root_domain},
     Host, IndexResponse, Language, TranslationStore,
 };
