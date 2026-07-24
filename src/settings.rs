@@ -68,7 +68,15 @@ impl<'r> Settings<'r> {
             .map(|cookie| cookie.value())
             .unwrap_or("default");
 
-        if !std::path::Path::new(&format!("public/static/styles/{}.css", &theme)).exists() {
+        let base = std::path::Path::new("public/static/styles").canonicalize().unwrap_or(std::path::Path::new("public/static/styles").to_path_buf());
+
+        let candidate = base.join(format!("{theme}.css"));
+
+        if let Ok(real) = candidate.canonicalize() {
+            if !real.starts_with(&base) {
+                theme = "default";
+            }
+        } else {
             theme = "default";
         }
 
