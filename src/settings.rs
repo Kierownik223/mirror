@@ -68,7 +68,9 @@ impl<'r> Settings<'r> {
             .map(|cookie| cookie.value())
             .unwrap_or("default");
 
-        let base = std::path::Path::new("public/static/styles").canonicalize().unwrap_or(std::path::Path::new("public/static/styles").to_path_buf());
+        let base = std::path::Path::new("public/static/styles")
+            .canonicalize()
+            .unwrap_or(std::path::Path::new("public/static/styles").to_path_buf());
 
         let candidate = base.join(format!("{theme}.css"));
 
