@@ -80,6 +80,10 @@ impl<'r> Settings<'r> {
             theme = "default";
         }
 
+        let js_candidate = base.join(format!("{theme}.js"));
+
+        let js_present = js_candidate.canonicalize().is_ok();
+
         let lang = if let Some(cookie_lang) = jar.get("lang").map(|c| c.value()) {
             cookie_lang
         } else {
@@ -138,8 +142,7 @@ impl<'r> Settings<'r> {
 
         Self {
             theme,
-            js_present: std::path::Path::new(&format!("public/static/styles/{}.js", &theme))
-                .exists(),
+            js_present,
             lang: lang,
             hires,
             smallhead,
