@@ -253,14 +253,17 @@ async fn login(
             let _ = fs::create_dir(format!("files/private/{}", &db_user.username));
         }
 
-        let mut redirect_url = next.unwrap_or("/");
-
-        if db_user.perms == 0 {
-            redirect_url = next.unwrap_or("/admin");
-        }
+        let redirect_url = next.map(|n| {
+            if db_user.perms == 0 {
+                urlencoding::decode(n).map(|d| d.to_string()).unwrap_or("/admin".into())
+            } else {
+                urlencoding::decode(n).map(|d| d.to_string()).unwrap_or("/".into())
+            }
+        })
+        .unwrap_or("/".into());
 
         Ok(IndexResponse::Redirect(Redirect::to(
-            urlencoding::encode(redirect_url).replace("%2F", "/"),
+            urlencoding::encode(&redirect_url).replace("%2F", "/"),
         )))
     } else {
         let strings = translations.get_translation(&lang.0);
