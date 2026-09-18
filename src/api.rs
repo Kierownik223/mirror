@@ -22,13 +22,7 @@ use rocket_multipart_form_data::{
 use zip::write::SimpleFileOptions;
 
 use crate::{
-    config::CONFIG,
-    db::{delete_file, FileDb},
-    jwt::JWT,
-    read_files, refresh_file_sizes,
-    responders::{ApiResponse, ApiResult},
-    utils::{add_path_to_zip, map_io_error_to_status, read_dirs_async},
-    Disk, FileSizes, Host, MirrorFile, MirrorFileInternal, Sysinfo,
+    Disk, FileSizes, Host, MirrorFile, MirrorFileInternal, Sysinfo, config::CONFIG, db::{FileDb, delete_file, get_file_by_id}, jwt::JWT, read_files, refresh_file_sizes, responders::{ApiResponse, ApiResult}, utils::{add_path_to_zip, map_io_error_to_status, read_dirs_async},
 };
 
 #[derive(serde::Serialize)]
@@ -200,6 +194,82 @@ async fn listing(
 
     if CONFIG.enable_login {
         if MirrorFile::is_restricted(&Path::new("files/").join(&file), token.is_ok()) {
+            return Err(Status::Forbidden);
+        }
+    }
+
+    dir_list.retain(|x| !CONFIG.hidden_files.contains(&x.name));
+    file_list.retain(|x| !CONFIG.hidden_files.contains(&x.name));
+
+    dir_list.sort();
+    file_list.sort();
+
+    dir_list.append(&mut file_list);
+
+    Ok(ApiResponse::Files(Json(dir_list)))
+}
+
+#[get("/listing/<segments..>")]
+async fn share_listing(
+    db: Connection<FileDb>,
+    segments: Segments<'_, rocket::http::uri::fmt::Path>,
+    sizes: &State<FileSizes>,
+    token: Result<JWT, Status>,
+) -> ApiResult {
+    let username = match token.as_ref() {
+        Ok(token) => &token.claims.sub,
+        Err(_) => &"Nobody".into(),
+    };
+
+    let file_path = segments.to_path_buf(true).map_err(|_| Status::BadRequest)?;
+
+    let path = if file_path.starts_with("share/") {
+        let mut iter = file_path.iter();
+        let file_name = iter
+            .nth(1)
+            .ok_or(Status::NotFound)?
+            .to_str()
+            .ok_or(Status::BadRequest)?;
+        let file_parts: Vec<&str> = file_name.split(".").collect();
+        let id = file_parts.iter().next().ok_or(Status::BadRequest)?;
+
+        if let Some(mut file) = get_file_by_id(db, id).await {
+            if file_path.components().count() > 1 {
+                let mut path = PathBuf::from(file);
+                for segment in iter {
+                    path.push(segment);
+                }
+
+                file = path.to_string_lossy().into_owned();
+            }
+
+            if Path::new("files/").join(&file).is_dir() {
+                Ok((Path::new("files/").join(&file).to_path_buf(), true))
+            } else {
+                return Err(Status::NotAcceptable)
+            }
+        } else {
+            return Err(Status::NotFound)
+        }
+    } else {
+        MirrorFile::get_real_path(&file_path, username.to_string())
+    }?.0;
+
+    println!("path: {:?}", path);
+
+    if path.is_file() {
+        return Err(Status::NotAcceptable);
+    }
+
+    let path = path.display().to_string();
+
+    let mut file_list = read_files(&path).map_err(map_io_error_to_status)?;
+    let mut dir_list = read_dirs_async(&path, sizes)
+        .await
+        .map_err(map_io_error_to_status)?;
+
+    if CONFIG.enable_login {
+        if MirrorFile::is_restricted(&Path::new("files/").join(&file_path), token.is_ok()) {
             return Err(Status::Forbidden);
         }
     }
@@ -1184,7 +1254,7 @@ pub fn build_api() -> AdHoc {
         rocket = rocket
             .mount(
                 "/api",
-                routes![index, listing, sysinfo, search, upload_info, create_folder,],
+                routes![index, sysinfo, search, upload_info, create_folder,],
             )
             .register("/api", catchers![default]);
 
@@ -1192,6 +1262,7 @@ pub fn build_api() -> AdHoc {
             rocket = rocket.mount(
                 "/api",
                 routes![
+                    share_listing,
                     file_with_downloads,
                     share,
                     delete_db,
@@ -1203,7 +1274,7 @@ pub fn build_api() -> AdHoc {
         } else {
             rocket = rocket.mount(
                 "/api",
-                routes![file, delete, rename, upload, upload_chunked],
+                routes![listing, file, delete, rename, upload, upload_chunked],
             )
         }
 
