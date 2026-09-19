@@ -30,7 +30,9 @@
             {% set subpath = segments | slice(start=0, end=i+1) %}
             {% set url = subpath | join(sep="/") %}
             {% if url != "" %}
-                {%- if i == num_segments - 1 or segments[i] == "share" -%}
+                {%- if segments[i] == "share" -%}
+                    <span>{{ segments[i] }}/</span>
+                {%- elif i == num_segments - 1 -%}
                     <span>{{ segments[i] }}</span>
                 {%- else -%}
                     <span><a href="{{ url | urlencode }}/">{{ segments[i] }}</a>/</span><span class="seg"> </span>

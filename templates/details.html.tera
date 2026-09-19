@@ -3,13 +3,7 @@
 {% block content %}
             <div class="controls">
                 <span class="title">
-                    <a href="/">MARMAK Mirror</a><span class="breadcrumbs">
-                        {%- if share_path -%}
-                        {{ macros::breadcrumbs_nolink(path=share_path) }}
-                        {% else -%}
-                        {{ macros::breadcrumbs(path=path) }}
-                        {%- endif %}
-                    </span>
+                    <a href="/">MARMAK Mirror</a><span class="breadcrumbs">{% if share_path %}{{ macros::breadcrumbs(path=share_path) }}{% else %}{{ macros::breadcrumbs(path=path) }}{% endif %}</span>
                 </span>
                 <div class="actions">
                     <a href="?download" id="download" download><span>{{ macros::icon(name="favicon", hires=settings.hires) }}{{ strings.download }}{% if downloads %} ({{ downloads }}){% endif %}</span></a>
