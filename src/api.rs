@@ -22,7 +22,13 @@ use rocket_multipart_form_data::{
 use zip::write::SimpleFileOptions;
 
 use crate::{
-    Disk, FileSizes, Host, MirrorFile, MirrorFileInternal, Sysinfo, config::CONFIG, db::{FileDb, delete_file, get_file_by_id}, jwt::JWT, read_files, refresh_file_sizes, responders::{ApiResponse, ApiResult}, utils::{add_path_to_zip, map_io_error_to_status, read_dirs_async},
+    config::CONFIG,
+    db::{delete_file, get_file_by_id, FileDb},
+    jwt::JWT,
+    read_files, refresh_file_sizes,
+    responders::{ApiResponse, ApiResult},
+    utils::{add_path_to_zip, map_io_error_to_status, read_dirs_async},
+    Disk, FileSizes, Host, MirrorFile, MirrorFileInternal, Sysinfo,
 };
 
 #[derive(serde::Serialize)]
@@ -246,14 +252,15 @@ async fn share_listing(
             if Path::new("files/").join(&file).is_dir() {
                 Ok((Path::new("files/").join(&file).to_path_buf(), true))
             } else {
-                return Err(Status::NotAcceptable)
+                return Err(Status::NotAcceptable);
             }
         } else {
-            return Err(Status::NotFound)
+            return Err(Status::NotFound);
         }
     } else {
         MirrorFile::get_real_path(&file_path, username.to_string())
-    }?.0;
+    }?
+    .0;
 
     if path.is_file() {
         return Err(Status::NotAcceptable);
@@ -379,7 +386,7 @@ async fn display_file(
     };
 
     let file_path = path.display().to_string();
-    
+
     let path = if let Some(database) = db {
         if path.starts_with("share/") {
             let mut iter = path.iter();
@@ -404,17 +411,18 @@ async fn display_file(
                 if Path::new("files/").join(&file).is_file() {
                     Ok((Path::new("files/").join(&file).to_path_buf(), true))
                 } else {
-                    return Err(Status::NotAcceptable)
+                    return Err(Status::NotAcceptable);
                 }
             } else {
-                return Err(Status::NotFound)
+                return Err(Status::NotFound);
             }
         } else {
             MirrorFile::get_real_path(&path, username.to_string())
         }
     } else {
         MirrorFile::get_real_path(&path, username.to_string())
-    }?.0;
+    }?
+    .0;
 
     let mirror_file = if let Some(db2) = db2 {
         MirrorFileInternal::load(db2, &path)
