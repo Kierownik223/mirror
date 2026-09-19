@@ -15,10 +15,11 @@ function createBreadcrumbs(path) {
 
             var subpathArr = segments.slice(0, i + 1);
             var subpath = subpathArr.join("/");
-
-            if (i === numSegments - 1) {
+            
+            var isShareSegment = segment === "share" && (i === 0 || i === 1);
+            if (i === numSegments - 1 || isShareSegment) {
                 var span = document.createElement("span");
-                span.innerText = segment;
+                span.innerText = isShareSegment ? segment + "/" : segment;
                 container.appendChild(span);
             } else {
                 var span2 = document.createElement("span");
