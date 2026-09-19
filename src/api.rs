@@ -255,8 +255,6 @@ async fn share_listing(
         MirrorFile::get_real_path(&file_path, username.to_string())
     }?.0;
 
-    println!("path: {:?}", path);
-
     if path.is_file() {
         return Err(Status::NotAcceptable);
     }
@@ -352,11 +350,12 @@ async fn search(
 #[get("/<segments..>", rank = 1)]
 async fn file_with_downloads(
     db: Connection<FileDb>,
+    db2: Connection<FileDb>,
     segments: Segments<'_, rocket::http::uri::fmt::Path>,
     token: Result<JWT, Status>,
 ) -> ApiResult {
     let file = segments.to_path_buf(true).map_err(|_| Status::BadRequest)?;
-    display_file(Some(db), file, token).await
+    display_file(Some(db), Some(db2), file, token).await
 }
 
 #[get("/<segments..>", rank = 1)]
@@ -365,11 +364,12 @@ async fn file(
     token: Result<JWT, Status>,
 ) -> ApiResult {
     let file = segments.to_path_buf(true).map_err(|_| Status::BadRequest)?;
-    display_file(None, file, token).await
+    display_file(None, None, file, token).await
 }
 
 async fn display_file(
     db: Option<Connection<FileDb>>,
+    db2: Option<Connection<FileDb>>,
     path: PathBuf,
     token: Result<JWT, Status>,
 ) -> ApiResult {
@@ -378,11 +378,46 @@ async fn display_file(
         Err(_) => &"Nobody".into(),
     };
 
-    let file = path.display().to_string();
-    let path = MirrorFile::get_real_path(&path, username.to_string())?.0;
+    let file_path = path.display().to_string();
+    
+    let path = if let Some(database) = db {
+        if path.starts_with("share/") {
+            let mut iter = path.iter();
+            let file_name = iter
+                .nth(1)
+                .ok_or(Status::NotFound)?
+                .to_str()
+                .ok_or(Status::BadRequest)?;
+            let file_parts: Vec<&str> = file_name.split(".").collect();
+            let id = file_parts.iter().next().ok_or(Status::BadRequest)?;
 
-    let mirror_file = if let Some(db) = db {
-        MirrorFileInternal::load(db, &path)
+            if let Some(mut file) = get_file_by_id(database, id).await {
+                if path.components().count() > 1 {
+                    let mut path = PathBuf::from(file);
+                    for segment in iter {
+                        path.push(segment);
+                    }
+
+                    file = path.to_string_lossy().into_owned();
+                }
+
+                if Path::new("files/").join(&file).is_file() {
+                    Ok((Path::new("files/").join(&file).to_path_buf(), true))
+                } else {
+                    return Err(Status::NotAcceptable)
+                }
+            } else {
+                return Err(Status::NotFound)
+            }
+        } else {
+            MirrorFile::get_real_path(&path, username.to_string())
+        }
+    } else {
+        MirrorFile::get_real_path(&path, username.to_string())
+    }?.0;
+
+    let mirror_file = if let Some(db2) = db2 {
+        MirrorFileInternal::load(db2, &path)
             .await
             .ok_or(Status::NotFound)?
             .mirror_file
@@ -429,7 +464,7 @@ async fn display_file(
     }
 
     if mirror_file.ext == "mp4" || mirror_file.ext == "mkv" || mirror_file.ext == "webm" {
-        let videopath = Path::new("/").join(file.clone()).display().to_string();
+        let videopath = Path::new("/").join(file_path.clone()).display().to_string();
 
         return Ok(ApiResponse::VideoFile(Json(VideoFile::load(
             &videopath,
