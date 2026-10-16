@@ -25,3 +25,9 @@ urlencoding = "2"
 uuid = { version = "1", features = ["v4"] }
 walkdir = "2"
 zip = "8"
+cab = { version = "0.6", optional = true }
+xml = { version = "1", optional = true }
+
+[features]
+default = ["wmcab"]
+wmcab = ["dep:cab", "dep:xml"]

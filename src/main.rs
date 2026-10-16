@@ -876,6 +876,78 @@ async fn display_file(
         }
         _ => {
             if CONFIG.extensions.contains(&ext) {
+                let mut additional_props: HashMap<&str, String> = HashMap::new();
+                #[cfg(feature = "wmcab")]
+                if ext == "cab" {
+                    let cab_file = fs::File::open(&path).unwrap();
+                    if let Ok(mut cabinet) = cab::Cabinet::new(cab_file) {
+                        let mut setup_file = None;
+
+                        for folder in cabinet.folder_entries() {
+                            for file in folder.file_entries() {
+                                if file.name().eq_ignore_ascii_case("_setup.xml") {
+                                    setup_file = Some(file.name().to_string());
+                                    break;
+                                }
+                            }
+
+                            if setup_file.is_some() {
+                                break;
+                            }
+                        }
+
+                        let xml_file_name = cabinet
+                            .folder_entries()
+                            .flat_map(|f| f.file_entries())
+                            .find(|f| f.name().eq_ignore_ascii_case("_setup.xml"))
+                            .map(|f| f.name().to_string());
+
+                        if let Some(xml_name) = xml_file_name {
+                            use xml::reader::{EventReader, XmlEvent};
+
+                            let reader = cabinet.read_file(&xml_name).unwrap();
+                            let parser = EventReader::new(reader);
+
+                            for event in parser {
+                                if let Ok(XmlEvent::StartElement { name, attributes, .. }) = event {
+                                    if name.local_name == "parm" {
+                                        let mut attr_name = None;
+                                        let mut attr_value = None;
+
+                                        for attr in attributes {
+                                            match attr.name.local_name.as_str() {
+                                                "name" => attr_name = Some(attr.value),
+                                                "value" => attr_value = Some(attr.value),
+                                                _ => {}
+                                            }
+                                        }
+
+                                        if let Some(param_name) = attr_name {
+                                            match param_name.as_str() {
+                                                "AppName" => {
+                                                    if let Some(val) = attr_value {
+                                                        additional_props.insert("app_name", val);
+                                                    }
+                                                }
+                                                "ProcessorType" => {
+                                                    let val = attr_value.unwrap_or_else(|| "Any CPU".to_string());
+                                                    additional_props.insert("processor_type", val);
+                                                }
+                                                "SetupDLL" => {
+                                                    if let Some(val) = attr_value {
+                                                        additional_props.insert("has_setup_dll", val);
+                                                    }
+                                                }
+                                                _ => {}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 Ok(IndexResponse::Template(Template::render(
                     if settings.plain {
                         "plain/details"
@@ -899,6 +971,7 @@ async fn display_file(
                         version: env!("CARGO_PKG_VERSION").to_string(),
                         downloads: mirror_file.downloads,
                         share_path,
+                        additional_props,
                     },
                 )))
             } else {
