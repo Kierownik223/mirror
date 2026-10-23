@@ -29,5 +29,6 @@ cab = { version = "0.6", optional = true }
 xml = { version = "1", optional = true }
 
 [features]
-default = ["wmcab"]
+default = ["wmcab", "wpxap"]
 wmcab = ["dep:cab", "dep:xml"]
+wpxap = ["dep:xml"]

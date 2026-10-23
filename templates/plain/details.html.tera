@@ -18,5 +18,12 @@
 {% if not share %}<a href="./">./</a>{% endif %}
 <p><strong>{{ strings.file_name }}:</strong> {{ filename }}</p>
 <p><strong>{{ strings.file_size }}:</strong> {{ filesize | format_size(use_si=settings.use_si) }}</p>
+{% if additional_props is defined and additional_props | length > 0 -%}
+<p>Additional properties (BETA):</p>
+<ul>
+{% for key, value in additional_props -%}
+<li><strong>{{ key }}:</strong> {{ value }}</li>
+{% endfor -%}
+{% endif -%}
 <a href="?download">{{ strings.download }}{% if downloads %} ({{ downloads }}){% endif %}</a>
 {% endblock content %}

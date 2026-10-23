@@ -948,6 +948,59 @@ async fn display_file(
                     }
                 }
 
+                #[cfg(feature = "wpxap")]
+                if ext == "xap" {
+                    let xap_file = fs::File::open(&path).unwrap();
+                    if let Ok(mut zip) = zip::ZipArchive::new(xap_file) {
+                        if let Ok(mut manifest_file) = zip.by_name("WMAppManifest.xml") {
+                            use xml::EventReader;
+
+                            let mut contents = String::new();
+                            manifest_file.read_to_string(&mut contents).unwrap();
+
+                            let parser = EventReader::new(contents.as_bytes());
+
+                            for event in parser {
+                                use xml::reader::XmlEvent;
+
+                                if let Ok(XmlEvent::StartElement { name, attributes, .. }) = event {
+                                    match name.local_name.as_str() {
+                                        "App" => {
+                                            for attr in attributes {
+                                                match attr.name.local_name.as_str() {
+                                                    "Title" => {
+                                                        additional_props.insert("title", attr.value);
+                                                    }
+                                                    "Author" => {
+                                                        additional_props.insert("author", attr.value);
+                                                    }
+                                                    "Publisher" => {
+                                                        additional_props.insert("publisher", attr.value);
+                                                    }
+                                                    "Description" => {
+                                                        additional_props.insert("description", attr.value);
+                                                    }
+                                                    "Version" => {
+                                                        additional_props.insert("version", attr.value);
+                                                    }
+                                                    _ => {}
+                                                }
+                                            }
+                                        }
+                                        "Deployment" => {
+                                            for attr in attributes {
+                                                if attr.name.local_name == "AppPlatformVersion" {
+                                                    additional_props.insert("app_platform_version", attr.value);
+                                                }
+                                            }
+                                        }
+                                        _ => {}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
                 Ok(IndexResponse::Template(Template::render(
                     if settings.plain {
                         "plain/details"
