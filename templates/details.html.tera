@@ -18,9 +18,9 @@
             {% if additional_props is defined and additional_props | length > 0 -%}
             <p>Additional properties (BETA):</p>
             <ul>
-            {% for key, value in additional_props -%}
-            <li><strong>{{ key }}:</strong> {{ value }}</li>
-            {% endfor -%}
-            {% endif -%}
+                {%- for key, value in additional_props %}
+                <li><strong>{{ key }}:</strong> {{ value }}</li>
+                {%- endfor %}
             </ul>
+            {%- endif %}
 {%- endblock content %}
