@@ -1,24 +1,30 @@
 {% extends "plain/base" %}
 
-{% block content %}
-<div>
-    <span>
-        <a href="/">MARMAK Mirror</a><span>
-            {% if share_path %}
-            {{ macros::breadcrumbs(path=share_path) }}
-            {% else %}
-            {{ macros::breadcrumbs(path=path) }}
-            {% endif %}
-        </span>
-    </span>
-    &nbsp;
-    <a href="?download">{{ strings.download }}{% if downloads %} ({{ downloads }}){% endif %}</a>
-</div>
-<hr>
-{% if not share %}<a href="./">./</a>{% endif %}
-<audio src="?download" controls style="width: 100%;" poster="/poster{{ path | urlencode }}">{{ strings.no_audio }}</audio>
-{%- if artist %}{{ artist }} - {% endif %}<b style="font-size: 24px;">{% if track %}{{ track }}. {% endif %}{{ audiotitle }}</b><br>
-{%- if album %}{{ strings.album }}: <b>{{ album }}</b><br>{% endif %}
-{%- if year %}{{ strings.year }}: <b>{{ year }}</b><br>{% endif %}
-{%- if genre %}{{ strings.genre }}: <b>{{ genre }}</b><br>{% endif %}
-{% endblock content %}
+{% block content -%}
+            <div>
+                <span>
+                    <a href="/">MARMAK Mirror</a><span>
+                        {%- if share_path -%}
+                        {{ macros::breadcrumbs(path=share_path) }}
+                        {%- else -%}
+                        {{ macros::breadcrumbs(path=path) }}
+                        {%- endif -%}
+                    </span>
+                </span>
+                &nbsp;
+                <a href="?download">{{ strings.download }}{% if downloads %} ({{ downloads }}){% endif %}</a>
+            </div>
+            <hr>
+            {% if not share %}<a href="./">./</a>{% endif %}
+            <audio src="?download" controls style="width: 100%;" poster="/poster{{ path | urlencode }}">{{ strings.no_audio }}</audio>
+            {% if artist %}{{ artist }} - {% endif %}<b style="font-size: 24px;">{% if track %}{{ track }}. {% endif %}{{ audiotitle }}</b><br>
+            {%- if album %}
+            {{ strings.album }}: <b>{{ album }}</b><br>
+            {%- endif %}
+            {%- if year %}
+            {{ strings.year }}: <b>{{ year }}</b><br>
+            {%- endif %}
+            {%- if genre %}
+            {{ strings.genre }}: <b>{{ genre }}</b><br>
+            {%- endif %}
+{%- endblock content %}

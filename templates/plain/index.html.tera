@@ -1,26 +1,28 @@
 {% extends "plain/base" %}
 
-{% block content %}
-<span><a href="/">MARMAK Mirror</a></span>{% if share %}{{ macros::breadcrumbs_folder(path=share_path) }}{% else %}{{ macros::breadcrumbs_folder(path=path) }}{% endif %}
-{% if admin and path != "/" or private %}
-{% if not share %}
-&nbsp;
-<a href="/upload?path={{ path }}">{{ strings.uploader }}</a>
-{% endif %}
-{% endif %}
-<hr>
-{% if path != "/" %}
-<a href="../">../</a><br>
-{% endif %}
-{% for s in dirs %}
-<a href="{{ s.name | urlencode }}/">{{ s.name }}/</a><br>
-{% endfor %}
-{% for s in files %}
-<a href="{{ s.name | urlencode }}">{{ s.name }}</a><br>
-{% endfor %}
-{% if markdown != "" %}
-<hr>
-README.md<br>
+{% block content -%}
+            <span><a href="/">MARMAK Mirror</a></span>{% if share %}{{ macros::breadcrumbs_folder(path=share_path) }}{% else %}{{ macros::breadcrumbs_folder(path=path) }}{% endif %}
+            {%- if admin and path != "/" or private %}
+            {%- if not share %}
+            &nbsp;
+            <a href="/upload?path={{ path }}">{{ strings.uploader }}</a>
+            {%- endif %}
+            {%- endif %}
+            <hr>
+            {%- if path != "/" %}
+            <a href="../">../</a><br>
+            {%- endif %}
+            {%- for s in dirs %}
+            <a href="{{ s.name | urlencode }}/">{{ s.name }}/</a><br>
+            {%- endfor %}
+            {%- for s in files %}
+            <a href="{{ s.name | urlencode }}">{{ s.name }}</a><br>
+            {%- endfor %}
+            {%- if markdown != "" %}
+            <hr>
+            README.md<br>
+            <div>
 {{ markdown }}
-{% endif %}
-{% endblock content %}
+            </div>
+            {%- endif %}
+{%- endblock content %}

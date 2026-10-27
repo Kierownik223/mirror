@@ -1,19 +1,23 @@
-<div>
-    <a href="/">{% if not settings.smallhead %}<h1>{% endif %}MARMAK Mirror{% if not settings.smallhead %}</h1>{% endif %}</a>{% if settings.smallhead %}&nbsp;{% endif %}
-    {%- if not settings.smallhead %}<a href="/">{{ strings.home }}</a>&nbsp;{% endif -%}
-    <a href="/settings">{{ strings.settings }}</a>&nbsp;{#- -#}
-    <a href="/search">{{ strings.search_engine }}</a>&nbsp;{#- -#}
-    {%- if config.marmak_link -%}<a href="http://{{ root_domain }}">{{ config.marmak_link }}</a>&nbsp;{%- endif -%}
-    {%- if config.enable_login -%}
-    {%- if not is_logged_in -%}
-    <a href="/account/login">{{ strings.log_in }}</a>&nbsp;
-    {%- else -%}
-    {%- if admin -%}
-    <a href="/admin/">{{ strings.admin }}</a>&nbsp;
-    {%- else -%}
-    <a href="http://account.{{ root_domain }}">{{ strings.manage_account }}</a>&nbsp;
-    {%- endif -%}
-    <a href="/account/logout">{{ strings.log_out }}</a>&nbsp;
-    {%- endif -%}
-    {%- endif -%}
-</div>
+        <div>
+            <a href="/">{% if not settings.smallhead %}<h1>{% endif %}MARMAK Mirror{% if not settings.smallhead %}</h1>{% endif %}</a>{% if settings.smallhead -%}&nbsp;{% endif %}
+            {%- if not settings.smallhead %}
+            <a href="/">{{ strings.home }}</a>&nbsp;
+            {%- endif %}
+            <a href="/settings">{{ strings.settings }}</a>&nbsp;
+            <a href="/search">{{ strings.search_engine }}</a>&nbsp;
+            {%- if config.marmak_link %}
+            <a href="http://{{ root_domain }}">{{ config.marmak_link }}</a>&nbsp;
+            {%- endif %}
+            {%- if config.enable_login %}
+            {%- if not is_logged_in %}
+            <a href="/account/login">{{ strings.log_in }}</a>&nbsp;
+            {%- else %}
+            {%- if admin %}
+            <a href="/admin/">{{ strings.admin }}</a>&nbsp;
+            {%- else %}
+            <a href="http://account.{{ root_domain }}">{{ strings.manage_account }}</a>&nbsp;
+            {%- endif %}
+            <a href="/account/logout">{{ strings.log_out }}</a>&nbsp;
+            {%- endif %}
+            {%- endif %}
+        </div>

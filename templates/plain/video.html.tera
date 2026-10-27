@@ -1,24 +1,24 @@
 {% extends "plain/base" %}
 
-{% block content %}
-<div>
-    <span>
-        <a href="/">MARMAK Mirror</a><span>
-            {% if share_path %}
-            {{ macros::breadcrumbs(path=share_path) }}
-            {% else %}
-            {{ macros::breadcrumbs(path=path) }}
-            {% endif %}
-        </span>
-    </span>
-    &nbsp;
-    <a href="?download">{{ strings.download }}{% if downloads %} ({{ downloads }}){% endif %}</a>
-</div>
-<hr>
-{% if not share %}<a href="./">./</a>{% endif %}
-<video src="?download" controls style="height: 60vh; width: 100%;" poster="{{ poster | urlencode }}">{{ strings.no_video }}</video>
-{% if displaydetails %}
-<b style="font-size: 24px;">{{ vidtitle }}</b>
-{{ details }}
-{% endif %}
-{% endblock content %}
+{% block content -%}
+            <div>
+                <span>
+                    <a href="/">MARMAK Mirror</a><span>
+                        {%- if share_path -%}
+                        {{ macros::breadcrumbs(path=share_path) }}
+                        {%- else -%}
+                        {{ macros::breadcrumbs(path=path) }}
+                        {%- endif -%}
+                    </span>
+                </span>
+                &nbsp;
+                <a href="?download">{{ strings.download }}{% if downloads %} ({{ downloads }}){% endif %}</a>
+            </div>
+            <hr>
+            {% if not share %}<a href="./">./</a>{% endif %}
+            <video src="?download" controls style="height: 60vh; width: 100%;" poster="{{ poster | urlencode }}">{{ strings.no_video }}</video>
+            {%- if displaydetails %}
+            <b style="font-size: 24px;">{{ vidtitle }}</b>
+            {{ details }}
+            {%- endif %}
+{%- endblock content %}
