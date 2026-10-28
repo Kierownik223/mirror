@@ -1001,6 +1001,56 @@ async fn display_file(
                         }
                     }
                 }
+                #[cfg(feature = "wpxap")]
+                if ext == "appx" {
+                    let xap_file = fs::File::open(&path).unwrap();
+                    if let Ok(mut zip) = zip::ZipArchive::new(xap_file) {
+                        if let Ok(mut manifest_file) = zip.by_name("AppxManifest.xml") {
+                            use xml::EventReader;
+
+                            let mut contents = String::new();
+                            manifest_file.read_to_string(&mut contents).unwrap();
+
+                            let parser = EventReader::new(contents.as_bytes());
+
+                            for event in parser {
+                                use xml::reader::XmlEvent;
+
+                                if let Ok(XmlEvent::StartElement { name, attributes, .. }) = event {
+                                    match name.local_name.as_str() {
+                                        "Identity" => {
+                                            for attr in attributes {
+                                                match attr.name.local_name.as_str() {
+                                                    "Name" => {
+                                                        additional_props.insert("package_id", attr.value);
+                                                    }
+                                                    "Publisher" => {
+                                                        additional_props.insert("author", attr.value);
+                                                    }
+                                                    "ProcessorArchitecture" => {
+                                                        additional_props.insert("architecture", attr.value);
+                                                    }
+                                                    "Version" => {
+                                                        additional_props.insert("version", attr.value);
+                                                    }
+                                                    _ => {}
+                                                }
+                                            }
+                                        }
+                                        "TargetDeviceFamily" => {
+                                            for attr in attributes {
+                                                if attr.name.local_name == "MinVersion" {
+                                                    additional_props.insert("min_version", attr.value);
+                                                }
+                                            }
+                                        }
+                                        _ => {}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
                 Ok(IndexResponse::Template(Template::render(
                     if settings.plain {
                         "plain/details"
