@@ -688,7 +688,7 @@ impl MirrorFile {
                                                 additional_props.insert("package_id", attr.value);
                                             }
                                             "Publisher" => {
-                                                additional_props.insert("author", attr.value);
+                                                additional_props.insert("author", crate::utils::DistinguishedNames::parse(attr.value).to_string());
                                             }
                                             "ProcessorArchitecture" => {
                                                 additional_props

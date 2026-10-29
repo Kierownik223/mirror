@@ -19,6 +19,91 @@ use crate::{config::CONFIG, FileEntry, MirrorFile};
 
 static CE_PROCESSORS: std::sync::OnceLock<HashMap<String, &'static str>> = std::sync::OnceLock::new();
 
+#[derive(Debug)]
+pub struct DistinguishedNames {
+    pub common_name: Option<String>,
+    pub organisational_unit: Option<String>,
+    pub organisation: Option<String>,
+    pub locality: Option<String>,
+    pub state: Option<String>,
+    pub country: Option<String>,
+}
+
+impl DistinguishedNames {
+    pub fn parse(input: String) -> Self {
+        let mut common_name = None;
+        let mut organisational_unit = None;
+        let mut organisation = None;
+        let mut locality = None;
+        let mut state = None;
+        let mut country = None;
+
+        for part in input.split(',') {
+            let part = part.trim();
+            if let Some((key, value)) = part.split_once('=') {
+                let key = key.trim().to_uppercase();
+                let value = Some(value.trim().to_string());
+
+                match key.as_str() {
+                    "CN" => common_name = value,
+                    "OU" => organisational_unit = value,
+                    "O" => organisation = value,
+                    "L" => locality = value,
+                    "S" => state = value,
+                    "ST" => state = value,
+                    "C" => country = value,
+                    _ => {} 
+                }
+            }
+        }
+
+        Self {
+            common_name,
+            organisational_unit,
+            organisation,
+            locality,
+            state,
+            country,
+        }
+    }
+
+    
+    pub fn to_string(&self) -> String {
+        let mut details = Vec::new();
+
+        match (&self.organisational_unit, &self.organisation) {
+            (Some(ou), Some(o)) => details.push(format!("{} @ {}", ou, o)),
+            (Some(ou), None) => details.push(ou.clone()),
+            (None, Some(o)) => match self.common_name { 
+                Some(ref cn) => if *o != *cn { details.push(o.clone()) },
+                None => details.push(o.clone()),
+            },
+            (None, None) => {}
+        }
+
+        if let Some(locality) = &self.locality {
+            details.push(locality.clone());
+        }
+        if let Some(state) = &self.state {
+            details.push(state.clone());
+        }
+        if let Some(country) = &self.country {
+            details.push(country.clone());
+        }
+
+        match &self.common_name {
+            Some(cn) if !details.is_empty() => {
+                format!("{} ({})", cn, details.join(", "))
+            }
+            Some(cn) => cn.clone(),
+            None if !details.is_empty() => {
+                format!("{}", details.join(", "))
+            }
+            None => String::new(),
+        }
+    }
+}
+
 pub fn read_dirs(path: &str) -> Result<Vec<MirrorFile>, Error> {
     let mut dir_list = Vec::new();
 
