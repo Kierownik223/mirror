@@ -17,6 +17,8 @@ use zip::write::SimpleFileOptions;
 
 use crate::{config::CONFIG, FileEntry, MirrorFile};
 
+static CE_PROCESSORS: std::sync::OnceLock<HashMap<String, &'static str>> = std::sync::OnceLock::new();
+
 pub fn read_dirs(path: &str) -> Result<Vec<MirrorFile>, Error> {
     let mut dir_list = Vec::new();
 
@@ -270,4 +272,25 @@ pub fn parse_bool(input: &str) -> bool {
         "false" => false,
         _ => false,
     }
+}
+
+pub fn get_ce_processor_name(code: String) -> &'static str {
+    let map = CE_PROCESSORS.get_or_init(|| {
+        HashMap::from([
+            ("0".into(), "Any CPU"),
+            ("10003".into(), "SuperH-3 (SH3)"),
+            ("10004".into(), "SuperH-3E (SH3e)"),
+            ("10005".into(), "SuperH-4 (SH4)"),
+            ("4000".into(), "MIPS"),
+            ("821".into(), "PowerPC"),
+            ("1824".into(), "ARM720 / ARM720T"),
+            ("2080".into(), "ARM820"),
+            ("2336".into(), "ARM920"),
+            ("2577".into(), "ARMv7"),
+            ("70001".into(), "ARM7TDMI"),
+            ("686".into(), "x86"),
+        ])
+    });
+
+    map.get(&code).copied().unwrap_or("unknown")
 }
