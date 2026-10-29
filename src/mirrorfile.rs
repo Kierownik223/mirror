@@ -584,7 +584,7 @@ impl MirrorFile {
                                         }
                                         "ProcessorType" => {
                                             if let Some(val) = attr_value {
-                                                additional_props.insert("processor_type", crate::utils::get_ce_processor_name(val).to_string());
+                                                additional_props.insert("processor_type", crate::utils::get_processor_name(val));
                                             }
                                         }
                                         "SetupDLL" => {
@@ -692,7 +692,7 @@ impl MirrorFile {
                                             }
                                             "ProcessorArchitecture" => {
                                                 additional_props
-                                                    .insert("processor_type", attr.value);
+                                                    .insert("processor_type", crate::utils::get_processor_name(attr.value));
                                             }
                                             "Version" => {
                                                 additional_props.insert("version", attr.value);

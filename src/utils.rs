@@ -274,23 +274,31 @@ pub fn parse_bool(input: &str) -> bool {
     }
 }
 
-pub fn get_ce_processor_name(code: String) -> &'static str {
+pub fn get_processor_name(code: String) -> String {
     let map = CE_PROCESSORS.get_or_init(|| {
         HashMap::from([
             ("0".into(), "Any CPU"),
             ("10003".into(), "SuperH-3 (SH3)"),
             ("10004".into(), "SuperH-3E (SH3e)"),
             ("10005".into(), "SuperH-4 (SH4)"),
+            ("1824".into(), "ARM"),
+            ("2080".into(), "ARM"),
+            ("2336".into(), "ARM"),
+            ("2577".into(), "ARM"),
             ("4000".into(), "MIPS"),
-            ("821".into(), "PowerPC"),
-            ("1824".into(), "ARM720 / ARM720T"),
-            ("2080".into(), "ARM820"),
-            ("2336".into(), "ARM920"),
-            ("2577".into(), "ARMv7"),
-            ("70001".into(), "ARM7TDMI"),
+            ("5000".into(), "MIPS"),
             ("686".into(), "x86"),
+            ("70001".into(), "ARM7TDMI"),
+            ("821".into(), "PowerPC"),
+            ("arm".into(), "ARM"),
+            ("arm64".into(), "ARM (64-bit)"),
+            ("x64".into(), "x86 (64-bit)"),
+            ("x86".into(), "x86"),
         ])
     });
 
-    map.get(&code).copied().unwrap_or("unknown")
+    match map.get(&code) {
+        Some(&name) => name.to_string(),
+        None => format!("unknown ({})", code),
+    }
 }
