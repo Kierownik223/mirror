@@ -559,7 +559,10 @@ impl MirrorFile {
                     let parser = EventReader::new(reader);
 
                     for event in parser {
-                        if let Ok(XmlEvent::StartElement { name, attributes, .. }) = event {
+                        if let Ok(XmlEvent::StartElement {
+                            name, attributes, ..
+                        }) = event
+                        {
                             if name.local_name == "parm" {
                                 let mut attr_name = None;
                                 let mut attr_value = None;
@@ -580,7 +583,8 @@ impl MirrorFile {
                                             }
                                         }
                                         "ProcessorType" => {
-                                            let val = attr_value.unwrap_or_else(|| "Any CPU".to_string());
+                                            let val =
+                                                attr_value.unwrap_or_else(|| "Any CPU".to_string());
                                             additional_props.insert("processor_type", val);
                                         }
                                         "SetupDLL" => {
@@ -614,7 +618,10 @@ impl MirrorFile {
                     for event in parser {
                         use xml::reader::XmlEvent;
 
-                        if let Ok(XmlEvent::StartElement { name, attributes, .. }) = event {
+                        if let Ok(XmlEvent::StartElement {
+                            name, attributes, ..
+                        }) = event
+                        {
                             match name.local_name.as_str() {
                                 "App" => {
                                     for attr in attributes {
@@ -669,7 +676,10 @@ impl MirrorFile {
                     for event in parser {
                         use xml::reader::XmlEvent;
 
-                        if let Ok(XmlEvent::StartElement { name, attributes, .. }) = event {
+                        if let Ok(XmlEvent::StartElement {
+                            name, attributes, ..
+                        }) = event
+                        {
                             match name.local_name.as_str() {
                                 "Identity" => {
                                     for attr in attributes {
@@ -681,7 +691,8 @@ impl MirrorFile {
                                                 additional_props.insert("author", attr.value);
                                             }
                                             "ProcessorArchitecture" => {
-                                                additional_props.insert("processor_type", attr.value);
+                                                additional_props
+                                                    .insert("processor_type", attr.value);
                                             }
                                             "Version" => {
                                                 additional_props.insert("version", attr.value);
@@ -693,7 +704,14 @@ impl MirrorFile {
                                 "TargetDeviceFamily" => {
                                     for attr in attributes {
                                         if attr.name.local_name == "MinVersion" {
-                                            additional_props.insert("platform_version", attr.value.split('.').take(2).collect::<Vec<&str>>().join("."));
+                                            additional_props.insert(
+                                                "platform_version",
+                                                attr.value
+                                                    .split('.')
+                                                    .take(2)
+                                                    .collect::<Vec<&str>>()
+                                                    .join("."),
+                                            );
                                             additional_props.insert("min_build", attr.value);
                                         }
                                     }
@@ -705,7 +723,7 @@ impl MirrorFile {
                 }
             }
         }
-        
+
         additional_props
     }
 }

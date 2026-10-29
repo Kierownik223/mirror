@@ -877,7 +877,7 @@ async fn display_file(
         _ => {
             if CONFIG.extensions.contains(&ext) {
                 let additional_props = MirrorFile::get_additional_properties(&path, ext);
-                
+
                 Ok(IndexResponse::Template(Template::render(
                     if settings.plain {
                         "plain/details"
