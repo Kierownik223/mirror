@@ -990,7 +990,7 @@ async fn display_file(
                                         "Deployment" => {
                                             for attr in attributes {
                                                 if attr.name.local_name == "AppPlatformVersion" {
-                                                    additional_props.insert("app_platform_version", attr.value);
+                                                    additional_props.insert("platform_version", attr.value);
                                                 }
                                             }
                                         }
@@ -1028,7 +1028,7 @@ async fn display_file(
                                                         additional_props.insert("author", attr.value);
                                                     }
                                                     "ProcessorArchitecture" => {
-                                                        additional_props.insert("architecture", attr.value);
+                                                        additional_props.insert("processor_type", attr.value);
                                                     }
                                                     "Version" => {
                                                         additional_props.insert("version", attr.value);
@@ -1040,7 +1040,8 @@ async fn display_file(
                                         "TargetDeviceFamily" => {
                                             for attr in attributes {
                                                 if attr.name.local_name == "MinVersion" {
-                                                    additional_props.insert("min_version", attr.value);
+                                                    additional_props.insert("platform_version", attr.value.split('.').take(2).collect::<Vec<&str>>().join("."));
+                                                    additional_props.insert("min_build", attr.value);
                                                 }
                                             }
                                         }
